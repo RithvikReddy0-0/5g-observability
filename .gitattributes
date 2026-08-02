@@ -1,0 +1,5 @@
+# Keep shell scripts and YAML LF-only so they run correctly on the Linux ODE
+# regardless of the authoring platform (this skeleton was authored on Windows).
+*.sh    text eol=lf
+*.yaml  text eol=lf
+*.yml   text eol=lf

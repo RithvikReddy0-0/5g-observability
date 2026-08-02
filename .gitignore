@@ -1,0 +1,25 @@
+# --- Pinned upstreams: fetched by scripts/bootstrap.sh, NEVER committed (SPEC ADR-002) ---
+/external/
+
+# --- Local env / secrets (keep .env.example) ---
+.env
+.env.local
+*.local.env
+
+# --- Python (traffic sim tooling) ---
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+
+# --- Runtime artifacts / logs ---
+/logs/
+*.log
+*_logs.txt
+
+# --- OS / editor cruft ---
+.DS_Store
+Thumbs.db
+
+# --- Claude Code local machine state ---
+.claude/settings.local.json
