@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ue-video
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: ue-video
+  template:
+    metadata:
+      labels:
+        app: ue-video
+    spec:
+      containers:
+      - name: ue-video
+        image: traffic-server:latest
+        imagePullPolicy: Never
+        command: ["python", "ue_client.py"]
+        env:
+        - name: SERVER_URL
+          value: "http://traffic-server-service:5000"
+        - name: UE_TYPE
+          value: "video"

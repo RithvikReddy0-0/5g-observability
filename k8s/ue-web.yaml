@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ue-web
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: ue-web
+  template:
+    metadata:
+      labels:
+        app: ue-web
+    spec:
+      containers:
+      - name: ue-web
+        image: traffic-server:latest
+        imagePullPolicy: Never
+        command: ["python", "ue_client.py"]
+        env:
+        - name: SERVER_URL
+          value: "http://traffic-server-service:5000"
+        - name: UE_TYPE
+          value: "web"
