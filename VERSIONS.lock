@@ -1,0 +1,44 @@
+{
+  "schema_version": "1",
+  "status": "TEMPLATE — source SHAs are frozen; empirical environment/gtp5g values are TO_BE_FILLED_ON_LAB_ODE. See docs/runbooks/m0-report.md.",
+  "reference_environment": "ODE: bare-metal Ubuntu 24.04 LTS, x86_64 (SPEC ADR-003). WSL2/VM/cloud are non-baseline.",
+  "captured_on_ode": "TO_BE_FILLED_ON_LAB_ODE",
+  "environment": {
+    "ubuntu_release": "24.04",
+    "ubuntu_point_release": "TO_BE_FILLED_ON_LAB_ODE",
+    "kernel_release": "TO_BE_FILLED_ON_LAB_ODE",
+    "arch": "x86_64",
+    "docker_engine": "TO_BE_FILLED_ON_LAB_ODE",
+    "docker_compose": "TO_BE_FILLED_ON_LAB_ODE"
+  },
+  "dependencies": {
+    "free5gc": {
+      "tag": "v4.2.3",
+      "commit": "3b34a08e93a9b334f0f4005d3a3a9f79b66d59b9"
+    },
+    "ueransim": {
+      "tag": "v3.3.0",
+      "commit": "6bf5a1a96aaef6ae8778b9d8b477ac6e2bbf8156"
+    },
+    "gtp5g": {
+      "tag": "v0.10.2",
+      "commit": "952fb419130f5fc44cac1874e8183312006b746c",
+      "module_version": "TO_BE_FILLED_ON_LAB_ODE"
+    },
+    "mongodb": {
+      "image": "mongo:4.4",
+      "note": "from ported free5gc-compose docker-compose.yaml; re-confirm against free5GC v4.2.3 at M2"
+    }
+  },
+  "container_images": {
+    "note": "Ported compose currently references free5gc/*:v4.2.0 published images while source is pinned to v4.2.3. Reconcile at M2 (build-from-source or bump image tags).",
+    "free5gc_images_tag": "v4.2.0"
+  },
+  "gtp5g_validation": {
+    "built": "TO_BE_FILLED_ON_LAB_ODE",
+    "loaded": "TO_BE_FILLED_ON_LAB_ODE",
+    "kernel": "TO_BE_FILLED_ON_LAB_ODE",
+    "module_version": "TO_BE_FILLED_ON_LAB_ODE",
+    "timestamp": "TO_BE_FILLED_ON_LAB_ODE"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "schema_version": "1",
+  "_comment": "SHA-pinned upstream dependencies (SPEC ADR-002, MILESTONE_0_BRIEF section 5). 'commit' is the authoritative 40-char pin; 'ref_hint' is the human tag it was resolved from and is NON-authoritative. Materialized into external/ (git-ignored) by scripts/bootstrap.sh. See docs/runbooks/m0-report.md for the gtp5g coupling reasoning.",
+  "dependencies": [
+    {
+      "name": "free5gc",
+      "url": "https://github.com/free5gc/free5gc.git",
+      "commit": "3b34a08e93a9b334f0f4005d3a3a9f79b66d59b9",
+      "ref_hint": "v4.2.3",
+      "dest": "external/free5gc",
+      "recurse_submodules": true
+    },
+    {
+      "name": "ueransim",
+      "url": "https://github.com/aligungr/UERANSIM.git",
+      "commit": "6bf5a1a96aaef6ae8778b9d8b477ac6e2bbf8156",
+      "ref_hint": "v3.3.0",
+      "dest": "external/ueransim",
+      "recurse_submodules": false
+    },
+    {
+      "name": "gtp5g",
+      "url": "https://github.com/free5gc/gtp5g.git",
+      "commit": "952fb419130f5fc44cac1874e8183312006b746c",
+      "ref_hint": "v0.10.2",
+      "dest": "external/gtp5g",
+      "recurse_submodules": false
+    }
+  ]
+}
