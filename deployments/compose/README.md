@@ -35,6 +35,20 @@ git-ignored (it contains private keys) and regenerates on a clean run.
 
 WebUI (subscriber provisioning) is published on `http://localhost:5000`.
 
+## Subscriber provisioning
+
+```bash
+COUNT=20 scripts/provision_subscribers.sh   # provision imsi-2089300000000NN
+scripts/provision_subscribers.sh --list     # show what exists
+scripts/provision_subscribers.sh --delete-all
+```
+
+Goes through the WebUI REST API so free5GC owns the document schema (it stores the
+credentials as `encPermanentKey` / `encOpcKey`, which is **not** the shape the POST body
+uses — writing MongoDB by hand gets this wrong). Slice/credentials default to the values in
+`ran/config/free5gc-ue.yaml`; GPSI is derived per-subscriber because free5GC rejects
+duplicates with `{"cause":"duplicate gpsi"}`.
+
 ## NOT ported (needed before M2 bring-up — flagged, not silently added)
 The ported `docker-compose.yaml` also references files that were outside the `*cfg.yaml` port scope:
 - `cert/` (per-NF TLS certs) — provided by free5GC bootstrap / generated at M2.
