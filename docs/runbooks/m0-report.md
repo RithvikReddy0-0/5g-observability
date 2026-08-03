@@ -134,11 +134,14 @@ freeze; none were silently changed.
   ≠ `configured-nssai` (1, 010203). Aligned to the modeled slice when `uecfg.yaml` was reduced
   to a single requested S-NSSAI (see F2 note below).
 
-- **F2 follow-up [PARTIALLY ACTIONED at M2].** The extra stock slice (1, 112233) was removed
-  from the **UE** request (`uecfg.yaml`) because requesting a slice the subscriber is not
-  provisioned for makes the AMF fail with `AMF can not select an target AMF by NRF`. The extra
-  slices still present in **AMF / SMF / NSSF** config were left untouched — pruning those
-  remains the open ADR-007 decision for you.
+- **F2 [RESOLVED].** The stock extra slices are now pruned everywhere, so the single modeled
+  slice (SST 1 / SD 010203) is consistent across **AMF, SMF, NSSF, gNB, UE, and subscribers** —
+  which is what ADR-007 requires. Removed: `(1,112233)` from amfcfg `snssaiList`, smfcfg
+  `snssaiInfos` + `sNssaiUpfInfos`, nssfcfg `supportedSnssaiList` + `nsiList` + serving-TAI
+  entry, gnbcfg `slices`, and uecfg; plus `(1,000003)`, `(2,000001)`, `(2,000002)` from nssfcfg.
+  Verified after pruning: all 8 NFs re-registered with the NRF and **20/20 UEs reached
+  REGISTERED**. A second slice is now a deliberate additive change in Phase 1.5, not a
+  leftover default.
 
 ---
 
