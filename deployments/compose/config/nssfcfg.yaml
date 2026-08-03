@@ -232,6 +232,25 @@ configuration:
             - sst: 2 # Slice/Service Type (uinteger, range: 0~255)
               sd: 000001 # Slice Differentiator (3 bytes hex string, range: 000000~FFFFFF)
   taList: # List of supported tracking area and their related information of this NSSF instance
+    # --- THIS deployment's serving TAI (ADR-007: the modeled slice must be configured
+    # consistently across AMF / NSSF / SMF / subscriber / UERANSIM). Without this entry
+    # NSSF logs "No TA ... in NSSF configuration", the AMF then fails with "can not
+    # select an target AMF by NRF", and every UE registration dies on T3510 expiry.
+    # The entries below this one are upstream sample data for unrelated PLMNs. ---
+    - tai:
+        plmnId:
+          mcc: 208
+          mnc: 93
+        # Quoted 6-hex-digit string: the AMF signals this TAC as "000001" (matching
+        # amfcfg supportTaiList), and NSSF compares it as a string. An integer 1 here
+        # does NOT match and still yields "No TA ... in NSSF configuration".
+        tac: "000001"
+      accessType: 3GPP_ACCESS
+      supportedSnssaiList:
+        - sst: 1
+          sd: 010203
+        - sst: 1
+          sd: 112233
     - tai: # Tracking Area Identity
         plmnId: # Public Land Mobile Network ID, <PLMN ID> = <MCC><MNC>
           mcc: 466 # Mobile Country Code (3 digits string, digit: 0~9)

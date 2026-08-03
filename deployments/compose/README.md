@@ -49,6 +49,40 @@ uses — writing MongoDB by hand gets this wrong). Slice/credentials default to 
 `ran/config/free5gc-ue.yaml`; GPSI is derived per-subscriber because free5GC rejects
 duplicates with `{"cause":"duplicate gpsi"}`.
 
+## RAN: gNB + UEs
+
+```bash
+docker compose up -d --no-deps ueransim   # nr-gnb; expect "NG Setup procedure is successful"
+COUNT=20 scripts/start_ues.sh             # launch UEs, report how many REGISTERED
+scripts/start_ues.sh --status
+scripts/start_ues.sh --stop
+```
+
+UEs run inside the `ueransim` container (radio-link sim on 127.0.0.1) rather than as 20
+separate containers. Verify from the RAN side with
+`docker compose exec ueransim ./nr-cli imsi-208930000000001 -e status` — expect
+`mm-state: MM-REGISTERED/NORMAL-SERVICE`.
+
+**PDU session establishment fails here by design** (T3580 retransmit): the UPF needs the
+gtp5g kernel module, which WSL2 does not provide. Registration is the success criterion on
+a non-baseline host; the data path is validated on the ODE.
+
+### Three config fixes that registration depends on
+
+Registration failed until all three were corrected — each produced a misleading symptom:
+
+1. **Subscriber SQN** — free5GC's stock `16f3b3f70fc2` is far beyond the 5G-AKA
+   acceptance window for a fresh UE (`SQN-MS` starts at 0), so every UE answered
+   "Authentication Failure due to SQN out of range", and AUTS re-sync then failed
+   (`Re-Sync MAC failed`). Provisioning now uses a low starting SQN.
+2. **NSSF `taList`** — the serving TAI (208/93, TAC 000001) was absent, so NSSF logged
+   `No TA ... in NSSF configuration`. The TAC must be the quoted 6-hex-digit string
+   `"000001"`; an integer `1` does not match.
+3. **UE requested NSSAI** — the stock `uecfg.yaml` requested a second slice (`112233`)
+   that subscribers are not provisioned for. The AMF then treated the NSSAI as unservable
+   and failed with `AMF can not select an target AMF by NRF`, so registration died on
+   T3510 expiry. The UE now requests only the modeled slice (ADR-007).
+
 ## NOT ported (needed before M2 bring-up — flagged, not silently added)
 The ported `docker-compose.yaml` also references files that were outside the `*cfg.yaml` port scope:
 - `cert/` (per-NF TLS certs) — provided by free5GC bootstrap / generated at M2.

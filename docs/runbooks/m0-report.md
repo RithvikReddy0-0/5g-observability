@@ -116,15 +116,29 @@ freeze; none were silently changed.
   (1, 010203). These are free5gc-compose defaults. ADR-007 wants a *clean* single slice, not
   defaults-plus-extras. **Decision needed** (potentially architectural re: ADR-007): prune to
   exactly one slice for the Phase-1 baseline, or keep extras. Not changed here.
-- **F3 — NSSF stock example topology.** `nssfcfg` `nsiList` / `amfSetList` / `taList` /
-  `mappingListFromPlmn` are populated with unrelated PLMNs (466/92, 310/560, 440/10) and TACs
-  (33456–33459). The serving TAI (208/93, TAC 1) does **not** appear in NSSF `taList`. Harmless for
-  the basic single-slice path (AMF resolves TAI), but relevant to **Phase 1.5 NSSF validation**.
+- **F3 — NSSF stock example topology. [CORRECTED — was NOT harmless; it blocked registration.]**
+  `nssfcfg` `nsiList` / `amfSetList` / `taList` / `mappingListFromPlmn` are populated with
+  unrelated PLMNs (466/92, 310/560, 440/10) and TACs (33456–33459), and the serving TAI
+  (208/93, TAC 000001) was **absent** from `taList`.
+  This report originally judged that "harmless for the basic single-slice path." **That was
+  wrong.** At M2 bring-up it proved to be a hard blocker: NSSF logged
+  `No TA {208/93, tac 000001} in NSSF configuration`, the AMF then failed with
+  `AMF can not select an target AMF by NRF`, and every UE registration died on T3510 expiry.
+  Fixed by adding the serving TAI to `taList` — the TAC must be the quoted 6-hex-digit string
+  `"000001"`; an integer `1` does not match. The remaining foreign-PLMN sample data is still
+  present and still matters for **Phase 1.5 NSSF validation**.
 - **F4 — Subscriber↔slice not file-verifiable.** UDR config is DB-connection only; the subscriber's
   provisioned S-NSSAI is in MongoDB (set via WebUI at M2). The "subscriber/UDR" leg of the audit
   cannot be checked from files now — it **must** be verified at M2 to equal (1, 010203).
-- **F5 — UE default-nssai differs (minor).** `default-nssai` = (1, sd 1) ≠ `configured-nssai`
-  (1, 010203). `default-nssai` is only a fallback; session/configured are correct. Low significance.
+- **F5 — UE default-nssai differs (minor). [RESOLVED at M2.]** `default-nssai` was (1, sd 1)
+  ≠ `configured-nssai` (1, 010203). Aligned to the modeled slice when `uecfg.yaml` was reduced
+  to a single requested S-NSSAI (see F2 note below).
+
+- **F2 follow-up [PARTIALLY ACTIONED at M2].** The extra stock slice (1, 112233) was removed
+  from the **UE** request (`uecfg.yaml`) because requesting a slice the subscriber is not
+  provisioned for makes the AMF fail with `AMF can not select an target AMF by NRF`. The extra
+  slices still present in **AMF / SMF / NSSF** config were left untouched — pruning those
+  remains the open ADR-007 decision for you.
 
 ---
 

@@ -35,7 +35,12 @@ DNN="${DNN:-internet}"
 KEY="${KEY:-8baf473f2f8fd09487cccbd7097c6862}"
 OPC="${OPC:-8e27b6af0e692e750f32667a3b14605d}"
 AMF_FIELD="${AMF_FIELD:-8000}"
-SQN="${SQN:-16f3b3f70fc2}"
+# Starting SQN must be LOW. free5GC's stock value (16f3b3f70fc2 ~ 2.5e13) sits far
+# beyond the 5G-AKA acceptance window (~2^28) ahead of a fresh UE, whose SQN-MS starts
+# at 0, so every first-time UERANSIM UE answers "Authentication Failure due to SQN out
+# of range" — and free5GC's AUTS re-sync then fails with "Re-Sync MAC failed", so it
+# never recovers. A small value authenticates cleanly on the first attempt.
+SQN="${SQN:-000000000020}"
 
 # GPSI (MSISDN) must be UNIQUE per subscriber — free5GC rejects duplicates with
 # {"cause":"duplicate gpsi"}. Derived from the index, not shared like the key/OPc.
