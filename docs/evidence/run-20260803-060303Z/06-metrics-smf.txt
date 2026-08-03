@@ -1,0 +1,58 @@
+# HELP free5gc_sbi_inbound_request_duration_seconds Histogram of request latencies
+# TYPE free5gc_sbi_inbound_request_duration_seconds histogram
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="smf",path="/nsmf-pdusession/v1/sm-contexts",status_code="403 Forbidden",le="0.0001"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="smf",path="/nsmf-pdusession/v1/sm-contexts",status_code="403 Forbidden",le="0.005"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="smf",path="/nsmf-pdusession/v1/sm-contexts",status_code="403 Forbidden",le="0.01"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="smf",path="/nsmf-pdusession/v1/sm-contexts",status_code="403 Forbidden",le="0.02"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="smf",path="/nsmf-pdusession/v1/sm-contexts",status_code="403 Forbidden",le="0.025"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="smf",path="/nsmf-pdusession/v1/sm-contexts",status_code="403 Forbidden",le="0.05"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="smf",path="/nsmf-pdusession/v1/sm-contexts",status_code="403 Forbidden",le="+Inf"} 3
+free5gc_sbi_inbound_request_duration_seconds_sum{method="POST",nf_type="smf",path="/nsmf-pdusession/v1/sm-contexts",status_code="403 Forbidden"} 0.401736511
+free5gc_sbi_inbound_request_duration_seconds_count{method="POST",nf_type="smf",path="/nsmf-pdusession/v1/sm-contexts",status_code="403 Forbidden"} 3
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="smf",path="/nsmf-pdusession/v1/sm-contexts",status_code="500 Internal Server Error",le="0.0001"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="smf",path="/nsmf-pdusession/v1/sm-contexts",status_code="500 Internal Server Error",le="0.005"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="smf",path="/nsmf-pdusession/v1/sm-contexts",status_code="500 Internal Server Error",le="0.01"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="smf",path="/nsmf-pdusession/v1/sm-contexts",status_code="500 Internal Server Error",le="0.02"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="smf",path="/nsmf-pdusession/v1/sm-contexts",status_code="500 Internal Server Error",le="0.025"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="smf",path="/nsmf-pdusession/v1/sm-contexts",status_code="500 Internal Server Error",le="0.05"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="smf",path="/nsmf-pdusession/v1/sm-contexts",status_code="500 Internal Server Error",le="+Inf"} 1934
+free5gc_sbi_inbound_request_duration_seconds_sum{method="POST",nf_type="smf",path="/nsmf-pdusession/v1/sm-contexts",status_code="500 Internal Server Error"} 635.6498692399989
+free5gc_sbi_inbound_request_duration_seconds_count{method="POST",nf_type="smf",path="/nsmf-pdusession/v1/sm-contexts",status_code="500 Internal Server Error"} 1934
+# HELP free5gc_sbi_inbound_request_total Total number of SBI inbound requests received by the NF
+# TYPE free5gc_sbi_inbound_request_total counter
+free5gc_sbi_inbound_request_total{cause="",method="POST",nf_type="smf",path="/nsmf-pdusession/v1/sm-contexts",status_code="403 Forbidden"} 3
+free5gc_sbi_inbound_request_total{cause="",method="POST",nf_type="smf",path="/nsmf-pdusession/v1/sm-contexts",status_code="500 Internal Server Error"} 1934
+# HELP free5gc_sbi_outbound_request_duration_seconds Histogram of request latencies
+# TYPE free5gc_sbi_outbound_request_duration_seconds histogram
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="smf",status_code="200 OK",target_service_name="nnrf-disc",le="0.0001"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="smf",status_code="200 OK",target_service_name="nnrf-disc",le="0.005"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="smf",status_code="200 OK",target_service_name="nnrf-disc",le="0.01"} 870
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="smf",status_code="200 OK",target_service_name="nnrf-disc",le="0.02"} 3086
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="smf",status_code="200 OK",target_service_name="nnrf-disc",le="0.025"} 3440
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="smf",status_code="200 OK",target_service_name="nnrf-disc",le="0.05"} 3818
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="smf",status_code="200 OK",target_service_name="nnrf-disc",le="+Inf"} 3872
+free5gc_sbi_outbound_request_duration_seconds_sum{method="GET",nf_type="smf",status_code="200 OK",target_service_name="nnrf-disc"} 103.4891413430001
+free5gc_sbi_outbound_request_duration_seconds_count{method="GET",nf_type="smf",status_code="200 OK",target_service_name="nnrf-disc"} 3872
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="smf",status_code="200 OK",target_service_name="nudm-sdm",le="0.0001"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="smf",status_code="200 OK",target_service_name="nudm-sdm",le="0.005"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="smf",status_code="200 OK",target_service_name="nudm-sdm",le="0.01"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="smf",status_code="200 OK",target_service_name="nudm-sdm",le="0.02"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="smf",status_code="200 OK",target_service_name="nudm-sdm",le="0.025"} 1
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="smf",status_code="200 OK",target_service_name="nudm-sdm",le="0.05"} 872
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="smf",status_code="200 OK",target_service_name="nudm-sdm",le="+Inf"} 1938
+free5gc_sbi_outbound_request_duration_seconds_sum{method="GET",nf_type="smf",status_code="200 OK",target_service_name="nudm-sdm"} 121.06619825500015
+free5gc_sbi_outbound_request_duration_seconds_count{method="GET",nf_type="smf",status_code="200 OK",target_service_name="nudm-sdm"} 1938
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="smf",status_code="201 Created",target_service_name="nnrf-nfm",le="0.0001"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="smf",status_code="201 Created",target_service_name="nnrf-nfm",le="0.005"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="smf",status_code="201 Created",target_service_name="nnrf-nfm",le="0.01"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="smf",status_code="201 Created",target_service_name="nnrf-nfm",le="0.02"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="smf",status_code="201 Created",target_service_name="nnrf-nfm",le="0.025"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="smf",status_code="201 Created",target_service_name="nnrf-nfm",le="0.05"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="smf",status_code="201 Created",target_service_name="nnrf-nfm",le="+Inf"} 1
+free5gc_sbi_outbound_request_duration_seconds_sum{method="PUT",nf_type="smf",status_code="201 Created",target_service_name="nnrf-nfm"} 0.050542098
+free5gc_sbi_outbound_request_duration_seconds_count{method="PUT",nf_type="smf",status_code="201 Created",target_service_name="nnrf-nfm"} 1
+# HELP free5gc_sbi_outbound_request_total Total number of SBI outbound requests attempted or sent by the NF
+# TYPE free5gc_sbi_outbound_request_total counter
+free5gc_sbi_outbound_request_total{method="GET",nf_type="smf",status_code="200 OK",target_service_name="nnrf-disc"} 3872
+free5gc_sbi_outbound_request_total{method="GET",nf_type="smf",status_code="200 OK",target_service_name="nudm-sdm"} 1938
+free5gc_sbi_outbound_request_total{method="PUT",nf_type="smf",status_code="201 Created",target_service_name="nnrf-nfm"} 1

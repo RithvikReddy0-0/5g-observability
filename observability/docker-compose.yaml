@@ -1,0 +1,66 @@
+# Observability plane — Prometheus + Grafana.
+#
+# Deliberately a SEPARATE compose project from deployments/compose (SPEC §3): free5GC
+# emits telemetry and is otherwise unaware of the plane, and data flow is one-directional
+# (core -> scrape -> storage -> dashboards). Nothing here writes back into the core.
+#
+# It attaches to the free5GC compose network as an EXTERNAL network so it can resolve
+# amf.free5gc.org etc. Bring the core up first (deployments/compose), then:
+#   cd observability && docker compose up -d
+#
+# Prometheus : http://localhost:9090
+# Grafana    : http://localhost:3000   (anonymous viewer enabled — dev only, see below)
+
+services:
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus:v3.1.0
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=15d
+      - --web.enable-lifecycle
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/alert-rules.yml:/etc/prometheus/alert-rules.yml:ro
+      - promdata:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      privnet:
+        aliases:
+          - prometheus
+    restart: unless-stopped
+
+  grafana:
+    container_name: grafana
+    image: grafana/grafana:11.5.2
+    environment:
+      # Anonymous VIEWER access: this is a local development observability stack, and it
+      # keeps dashboards screenshot-able without handling credentials. Do NOT carry this
+      # setting into any shared or internet-reachable deployment.
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_AUTH_DISABLE_LOGIN_FORM: "false"
+      GF_USERS_DEFAULT_THEME: dark
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/free5gc-overview.json
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafanadata:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    networks:
+      - privnet
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+volumes:
+  promdata:
+  grafanadata:
+
+networks:
+  privnet:
+    external: true
+    name: compose_privnet

@@ -1,0 +1,40 @@
+# Prometheus scrape configuration for the free5GC control plane.
+#
+# Targets are free5GC's NATIVE metrics exporters (metrics.enable: true, port 9091 in each
+# NF's *cfg.yaml) — no source changes, satisfying the ADR-004 external-instrumentation-first
+# ladder. Prometheus joins the free5GC compose network as an external network, so the core
+# stays unaware it is being observed (SPEC §3 loose coupling).
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    deployment: free5gc-phase1
+
+rule_files:
+  - /etc/prometheus/alert-rules.yml
+
+scrape_configs:
+  - job_name: free5gc
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["amf.free5gc.org:9091"]
+        labels: { nf: amf }
+      - targets: ["smf.free5gc.org:9091"]
+        labels: { nf: smf }
+      - targets: ["nrf.free5gc.org:9091"]
+        labels: { nf: nrf }
+      - targets: ["nssf.free5gc.org:9091"]
+        labels: { nf: nssf }
+      - targets: ["pcf.free5gc.org:9091"]
+        labels: { nf: pcf }
+      - targets: ["ausf.free5gc.org:9091"]
+        labels: { nf: ausf }
+      - targets: ["udm.free5gc.org:9091"]
+        labels: { nf: udm }
+      - targets: ["udr.free5gc.org:9091"]
+        labels: { nf: udr }
+
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]

@@ -1,0 +1,10 @@
+--- grafana health ---
+{
+  "database": "ok",
+  "version": "11.5.2",
+  "commit": "598e0338d5374d6bc404b02a58094132c5eeceb8"
+}
+--- provisioned dashboards ---
+[{"id":1,"uid":"free5gc-overview","orgId":1,"title":"free5GC — control plane overview","uri":"db/free5gc-e28094-control-plane-overview","url":"/d/free5gc-overview/free5gc-e28094-control-plane-overview","slug":"","type":"dash-db","tags":["5g","free5gc","phase1"],"isStarred":false,"sortMeta":0,"isDeleted":false}]
+--- datasources ---
+[{"id":1,"uid":"prometheus","orgId":1,"name":"Prometheus","type":"prometheus","typeName":"Prometheus","typeLogoUrl":"public/app/plugins/datasource/prometheus/img/prometheus_logo.svg","access":"proxy","url":"http://prometheus:9090","user":"","database":"","basicAuth":false,"isDefault":true,"jsonData":{"timeInterval":"15s"},"readOnly":true}]

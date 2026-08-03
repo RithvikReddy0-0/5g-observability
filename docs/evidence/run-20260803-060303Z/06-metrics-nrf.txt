@@ -1,0 +1,54 @@
+# HELP free5gc_sbi_inbound_request_duration_seconds Histogram of request latencies
+# TYPE free5gc_sbi_inbound_request_duration_seconds histogram
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="DELETE",nf_type="nrf",path="/nnrf-nfm/v1/nf-instances/:nfInstanceID",status_code="204 No Content",le="0.0001"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="DELETE",nf_type="nrf",path="/nnrf-nfm/v1/nf-instances/:nfInstanceID",status_code="204 No Content",le="0.005"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="DELETE",nf_type="nrf",path="/nnrf-nfm/v1/nf-instances/:nfInstanceID",status_code="204 No Content",le="0.01"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="DELETE",nf_type="nrf",path="/nnrf-nfm/v1/nf-instances/:nfInstanceID",status_code="204 No Content",le="0.02"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="DELETE",nf_type="nrf",path="/nnrf-nfm/v1/nf-instances/:nfInstanceID",status_code="204 No Content",le="0.025"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="DELETE",nf_type="nrf",path="/nnrf-nfm/v1/nf-instances/:nfInstanceID",status_code="204 No Content",le="0.05"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="DELETE",nf_type="nrf",path="/nnrf-nfm/v1/nf-instances/:nfInstanceID",status_code="204 No Content",le="+Inf"} 1
+free5gc_sbi_inbound_request_duration_seconds_sum{method="DELETE",nf_type="nrf",path="/nnrf-nfm/v1/nf-instances/:nfInstanceID",status_code="204 No Content"} 0.561991776
+free5gc_sbi_inbound_request_duration_seconds_count{method="DELETE",nf_type="nrf",path="/nnrf-nfm/v1/nf-instances/:nfInstanceID",status_code="204 No Content"} 1
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="nrf",path="/nnrf-disc/v1/nf-instances",status_code="200 OK",le="0.0001"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="nrf",path="/nnrf-disc/v1/nf-instances",status_code="200 OK",le="0.005"} 1
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="nrf",path="/nnrf-disc/v1/nf-instances",status_code="200 OK",le="0.01"} 2281
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="nrf",path="/nnrf-disc/v1/nf-instances",status_code="200 OK",le="0.02"} 6031
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="nrf",path="/nnrf-disc/v1/nf-instances",status_code="200 OK",le="0.025"} 6407
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="nrf",path="/nnrf-disc/v1/nf-instances",status_code="200 OK",le="0.05"} 6615
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="nrf",path="/nnrf-disc/v1/nf-instances",status_code="200 OK",le="+Inf"} 6627
+free5gc_sbi_inbound_request_duration_seconds_sum{method="GET",nf_type="nrf",path="/nnrf-disc/v1/nf-instances",status_code="200 OK"} 85.14671735000023
+free5gc_sbi_inbound_request_duration_seconds_count{method="GET",nf_type="nrf",path="/nnrf-disc/v1/nf-instances",status_code="200 OK"} 6627
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="nrf",path="/oauth2/token",status_code="200 OK",le="0.0001"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="nrf",path="/oauth2/token",status_code="200 OK",le="0.005"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="nrf",path="/oauth2/token",status_code="200 OK",le="0.01"} 1083
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="nrf",path="/oauth2/token",status_code="200 OK",le="0.02"} 11725
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="nrf",path="/oauth2/token",status_code="200 OK",le="0.025"} 14458
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="nrf",path="/oauth2/token",status_code="200 OK",le="0.05"} 16944
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="nrf",path="/oauth2/token",status_code="200 OK",le="+Inf"} 17005
+free5gc_sbi_inbound_request_duration_seconds_sum{method="POST",nf_type="nrf",path="/oauth2/token",status_code="200 OK"} 308.9232431789986
+free5gc_sbi_inbound_request_duration_seconds_count{method="POST",nf_type="nrf",path="/oauth2/token",status_code="200 OK"} 17005
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="nrf",path="/oauth2/token",status_code="400 Bad Request",le="0.0001"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="nrf",path="/oauth2/token",status_code="400 Bad Request",le="0.005"} 2
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="nrf",path="/oauth2/token",status_code="400 Bad Request",le="0.01"} 2
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="nrf",path="/oauth2/token",status_code="400 Bad Request",le="0.02"} 4
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="nrf",path="/oauth2/token",status_code="400 Bad Request",le="0.025"} 5
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="nrf",path="/oauth2/token",status_code="400 Bad Request",le="0.05"} 7
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="nrf",path="/oauth2/token",status_code="400 Bad Request",le="+Inf"} 7
+free5gc_sbi_inbound_request_duration_seconds_sum{method="POST",nf_type="nrf",path="/oauth2/token",status_code="400 Bad Request"} 0.117460622
+free5gc_sbi_inbound_request_duration_seconds_count{method="POST",nf_type="nrf",path="/oauth2/token",status_code="400 Bad Request"} 7
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="PUT",nf_type="nrf",path="/nnrf-nfm/v1/nf-instances/:nfInstanceID",status_code="201 Created",le="0.0001"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="PUT",nf_type="nrf",path="/nnrf-nfm/v1/nf-instances/:nfInstanceID",status_code="201 Created",le="0.005"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="PUT",nf_type="nrf",path="/nnrf-nfm/v1/nf-instances/:nfInstanceID",status_code="201 Created",le="0.01"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="PUT",nf_type="nrf",path="/nnrf-nfm/v1/nf-instances/:nfInstanceID",status_code="201 Created",le="0.02"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="PUT",nf_type="nrf",path="/nnrf-nfm/v1/nf-instances/:nfInstanceID",status_code="201 Created",le="0.025"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="PUT",nf_type="nrf",path="/nnrf-nfm/v1/nf-instances/:nfInstanceID",status_code="201 Created",le="0.05"} 5
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="PUT",nf_type="nrf",path="/nnrf-nfm/v1/nf-instances/:nfInstanceID",status_code="201 Created",le="+Inf"} 8
+free5gc_sbi_inbound_request_duration_seconds_sum{method="PUT",nf_type="nrf",path="/nnrf-nfm/v1/nf-instances/:nfInstanceID",status_code="201 Created"} 0.433455537
+free5gc_sbi_inbound_request_duration_seconds_count{method="PUT",nf_type="nrf",path="/nnrf-nfm/v1/nf-instances/:nfInstanceID",status_code="201 Created"} 8
+# HELP free5gc_sbi_inbound_request_total Total number of SBI inbound requests received by the NF
+# TYPE free5gc_sbi_inbound_request_total counter
+free5gc_sbi_inbound_request_total{cause="",method="DELETE",nf_type="nrf",path="/nnrf-nfm/v1/nf-instances/:nfInstanceID",status_code="204 No Content"} 1
+free5gc_sbi_inbound_request_total{cause="",method="GET",nf_type="nrf",path="/nnrf-disc/v1/nf-instances",status_code="200 OK"} 6627
+free5gc_sbi_inbound_request_total{cause="",method="POST",nf_type="nrf",path="/oauth2/token",status_code="200 OK"} 17005
+free5gc_sbi_inbound_request_total{cause="",method="PUT",nf_type="nrf",path="/nnrf-nfm/v1/nf-instances/:nfInstanceID",status_code="201 Created"} 8
+free5gc_sbi_inbound_request_total{cause="invalid_client",method="POST",nf_type="nrf",path="/oauth2/token",status_code="400 Bad Request"} 7

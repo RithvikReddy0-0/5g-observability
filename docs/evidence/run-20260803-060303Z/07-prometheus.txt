@@ -1,0 +1,48 @@
+--- prometheus target health ---
+"nf":"udr"}
+"nf":"udr"}
+"scrapeUrl":"http://udr.free5gc.org:9091/metrics"
+"health":"up"
+"nf":"amf"}
+"nf":"amf"}
+"scrapeUrl":"http://amf.free5gc.org:9091/metrics"
+"health":"up"
+"nf":"smf"}
+"nf":"smf"}
+"scrapeUrl":"http://smf.free5gc.org:9091/metrics"
+"health":"up"
+"nf":"nrf"}
+"nf":"nrf"}
+"scrapeUrl":"http://nrf.free5gc.org:9091/metrics"
+"health":"up"
+"nf":"nssf"}
+"nf":"nssf"}
+"scrapeUrl":"http://nssf.free5gc.org:9091/metrics"
+"health":"up"
+"nf":"pcf"}
+"nf":"pcf"}
+"scrapeUrl":"http://pcf.free5gc.org:9091/metrics"
+"health":"up"
+"nf":"ausf"}
+"nf":"ausf"}
+"scrapeUrl":"http://ausf.free5gc.org:9091/metrics"
+"health":"up"
+"nf":"udm"}
+"nf":"udm"}
+"scrapeUrl":"http://udm.free5gc.org:9091/metrics"
+"health":"up"
+"scrapeUrl":"http://localhost:9090/metrics"
+"health":"up"
+
+--- up{job=free5gc} ---
+{"status":"success","data":{"resultType":"vector","result":[{"metric":{},"value":[1785737004.541,"8"]}]}}
+--- selected dashboard queries ---
+  query: free5gc_amf_business_ue_connectivity{access_type="3GPP_ACCESS"}
+{"status":"success","data":{"resultType":"vector","result":[{"metric":{"__name__":"free5gc_amf_business_ue_connectivity","access_type":"3GPP_ACCESS","instance":"amf.free5gc.org:9091","job":"free5gc","nf":"amf"},"value":[1785737004.562,"3"]}]}}
+
+  query: sum(free5gc_nas_msg_received_total{name="RegistrationRequest"})
+{"status":"success","data":{"resultType":"vector","result":[{"metric":{},"value":[1785737004.581,"122"]}]}}
+
+  query: sum by (nf_type) (free5gc_sbi_inbound_request_total)
+{"status":"success","data":{"resultType":"vector","result":[{"metric":{"nf_type":"udr"},"value":[1785737004.603,"3248"]},{"metric":{"nf_type":"NSSF"},"value":[1785737004.603,"1936"]},{"metric":{"nf_type":"ausf"},"value":[1785737004.603,"322"]},{"metric":{"nf_type":"pcf"},"value":[1785737004.603,"134"]},{"metric":{"nf_type":"smf"},"value":[1785737004.603,"1939"]},{"metric":{"nf_type":"udm"},"value":[1785737004.603,"2948"]},{"metric":{"nf_type":"nrf"},"value":[1785737004.603,"23549"]}]}}
+

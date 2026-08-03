@@ -1,0 +1,46 @@
+# Alert rules for the free5GC control plane.
+#
+# NOTE: this replaces the alert-rules.yml ported from the previous project, which was an
+# EMPTY 0-byte file (as was its prometheus.yml). Every expression below is written against
+# metric names and labels verified in docs/evidence/ — not guessed.
+
+groups:
+  - name: free5gc-availability
+    rules:
+      - alert: NFExporterDown
+        expr: up{job="free5gc"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "{{ $labels.nf }} metrics endpoint unreachable"
+          description: "Prometheus cannot scrape {{ $labels.nf }} ({{ $labels.instance }}) for over 1 minute. The NF may be down or metrics.enable may have been turned off."
+
+      - alert: NoConnectedUEs
+        expr: free5gc_amf_business_ue_connectivity{access_type="3GPP_ACCESS"} == 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "No UEs connected to the core"
+          description: "AMF reports zero connected UEs (cm-connected + gmm-registered) for 5 minutes. Check the gNB NGAP link and that UEs are running."
+
+  - name: free5gc-sbi-health
+    rules:
+      - alert: SbiServerErrors
+        expr: sum by (nf_type, path) (rate(free5gc_sbi_inbound_request_total{status_code=~"5.*"}[5m])) > 0.2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.nf_type }} returning 5xx on {{ $labels.path }}"
+          description: "Sustained server-side SBI errors. Expected on a non-baseline host for /nsmf-pdusession/v1/sm-contexts, where PDU session creation fails because the UPF (gtp5g) is absent."
+
+      - alert: SbiLatencyHigh
+        expr: histogram_quantile(0.95, sum by (le, nf_type) (rate(free5gc_sbi_inbound_request_duration_seconds_bucket[5m]))) > 1
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.nf_type }} p95 SBI latency above 1s"
+          description: "95th percentile inbound SBI request latency has exceeded 1 second for 10 minutes."
