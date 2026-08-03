@@ -1,0 +1,68 @@
+# HELP free5gc_sbi_inbound_request_duration_seconds Histogram of request latencies
+# TYPE free5gc_sbi_inbound_request_duration_seconds histogram
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="pcf",path="/npcf-am-policy-control/v1/policies",status_code="201 Created",le="0.0001"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="pcf",path="/npcf-am-policy-control/v1/policies",status_code="201 Created",le="0.005"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="pcf",path="/npcf-am-policy-control/v1/policies",status_code="201 Created",le="0.01"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="pcf",path="/npcf-am-policy-control/v1/policies",status_code="201 Created",le="0.02"} 5
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="pcf",path="/npcf-am-policy-control/v1/policies",status_code="201 Created",le="0.025"} 31
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="pcf",path="/npcf-am-policy-control/v1/policies",status_code="201 Created",le="0.05"} 98
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="pcf",path="/npcf-am-policy-control/v1/policies",status_code="201 Created",le="+Inf"} 117
+free5gc_sbi_inbound_request_duration_seconds_sum{method="POST",nf_type="pcf",path="/npcf-am-policy-control/v1/policies",status_code="201 Created"} 4.489552422
+free5gc_sbi_inbound_request_duration_seconds_count{method="POST",nf_type="pcf",path="/npcf-am-policy-control/v1/policies",status_code="201 Created"} 117
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="pcf",path="/npcf-callback/v1/amfstatus",status_code="204 No Content",le="0.0001"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="pcf",path="/npcf-callback/v1/amfstatus",status_code="204 No Content",le="0.005"} 1
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="pcf",path="/npcf-callback/v1/amfstatus",status_code="204 No Content",le="0.01"} 1
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="pcf",path="/npcf-callback/v1/amfstatus",status_code="204 No Content",le="0.02"} 1
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="pcf",path="/npcf-callback/v1/amfstatus",status_code="204 No Content",le="0.025"} 1
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="pcf",path="/npcf-callback/v1/amfstatus",status_code="204 No Content",le="0.05"} 1
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="pcf",path="/npcf-callback/v1/amfstatus",status_code="204 No Content",le="+Inf"} 1
+free5gc_sbi_inbound_request_duration_seconds_sum{method="POST",nf_type="pcf",path="/npcf-callback/v1/amfstatus",status_code="204 No Content"} 0.001211768
+free5gc_sbi_inbound_request_duration_seconds_count{method="POST",nf_type="pcf",path="/npcf-callback/v1/amfstatus",status_code="204 No Content"} 1
+# HELP free5gc_sbi_inbound_request_total Total number of SBI inbound requests received by the NF
+# TYPE free5gc_sbi_inbound_request_total counter
+free5gc_sbi_inbound_request_total{cause="",method="POST",nf_type="pcf",path="/npcf-am-policy-control/v1/policies",status_code="201 Created"} 117
+free5gc_sbi_inbound_request_total{cause="",method="POST",nf_type="pcf",path="/npcf-callback/v1/amfstatus",status_code="204 No Content"} 1
+# HELP free5gc_sbi_outbound_request_duration_seconds Histogram of request latencies
+# TYPE free5gc_sbi_outbound_request_duration_seconds histogram
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="pcf",status_code="200 OK",target_service_name="nnrf-disc",le="0.0001"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="pcf",status_code="200 OK",target_service_name="nnrf-disc",le="0.005"} 1
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="pcf",status_code="200 OK",target_service_name="nnrf-disc",le="0.01"} 13
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="pcf",status_code="200 OK",target_service_name="nnrf-disc",le="0.02"} 22
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="pcf",status_code="200 OK",target_service_name="nnrf-disc",le="0.025"} 23
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="pcf",status_code="200 OK",target_service_name="nnrf-disc",le="0.05"} 23
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="pcf",status_code="200 OK",target_service_name="nnrf-disc",le="+Inf"} 23
+free5gc_sbi_outbound_request_duration_seconds_sum{method="GET",nf_type="pcf",status_code="200 OK",target_service_name="nnrf-disc"} 0.24565373999999998
+free5gc_sbi_outbound_request_duration_seconds_count{method="GET",nf_type="pcf",status_code="200 OK",target_service_name="nnrf-disc"} 23
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="pcf",status_code="200 OK",target_service_name="nudr-dr",le="0.0001"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="pcf",status_code="200 OK",target_service_name="nudr-dr",le="0.005"} 1
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="pcf",status_code="200 OK",target_service_name="nudr-dr",le="0.01"} 67
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="pcf",status_code="200 OK",target_service_name="nudr-dr",le="0.02"} 113
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="pcf",status_code="200 OK",target_service_name="nudr-dr",le="0.025"} 116
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="pcf",status_code="200 OK",target_service_name="nudr-dr",le="0.05"} 117
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="pcf",status_code="200 OK",target_service_name="nudr-dr",le="+Inf"} 117
+free5gc_sbi_outbound_request_duration_seconds_sum{method="GET",nf_type="pcf",status_code="200 OK",target_service_name="nudr-dr"} 1.223848875
+free5gc_sbi_outbound_request_duration_seconds_count{method="GET",nf_type="pcf",status_code="200 OK",target_service_name="nudr-dr"} 117
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="pcf",status_code="201 Created",target_service_name="namf-comm",le="0.0001"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="pcf",status_code="201 Created",target_service_name="namf-comm",le="0.005"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="pcf",status_code="201 Created",target_service_name="namf-comm",le="0.01"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="pcf",status_code="201 Created",target_service_name="namf-comm",le="0.02"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="pcf",status_code="201 Created",target_service_name="namf-comm",le="0.025"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="pcf",status_code="201 Created",target_service_name="namf-comm",le="0.05"} 1
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="pcf",status_code="201 Created",target_service_name="namf-comm",le="+Inf"} 1
+free5gc_sbi_outbound_request_duration_seconds_sum{method="POST",nf_type="pcf",status_code="201 Created",target_service_name="namf-comm"} 0.034184759
+free5gc_sbi_outbound_request_duration_seconds_count{method="POST",nf_type="pcf",status_code="201 Created",target_service_name="namf-comm"} 1
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="pcf",status_code="201 Created",target_service_name="nnrf-nfm",le="0.0001"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="pcf",status_code="201 Created",target_service_name="nnrf-nfm",le="0.005"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="pcf",status_code="201 Created",target_service_name="nnrf-nfm",le="0.01"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="pcf",status_code="201 Created",target_service_name="nnrf-nfm",le="0.02"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="pcf",status_code="201 Created",target_service_name="nnrf-nfm",le="0.025"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="pcf",status_code="201 Created",target_service_name="nnrf-nfm",le="0.05"} 1
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="pcf",status_code="201 Created",target_service_name="nnrf-nfm",le="+Inf"} 1
+free5gc_sbi_outbound_request_duration_seconds_sum{method="PUT",nf_type="pcf",status_code="201 Created",target_service_name="nnrf-nfm"} 0.043388716
+free5gc_sbi_outbound_request_duration_seconds_count{method="PUT",nf_type="pcf",status_code="201 Created",target_service_name="nnrf-nfm"} 1
+# HELP free5gc_sbi_outbound_request_total Total number of SBI outbound requests attempted or sent by the NF
+# TYPE free5gc_sbi_outbound_request_total counter
+free5gc_sbi_outbound_request_total{method="GET",nf_type="pcf",status_code="200 OK",target_service_name="nnrf-disc"} 23
+free5gc_sbi_outbound_request_total{method="GET",nf_type="pcf",status_code="200 OK",target_service_name="nudr-dr"} 117
+free5gc_sbi_outbound_request_total{method="POST",nf_type="pcf",status_code="201 Created",target_service_name="namf-comm"} 1
+free5gc_sbi_outbound_request_total{method="PUT",nf_type="pcf",status_code="201 Created",target_service_name="nnrf-nfm"} 1

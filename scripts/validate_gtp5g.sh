@@ -67,7 +67,7 @@ fi
 # --- Build ---
 echo "== building gtp5g =="
 make -C "$GTP5G_DIR" clean >/dev/null 2>&1 || true
-if ! make -C "$GTP5G_DIR" >"$BUILD_LOG" 2>&1; then
+0if ! make -C "$GTP5G_DIR" >"$BUILD_LOG" 2>&1; then
   echo "BUILD FAILED — see $BUILD_LOG"
   echo
   echo "### HARD STOP (brief 8.6): gtp5g failed to BUILD on kernel $KREL."

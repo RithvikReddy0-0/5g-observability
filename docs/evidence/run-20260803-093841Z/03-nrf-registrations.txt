@@ -1,0 +1,34 @@
+[
+	{
+		"nfType" : "UDR",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfType" : "UDM",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfType" : "AUSF",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfStatus" : "REGISTERED",
+		"nfType" : "PCF"
+	},
+	{
+		"nfType" : "AF",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfType" : "AMF",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfStatus" : "REGISTERED",
+		"nfType" : "SMF"
+	},
+	{
+		"nfType" : "NSSF",
+		"nfStatus" : "REGISTERED"
+	}
+]

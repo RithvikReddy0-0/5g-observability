@@ -206,6 +206,84 @@
         "overrides": []
       },
       "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi" } }
+    },
+    {
+      "id": 9,
+      "type": "row",
+      "title": "Per-slice (S-NSSAI) — derived, see observability/README.md",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 22 },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 10,
+      "type": "stat",
+      "title": "Subscribers provisioned per slice",
+      "description": "free5gc_slice_provisioned_subscribers — from MongoDB amData. free5GC's own metrics carry NO slice identity; this comes from the slice-exporter (ADR-004 rung 2), closing risk R-02.",
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 23 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "free5gc_slice_provisioned_subscribers",
+          "legendFormat": "sst {{sst}} / sd {{sd}}"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": { "unit": "short", "thresholds": { "mode": "absolute", "steps": [{ "color": "purple", "value": null }] } },
+        "overrides": []
+      }
+    },
+    {
+      "id": 11,
+      "type": "timeseries",
+      "title": "UEs observed registered, per slice",
+      "description": "free5gc_slice_ues_observed_registered — distinct SUPIs seen in GMM State[Registered] in the recent AMF log window, joined to their provisioned slice. Log-window derived, NOT a live population gauge.",
+      "gridPos": { "h": 6, "w": 8, "x": 8, "y": 23 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "free5gc_slice_ues_observed_registered",
+          "legendFormat": "sst {{sst}} / sd {{sd}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 15, "showPoints": "never" }
+        },
+        "overrides": []
+      },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi" } }
+    },
+    {
+      "id": 12,
+      "type": "timeseries",
+      "title": "SMF selections per slice (rate)",
+      "description": "free5gc_slice_smf_selection_total — parsed from AMF 'Select SMF [snssai: …]' log lines. Real 5G signalling events, attributed to a slice and DNN.",
+      "gridPos": { "h": 6, "w": 8, "x": 16, "y": 23 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (sst, sd, dnn) (rate(free5gc_slice_smf_selection_total[5m]))",
+          "legendFormat": "sst {{sst}} / sd {{sd}} / {{dnn}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 10, "showPoints": "never" }
+        },
+        "overrides": []
+      },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi" } }
     }
   ]
 }

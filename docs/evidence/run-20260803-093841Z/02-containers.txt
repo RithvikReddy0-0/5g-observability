@@ -1,0 +1,12 @@
+NAME       STATUS
+amf        Up 32 minutes
+ausf       Up About an hour
+mongodb    Up About an hour
+nrf        Up About an hour
+nssf       Up 26 minutes
+pcf        Up About an hour
+smf        Up 32 minutes
+udm        Up About an hour
+udr        Up About an hour
+ueransim   Up 26 minutes
+webui      Up About an hour

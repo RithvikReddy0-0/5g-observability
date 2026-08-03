@@ -76,26 +76,45 @@ dc exec -T db mongo free5gc --quiet --eval \
     "grep 'Initial Registration is successful' /tmp/ue.log 2>/dev/null | grep -oE '20893[0-9]+' | sort -u | wc -l"
   echo
   echo "--- per-UE state via nr-cli (GROUND TRUTH — see note in 00-summary.md) ---"
-  reg=0; conn=0
-  for i in $(seq 1 "${UE_COUNT:-20}"); do
-    supi="$(printf 'imsi-20893%010d' "$i")"
-    out="$(dc exec -T ueransim ./nr-cli "$supi" -e status 2>/dev/null | tr -d '\r')"
-    rm_state="$(printf '%s' "$out" | awk -F': ' '/^rm-state/{print $2}')"
-    cm_state="$(printf '%s' "$out" | awk -F': ' '/^cm-state/{print $2}')"
-    printf '%s  rm=%s  cm=%s\n' "$supi" "${rm_state:-?}" "${cm_state:-?}"
-    [ "$rm_state" = "RM-REGISTERED" ] && reg=$((reg+1))
-    [ "$cm_state" = "CM-CONNECTED" ] && conn=$((conn+1))
-  done
+  # The nr-cli loop runs INSIDE the container: one `docker compose exec` instead of one per
+  # UE. Per-exec overhead is seconds on this host, so the per-UE version took minutes.
+  # Single-quoted so the HOST shell expands nothing; only the UE count is spliced in.
+  # An earlier escaped-double-quote version silently produced no output.
+  ue_n="${UE_COUNT:-20}"
+  inner='for i in $(seq 1 '"$ue_n"'); do s=$(printf "imsi-20893%010d" $i); printf "%s " "$s"; ./nr-cli "$s" -e status 2>/dev/null | grep -E "^rm-state|^cm-state" | tr -d "\r" | tr "\n" " "; echo; done'
+  ue_states="$(dc exec -T ueransim sh -c "$inner")"
+  printf '%s\n' "$ue_states"
+  reg="$(printf '%s' "$ue_states" | grep -c 'RM-REGISTERED' || true)"
+  conn="$(printf '%s' "$ue_states" | grep -c 'CM-CONNECTED' || true)"
   echo
-  echo "RM-REGISTERED : $reg / ${UE_COUNT:-20}"
-  echo "CM-CONNECTED  : $conn / ${UE_COUNT:-20}"
+  echo "RM-REGISTERED : $reg / $ue_n"
+  echo "CM-CONNECTED  : $conn / $ue_n"
   echo "$reg" > "$OUT_DIR/.reg_count"
 } > "$OUT_DIR/05-ue-registration.txt"
 
 # --- 6. NF Prometheus metrics --------------------------------------------
-for nf in amf smf nssf pcf ausf udm udr nrf; do
-  curl_net "http://$nf.free5gc.org:9091/metrics" > "$OUT_DIR/06-metrics-$nf.txt"
-done
+# ONE throwaway curl container fetches all eight endpoints. Spawning one container per NF
+# put real memory pressure on this 8 GB host — enough to get the nr-ue processes killed
+# mid-collection. Output is split back into per-NF files on the host.
+NF_LIST="amf smf nssf pcf ausf udm udr nrf"
+combined="$OUT_DIR/.combined"
+docker run --rm --network compose_privnet curlimages/curl:latest sh -c \
+  'for nf in '"$NF_LIST"'; do echo "@@@FREE5GC_NF@@@ $nf"; curl -s --max-time 8 "http://$nf.free5gc.org:9091/metrics" || true; done' \
+  > "$combined" 2>/dev/null || true
+
+current=""
+while IFS= read -r line; do
+  case "$line" in
+    "@@@FREE5GC_NF@@@ "*)
+      current="$OUT_DIR/06-metrics-${line##* }.txt"
+      : > "$current"
+      ;;
+    *)
+      [ -n "$current" ] && printf '%s\n' "$line" >> "$current"
+      ;;
+  esac
+done < "$combined"
+rm -f "$combined"
 
 # --- 7. observability stack (if running) ---------------------------------
 {
@@ -110,12 +129,23 @@ done
   echo "--- selected dashboard queries ---"
   for q in 'free5gc_amf_business_ue_connectivity{access_type="3GPP_ACCESS"}' \
            'sum(free5gc_nas_msg_received_total{name="RegistrationRequest"})' \
-           'sum by (nf_type) (free5gc_sbi_inbound_request_total)'; do
+           'sum by (nf_type) (free5gc_sbi_inbound_request_total)' \
+           'free5gc_slice_provisioned_subscribers' \
+           'free5gc_slice_ues_observed_registered' \
+           'free5gc_slice_smf_selection_total'; do
     echo "  query: $q"
     curl -sG --max-time 8 --data-urlencode "query=$q" http://localhost:9090/api/v1/query 2>/dev/null | head -c 600
     echo; echo
   done
 } > "$OUT_DIR/07-prometheus.txt" 2>&1
+
+# --- 7b. slice-labeled metrics (the R-02 gap closer) ----------------------
+{
+  echo "--- raw exposition from the slice exporter (:9105) ---"
+  echo "free5GC's native metrics carry NO slice identity; these are derived."
+  echo
+  curl -s --max-time 60 http://localhost:9105/metrics || echo "(slice exporter not reachable on :9105)"
+} > "$OUT_DIR/07b-slice-metrics.txt" 2>&1
 
 {
   echo "--- grafana health ---"
@@ -167,6 +197,7 @@ conforming ODE (SPEC ADR-003). Registration is the success criterion here.
 | \`06-metrics-<nf>.txt\` | raw Prometheus exposition from each NF's \`:9091/metrics\` |
 
 | \`07-prometheus.txt\` | target health + selected dashboard queries |
+| \`07b-slice-metrics.txt\` | **slice-labeled metrics** (sst/sd) from the slice exporter |
 | \`08-grafana.txt\` | Grafana health, provisioned dashboards, datasources |
 
 ## Notes

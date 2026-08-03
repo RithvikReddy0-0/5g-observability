@@ -35,6 +35,18 @@ scrape_configs:
       - targets: ["udr.free5gc.org:9091"]
         labels: { nf: udr }
 
+  # Slice-labeled metrics (observability/slice-exporter). free5GC's own metrics carry NO
+  # slice identity, so this derives it from AMF logs + MongoDB — see R-02 / ADR-006.
+  # The exporter runs on the HOST (it shells out to docker), reached via the compose
+  # network gateway. 10.100.200.1 is the gateway of compose_privnet (subnet 10.100.200.0/24);
+  # host.docker.internal does NOT resolve on this user-defined network.
+  - job_name: slice-exporter
+    metrics_path: /metrics
+    scrape_interval: 30s
+    static_configs:
+      - targets: ["10.100.200.1:9105"]
+        labels: { component: slice-exporter }
+
   - job_name: prometheus
     static_configs:
       - targets: ["localhost:9090"]

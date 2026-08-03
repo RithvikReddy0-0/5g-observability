@@ -1,0 +1,148 @@
+# HELP free5gc_sbi_inbound_request_duration_seconds Histogram of request latencies
+# TYPE free5gc_sbi_inbound_request_duration_seconds histogram
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udm",path="/nudm-sdm/v2/:supi/:subscriptionId",status_code="200 OK",le="0.0001"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udm",path="/nudm-sdm/v2/:supi/:subscriptionId",status_code="200 OK",le="0.005"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udm",path="/nudm-sdm/v2/:supi/:subscriptionId",status_code="200 OK",le="0.01"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udm",path="/nudm-sdm/v2/:supi/:subscriptionId",status_code="200 OK",le="0.02"} 326
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udm",path="/nudm-sdm/v2/:supi/:subscriptionId",status_code="200 OK",le="0.025"} 1408
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udm",path="/nudm-sdm/v2/:supi/:subscriptionId",status_code="200 OK",le="0.05"} 4071
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udm",path="/nudm-sdm/v2/:supi/:subscriptionId",status_code="200 OK",le="+Inf"} 4469
+free5gc_sbi_inbound_request_duration_seconds_sum{method="GET",nf_type="udm",path="/nudm-sdm/v2/:supi/:subscriptionId",status_code="200 OK"} 159.37953476500087
+free5gc_sbi_inbound_request_duration_seconds_count{method="GET",nf_type="udm",path="/nudm-sdm/v2/:supi/:subscriptionId",status_code="200 OK"} 4469
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udm",path="/nudm-sdm/v2/:supi/:subscriptionId",status_code="500 Internal Server Error",le="0.0001"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udm",path="/nudm-sdm/v2/:supi/:subscriptionId",status_code="500 Internal Server Error",le="0.005"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udm",path="/nudm-sdm/v2/:supi/:subscriptionId",status_code="500 Internal Server Error",le="0.01"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udm",path="/nudm-sdm/v2/:supi/:subscriptionId",status_code="500 Internal Server Error",le="0.02"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udm",path="/nudm-sdm/v2/:supi/:subscriptionId",status_code="500 Internal Server Error",le="0.025"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udm",path="/nudm-sdm/v2/:supi/:subscriptionId",status_code="500 Internal Server Error",le="0.05"} 1
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udm",path="/nudm-sdm/v2/:supi/:subscriptionId",status_code="500 Internal Server Error",le="+Inf"} 1
+free5gc_sbi_inbound_request_duration_seconds_sum{method="GET",nf_type="udm",path="/nudm-sdm/v2/:supi/:subscriptionId",status_code="500 Internal Server Error"} 0.031182224
+free5gc_sbi_inbound_request_duration_seconds_count{method="GET",nf_type="udm",path="/nudm-sdm/v2/:supi/:subscriptionId",status_code="500 Internal Server Error"} 1
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="udm",path="/nudm-sdm/v2/:supi/:subscriptionId",status_code="201 Created",le="0.0001"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="udm",path="/nudm-sdm/v2/:supi/:subscriptionId",status_code="201 Created",le="0.005"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="udm",path="/nudm-sdm/v2/:supi/:subscriptionId",status_code="201 Created",le="0.01"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="udm",path="/nudm-sdm/v2/:supi/:subscriptionId",status_code="201 Created",le="0.02"} 8
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="udm",path="/nudm-sdm/v2/:supi/:subscriptionId",status_code="201 Created",le="0.025"} 23
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="udm",path="/nudm-sdm/v2/:supi/:subscriptionId",status_code="201 Created",le="0.05"} 78
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="udm",path="/nudm-sdm/v2/:supi/:subscriptionId",status_code="201 Created",le="+Inf"} 79
+free5gc_sbi_inbound_request_duration_seconds_sum{method="POST",nf_type="udm",path="/nudm-sdm/v2/:supi/:subscriptionId",status_code="201 Created"} 2.425304249
+free5gc_sbi_inbound_request_duration_seconds_count{method="POST",nf_type="udm",path="/nudm-sdm/v2/:supi/:subscriptionId",status_code="201 Created"} 79
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="udm",path="/nudm-ueau/v1/:supi/:twoLayer",status_code="201 Created",le="0.0001"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="udm",path="/nudm-ueau/v1/:supi/:twoLayer",status_code="201 Created",le="0.005"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="udm",path="/nudm-ueau/v1/:supi/:twoLayer",status_code="201 Created",le="0.01"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="udm",path="/nudm-ueau/v1/:supi/:twoLayer",status_code="201 Created",le="0.02"} 8
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="udm",path="/nudm-ueau/v1/:supi/:twoLayer",status_code="201 Created",le="0.025"} 30
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="udm",path="/nudm-ueau/v1/:supi/:twoLayer",status_code="201 Created",le="0.05"} 114
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="udm",path="/nudm-ueau/v1/:supi/:twoLayer",status_code="201 Created",le="+Inf"} 117
+free5gc_sbi_inbound_request_duration_seconds_sum{method="POST",nf_type="udm",path="/nudm-ueau/v1/:supi/:twoLayer",status_code="201 Created"} 3.7588907920000008
+free5gc_sbi_inbound_request_duration_seconds_count{method="POST",nf_type="udm",path="/nudm-ueau/v1/:supi/:twoLayer",status_code="201 Created"} 117
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="udm",path="/nudm-ueau/v1/:supi/:twoLayer/:thirdLayer",status_code="200 OK",le="0.0001"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="udm",path="/nudm-ueau/v1/:supi/:twoLayer/:thirdLayer",status_code="200 OK",le="0.005"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="udm",path="/nudm-ueau/v1/:supi/:twoLayer/:thirdLayer",status_code="200 OK",le="0.01"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="udm",path="/nudm-ueau/v1/:supi/:twoLayer/:thirdLayer",status_code="200 OK",le="0.02"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="udm",path="/nudm-ueau/v1/:supi/:twoLayer/:thirdLayer",status_code="200 OK",le="0.025"} 4
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="udm",path="/nudm-ueau/v1/:supi/:twoLayer/:thirdLayer",status_code="200 OK",le="0.05"} 73
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="udm",path="/nudm-ueau/v1/:supi/:twoLayer/:thirdLayer",status_code="200 OK",le="+Inf"} 117
+free5gc_sbi_inbound_request_duration_seconds_sum{method="POST",nf_type="udm",path="/nudm-ueau/v1/:supi/:twoLayer/:thirdLayer",status_code="200 OK"} 5.867977431
+free5gc_sbi_inbound_request_duration_seconds_count{method="POST",nf_type="udm",path="/nudm-ueau/v1/:supi/:twoLayer/:thirdLayer",status_code="200 OK"} 117
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="PUT",nf_type="udm",path="/nudm-uecm/v1/:ueId/registrations/amf-3gpp-access",status_code="200 OK",le="0.0001"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="PUT",nf_type="udm",path="/nudm-uecm/v1/:ueId/registrations/amf-3gpp-access",status_code="200 OK",le="0.005"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="PUT",nf_type="udm",path="/nudm-uecm/v1/:ueId/registrations/amf-3gpp-access",status_code="200 OK",le="0.01"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="PUT",nf_type="udm",path="/nudm-uecm/v1/:ueId/registrations/amf-3gpp-access",status_code="200 OK",le="0.02"} 8
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="PUT",nf_type="udm",path="/nudm-uecm/v1/:ueId/registrations/amf-3gpp-access",status_code="200 OK",le="0.025"} 21
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="PUT",nf_type="udm",path="/nudm-uecm/v1/:ueId/registrations/amf-3gpp-access",status_code="200 OK",le="0.05"} 54
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="PUT",nf_type="udm",path="/nudm-uecm/v1/:ueId/registrations/amf-3gpp-access",status_code="200 OK",le="+Inf"} 59
+free5gc_sbi_inbound_request_duration_seconds_sum{method="PUT",nf_type="udm",path="/nudm-uecm/v1/:ueId/registrations/amf-3gpp-access",status_code="200 OK"} 1.888749782
+free5gc_sbi_inbound_request_duration_seconds_count{method="PUT",nf_type="udm",path="/nudm-uecm/v1/:ueId/registrations/amf-3gpp-access",status_code="200 OK"} 59
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="PUT",nf_type="udm",path="/nudm-uecm/v1/:ueId/registrations/amf-3gpp-access",status_code="201 Created",le="0.0001"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="PUT",nf_type="udm",path="/nudm-uecm/v1/:ueId/registrations/amf-3gpp-access",status_code="201 Created",le="0.005"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="PUT",nf_type="udm",path="/nudm-uecm/v1/:ueId/registrations/amf-3gpp-access",status_code="201 Created",le="0.01"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="PUT",nf_type="udm",path="/nudm-uecm/v1/:ueId/registrations/amf-3gpp-access",status_code="201 Created",le="0.02"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="PUT",nf_type="udm",path="/nudm-uecm/v1/:ueId/registrations/amf-3gpp-access",status_code="201 Created",le="0.025"} 1
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="PUT",nf_type="udm",path="/nudm-uecm/v1/:ueId/registrations/amf-3gpp-access",status_code="201 Created",le="0.05"} 19
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="PUT",nf_type="udm",path="/nudm-uecm/v1/:ueId/registrations/amf-3gpp-access",status_code="201 Created",le="+Inf"} 20
+free5gc_sbi_inbound_request_duration_seconds_sum{method="PUT",nf_type="udm",path="/nudm-uecm/v1/:ueId/registrations/amf-3gpp-access",status_code="201 Created"} 0.735596366
+free5gc_sbi_inbound_request_duration_seconds_count{method="PUT",nf_type="udm",path="/nudm-uecm/v1/:ueId/registrations/amf-3gpp-access",status_code="201 Created"} 20
+# HELP free5gc_sbi_inbound_request_total Total number of SBI inbound requests received by the NF
+# TYPE free5gc_sbi_inbound_request_total counter
+free5gc_sbi_inbound_request_total{cause="",method="GET",nf_type="udm",path="/nudm-sdm/v2/:supi/:subscriptionId",status_code="200 OK"} 4469
+free5gc_sbi_inbound_request_total{cause="",method="POST",nf_type="udm",path="/nudm-sdm/v2/:supi/:subscriptionId",status_code="201 Created"} 79
+free5gc_sbi_inbound_request_total{cause="",method="POST",nf_type="udm",path="/nudm-ueau/v1/:supi/:twoLayer",status_code="201 Created"} 117
+free5gc_sbi_inbound_request_total{cause="",method="POST",nf_type="udm",path="/nudm-ueau/v1/:supi/:twoLayer/:thirdLayer",status_code="200 OK"} 117
+free5gc_sbi_inbound_request_total{cause="",method="PUT",nf_type="udm",path="/nudm-uecm/v1/:ueId/registrations/amf-3gpp-access",status_code="200 OK"} 59
+free5gc_sbi_inbound_request_total{cause="",method="PUT",nf_type="udm",path="/nudm-uecm/v1/:ueId/registrations/amf-3gpp-access",status_code="201 Created"} 20
+free5gc_sbi_inbound_request_total{cause="SYSTEM_FAILURE",method="GET",nf_type="udm",path="/nudm-sdm/v2/:supi/:subscriptionId",status_code="500 Internal Server Error"} 1
+# HELP free5gc_sbi_outbound_request_duration_seconds Histogram of request latencies
+# TYPE free5gc_sbi_outbound_request_duration_seconds histogram
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="udm",status_code="200 OK",target_service_name="nnrf-disc",le="0.0001"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="udm",status_code="200 OK",target_service_name="nnrf-disc",le="0.005"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="udm",status_code="200 OK",target_service_name="nnrf-disc",le="0.01"} 11
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="udm",status_code="200 OK",target_service_name="nnrf-disc",le="0.02"} 20
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="udm",status_code="200 OK",target_service_name="nnrf-disc",le="0.025"} 20
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="udm",status_code="200 OK",target_service_name="nnrf-disc",le="0.05"} 20
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="udm",status_code="200 OK",target_service_name="nnrf-disc",le="+Inf"} 20
+free5gc_sbi_outbound_request_duration_seconds_sum{method="GET",nf_type="udm",status_code="200 OK",target_service_name="nnrf-disc"} 0.212593661
+free5gc_sbi_outbound_request_duration_seconds_count{method="GET",nf_type="udm",status_code="200 OK",target_service_name="nnrf-disc"} 20
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="udm",status_code="200 OK",target_service_name="nudr-dr",le="0.0001"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="udm",status_code="200 OK",target_service_name="nudr-dr",le="0.005"} 16
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="udm",status_code="200 OK",target_service_name="nudr-dr",le="0.01"} 2351
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="udm",status_code="200 OK",target_service_name="nudr-dr",le="0.02"} 4348
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="udm",status_code="200 OK",target_service_name="nudr-dr",le="0.025"} 4484
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="udm",status_code="200 OK",target_service_name="nudr-dr",le="0.05"} 4579
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="udm",status_code="200 OK",target_service_name="nudr-dr",le="+Inf"} 4586
+free5gc_sbi_outbound_request_duration_seconds_sum{method="GET",nf_type="udm",status_code="200 OK",target_service_name="nudr-dr"} 58.02015639799989
+free5gc_sbi_outbound_request_duration_seconds_count{method="GET",nf_type="udm",status_code="200 OK",target_service_name="nudr-dr"} 4586
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="udm",status_code="500 Internal Server Error",target_service_name="nudr-dr",le="0.0001"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="udm",status_code="500 Internal Server Error",target_service_name="nudr-dr",le="0.005"} 1
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="udm",status_code="500 Internal Server Error",target_service_name="nudr-dr",le="0.01"} 1
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="udm",status_code="500 Internal Server Error",target_service_name="nudr-dr",le="0.02"} 1
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="udm",status_code="500 Internal Server Error",target_service_name="nudr-dr",le="0.025"} 1
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="udm",status_code="500 Internal Server Error",target_service_name="nudr-dr",le="0.05"} 1
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="udm",status_code="500 Internal Server Error",target_service_name="nudr-dr",le="+Inf"} 1
+free5gc_sbi_outbound_request_duration_seconds_sum{method="GET",nf_type="udm",status_code="500 Internal Server Error",target_service_name="nudr-dr"} 0.002429049
+free5gc_sbi_outbound_request_duration_seconds_count{method="GET",nf_type="udm",status_code="500 Internal Server Error",target_service_name="nudr-dr"} 1
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PATCH",nf_type="udm",status_code="204 No Content",target_service_name="nudr-dr",le="0.0001"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PATCH",nf_type="udm",status_code="204 No Content",target_service_name="nudr-dr",le="0.005"} 2
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PATCH",nf_type="udm",status_code="204 No Content",target_service_name="nudr-dr",le="0.01"} 47
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PATCH",nf_type="udm",status_code="204 No Content",target_service_name="nudr-dr",le="0.02"} 107
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PATCH",nf_type="udm",status_code="204 No Content",target_service_name="nudr-dr",le="0.025"} 113
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PATCH",nf_type="udm",status_code="204 No Content",target_service_name="nudr-dr",le="0.05"} 117
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PATCH",nf_type="udm",status_code="204 No Content",target_service_name="nudr-dr",le="+Inf"} 117
+free5gc_sbi_outbound_request_duration_seconds_sum{method="PATCH",nf_type="udm",status_code="204 No Content",target_service_name="nudr-dr"} 1.3896253520000004
+free5gc_sbi_outbound_request_duration_seconds_count{method="PATCH",nf_type="udm",status_code="204 No Content",target_service_name="nudr-dr"} 117
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="udm",status_code="201 Created",target_service_name="nudr-dr",le="0.0001"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="udm",status_code="201 Created",target_service_name="nudr-dr",le="0.005"} 5
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="udm",status_code="201 Created",target_service_name="nudr-dr",le="0.01"} 49
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="udm",status_code="201 Created",target_service_name="nudr-dr",le="0.02"} 79
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="udm",status_code="201 Created",target_service_name="nudr-dr",le="0.025"} 79
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="udm",status_code="201 Created",target_service_name="nudr-dr",le="0.05"} 79
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="udm",status_code="201 Created",target_service_name="nudr-dr",le="+Inf"} 79
+free5gc_sbi_outbound_request_duration_seconds_sum{method="POST",nf_type="udm",status_code="201 Created",target_service_name="nudr-dr"} 0.7580952619999997
+free5gc_sbi_outbound_request_duration_seconds_count{method="POST",nf_type="udm",status_code="201 Created",target_service_name="nudr-dr"} 79
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="udm",status_code="201 Created",target_service_name="nnrf-nfm",le="0.0001"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="udm",status_code="201 Created",target_service_name="nnrf-nfm",le="0.005"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="udm",status_code="201 Created",target_service_name="nnrf-nfm",le="0.01"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="udm",status_code="201 Created",target_service_name="nnrf-nfm",le="0.02"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="udm",status_code="201 Created",target_service_name="nnrf-nfm",le="0.025"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="udm",status_code="201 Created",target_service_name="nnrf-nfm",le="0.05"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="udm",status_code="201 Created",target_service_name="nnrf-nfm",le="+Inf"} 1
+free5gc_sbi_outbound_request_duration_seconds_sum{method="PUT",nf_type="udm",status_code="201 Created",target_service_name="nnrf-nfm"} 0.059786663
+free5gc_sbi_outbound_request_duration_seconds_count{method="PUT",nf_type="udm",status_code="201 Created",target_service_name="nnrf-nfm"} 1
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="udm",status_code="204 No Content",target_service_name="nudr-dr",le="0.0001"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="udm",status_code="204 No Content",target_service_name="nudr-dr",le="0.005"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="udm",status_code="204 No Content",target_service_name="nudr-dr",le="0.01"} 79
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="udm",status_code="204 No Content",target_service_name="nudr-dr",le="0.02"} 188
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="udm",status_code="204 No Content",target_service_name="nudr-dr",le="0.025"} 196
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="udm",status_code="204 No Content",target_service_name="nudr-dr",le="0.05"} 196
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="udm",status_code="204 No Content",target_service_name="nudr-dr",le="+Inf"} 196
+free5gc_sbi_outbound_request_duration_seconds_sum{method="PUT",nf_type="udm",status_code="204 No Content",target_service_name="nudr-dr"} 2.3004620210000013
+free5gc_sbi_outbound_request_duration_seconds_count{method="PUT",nf_type="udm",status_code="204 No Content",target_service_name="nudr-dr"} 196
+# HELP free5gc_sbi_outbound_request_total Total number of SBI outbound requests attempted or sent by the NF
+# TYPE free5gc_sbi_outbound_request_total counter
+free5gc_sbi_outbound_request_total{method="GET",nf_type="udm",status_code="200 OK",target_service_name="nnrf-disc"} 20
+free5gc_sbi_outbound_request_total{method="GET",nf_type="udm",status_code="200 OK",target_service_name="nudr-dr"} 4586
+free5gc_sbi_outbound_request_total{method="GET",nf_type="udm",status_code="500 Internal Server Error",target_service_name="nudr-dr"} 1
+free5gc_sbi_outbound_request_total{method="PATCH",nf_type="udm",status_code="204 No Content",target_service_name="nudr-dr"} 117
+free5gc_sbi_outbound_request_total{method="POST",nf_type="udm",status_code="201 Created",target_service_name="nudr-dr"} 79
+free5gc_sbi_outbound_request_total{method="PUT",nf_type="udm",status_code="201 Created",target_service_name="nnrf-nfm"} 1
+free5gc_sbi_outbound_request_total{method="PUT",nf_type="udm",status_code="204 No Content",target_service_name="nudr-dr"} 196

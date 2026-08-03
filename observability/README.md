@@ -70,6 +70,50 @@ This is exactly the kind of gap the observability plane exists to expose, and it
 input to the ADR-004 decision about whether NF-native telemetry is sufficient or an
 instrumentation patch is eventually warranted.
 
+## Slice-labeled metrics (closes R-02)
+
+free5GC's native metrics carry **no slice identity** — verified across all 629 series and
+15 metric names. That blocks the ADR-006 labeling contract the Slice Correlation Engine
+depends on (risk **R-02**).
+
+`slice-exporter/slice_exporter.py` closes the gap at **ADR-004 rung 2 (log-derived)**, with
+no changes to free5GC source:
+
+```bash
+scripts/start_slice_exporter.sh            # start (also --stop, --status)
+```
+
+| Metric | Labels | Source |
+|---|---|---|
+| `free5gc_slice_provisioned_subscribers` | `sst`, `sd` | MongoDB `amData.nssai.defaultSingleNssais` |
+| `free5gc_slice_ues_observed_registered` | `sst`, `sd` | AMF log `GMM State[Registered]`, SUPI joined to its provisioned slice |
+| `free5gc_slice_smf_selection_total` | `sst`, `sd`, `dnn` | AMF log `Select SMF [snssai: {Sst:1 Sd:010203}, dnn: internet]` |
+
+Slice identity is real, taken from these AMF log lines (present at **INFO**, no debug needed):
+
+```
+[AMF][Gmm][supi:SUPI:imsi-208930000000004] Select SMF [snssai: {Sst:1 Sd:010203}, dnn: internet]
+```
+
+**Honesty notes.**
+- These are **derived** metrics, not NF-native slice labels. The upstream gap is unchanged;
+  this makes slice-aware observability possible without patching free5GC, and is the
+  evidence base for the eventual ADR-004 decision on whether a patch is warranted.
+- `free5gc_slice_ues_observed_registered` is **log-window derived, not a live gauge**, and
+  this matters in practice: it is an *activity* signal, not a population count. UERANSIM UEs
+  give up after ~5 PDU-session retries and then go silent, at which point they emit no
+  further AMF log lines and **this metric decays to 0 even though all 20 UEs are still
+  RM-REGISTERED** (observed in `docs/evidence/run-20260803-093841Z`). For UE population use
+  `free5gc_slice_provisioned_subscribers` together with the `nr-cli` ground truth captured
+  by `scripts/collect_evidence.sh`. `free5gc_slice_smf_selection_total` is a cumulative
+  counter and does not have this problem.
+- The exporter runs on the **host**, not in a container, because it shells out to `docker`.
+  Prometheus reaches it at `10.100.200.1:9105` (the compose network gateway);
+  `host.docker.internal` does **not** resolve on this user-defined network.
+- It deliberately avoids `nr-cli`: one `docker compose exec` per UE took >180s for 20 UEs
+  on this memory-constrained host and timed out every scrape. A single `docker compose logs`
+  read returns in under a second and carries the same slice identity.
+
 ## Alerts
 
 `prometheus/alert-rules.yml` defines NFExporterDown, NoConnectedUEs, SbiServerErrors and
