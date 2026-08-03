@@ -12,6 +12,13 @@ __pycache__/
 venv/
 .venv/
 
+# --- TLS material: free5GC auto-generates these into the bind-mounted cert dir
+#     at first start. They are runtime artifacts and include PRIVATE KEYS.
+#     Never commit them (this repo is public); they regenerate on a clean run. ---
+deployments/compose/cert/
+*.key
+*.pem
+
 # --- Runtime artifacts / logs ---
 /logs/
 *.log

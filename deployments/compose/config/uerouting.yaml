@@ -1,0 +1,19 @@
+info:
+  version: 1.0.7
+  description: Routing information for UE
+
+# Authored for THIS deployment's topology, not copied from the upstream ULCL
+# example. Node names must match smfcfg.yaml userplaneInformation.upNodes,
+# which defines exactly two nodes: gNB1 (AN) and UPF. The upstream sample
+# references I-UPF / PSA-UPF / BranchingUPF / AnchorUPF*, none of which exist
+# here, so using it verbatim would be inconsistent (and is ULCL-only anyway).
+#
+# Single-UPF, single-slice baseline: one group, default path gNB1 -> UPF.
+# Extend `members` as additional subscribers are provisioned.
+ueRoutingInfo:
+  UE1:
+    members:
+      - imsi-208930000000001
+    topology:
+      - A: gNB1
+        B: UPF
