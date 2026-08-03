@@ -1,0 +1,67 @@
+--- gNB NG setup ---
+[2026-08-03 05:46:01.384] [sctp] [info] Trying to establish SCTP connection... (10.100.200.16:38412)
+[2026-08-03 05:46:01.393] [sctp] [info] SCTP connection established (10.100.200.16:38412)
+[2026-08-03 05:46:01.394] [ngap] [debug] Sending NG Setup Request
+[2026-08-03 05:46:01.395] [ngap] [debug] NG Setup Response received
+[2026-08-03 05:46:01.395] [ngap] [info] NG Setup procedure is successful
+
+--- registered UEs (from UE log) ---
+208930000000001
+208930000000002
+208930000000003
+208930000000004
+208930000000005
+208930000000006
+208930000000007
+208930000000008
+208930000000009
+208930000000010
+208930000000011
+208930000000012
+208930000000013
+208930000000014
+208930000000015
+208930000000016
+208930000000017
+208930000000018
+208930000000019
+208930000000020
+
+count registered: 20
+
+--- per-UE state via nr-cli (network-independent check) ---
+== imsi-208930000000001 ==
+cm-state: CM-CONNECTED
+rm-state: RM-REGISTERED
+mm-state: MM-REGISTERED/NORMAL-SERVICE
+5u-state: 5U1-UPDATED
+sim-inserted: true
+selected-plmn: 208/93
+== imsi-208930000000002 ==
+cm-state: CM-CONNECTED
+rm-state: RM-REGISTERED
+mm-state: MM-REGISTERED/NORMAL-SERVICE
+5u-state: 5U1-UPDATED
+sim-inserted: true
+selected-plmn: 208/93
+== imsi-208930000000003 ==
+cm-state: CM-CONNECTED
+rm-state: RM-REGISTERED
+mm-state: MM-REGISTERED/NORMAL-SERVICE
+5u-state: 5U1-UPDATED
+sim-inserted: true
+selected-plmn: 208/93
+== imsi-208930000000010 ==
+cm-state: CM-CONNECTED
+rm-state: RM-REGISTERED
+mm-state: MM-REGISTERED/NORMAL-SERVICE
+5u-state: 5U1-UPDATED
+sim-inserted: true
+selected-plmn: 208/93
+== imsi-208930000000020 ==
+cm-state: CM-CONNECTED
+rm-state: RM-REGISTERED
+mm-state: MM-REGISTERED/NORMAL-SERVICE
+5u-state: 5U1-UPDATED
+sim-inserted: true
+selected-plmn: 208/93
