@@ -286,6 +286,10 @@ services:
     volumes:
       - ./config/gnbcfg.yaml:/ueransim/config/gnbcfg.yaml
       - ./config/uecfg.yaml:/ueransim/config/uecfg.yaml
+      # PHASE 1.5 slice B. Configs are mounted FILE BY FILE here, not as a directory, so a
+      # new config is invisible inside the container until it is listed explicitly —
+      # nr-ue fails with "ERROR: bad file: ./config/uecfg-slice-b.yaml".
+      - ./config/uecfg-slice-b.yaml:/ueransim/config/uecfg-slice-b.yaml
     cap_add:
       - NET_ADMIN
     devices:

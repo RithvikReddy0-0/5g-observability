@@ -15,10 +15,12 @@ amfConfigs:
     port: 38412
 
 # List of supported S-NSSAIs by this gNB
-# ADR-007: the gNB advertises only the modeled slice, matching AMF/SMF/NSSF/subscribers/UE.
+# PHASE 1.5: the gNB advertises both modeled slices, matching AMF/SMF/NSSF/subscribers/UEs.
 slices:
   - sst: 0x1
     sd: 0x010203
+  - sst: 0x1
+    sd: 0x112233
 
 # Indicates whether or not SCTP stream number errors should be ignored.
 ignoreStreamIds: true

@@ -29,12 +29,30 @@ UE_CFG="${UE_CFG:-./config/uecfg.yaml}"
 SETTLE="${SETTLE:-45}"         # seconds to wait before counting
 LOG=/tmp/ue.log
 
+# Optional SECOND slice group (Phase 1.5). Set COUNT_B to launch a second nr-ue process
+# with its own config, so the two groups differ only by requested S-NSSAI. Each group logs
+# separately; registration is counted across both.
+COUNT_B="${COUNT_B:-0}"
+UE_CFG_B="${UE_CFG_B:-./config/uecfg-slice-b.yaml}"
+LOG_B=/tmp/ue-b.log
+
 dc() { (cd "$COMPOSE_DIR" && docker compose "$@" 2>/dev/null); }
 
-registered_count() {
+count_in_log() {
   dc exec -T ueransim sh -c \
-    "grep 'Initial Registration is successful' $LOG 2>/dev/null | grep -oE '20893[0-9]+' | sort -u | wc -l" \
+    "grep 'Initial Registration is successful' $1 2>/dev/null | grep -oE '20893[0-9]+' | sort -u | wc -l" \
     | tr -d ' \r'
+}
+
+registered_count() {
+  a="$(count_in_log "$LOG")"
+  a="${a:-0}"
+  if [ "$COUNT_B" -gt 0 ] 2>/dev/null; then
+    b="$(count_in_log "$LOG_B")"
+    echo $((a + ${b:-0}))
+  else
+    echo "$a"
+  fi
 }
 
 case "${1:-}" in
@@ -44,7 +62,9 @@ case "${1:-}" in
     exit 0
     ;;
   --status)
-    echo "UEs registered: $(registered_count) / requested $COUNT"
+    _tot="$COUNT"
+    [ "$COUNT_B" -gt 0 ] 2>/dev/null && _tot=$((COUNT + COUNT_B))
+    echo "UEs registered: $(registered_count) / requested $_tot"
     dc exec -T ueransim ./nr-cli --dump | grep -c imsi- | xargs -I{} echo "UE instances running: {}"
     exit 0
     ;;
@@ -60,19 +80,28 @@ echo "==================================================================="
 echo "launching $COUNT UE(s)  (stagger ${TEMPO}ms, settle ${SETTLE}s)"
 echo "==================================================================="
 
+TOTAL="$COUNT"
+[ "$COUNT_B" -gt 0 ] 2>/dev/null && TOTAL=$((COUNT + COUNT_B))
+
 dc exec -T ueransim pkill nr-ue >/dev/null 2>&1
 sleep 2
-dc exec -T ueransim sh -c "rm -f $LOG" >/dev/null 2>&1
+dc exec -T ueransim sh -c "rm -f $LOG $LOG_B" >/dev/null 2>&1
 dc exec -d ueransim sh -c "./nr-ue -c $UE_CFG -n $COUNT -t $TEMPO > $LOG 2>&1" >/dev/null
+if [ "$COUNT_B" -gt 0 ] 2>/dev/null; then
+  echo "  group A: $COUNT UE(s) via $UE_CFG"
+  echo "  group B: $COUNT_B UE(s) via $UE_CFG_B"
+  sleep 2
+  dc exec -d ueransim sh -c "./nr-ue -c $UE_CFG_B -n $COUNT_B -t $TEMPO > $LOG_B 2>&1" >/dev/null
+fi
 
 echo "launched; waiting ${SETTLE}s for registration to settle ..."
 sleep "$SETTLE"
 
 got="$(registered_count)"
 echo "-------------------------------------------------------------------"
-echo "UEs REGISTERED: $got / $COUNT"
+echo "UEs REGISTERED: $got / $TOTAL"
 
-if [ "${got:-0}" -ge "$COUNT" ] 2>/dev/null; then
+if [ "${got:-0}" -ge "$TOTAL" ] 2>/dev/null; then
   echo "UE REGISTRATION: PASS"
   exit 0
 fi

@@ -36,8 +36,39 @@ ok()   { echo "  [ OK ] $*"; }
 info() { echo "  [INFO] $*"; }
 
 command -v git >/dev/null 2>&1 || { echo "ERROR: git not found in PATH" >&2; exit 2; }
-command -v jq  >/dev/null 2>&1 || { echo "ERROR: jq not found in PATH (required to parse manifest.lock)" >&2; exit 2; }
 [ -f "$MANIFEST" ] || { echo "ERROR: manifest.lock not found at $MANIFEST" >&2; exit 2; }
+
+# manifest.lock is JSON. The brief names jq, but leaves bootstrap's mechanics to the
+# implementer — so python3 is accepted as a fallback. python3 ships with Ubuntu by default
+# while jq does not, which removes an undocumented prerequisite from the ODE runbook.
+if command -v jq >/dev/null 2>&1; then
+  JSON_TOOL=jq
+elif command -v python3 >/dev/null 2>&1; then
+  JSON_TOOL=python3
+else
+  echo "ERROR: need jq or python3 in PATH to parse manifest.lock" >&2
+  exit 2
+fi
+
+dep_count() {
+  if [ "$JSON_TOOL" = jq ]; then
+    jq '.dependencies | length' "$MANIFEST"
+  else
+    python3 -c 'import json,sys; print(len(json.load(open(sys.argv[1]))["dependencies"]))' "$MANIFEST"
+  fi
+}
+
+# dep_field <index> <field>  — booleans render as lowercase true/false, matching `jq -r`.
+dep_field() {
+  if [ "$JSON_TOOL" = jq ]; then
+    jq -r ".dependencies[$1].$2" "$MANIFEST"
+  else
+    python3 -c 'import json,sys
+d = json.load(open(sys.argv[1]))["dependencies"][int(sys.argv[2])]
+v = d[sys.argv[3]]
+print(str(v).lower() if isinstance(v, bool) else v)' "$MANIFEST" "$1" "$2"
+  fi
+}
 
 # Safety: only ever operate on <repo>/external.
 if [ "$EXTERNAL_DIR" != "$REPO_ROOT/external" ]; then
@@ -117,14 +148,14 @@ echo "external  : $EXTERNAL_DIR"
 echo "==================================================================="
 
 overall=0
-count="$(jq '.dependencies | length' "$MANIFEST")"
+count="$(dep_count)"
 i=0
 while [ "$i" -lt "$count" ]; do
-  name="$(jq -r ".dependencies[$i].name" "$MANIFEST")"
-  url="$(jq -r ".dependencies[$i].url" "$MANIFEST")"
-  commit="$(jq -r ".dependencies[$i].commit" "$MANIFEST")"
-  destrel="$(jq -r ".dependencies[$i].dest" "$MANIFEST")"
-  recurse="$(jq -r ".dependencies[$i].recurse_submodules" "$MANIFEST")"
+  name="$(dep_field "$i" name)"
+  url="$(dep_field "$i" url)"
+  commit="$(dep_field "$i" commit)"
+  destrel="$(dep_field "$i" dest)"
+  recurse="$(dep_field "$i" recurse_submodules)"
   dest="$REPO_ROOT/$destrel"
 
   echo

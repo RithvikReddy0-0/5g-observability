@@ -67,6 +67,31 @@ separate containers. Verify from the RAN side with
 gtp5g kernel module, which WSL2 does not provide. Registration is the success criterion on
 a non-baseline host; the data path is validated on the ODE.
 
+## Phase 1.5 — two slices
+
+Two explicitly-modeled slices, added **additively** (config only, no schema change) as
+ADR-007 requires:
+
+| Slice | S-NSSAI | Subscribers | UE config |
+|---|---|---|---|
+| A | SST 1 / SD `010203` | `imsi-2089300000000 01..10` | `config/uecfg.yaml` |
+| B | SST 1 / SD `112233` | `imsi-2089300000000 11..20` | `config/uecfg-slice-b.yaml` |
+
+```bash
+scripts/provision_subscribers.sh --delete-all
+COUNT=10 START=1  SD=010203 scripts/provision_subscribers.sh
+COUNT=10 START=11 SD=112233 scripts/provision_subscribers.sh
+COUNT=10 COUNT_B=10 TEMPO=600 scripts/start_ues.sh
+```
+
+Validated: slice B **10/10 registered**, and NSSF performed slice selection independently
+for each — 60 requests carrying `sd=010203` and 60 carrying `sd=112233`. Both slices appear
+in `free5gc_slice_provisioned_subscribers`.
+
+**Gotcha:** configs are bind-mounted **file by file**, not as a directory. A new config is
+invisible inside the container until it is listed explicitly in `docker-compose.yaml`, and
+`nr-ue` fails with `ERROR: bad file: ./config/uecfg-slice-b.yaml`.
+
 ### Three config fixes that registration depends on
 
 Registration failed until all three were corrected — each produced a misleading symptom:

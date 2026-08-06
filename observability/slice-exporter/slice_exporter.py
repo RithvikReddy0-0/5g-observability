@@ -55,6 +55,10 @@ REFRESH = int(os.environ.get("REFRESH", "20"))          # seconds between recomp
 LOG_TAIL = os.environ.get("LOG_TAIL", "20000")
 UE_MAX = int(os.environ.get("UE_MAX", "20"))             # how many SUPIs to poll via nr-cli
 
+# Container NAMES (not compose service names) — see docker_exec() for why.
+DB_CONTAINER = os.environ.get("DB_CONTAINER", "mongodb")
+AMF_CONTAINER = os.environ.get("AMF_CONTAINER", "amf")
+
 # [supi:SUPI:imsi-208930000000004] ... Select SMF [snssai: {Sst:1 Sd:010203}, dnn: internet]
 SELECT_SMF_RE = re.compile(
     r"supi:SUPI:(?P<supi>imsi-\d+)\].*?Select SMF \[snssai: \{Sst:(?P<sst>\d+) Sd:(?P<sd>[0-9A-Fa-f]*)\}, dnn: (?P<dnn>[^\]]+)\]"
@@ -69,19 +73,27 @@ _lock = threading.Lock()
 _cache = {"text": "", "ts": 0.0}
 
 
-def dc(args, timeout=60):
-    """Run a docker compose command in the core's compose project."""
+def _run(cmd, timeout=60):
     try:
-        out = subprocess.run(
-            ["docker", "compose"] + args,
-            cwd=COMPOSE_DIR,
-            capture_output=True,
-            text=True,
-            timeout=timeout,
-        )
+        out = subprocess.run(cmd, cwd=COMPOSE_DIR, capture_output=True, text=True, timeout=timeout)
         return out.stdout
     except Exception:
         return ""
+
+
+def docker_exec(container, args, timeout=60):
+    """Run a command in a container by NAME, using plain `docker`.
+
+    Deliberately not `docker compose`: on Docker Desktop + WSL the compose plugin is a
+    symlink into /mnt/wsl/docker-desktop/, which disappears whenever Docker Desktop
+    restarts. The daemon keeps working, so plain `docker` against stable container names
+    survives that; `docker compose` silently returns nothing and every metric vanishes.
+    """
+    return _run(["docker", "exec", "-i", container] + args, timeout)
+
+
+def docker_logs(container, tail, timeout=90):
+    return _run(["docker", "logs", "--tail", str(tail), container], timeout)
 
 
 def provisioned_by_slice():
@@ -96,7 +108,7 @@ def provisioned_by_slice():
         '});'
         'print(JSON.stringify({counts:m,ues:u}));'
     )
-    raw = dc(["exec", "-T", "db", "mongo", "free5gc", "--quiet", "--eval", js])
+    raw = docker_exec(DB_CONTAINER, ["mongo", "free5gc", "--quiet", "--eval", js])
     for line in raw.splitlines():
         line = line.strip()
         if line.startswith("{"):
@@ -115,7 +127,7 @@ def amf_log_facts():
     scrape. A single `docker compose logs` call returns in well under a second and carries
     the same slice identity.
     """
-    raw = dc(["logs", "--no-log-prefix", "--tail", LOG_TAIL, "free5gc-amf"], timeout=90)
+    raw = docker_logs(AMF_CONTAINER, LOG_TAIL)
 
     counts = {}
     for m in SELECT_SMF_RE.finditer(raw):

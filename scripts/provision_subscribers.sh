@@ -19,6 +19,9 @@
 set -uo pipefail
 
 COUNT="${COUNT:-20}"
+# START lets subscribers be provisioned in ranges, so different ranges can sit on different
+# slices (Phase 1.5). e.g. COUNT=10 provisions 1..10; COUNT=10 START=11 provisions 11..20.
+START="${START:-1}"
 WEBUI_URL="${WEBUI_URL:-http://localhost:5000}"
 ADMIN_USER="${ADMIN_USER:-admin}"
 ADMIN_PASS="${ADMIN_PASS:-free5gc}"
@@ -144,8 +147,9 @@ case "${1:-}" in
     ;;
 esac
 
+END=$((START + COUNT - 1))
 echo "==================================================================="
-echo "provisioning $COUNT subscriber(s)"
+echo "provisioning $COUNT subscriber(s)  [index $START..$END]"
 echo "  PLMN     : $MCC/$MNC"
 echo "  slice    : SST $SST / SD $SD   (key $SNSSAI_KEY)"
 echo "  DNN      : $DNN"
@@ -153,7 +157,7 @@ echo "  webui    : $WEBUI_URL"
 echo "==================================================================="
 
 ok=0; fail=0
-for i in $(seq 1 "$COUNT"); do
+for i in $(seq "$START" "$END"); do
   supi="$(supi_for "$i")"
   body="$(subscriber_json "$supi" "$i")"
   resp_body="$(mktemp)"
