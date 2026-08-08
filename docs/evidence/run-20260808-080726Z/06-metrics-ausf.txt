@@ -1,0 +1,68 @@
+# HELP free5gc_sbi_inbound_request_duration_seconds Histogram of request latencies
+# TYPE free5gc_sbi_inbound_request_duration_seconds histogram
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="ausf",path="/nausf-auth/v1/ue-authentications",status_code="201 Created",le="0.0001"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="ausf",path="/nausf-auth/v1/ue-authentications",status_code="201 Created",le="0.005"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="ausf",path="/nausf-auth/v1/ue-authentications",status_code="201 Created",le="0.01"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="ausf",path="/nausf-auth/v1/ue-authentications",status_code="201 Created",le="0.02"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="ausf",path="/nausf-auth/v1/ue-authentications",status_code="201 Created",le="0.025"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="ausf",path="/nausf-auth/v1/ue-authentications",status_code="201 Created",le="0.05"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="ausf",path="/nausf-auth/v1/ue-authentications",status_code="201 Created",le="+Inf"} 21
+free5gc_sbi_inbound_request_duration_seconds_sum{method="POST",nf_type="ausf",path="/nausf-auth/v1/ue-authentications",status_code="201 Created"} 3.107523606
+free5gc_sbi_inbound_request_duration_seconds_count{method="POST",nf_type="ausf",path="/nausf-auth/v1/ue-authentications",status_code="201 Created"} 21
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="PUT",nf_type="ausf",path="/nausf-auth/v1/ue-authentications/:authCtxId/5g-aka-confirmation",status_code="200 OK",le="0.0001"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="PUT",nf_type="ausf",path="/nausf-auth/v1/ue-authentications/:authCtxId/5g-aka-confirmation",status_code="200 OK",le="0.005"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="PUT",nf_type="ausf",path="/nausf-auth/v1/ue-authentications/:authCtxId/5g-aka-confirmation",status_code="200 OK",le="0.01"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="PUT",nf_type="ausf",path="/nausf-auth/v1/ue-authentications/:authCtxId/5g-aka-confirmation",status_code="200 OK",le="0.02"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="PUT",nf_type="ausf",path="/nausf-auth/v1/ue-authentications/:authCtxId/5g-aka-confirmation",status_code="200 OK",le="0.025"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="PUT",nf_type="ausf",path="/nausf-auth/v1/ue-authentications/:authCtxId/5g-aka-confirmation",status_code="200 OK",le="0.05"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="PUT",nf_type="ausf",path="/nausf-auth/v1/ue-authentications/:authCtxId/5g-aka-confirmation",status_code="200 OK",le="+Inf"} 21
+free5gc_sbi_inbound_request_duration_seconds_sum{method="PUT",nf_type="ausf",path="/nausf-auth/v1/ue-authentications/:authCtxId/5g-aka-confirmation",status_code="200 OK"} 1.620868062
+free5gc_sbi_inbound_request_duration_seconds_count{method="PUT",nf_type="ausf",path="/nausf-auth/v1/ue-authentications/:authCtxId/5g-aka-confirmation",status_code="200 OK"} 21
+# HELP free5gc_sbi_inbound_request_total Total number of SBI inbound requests received by the NF
+# TYPE free5gc_sbi_inbound_request_total counter
+free5gc_sbi_inbound_request_total{cause="",method="POST",nf_type="ausf",path="/nausf-auth/v1/ue-authentications",status_code="201 Created"} 21
+free5gc_sbi_inbound_request_total{cause="",method="PUT",nf_type="ausf",path="/nausf-auth/v1/ue-authentications/:authCtxId/5g-aka-confirmation",status_code="200 OK"} 21
+# HELP free5gc_sbi_outbound_request_duration_seconds Histogram of request latencies
+# TYPE free5gc_sbi_outbound_request_duration_seconds histogram
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="ausf",status_code="200 OK",target_service_name="nnrf-disc",le="0.0001"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="ausf",status_code="200 OK",target_service_name="nnrf-disc",le="0.005"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="ausf",status_code="200 OK",target_service_name="nnrf-disc",le="0.01"} 1
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="ausf",status_code="200 OK",target_service_name="nnrf-disc",le="0.02"} 20
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="ausf",status_code="200 OK",target_service_name="nnrf-disc",le="0.025"} 21
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="ausf",status_code="200 OK",target_service_name="nnrf-disc",le="0.05"} 21
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="ausf",status_code="200 OK",target_service_name="nnrf-disc",le="+Inf"} 21
+free5gc_sbi_outbound_request_duration_seconds_sum{method="GET",nf_type="ausf",status_code="200 OK",target_service_name="nnrf-disc"} 0.312461422
+free5gc_sbi_outbound_request_duration_seconds_count{method="GET",nf_type="ausf",status_code="200 OK",target_service_name="nnrf-disc"} 21
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="ausf",status_code="200 OK",target_service_name="nudm-ueau",le="0.0001"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="ausf",status_code="200 OK",target_service_name="nudm-ueau",le="0.005"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="ausf",status_code="200 OK",target_service_name="nudm-ueau",le="0.01"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="ausf",status_code="200 OK",target_service_name="nudm-ueau",le="0.02"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="ausf",status_code="200 OK",target_service_name="nudm-ueau",le="0.025"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="ausf",status_code="200 OK",target_service_name="nudm-ueau",le="0.05"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="ausf",status_code="200 OK",target_service_name="nudm-ueau",le="+Inf"} 21
+free5gc_sbi_outbound_request_duration_seconds_sum{method="POST",nf_type="ausf",status_code="200 OK",target_service_name="nudm-ueau"} 1.8385903380000002
+free5gc_sbi_outbound_request_duration_seconds_count{method="POST",nf_type="ausf",status_code="200 OK",target_service_name="nudm-ueau"} 21
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="ausf",status_code="201 Created",target_service_name="nudm-ueau",le="0.0001"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="ausf",status_code="201 Created",target_service_name="nudm-ueau",le="0.005"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="ausf",status_code="201 Created",target_service_name="nudm-ueau",le="0.01"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="ausf",status_code="201 Created",target_service_name="nudm-ueau",le="0.02"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="ausf",status_code="201 Created",target_service_name="nudm-ueau",le="0.025"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="ausf",status_code="201 Created",target_service_name="nudm-ueau",le="0.05"} 11
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="ausf",status_code="201 Created",target_service_name="nudm-ueau",le="+Inf"} 21
+free5gc_sbi_outbound_request_duration_seconds_sum{method="POST",nf_type="ausf",status_code="201 Created",target_service_name="nudm-ueau"} 1.017764872
+free5gc_sbi_outbound_request_duration_seconds_count{method="POST",nf_type="ausf",status_code="201 Created",target_service_name="nudm-ueau"} 21
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="ausf",status_code="201 Created",target_service_name="nnrf-nfm",le="0.0001"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="ausf",status_code="201 Created",target_service_name="nnrf-nfm",le="0.005"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="ausf",status_code="201 Created",target_service_name="nnrf-nfm",le="0.01"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="ausf",status_code="201 Created",target_service_name="nnrf-nfm",le="0.02"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="ausf",status_code="201 Created",target_service_name="nnrf-nfm",le="0.025"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="ausf",status_code="201 Created",target_service_name="nnrf-nfm",le="0.05"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="ausf",status_code="201 Created",target_service_name="nnrf-nfm",le="+Inf"} 1
+free5gc_sbi_outbound_request_duration_seconds_sum{method="PUT",nf_type="ausf",status_code="201 Created",target_service_name="nnrf-nfm"} 0.051836641
+free5gc_sbi_outbound_request_duration_seconds_count{method="PUT",nf_type="ausf",status_code="201 Created",target_service_name="nnrf-nfm"} 1
+# HELP free5gc_sbi_outbound_request_total Total number of SBI outbound requests attempted or sent by the NF
+# TYPE free5gc_sbi_outbound_request_total counter
+free5gc_sbi_outbound_request_total{method="GET",nf_type="ausf",status_code="200 OK",target_service_name="nnrf-disc"} 21
+free5gc_sbi_outbound_request_total{method="POST",nf_type="ausf",status_code="200 OK",target_service_name="nudm-ueau"} 21
+free5gc_sbi_outbound_request_total{method="POST",nf_type="ausf",status_code="201 Created",target_service_name="nudm-ueau"} 21
+free5gc_sbi_outbound_request_total{method="PUT",nf_type="ausf",status_code="201 Created",target_service_name="nnrf-nfm"} 1

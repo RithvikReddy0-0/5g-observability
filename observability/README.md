@@ -46,25 +46,31 @@ Useful series (verified against real captures in `docs/evidence/`, not guessed):
 | `free5gc_amf_business_ue_connectivity` | connected UEs — **see caveat below** |
 | `free5gc_amf_business_ue_gmm_state_count` | UEs per 5GMM state — **see caveat below** |
 
-## Caveat: the AMF business gauges are not trustworthy on v4.2.0
+## Caveat: the AMF business gauges LEAK under churn on v4.2.0
 
-Measured simultaneously on this deployment:
+They are not simply broken — they are accurate on a clean run and drift badly once
+procedures abort or the AMF restarts. Both states were measured on this deployment:
 
-| Source | Value |
-|---|---|
-| `nr-cli` per-UE status (ground truth) | **20/20** RM-REGISTERED, 20/20 CM-CONNECTED |
-| `free5gc_amf_business_ue_connectivity{3GPP}` | **3** (undercounts) |
-| `free5gc_amf_business_ue_cm_gmm_state_count{cm-connected}` | **63** (overcounts) |
+| Source | After heavy churn | After a clean cycle |
+|---|---|---|
+| `nr-cli` per-UE status (ground truth) | **20/20** registered | **20/20** registered |
+| `free5gc_amf_business_ue_connectivity{3GPP}` | **3** (undercounts) | **20** ✅ matches |
+| `free5gc_amf_business_ue_cm_gmm_state_count{cm-connected}` | **63** (overcounts) | **20** ✅ matches |
 
-Both are wrong, in opposite directions. These gauges are adjusted on state transitions, and
-aborted procedures (T3510/T3580 timeouts, failed PDU session creation) plus AMF restarts leave
-them unbalanced — they leak. `ue_gmm_state_count` also accumulates despite its "current
-number" HELP text.
+The gauges are adjusted on state transitions, so aborted procedures (T3510/T3580 timeouts,
+failed PDU session creation) and AMF restarts leave them unbalanced — and they never
+self-correct. Wrong in *both* directions depending on which transitions were lost.
+`ue_gmm_state_count` additionally accumulates despite its "current number" HELP text.
 
-**Consequence:** do not use these as the UE population figure. Ground truth is
-`docker compose exec ueransim ./nr-cli <supi> -e status`, captured by
+**Consequence:** these gauges are only trustworthy immediately after a clean bring-up, which
+is precisely when you least need them. Do not use them as the UE population figure in a
+long-running deployment. Ground truth is
+`docker exec ueransim ./nr-cli <supi> -e status`, captured by
 `scripts/collect_evidence.sh`. The counter-based series (`*_msg_received_total`,
-`*_sbi_inbound_request_total`) and `up` behave correctly.
+`*_sbi_inbound_request_total`) and `up` behave correctly throughout.
+
+For a clean reading: drop the stale NRF registry, restart the NFs, re-provision, and
+relaunch the UEs — the recipe in `scripts/` does this end to end.
 
 This is exactly the kind of gap the observability plane exists to expose, and it is a concrete
 input to the ADR-004 decision about whether NF-native telemetry is sufficient or an

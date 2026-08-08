@@ -1,0 +1,59 @@
+--- prometheus target health ---
+"nf":"ausf"}
+"nf":"ausf"}
+"scrapeUrl":"http://ausf.free5gc.org:9091/metrics"
+"health":"unknown"
+"nf":"udm"}
+"nf":"udm"}
+"scrapeUrl":"http://udm.free5gc.org:9091/metrics"
+"health":"unknown"
+"nf":"udr"}
+"nf":"udr"}
+"scrapeUrl":"http://udr.free5gc.org:9091/metrics"
+"health":"unknown"
+"nf":"amf"}
+"nf":"amf"}
+"scrapeUrl":"http://amf.free5gc.org:9091/metrics"
+"health":"unknown"
+"nf":"smf"}
+"nf":"smf"}
+"scrapeUrl":"http://smf.free5gc.org:9091/metrics"
+"health":"unknown"
+"nf":"nrf"}
+"nf":"nrf"}
+"scrapeUrl":"http://nrf.free5gc.org:9091/metrics"
+"health":"unknown"
+"nf":"nssf"}
+"nf":"nssf"}
+"scrapeUrl":"http://nssf.free5gc.org:9091/metrics"
+"health":"unknown"
+"nf":"pcf"}
+"nf":"pcf"}
+"scrapeUrl":"http://pcf.free5gc.org:9091/metrics"
+"health":"unknown"
+"scrapeUrl":"http://localhost:9090/metrics"
+"health":"unknown"
+"scrapeUrl":"http://10.100.200.1:9105/metrics"
+"health":"unknown"
+
+--- up{job=free5gc} ---
+{"status":"success","data":{"resultType":"vector","result":[]}}
+--- selected dashboard queries ---
+  query: free5gc_amf_business_ue_connectivity{access_type="3GPP_ACCESS"}
+{"status":"success","data":{"resultType":"vector","result":[]}}
+
+  query: sum(free5gc_nas_msg_received_total{name="RegistrationRequest"})
+{"status":"success","data":{"resultType":"vector","result":[]}}
+
+  query: sum by (nf_type) (free5gc_sbi_inbound_request_total)
+{"status":"success","data":{"resultType":"vector","result":[]}}
+
+  query: free5gc_slice_provisioned_subscribers
+{"status":"success","data":{"resultType":"vector","result":[]}}
+
+  query: free5gc_slice_ues_observed_registered
+{"status":"success","data":{"resultType":"vector","result":[]}}
+
+  query: free5gc_slice_smf_selection_total
+{"status":"success","data":{"resultType":"vector","result":[]}}
+

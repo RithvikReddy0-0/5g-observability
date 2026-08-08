@@ -1,0 +1,194 @@
+[
+	{
+		"nfType" : "AMF",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfType" : "AUSF",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfType" : "UDM",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfType" : "UDR",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfType" : "PCF",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfType" : "NSSF",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfType" : "SMF",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfStatus" : "REGISTERED",
+		"nfType" : "AF"
+	},
+	{
+		"nfType" : "AMF",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfType" : "AUSF",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfType" : "UDM",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfType" : "UDR",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfStatus" : "REGISTERED",
+		"nfType" : "PCF"
+	},
+	{
+		"nfType" : "NSSF",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfStatus" : "REGISTERED",
+		"nfType" : "SMF"
+	},
+	{
+		"nfType" : "AF",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfType" : "AMF",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfStatus" : "REGISTERED",
+		"nfType" : "AUSF"
+	},
+	{
+		"nfType" : "UDM",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfType" : "UDR",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfType" : "PCF",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfType" : "NSSF",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfType" : "SMF",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfType" : "AF",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfType" : "AMF",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfType" : "AUSF",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfType" : "UDM",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfType" : "UDR",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfStatus" : "REGISTERED",
+		"nfType" : "PCF"
+	},
+	{
+		"nfType" : "NSSF",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfType" : "SMF",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfType" : "AF",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfType" : "AMF",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfType" : "AUSF",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfType" : "UDM",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfStatus" : "REGISTERED",
+		"nfType" : "UDR"
+	},
+	{
+		"nfType" : "PCF",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfType" : "NSSF",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfType" : "SMF",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfType" : "AF",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfStatus" : "REGISTERED",
+		"nfType" : "AMF"
+	},
+	{
+		"nfType" : "AUSF",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfStatus" : "REGISTERED",
+		"nfType" : "UDM"
+	},
+	{
+		"nfType" : "UDR",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfType" : "PCF",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfType" : "NSSF",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfStatus" : "REGISTERED",
+		"nfType" : "SMF"
+	},
+	{
+		"nfType" : "AF",
+		"nfStatus" : "REGISTERED"
+	}
+]

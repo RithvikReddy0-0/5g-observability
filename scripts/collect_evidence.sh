@@ -18,7 +18,46 @@ TS="$(date -u +%Y%m%d-%H%M%SZ)"
 OUT_DIR="${OUT_DIR:-$REPO_ROOT/docs/evidence/run-$TS}"
 mkdir -p "$OUT_DIR"
 
-dc() { (cd "$COMPOSE_DIR" && docker compose "$@" 2>/dev/null); }
+# Plain `docker` against container NAMES, not `docker compose`. On Docker Desktop + WSL the
+# compose plugin is a symlink into /mnt/wsl/docker-desktop/ that disappears whenever Desktop
+# restarts; the daemon keeps working. When the plugin was gone this script silently produced
+# an evidence bundle with every count blank, which is worse than failing.
+CORE_CONTAINERS="mongodb nrf amf ausf udm udr pcf nssf smf webui ueransim"
+
+# dc <compose-ish args> — translated to plain docker. Supports the subset used below.
+dc() {
+  local sub="$1"; shift
+  case "$sub" in
+    exec)
+      # strip a leading -T, map service name -> container name
+      [ "${1:-}" = "-T" ] && shift
+      local svc="$1"; shift
+      case "$svc" in db) svc=mongodb ;; free5gc-*) svc="${svc#free5gc-}" ;; esac
+      docker exec -i "$svc" "$@" 2>/dev/null
+      ;;
+    logs)
+      local args=() svc=""
+      while [ $# -gt 0 ]; do
+        case "$1" in
+          --no-log-prefix) ;;
+          --tail|--since) args+=("$1" "$2"); shift ;;
+          -*) args+=("$1") ;;
+          *) svc="$1" ;;
+        esac
+        shift
+      done
+      case "$svc" in db) svc=mongodb ;; free5gc-*) svc="${svc#free5gc-}" ;; esac
+      docker logs "${args[@]}" "$svc" 2>&1
+      ;;
+    ps)
+      docker ps --filter "name=$(echo "$CORE_CONTAINERS" | tr ' ' '|')" \
+        --format "table {{.Names}}\t{{.Status}}" 2>/dev/null
+      ;;
+    *)
+      docker "$sub" "$@" 2>/dev/null
+      ;;
+  esac
+}
 curl_net() { docker run --rm --network compose_privnet curlimages/curl:latest -s --max-time 8 "$@" 2>/dev/null; }
 
 echo "collecting evidence into: $OUT_DIR"
@@ -69,11 +108,11 @@ dc exec -T db mongo free5gc --quiet --eval \
   echo
   echo "--- registered UEs (from UE log) ---"
   dc exec -T ueransim sh -c \
-    "grep 'Initial Registration is successful' /tmp/ue.log 2>/dev/null | grep -oE '20893[0-9]+' | sort -u"
+    "cat /tmp/ue.log /tmp/ue-b.log 2>/dev/null | grep 'Initial Registration is successful' | grep -oE '20893[0-9]+' | sort -u"
   echo
   echo -n "count registered: "
   dc exec -T ueransim sh -c \
-    "grep 'Initial Registration is successful' /tmp/ue.log 2>/dev/null | grep -oE '20893[0-9]+' | sort -u | wc -l"
+    "cat /tmp/ue.log /tmp/ue-b.log 2>/dev/null | grep 'Initial Registration is successful' | grep -oE '20893[0-9]+' | sort -u | wc -l"
   echo
   echo "--- per-UE state via nr-cli (GROUND TRUTH — see note in 00-summary.md) ---"
   # The nr-cli loop runs INSIDE the container: one `docker compose exec` instead of one per
@@ -159,7 +198,7 @@ rm -f "$combined"
 } > "$OUT_DIR/08-grafana.txt" 2>&1
 
 # --- 8. summary -----------------------------------------------------------
-REG_COUNT="$(dc exec -T ueransim sh -c "grep 'Initial Registration is successful' /tmp/ue.log 2>/dev/null | grep -oE '20893[0-9]+' | sort -u | wc -l" | tr -d ' \r')"
+REG_COUNT="$(dc exec -T ueransim sh -c "cat /tmp/ue.log /tmp/ue-b.log 2>/dev/null | grep 'Initial Registration is successful' | grep -oE '20893[0-9]+' | sort -u | wc -l" | tr -d ' \r')"
 SUB_COUNT="$(dc exec -T db mongo free5gc --quiet --eval 'print(db["subscriptionData.provisionedData.amData"].count())' | tr -d ' \r')"
 NF_COUNT="$(dc exec -T db mongo free5gc --quiet --eval 'print(db.NfProfile.count())' | tr -d ' \r')"
 CM_CONNECTED="$(grep 'state="cm-connected"' "$OUT_DIR/06-metrics-amf.txt" 2>/dev/null | grep '3GPP_ACCESS' | head -1 | awk '{print $NF}')"

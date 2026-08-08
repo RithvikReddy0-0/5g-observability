@@ -1,0 +1,59 @@
+--- prometheus target health ---
+"nf":"ausf"}
+"nf":"ausf"}
+"scrapeUrl":"http://ausf.free5gc.org:9091/metrics"
+"health":"up"
+"nf":"udm"}
+"nf":"udm"}
+"scrapeUrl":"http://udm.free5gc.org:9091/metrics"
+"health":"up"
+"nf":"udr"}
+"nf":"udr"}
+"scrapeUrl":"http://udr.free5gc.org:9091/metrics"
+"health":"up"
+"nf":"amf"}
+"nf":"amf"}
+"scrapeUrl":"http://amf.free5gc.org:9091/metrics"
+"health":"up"
+"nf":"smf"}
+"nf":"smf"}
+"scrapeUrl":"http://smf.free5gc.org:9091/metrics"
+"health":"up"
+"nf":"nrf"}
+"nf":"nrf"}
+"scrapeUrl":"http://nrf.free5gc.org:9091/metrics"
+"health":"up"
+"nf":"nssf"}
+"nf":"nssf"}
+"scrapeUrl":"http://nssf.free5gc.org:9091/metrics"
+"health":"up"
+"nf":"pcf"}
+"nf":"pcf"}
+"scrapeUrl":"http://pcf.free5gc.org:9091/metrics"
+"health":"up"
+"scrapeUrl":"http://localhost:9090/metrics"
+"health":"up"
+"scrapeUrl":"http://10.100.200.1:9105/metrics"
+"health":"down"
+
+--- up{job=free5gc} ---
+{"status":"success","data":{"resultType":"vector","result":[{"metric":{},"value":[1786176458.267,"8"]}]}}
+--- selected dashboard queries ---
+  query: free5gc_amf_business_ue_connectivity{access_type="3GPP_ACCESS"}
+{"status":"success","data":{"resultType":"vector","result":[{"metric":{"__name__":"free5gc_amf_business_ue_connectivity","access_type":"3GPP_ACCESS","instance":"amf.free5gc.org:9091","job":"free5gc","nf":"amf"},"value":[1786176458.290,"20"]}]}}
+
+  query: sum(free5gc_nas_msg_received_total{name="RegistrationRequest"})
+{"status":"success","data":{"resultType":"vector","result":[{"metric":{},"value":[1786176458.307,"21"]}]}}
+
+  query: sum by (nf_type) (free5gc_sbi_inbound_request_total)
+{"status":"success","data":{"resultType":"vector","result":[{"metric":{"nf_type":"nrf"},"value":[1786176458.327,"2116"]},{"metric":{"nf_type":"ausf"},"value":[1786176458.327,"42"]},{"metric":{"nf_type":"pcf"},"value":[1786176458.327,"21"]},{"metric":{"nf_type":"smf"},"value":[1786176458.327,"145"]},{"metric":{"nf_type":"udm"},"value":[1786176458.327,"296"]},{"metric":{"nf_type":"amf"},"value":[1786176458.327,"1"]},{"metric":{"nf_type":"udr"},"value":[1786176458.327,"348"]},{"metric":{"nf_type":"NSSF"},"value":[1786176458.327,"140"]}]}}
+
+  query: free5gc_slice_provisioned_subscribers
+{"status":"success","data":{"resultType":"vector","result":[]}}
+
+  query: free5gc_slice_ues_observed_registered
+{"status":"success","data":{"resultType":"vector","result":[]}}
+
+  query: free5gc_slice_smf_selection_total
+{"status":"success","data":{"resultType":"vector","result":[]}}
+

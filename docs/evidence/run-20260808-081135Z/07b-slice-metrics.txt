@@ -1,0 +1,19 @@
+--- raw exposition from the slice exporter (:9105) ---
+free5GC's native metrics carry NO slice identity; these are derived.
+
+# HELP free5gc_slice_provisioned_subscribers Subscribers provisioned per S-NSSAI (source: MongoDB amData.nssai.defaultSingleNssais).
+# TYPE free5gc_slice_provisioned_subscribers gauge
+free5gc_slice_provisioned_subscribers{sst="1",sd="010203"} 10
+free5gc_slice_provisioned_subscribers{sst="1",sd="112233"} 10
+# HELP free5gc_slice_ues_observed_registered Distinct UEs observed in GMM State[Registered] within the recent AMF log window, per S-NSSAI (SUPI joined to its provisioned slice). Log-window derived, NOT a live population gauge: a registered but idle UE stops appearing once it leaves the window.
+# TYPE free5gc_slice_ues_observed_registered gauge
+free5gc_slice_ues_observed_registered{sst="1",sd="010203"} 0
+free5gc_slice_ues_observed_registered{sst="1",sd="112233"} 0
+# HELP free5gc_slice_smf_selection_total SMF selections observed in AMF logs, per S-NSSAI and DNN (resets when the AMF restarts).
+# TYPE free5gc_slice_smf_selection_total counter
+# HELP free5gc_slice_exporter_scrape_duration_seconds Time to collect slice metrics.
+# TYPE free5gc_slice_exporter_scrape_duration_seconds gauge
+free5gc_slice_exporter_scrape_duration_seconds 0.462
+# HELP free5gc_slice_exporter_up Always 1 when the exporter served a scrape.
+# TYPE free5gc_slice_exporter_up gauge
+free5gc_slice_exporter_up 1

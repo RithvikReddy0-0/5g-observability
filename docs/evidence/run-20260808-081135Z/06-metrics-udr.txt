@@ -1,0 +1,118 @@
+# HELP free5gc_sbi_inbound_request_duration_seconds Histogram of request latencies
+# TYPE free5gc_sbi_inbound_request_duration_seconds histogram
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udr",path="/nudr-dr/v2/policy-data/ues/:ueId/am-data",status_code="200 OK",le="0.0001"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udr",path="/nudr-dr/v2/policy-data/ues/:ueId/am-data",status_code="200 OK",le="0.005"} 1
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udr",path="/nudr-dr/v2/policy-data/ues/:ueId/am-data",status_code="200 OK",le="0.01"} 13
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udr",path="/nudr-dr/v2/policy-data/ues/:ueId/am-data",status_code="200 OK",le="0.02"} 20
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udr",path="/nudr-dr/v2/policy-data/ues/:ueId/am-data",status_code="200 OK",le="0.025"} 20
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udr",path="/nudr-dr/v2/policy-data/ues/:ueId/am-data",status_code="200 OK",le="0.05"} 20
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udr",path="/nudr-dr/v2/policy-data/ues/:ueId/am-data",status_code="200 OK",le="+Inf"} 20
+free5gc_sbi_inbound_request_duration_seconds_sum{method="GET",nf_type="udr",path="/nudr-dr/v2/policy-data/ues/:ueId/am-data",status_code="200 OK"} 0.178343864
+free5gc_sbi_inbound_request_duration_seconds_count{method="GET",nf_type="udr",path="/nudr-dr/v2/policy-data/ues/:ueId/am-data",status_code="200 OK"} 20
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/authentication-subscription",status_code="200 OK",le="0.0001"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/authentication-subscription",status_code="200 OK",le="0.005"} 1
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/authentication-subscription",status_code="200 OK",le="0.01"} 11
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/authentication-subscription",status_code="200 OK",le="0.02"} 20
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/authentication-subscription",status_code="200 OK",le="0.025"} 20
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/authentication-subscription",status_code="200 OK",le="0.05"} 20
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/authentication-subscription",status_code="200 OK",le="+Inf"} 20
+free5gc_sbi_inbound_request_duration_seconds_sum{method="GET",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/authentication-subscription",status_code="200 OK"} 0.197039752
+free5gc_sbi_inbound_request_duration_seconds_count{method="GET",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/authentication-subscription",status_code="200 OK"} 20
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/provisioned-data/am-data",status_code="200 OK",le="0.0001"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/provisioned-data/am-data",status_code="200 OK",le="0.005"} 3
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/provisioned-data/am-data",status_code="200 OK",le="0.01"} 28
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/provisioned-data/am-data",status_code="200 OK",le="0.02"} 40
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/provisioned-data/am-data",status_code="200 OK",le="0.025"} 40
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/provisioned-data/am-data",status_code="200 OK",le="0.05"} 40
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/provisioned-data/am-data",status_code="200 OK",le="+Inf"} 40
+free5gc_sbi_inbound_request_duration_seconds_sum{method="GET",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/provisioned-data/am-data",status_code="200 OK"} 0.34787708199999995
+free5gc_sbi_inbound_request_duration_seconds_count{method="GET",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/provisioned-data/am-data",status_code="200 OK"} 40
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/provisioned-data/sm-data",status_code="200 OK",le="0.0001"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/provisioned-data/sm-data",status_code="200 OK",le="0.005"} 3
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/provisioned-data/sm-data",status_code="200 OK",le="0.01"} 87
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/provisioned-data/sm-data",status_code="200 OK",le="0.02"} 145
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/provisioned-data/sm-data",status_code="200 OK",le="0.025"} 146
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/provisioned-data/sm-data",status_code="200 OK",le="0.05"} 146
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/provisioned-data/sm-data",status_code="200 OK",le="+Inf"} 146
+free5gc_sbi_inbound_request_duration_seconds_sum{method="GET",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/provisioned-data/sm-data",status_code="200 OK"} 1.3830009490000006
+free5gc_sbi_inbound_request_duration_seconds_count{method="GET",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/provisioned-data/sm-data",status_code="200 OK"} 146
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/provisioned-data/smf-selection-subscription-data",status_code="200 OK",le="0.0001"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/provisioned-data/smf-selection-subscription-data",status_code="200 OK",le="0.005"} 2
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/provisioned-data/smf-selection-subscription-data",status_code="200 OK",le="0.01"} 16
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/provisioned-data/smf-selection-subscription-data",status_code="200 OK",le="0.02"} 20
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/provisioned-data/smf-selection-subscription-data",status_code="200 OK",le="0.025"} 20
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/provisioned-data/smf-selection-subscription-data",status_code="200 OK",le="0.05"} 20
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/provisioned-data/smf-selection-subscription-data",status_code="200 OK",le="+Inf"} 20
+free5gc_sbi_inbound_request_duration_seconds_sum{method="GET",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/provisioned-data/smf-selection-subscription-data",status_code="200 OK"} 0.154907787
+free5gc_sbi_inbound_request_duration_seconds_count{method="GET",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/provisioned-data/smf-selection-subscription-data",status_code="200 OK"} 20
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/smf-registrations",status_code="200 OK",le="0.0001"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/smf-registrations",status_code="200 OK",le="0.005"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/smf-registrations",status_code="200 OK",le="0.01"} 18
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/smf-registrations",status_code="200 OK",le="0.02"} 20
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/smf-registrations",status_code="200 OK",le="0.025"} 20
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/smf-registrations",status_code="200 OK",le="0.05"} 20
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="GET",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/smf-registrations",status_code="200 OK",le="+Inf"} 20
+free5gc_sbi_inbound_request_duration_seconds_sum{method="GET",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/smf-registrations",status_code="200 OK"} 0.16176161999999997
+free5gc_sbi_inbound_request_duration_seconds_count{method="GET",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/smf-registrations",status_code="200 OK"} 20
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="PATCH",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/authentication-subscription",status_code="204 No Content",le="0.0001"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="PATCH",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/authentication-subscription",status_code="204 No Content",le="0.005"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="PATCH",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/authentication-subscription",status_code="204 No Content",le="0.01"} 5
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="PATCH",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/authentication-subscription",status_code="204 No Content",le="0.02"} 20
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="PATCH",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/authentication-subscription",status_code="204 No Content",le="0.025"} 20
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="PATCH",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/authentication-subscription",status_code="204 No Content",le="0.05"} 20
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="PATCH",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/authentication-subscription",status_code="204 No Content",le="+Inf"} 20
+free5gc_sbi_inbound_request_duration_seconds_sum{method="PATCH",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/authentication-subscription",status_code="204 No Content"} 0.24928768900000003
+free5gc_sbi_inbound_request_duration_seconds_count{method="PATCH",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/authentication-subscription",status_code="204 No Content"} 20
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/sdm-subscriptions",status_code="201 Created",le="0.0001"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/sdm-subscriptions",status_code="201 Created",le="0.005"} 4
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/sdm-subscriptions",status_code="201 Created",le="0.01"} 13
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/sdm-subscriptions",status_code="201 Created",le="0.02"} 20
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/sdm-subscriptions",status_code="201 Created",le="0.025"} 20
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/sdm-subscriptions",status_code="201 Created",le="0.05"} 20
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/sdm-subscriptions",status_code="201 Created",le="+Inf"} 20
+free5gc_sbi_inbound_request_duration_seconds_sum{method="POST",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/sdm-subscriptions",status_code="201 Created"} 0.16184247700000004
+free5gc_sbi_inbound_request_duration_seconds_count{method="POST",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/sdm-subscriptions",status_code="201 Created"} 20
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="PUT",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/amf-3gpp-access",status_code="204 No Content",le="0.0001"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="PUT",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/amf-3gpp-access",status_code="204 No Content",le="0.005"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="PUT",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/amf-3gpp-access",status_code="204 No Content",le="0.01"} 12
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="PUT",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/amf-3gpp-access",status_code="204 No Content",le="0.02"} 20
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="PUT",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/amf-3gpp-access",status_code="204 No Content",le="0.025"} 20
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="PUT",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/amf-3gpp-access",status_code="204 No Content",le="0.05"} 20
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="PUT",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/amf-3gpp-access",status_code="204 No Content",le="+Inf"} 20
+free5gc_sbi_inbound_request_duration_seconds_sum{method="PUT",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/amf-3gpp-access",status_code="204 No Content"} 0.19425087
+free5gc_sbi_inbound_request_duration_seconds_count{method="PUT",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/amf-3gpp-access",status_code="204 No Content"} 20
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="PUT",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/authentication-status",status_code="204 No Content",le="0.0001"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="PUT",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/authentication-status",status_code="204 No Content",le="0.005"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="PUT",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/authentication-status",status_code="204 No Content",le="0.01"} 9
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="PUT",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/authentication-status",status_code="204 No Content",le="0.02"} 20
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="PUT",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/authentication-status",status_code="204 No Content",le="0.025"} 20
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="PUT",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/authentication-status",status_code="204 No Content",le="0.05"} 20
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="PUT",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/authentication-status",status_code="204 No Content",le="+Inf"} 20
+free5gc_sbi_inbound_request_duration_seconds_sum{method="PUT",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/authentication-status",status_code="204 No Content"} 0.20165208199999998
+free5gc_sbi_inbound_request_duration_seconds_count{method="PUT",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/authentication-status",status_code="204 No Content"} 20
+# HELP free5gc_sbi_inbound_request_total Total number of SBI inbound requests received by the NF
+# TYPE free5gc_sbi_inbound_request_total counter
+free5gc_sbi_inbound_request_total{cause="",method="GET",nf_type="udr",path="/nudr-dr/v2/policy-data/ues/:ueId/am-data",status_code="200 OK"} 20
+free5gc_sbi_inbound_request_total{cause="",method="GET",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/authentication-subscription",status_code="200 OK"} 20
+free5gc_sbi_inbound_request_total{cause="",method="GET",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/provisioned-data/am-data",status_code="200 OK"} 40
+free5gc_sbi_inbound_request_total{cause="",method="GET",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/provisioned-data/sm-data",status_code="200 OK"} 146
+free5gc_sbi_inbound_request_total{cause="",method="GET",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/provisioned-data/smf-selection-subscription-data",status_code="200 OK"} 20
+free5gc_sbi_inbound_request_total{cause="",method="GET",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/smf-registrations",status_code="200 OK"} 20
+free5gc_sbi_inbound_request_total{cause="",method="PATCH",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/authentication-subscription",status_code="204 No Content"} 20
+free5gc_sbi_inbound_request_total{cause="",method="POST",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/sdm-subscriptions",status_code="201 Created"} 20
+free5gc_sbi_inbound_request_total{cause="",method="PUT",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/amf-3gpp-access",status_code="204 No Content"} 20
+free5gc_sbi_inbound_request_total{cause="",method="PUT",nf_type="udr",path="/nudr-dr/v2/subscription-data/:ueId/:servingPlmnId/authentication-status",status_code="204 No Content"} 20
+# HELP free5gc_sbi_outbound_request_duration_seconds Histogram of request latencies
+# TYPE free5gc_sbi_outbound_request_duration_seconds histogram
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="udr",status_code="201 Created",target_service_name="nnrf-nfm",le="0.0001"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="udr",status_code="201 Created",target_service_name="nnrf-nfm",le="0.005"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="udr",status_code="201 Created",target_service_name="nnrf-nfm",le="0.01"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="udr",status_code="201 Created",target_service_name="nnrf-nfm",le="0.02"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="udr",status_code="201 Created",target_service_name="nnrf-nfm",le="0.025"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="udr",status_code="201 Created",target_service_name="nnrf-nfm",le="0.05"} 1
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="udr",status_code="201 Created",target_service_name="nnrf-nfm",le="+Inf"} 1
+free5gc_sbi_outbound_request_duration_seconds_sum{method="PUT",nf_type="udr",status_code="201 Created",target_service_name="nnrf-nfm"} 0.04163829
+free5gc_sbi_outbound_request_duration_seconds_count{method="PUT",nf_type="udr",status_code="201 Created",target_service_name="nnrf-nfm"} 1
+# HELP free5gc_sbi_outbound_request_total Total number of SBI outbound requests attempted or sent by the NF
+# TYPE free5gc_sbi_outbound_request_total counter
+free5gc_sbi_outbound_request_total{method="PUT",nf_type="udr",status_code="201 Created",target_service_name="nnrf-nfm"} 1

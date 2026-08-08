@@ -1,0 +1,4 @@
+--- raw exposition from the slice exporter (:9105) ---
+free5GC's native metrics carry NO slice identity; these are derived.
+
+(slice exporter not reachable on :9105)

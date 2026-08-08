@@ -2,14 +2,14 @@
 
 **Document ID:** SPEC-000
 **Status:** Accepted (ratified at inception)
-**Version:** 0.4 (Project Inception)
+**Version:** 0.5 (Project Inception + ADR-009 re-sequencing)
 **Scope:** Phase 1 (Stable Baseline) + Phase 1.5 (multi-slice) with forward-looking architecture for Phases 2–5
 **Source of truth:** *Master Project Bible v1* (handbook) + decisions ratified in this document
 **Authority:** This specification governs architecture. Where it conflicts with the handbook, this document wins; where it is silent, the handbook wins.
 
 **Phase model (ratified):** Phase 1 = single-slice functional baseline → **freeze** → Phase 1.5 = second slice + NSSF validation → **freeze** → Phase 2 = (a) migrate frozen baseline to Kubernetes, *then* (b) introduce the observability stack → Phases 3–5 = slice observability, analytics, AI.
 
-**Changelog:** v0.4 — Official Development Environment (ODE) ratified as the reference *platform* (Ubuntu 24.04 LTS, x86_64, bare-metal, ≥8 threads / ≥16 GB / ≥100 GB SSD); ADR-003 and M0 updated; VMs/cloud/CI demoted to future secondary targets. v0.3 — ADR-002 switched from Git submodules to a SHA-pinned `manifest.lock` + verifying `bootstrap.sh` into a git-ignored `external/`; repo layout, M1, and R-04 updated accordingly. v0.2 — second slice reframed as a named Phase 1.5 *after* the Phase 1 freeze (was M5 inside Phase 1); Phase 2 sequenced explicitly as K8s-migration-then-observability; per-component deployment model added to §3.
+**Changelog:** v0.5 — **ADR-009 added**, superseding the *sequencing* clause of ADR-001 only: the observability plane was built on Docker Compose **before** the Phase 2a Kubernetes migration, and the Phase 1.5 second slice was added **before** the Phase 1 freeze. Driven by the ODE being unavailable — the UPF needs gtp5g, so Phase 1 cannot be completed or frozen on the development host. Phase 1's acceptance criteria are **unchanged and explicitly not met**; `tests/acceptance.sh` reports the outstanding ones as `SKIP-ODE` and refuses to declare Phase 1 complete. ADR-001's Compose-first decision and K8s-portability guardrails remain in force. See `docs/adr/ADR-009-phase-resequencing.md`. v0.4 — Official Development Environment (ODE) ratified as the reference *platform* (Ubuntu 24.04 LTS, x86_64, bare-metal, ≥8 threads / ≥16 GB / ≥100 GB SSD); ADR-003 and M0 updated; VMs/cloud/CI demoted to future secondary targets. v0.3 — ADR-002 switched from Git submodules to a SHA-pinned `manifest.lock` + verifying `bootstrap.sh` into a git-ignored `external/`; repo layout, M1, and R-04 updated accordingly. v0.2 — second slice reframed as a named Phase 1.5 *after* the Phase 1 freeze (was M5 inside Phase 1); Phase 2 sequenced explicitly as K8s-migration-then-observability; per-component deployment model added to §3.
 
 ---
 

@@ -1,0 +1,10 @@
+--- gNB NG setup ---
+
+--- registered UEs (from UE log) ---
+
+count registered: 
+--- per-UE state via nr-cli (GROUND TRUTH — see note in 00-summary.md) ---
+
+
+RM-REGISTERED : 0 / 20
+CM-CONNECTED  : 0 / 20
