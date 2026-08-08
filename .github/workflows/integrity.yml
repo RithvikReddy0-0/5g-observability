@@ -1,0 +1,107 @@
+name: integrity
+
+# M1 CI contract (SPEC / M0 brief section 7): a drifted or stale `external/` must fail the
+# build. This runs the same `bootstrap.sh --verify-only` gate used locally, plus config
+# validation. It deliberately does NOT deploy free5GC — that needs the gtp5g kernel module
+# and a conforming ODE, which GitHub runners are not (SPEC ADR-003).
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  manifest-integrity:
+    name: manifest.lock integrity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: manifest.lock is valid JSON with full 40-char SHAs
+        run: |
+          python3 - <<'PY'
+          import json, re, sys
+          m = json.load(open("manifest.lock"))
+          assert m.get("schema_version") == "1", "unexpected schema_version"
+          deps = m["dependencies"]
+          assert {d["name"] for d in deps} == {"free5gc", "ueransim", "gtp5g"}, "unexpected dependency set"
+          bad = [d["name"] for d in deps if not re.fullmatch(r"[0-9a-f]{40}", d["commit"])]
+          if bad:
+              sys.exit(f"pins are not full 40-char SHAs: {bad}")
+          # A tag or branch as the pin is forbidden — those move, SHAs do not.
+          print(f"{len(deps)} dependencies pinned to full SHAs")
+          PY
+
+      - name: bootstrap materializes and verifies the pinned SHAs
+        run: bash scripts/bootstrap.sh
+
+      - name: verify-only gate passes on the materialized tree
+        run: bash scripts/bootstrap.sh --verify-only
+
+      - name: verify-only FAILS on a drifted tree
+        run: |
+          # Move one upstream off its pin; the gate must reject it.
+          git -C external/gtp5g -c advice.detachedHead=false checkout --quiet HEAD~1
+          if bash scripts/bootstrap.sh --verify-only; then
+            echo "::error::drift was NOT detected — the integrity gate is ineffective"
+            exit 1
+          fi
+          echo "drift correctly rejected"
+
+      - name: external/ must never be tracked
+        run: |
+          if [ -n "$(git ls-files external/)" ]; then
+            echo "::error::files under external/ are tracked by git"
+            git ls-files external/ | head
+            exit 1
+          fi
+          echo "external/ is untracked"
+
+  config-lint:
+    name: config validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: every YAML config parses
+        run: |
+          python3 - <<'PY'
+          import glob, sys, yaml
+          bad = []
+          for f in sorted(glob.glob("deployments/compose/**/*.yaml", recursive=True)
+                          + glob.glob("deployments/compose/**/*.yml", recursive=True)
+                          + glob.glob("observability/**/*.yml", recursive=True)
+                          + glob.glob("observability/**/*.yaml", recursive=True)
+                          + glob.glob("ran/config/*.yaml")):
+              try:
+                  yaml.safe_load(open(f))
+              except Exception as e:
+                  bad.append((f, str(e).splitlines()[0]))
+          for f, e in bad:
+              print(f"::error file={f}::{e}")
+          print(f"checked YAML files; {len(bad)} invalid")
+          sys.exit(1 if bad else 0)
+          PY
+
+      - name: slice consistency — the modeled slice appears in every plane
+        run: |
+          # ADR-007: whatever S-NSSAI the UE requests must be advertised by AMF, SMF, NSSF
+          # and the gNB. A slice present in one plane but not another is the exact failure
+          # that produced "AMF can not select an target AMF by NRF".
+          set -e
+          cfg=deployments/compose/config
+          for sd in $(grep -oE 'sd: 0x[0-9a-fA-F]{6}' $cfg/uecfg*.yaml | grep -oE '[0-9a-fA-F]{6}$' | sort -u); do
+            for f in amfcfg smfcfg nssfcfg gnbcfg; do
+              grep -qi "$sd" "$cfg/$f.yaml" || { echo "::error::slice $sd missing from $f.yaml"; exit 1; }
+            done
+            echo "slice $sd present in AMF, SMF, NSSF and gNB config"
+          done
+
+      - name: shell scripts are syntactically valid
+        run: |
+          rc=0
+          for s in scripts/*.sh tests/*.sh; do
+            bash -n "$s" || { echo "::error file=$s::syntax error"; rc=1; }
+          done
+          exit $rc

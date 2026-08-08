@@ -1,0 +1,71 @@
+%% UE Registration — authored from behaviour OBSERVED on this deployment, not from spec text.
+%% Sources: UERANSIM /tmp/ue.log, and container logs for amf, ausf, udm, nssf.
+%% Evidence bundles: docs/evidence/run-*/05-ue-registration.txt
+%% Every message below was seen in logs; nothing is inferred from 3GPP text alone.
+sequenceDiagram
+    autonumber
+    participant UE as UE (nr-ue)
+    participant GNB as gNB (nr-gnb)
+    participant AMF
+    participant AUSF
+    participant UDM
+    participant NSSF
+    participant PCF
+    participant SMF
+
+    Note over UE,GNB: Uu / radio-link simulation (127.0.0.1 inside the ueransim container)
+    UE->>UE: MM-DEREGISTERED/PLMN-SEARCH
+    UE->>GNB: RRC Setup Request
+    GNB-->>UE: RRC connection established
+    Note over UE: Selected cell plmn[208/93] tac[1] category[SUITABLE]
+
+    rect rgb(238,237,254)
+    Note over UE,AMF: N1 (NAS) carried over N2 (NGAP/SCTP :38412)
+    UE->>GNB: Registration Request (SUCI, requested NSSAI)
+    GNB->>AMF: NGAP Initial UE Message
+    Note over AMF: MobileIdentity5GS: SUCI[suci-0-208-93-...]
+    end
+
+    rect rgb(225,245,238)
+    Note over AMF,UDM: 5G-AKA authentication over the SBI
+    AMF->>AUSF: POST /nausf-auth/v1/ue-authentications
+    AUSF->>UDM: POST /nudm-ueau/v1/{supiOrSuci}/security-information/generate-auth-data
+    Note over UDM: de-conceals SUCI to SUPI; returns AV; increments stored SQN
+    UDM-->>AUSF: 200 auth vector
+    AUSF-->>AMF: 201 (5G-AKA challenge)
+    AMF->>UE: Authentication Request (RAND, AUTN)
+    Note over UE: checks AUTN MAC, then SQN freshness
+    UE->>AMF: Authentication Response (RES*)
+    AMF->>AUSF: confirm RES*
+    AUSF-->>AMF: authentication successful
+    end
+
+    AMF->>UE: Security Mode Command
+    UE->>AMF: Security Mode Complete
+    Note over AMF: Selected integrity[NIA2] ciphering[NEA0]
+
+    rect rgb(250,238,218)
+    Note over AMF,NSSF: slice selection — the step that carries S-NSSAI
+    AMF->>NSSF: GET /nnssf-nsselection/v2/network-slice-information<br/>?slice-info-request-for-...={"sNssai":{"sst":1,"sd":"010203"}}&tai={...tac:"000001"}
+    Note over NSSF: TAI must exist in nssfcfg taList,<br/>with tac as the quoted string "000001"
+    NSSF-->>AMF: 200 authorizedNetworkSliceInfo
+    end
+
+    AMF->>UDM: subscription data retrieval (Nudm_SDM)
+    UDM-->>AMF: AM data incl. defaultSingleNssais
+    AMF->>PCF: AM policy association
+    PCF-->>AMF: policy
+
+    AMF->>UE: Registration Accept (allowed NSSAI, 5G-GUTI)
+    UE->>AMF: Registration Complete
+    Note over UE: MM-REGISTERED/NORMAL-SERVICE — "Initial Registration is successful"
+
+    rect rgb(250,234,240)
+    Note over UE,SMF: PDU session attempt — FAILS on a non-baseline host
+    UE->>AMF: UL NAS Transport (PDU Session Establishment Request)
+    Note over AMF: Select SMF [snssai: {Sst:1 Sd:010203}, dnn: internet]
+    AMF->>SMF: POST /nsmf-pdusession/v1/sm-contexts
+    Note over SMF: no PFCP association with the UPF<br/>(gtp5g absent on WSL2)
+    SMF-->>AMF: 500 Internal Server Error
+    AMF-->>UE: (no accept) — UE retransmits until T3580 expiry
+    end

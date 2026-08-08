@@ -1,0 +1,55 @@
+%% PDU Session Establishment.
+%%
+%% HONESTY MARKER: only the section marked OBSERVED was seen on this deployment. Everything
+%% after the SMF's UPF lookup is DESIGN-ONLY — it cannot be observed here because the UPF
+%% needs the gtp5g kernel module, which WSL2 cannot provide (SPEC ADR-003, risk R-01).
+%% This diagram must be re-authored from real logs on the ODE before Phase 1 acceptance
+%% (SPEC section 5 requires it be authored "from the running system's behavior").
+sequenceDiagram
+    autonumber
+    participant UE
+    participant GNB as gNB
+    participant AMF
+    participant SMF
+    participant UDM
+    participant PCF
+    participant UPF
+    participant DN as Data Network
+
+    rect rgb(225,245,238)
+    Note over UE,SMF: OBSERVED on this deployment
+    UE->>AMF: UL NAS Transport — PDU Session Establishment Request<br/>(PDU session id, S-NSSAI, DNN=internet)
+    Note over AMF: Select SMF [snssai: {Sst:1 Sd:010203}, dnn: internet]
+    AMF->>AMF: Search SMF from NRF
+    AMF->>SMF: POST /nsmf-pdusession/v1/sm-contexts
+    end
+
+    rect rgb(250,234,240)
+    Note over SMF,UPF: FAILURE PATH actually seen here (no UPF)
+    SMF--xUPF: PFCP association never established<br/>"Failed to setup an association with UPF ... no destination IP address"
+    SMF-->>AMF: 500 Internal Server Error
+    AMF-->>UE: no PDU Session Accept
+    Note over UE: retransmits, then T3580 expiry
+    end
+
+    rect rgb(238,237,254)
+    Note over SMF,DN: DESIGN ONLY — requires gtp5g on a conforming ODE
+    SMF->>UDM: Nudm_SDM — session management subscription data
+    UDM-->>SMF: allowed DNN / S-NSSAI, session AMBR
+    SMF->>PCF: SM policy association
+    PCF-->>SMF: SM policy (QoS rules)
+    SMF->>SMF: allocate UE IP from the slice pool<br/>(10.60.0.0/16 slice A · 10.61.0.0/16 slice B)
+    SMF->>UPF: N4 PFCP Session Establishment (PDRs, FARs, QERs)
+    UPF-->>SMF: N4 response (F-TEID allocated)
+    SMF-->>AMF: 201 SM context created
+    AMF->>UE: PDU Session Establishment Accept (UE IP, QoS)
+    AMF->>GNB: N2 PDU Session Resource Setup
+    GNB-->>AMF: setup response (gNB F-TEID)
+    AMF->>SMF: N2 info — update SMF with gNB tunnel endpoint
+    SMF->>UPF: N4 Session Modification (downlink FAR → gNB)
+    Note over GNB,UPF: N3 GTP-U tunnel established
+    UE->>GNB: user-plane traffic on the UE TUN interface
+    GNB->>UPF: N3 GTP-U
+    UPF->>DN: N6 (IP forwarding / NAT)
+    DN-->>UPF: return traffic
+    end
