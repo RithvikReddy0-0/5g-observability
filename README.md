@@ -9,6 +9,7 @@ gtp5g) are pinned by SHA in [`manifest.lock`](manifest.lock) and fetched into a 
 - **Phase re-sequencing:** [`docs/adr/ADR-009-phase-resequencing.md`](docs/adr/ADR-009-phase-resequencing.md).
 - **M0 run report:** [`docs/runbooks/m0-report.md`](docs/runbooks/m0-report.md).
 - **Runbook:** [`docs/runbooks/clean-install.md`](docs/runbooks/clean-install.md).
+- **Results & findings:** [`docs/RESULTS.md`](docs/RESULTS.md) — all measured outcomes in one place.
 
 > **Baseline environment (ODE):** bare-metal **Ubuntu 24.04 LTS, x86_64, ≥16 GB RAM** (ADR-003).
 > **WSL2 / VMs / cloud are non-baseline.** The user plane (UPF/gtp5g) runs only on a conforming ODE.
@@ -100,7 +101,8 @@ slice-labeling contract the Slice Correlation Engine depends on.
 [`observability/slice-exporter`](observability/slice-exporter/) closes the gap at ADR-004
 rung 2 by deriving slice identity from AMF logs and MongoDB — no upstream patch. Its limits
 are documented honestly in [`observability/README.md`](observability/README.md), including
-that the AMF's own UE gauges disagree with ground truth on v4.2.0.
+that the AMF's own UE gauges *leak under churn* on v4.2.0: they match ground truth right
+after a clean bring-up, then drift permanently once procedures abort or the AMF restarts.
 
 ## Provenance
 
