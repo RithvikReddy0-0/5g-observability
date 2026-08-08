@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>5G Observability Project — Report</title>
+<style>
+  @page { size: A4; margin: 16mm 14mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    color: #1a1a1a; line-height: 1.55; font-size: 10.5pt; margin: 0;
+  }
+  h1 { font-size: 23pt; margin: 0 0 4px; color: #0f2f5c; }
+  h2 { font-size: 15pt; margin: 26px 0 8px; color: #0f2f5c;
+       border-bottom: 2px solid #0f2f5c; padding-bottom: 4px; }
+  h3 { font-size: 12pt; margin: 16px 0 6px; color: #23415f; }
+  p  { margin: 7px 0; }
+  .sub { color: #555; font-size: 10pt; margin-bottom: 2px; }
+  .meta { color: #666; font-size: 9pt; }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 9.5pt; }
+  th, td { border: 1px solid #ccd4de; padding: 5px 8px; text-align: left; vertical-align: top; }
+  th { background: #eef2f7; font-weight: 600; }
+  code { font-family: Consolas, monospace; background: #f2f4f7; padding: 1px 4px;
+         border-radius: 3px; font-size: 9pt; }
+  pre { background: #f6f8fa; border: 1px solid #dde3ea; border-left: 3px solid #0f2f5c;
+        padding: 9px 11px; font-family: Consolas, monospace; font-size: 8.7pt;
+        white-space: pre-wrap; border-radius: 3px; margin: 9px 0; }
+  .ok   { color: #17692f; font-weight: 600; }
+  .bad  { color: #a3211a; font-weight: 600; }
+  .warn { color: #8a5a00; font-weight: 600; }
+  .box { background: #f6f8fa; border: 1px solid #dde3ea; border-radius: 4px;
+         padding: 10px 13px; margin: 12px 0; }
+  .box.note   { background: #eef5fb; border-color: #b9d4ea; }
+  .box.caution{ background: #fdf5e6; border-color: #e8d199; }
+  figure { margin: 14px 0 18px; page-break-inside: avoid; }
+  figure img { width: 100%; border: 1px solid #ccd4de; border-radius: 3px; display: block; }
+  figcaption { font-size: 8.8pt; color: #555; margin-top: 5px; font-style: italic; }
+  .page-break { page-break-before: always; }
+  ul, ol { margin: 7px 0 7px 20px; padding: 0; }
+  li { margin: 3px 0; }
+  .kpi { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+  .kpi div { flex: 1 1 30%; border: 1px solid #ccd4de; border-radius: 4px;
+             padding: 8px 10px; background: #fafbfc; }
+  .kpi b { display: block; font-size: 17pt; color: #0f2f5c; line-height: 1.1; }
+  .kpi span { font-size: 8.6pt; color: #555; }
+  .foot { margin-top: 26px; border-top: 1px solid #ccd4de; padding-top: 8px;
+          font-size: 8.6pt; color: #666; }
+</style>
+</head>
+<body>
+
+<h1>Cloud-Native Observability Plane for free5GC</h1>
+<p class="sub">A working 5G core network with 20 devices, two network slices, and live monitoring</p>
+<p class="meta">Repository: github.com/RithvikReddy0-0/5g-observability &nbsp;·&nbsp; Report generated 8 August 2026</p>
+
+<div class="box note">
+<b>What this project is, in one paragraph.</b><br>
+We built a real 5G mobile core network that runs on a laptop. It has all the pieces a real
+operator would have — the parts that authenticate your phone, decide which network "slice"
+you belong to, and manage your data session. We connected 20 simulated phones to it, split
+across two separate network slices, and then built a monitoring system on top so we can see
+what the network is doing. Everything is automated and reproducible: one person can rebuild
+the whole thing from scratch by running a few scripts.
+</div>
+
+<h2>1. Results at a glance</h2>
+
+<div class="kpi">
+  <div><b>8 / 8</b><span>Network functions running and registered</span></div>
+  <div><b>20 / 20</b><span>Devices (UEs) successfully connected</span></div>
+  <div><b>2</b><span>Network slices, working independently</span></div>
+</div>
+<div class="kpi">
+  <div><b>10 / 10</b><span>Monitoring targets healthy</span></div>
+  <div><b>12 / 12</b><span>Testable requirements passed</span></div>
+  <div><b>0</b><span>Failures</span></div>
+</div>
+
+<table>
+<tr><th>What we checked</th><th>Result</th><th>How we proved it</th></tr>
+<tr><td>Software versions locked and reproducible</td><td class="ok">PASS</td><td>Deleted everything, re-downloaded — got byte-identical results</td></tr>
+<tr><td>All core network functions running</td><td class="ok">8 / 8</td><td>Read the network's own registry database</td></tr>
+<tr><td>Subscribers (SIM cards) provisioned</td><td class="ok">20</td><td>Database query</td></tr>
+<tr><td>Devices connected to the network</td><td class="ok">20 / 20</td><td>Asked each device directly for its status</td></tr>
+<tr><td>Both network slices selected correctly</td><td class="ok">PASS</td><td>60 requests for each slice in the logs</td></tr>
+<tr><td>Monitoring collecting data</td><td class="ok">10 / 10</td><td>Prometheus target page</td></tr>
+<tr><td>Data traffic through the network</td><td class="bad">BLOCKED</td><td>Needs different hardware — explained in section 5</td></tr>
+</table>
+
+<h2>2. What we built</h2>
+
+<h3>The 5G core network</h3>
+<p>
+Eight "network functions" — think of them as specialised servers that each do one job.
+The AMF handles device connections, the AUSF and UDM check that a SIM card is genuine,
+the SMF sets up data sessions, and the NSSF decides which network slice a device belongs to.
+They find each other through a registry called the NRF, and all their settings live in
+version-controlled files.
+</p>
+
+<h3>20 simulated phones, on 2 network slices</h3>
+<p>
+A network slice is a way of splitting one physical network into separate virtual networks —
+so, for example, emergency services and normal customers can share hardware but stay isolated.
+We set up two real slices and split the devices between them:
+</p>
+<table>
+<tr><th>Slice</th><th>Identifier</th><th>Devices</th><th>Address range</th></tr>
+<tr><td>Slice A</td><td>SST 1 / SD 010203</td><td>10 devices</td><td>10.60.0.0/16</td></tr>
+<tr><td>Slice B</td><td>SST 1 / SD 112233</td><td>10 devices</td><td>10.61.0.0/16</td></tr>
+</table>
+<p>
+These are genuine 5G slices, not labels. Each device asks for its slice during connection,
+and the network's slice-selection function independently approves it.
+</p>
+
+<h3>The monitoring system</h3>
+<p>
+Prometheus collects measurements every 15 seconds; Grafana draws the dashboards. It runs as a
+completely separate system that only reads from the 5G core — the core doesn't even know it's
+being watched, and monitoring can never interfere with the network.
+</p>
+
+<h3>Automation</h3>
+<p>
+Scripts handle: downloading exact software versions, checking the machine is suitable, setting
+up SIM cards, launching devices, collecting evidence, and running the test suite. A CI pipeline
+checks on every code change that nobody has quietly swapped a software version.
+</p>
+
+<div class="page-break"></div>
+<h2>3. Evidence — screenshots from the live system</h2>
+
+<figure>
+  <img src="screenshots/01-grafana-dashboard.png" alt="Grafana dashboard">
+  <figcaption>
+    <b>Figure 1 — The main dashboard.</b> Top row: 8 network functions being monitored,
+    20 devices connected, 0 active data sessions, 20 connection requests. The charts show
+    device states and message rates over the last hour. Note "Active PDU sessions = 0" —
+    that is expected and explained in section 5, not a fault.
+  </figcaption>
+</figure>
+
+<figure>
+  <img src="screenshots/02-prometheus-targets.png" alt="Prometheus targets">
+  <figcaption>
+    <b>Figure 2 — Monitoring health.</b> All 8 network functions reporting <b>UP</b>, plus
+    Prometheus itself and our custom slice exporter. 10 healthy sources of data.
+  </figcaption>
+</figure>
+
+<figure>
+  <img src="screenshots/03-prometheus-slice-metrics.png" alt="Slice metrics">
+  <figcaption>
+    <b>Figure 3 — The most important result.</b> Measurements tagged by network slice:
+    10 subscribers on slice <code>010203</code> and 10 on slice <code>112233</code>.
+    free5GC cannot produce this by itself (see section 4) — we had to build it.
+  </figcaption>
+</figure>
+
+<div class="page-break"></div>
+<h2>4. What we discovered</h2>
+
+<h3>4.1 The monitoring gap — and how we closed it</h3>
+<p>
+The biggest finding. We checked every single measurement free5GC produces —
+<b>629 of them</b> — and found that <b>none of them say which network slice they belong to</b>.
+</p>
+<p>
+That is a serious problem for this project, because the whole goal is to monitor networks
+<i>per slice</i>. Without slice labels you can see that the network is busy, but not
+<i>which slice</i> is busy. The project's design document had listed this as a risk; we
+confirmed it is real.
+</p>
+<p>
+<b>Our solution:</b> the network's logs do mention the slice, even though the measurements
+don't. We wrote a small program that reads those logs, combines them with the subscriber
+database, and produces proper slice-tagged measurements — without modifying free5GC itself.
+Figure 3 is that solution working.
+</p>
+
+<h3>4.2 Some built-in counters can't be trusted</h3>
+<p>
+We found that free5GC's own device counters drift over time. Immediately after a clean start
+they are correct, but once connections fail and retry, they lose track and never recover:
+</p>
+<table>
+<tr><th>Source</th><th>After a clean start</th><th>After lots of retries</th></tr>
+<tr><td>Asking each device directly (the truth)</td><td class="ok">20</td><td class="ok">20</td></tr>
+<tr><td>free5GC's "connected devices" counter</td><td class="ok">20 ✓</td><td class="bad">3 ✗</td></tr>
+<tr><td>free5GC's "connected state" counter</td><td class="ok">20 ✓</td><td class="bad">63 ✗</td></tr>
+</table>
+<p>
+Worth knowing before anyone builds alerts on those numbers. Our reports use the device's own
+answer as the source of truth.
+</p>
+
+<h3>4.3 Three faults blocked device connection — all misleading</h3>
+<ol>
+<li><b>A counter set too high.</b> free5GC's default security counter was so far ahead of what
+a fresh device expects that every connection was rejected. <i>The error looked exactly like a
+wrong SIM key — the keys were correct the whole time.</i></li>
+<li><b>A missing location entry.</b> The slice-selection function didn't know about our
+network's location area. The value also had to be written as text <code>"000001"</code>, not
+the number <code>1</code> — otherwise it silently fails to match.</li>
+<li><b>Devices asking for a slice they weren't allowed on.</b> The default config asked for a
+second slice that no SIM was registered for, which made the network try to hand the device to
+a different server that doesn't exist.</li>
+</ol>
+
+<h3>4.4 Structured logging isn't possible on this version</h3>
+<p>
+The design asked for machine-readable (JSON) logs. We checked the source code: free5GC v4.2.3
+simply doesn't offer that option. Recorded as a known limitation rather than modifying
+someone else's software.
+</p>
+
+<h3>4.5 The previous project's "slices" weren't real</h3>
+<p>
+The earlier version of this project appeared to do slice-based traffic handling. It didn't —
+it was a web app sorting requests with a lookup table and calling them "slices". The 5G core
+and the traffic simulator never talked to each other. The slicing in this project is real.
+</p>
+
+<div class="page-break"></div>
+<h2>5. What is not finished, and why</h2>
+
+<div class="box caution">
+<b>One hardware limitation blocks the remaining work.</b><br>
+Moving actual user data through a 5G network needs a special Linux kernel component called
+<b>gtp5g</b>. It only works on a normal Linux machine. This laptop runs Linux inside Windows
+(WSL2), whose kernel cannot load it. This is not a configuration problem and cannot be worked
+around in software.
+</div>
+
+<p><b>What works without it:</b> everything that happens when a phone connects — authentication,
+security, slice selection, registration. That is the majority of a 5G core, and it is fully
+working here.</p>
+
+<p><b>What doesn't:</b> the data path. Devices connect successfully but cannot be given an IP
+address or send traffic. This is why "Active PDU sessions" reads 0 in Figure 1.</p>
+
+<table>
+<tr><th>Remaining item</th><th>Why it's blocked</th></tr>
+<tr><td>Load the gtp5g kernel component</td><td>Needs a standard Linux machine</td></tr>
+<tr><td>Establish data sessions / assign IPs</td><td>Depends on the above</td></tr>
+<tr><td>Prove end-to-end connectivity (ping)</td><td>Depends on the above</td></tr>
+<tr><td>Record final hardware versions</td><td>Must be captured on the target machine</td></tr>
+<tr><td>Full rebuild-from-empty proof</td><td>Should be done with the data path present</td></tr>
+<tr><td><b>Tag the finished baseline</b></td><td><b>Can't declare it finished while data doesn't flow</b></td></tr>
+</table>
+
+<p>
+Because of this, <b>Phase 1 is deliberately not marked complete</b>. The automated test suite
+enforces that honestly — it reports these items as "needs proper hardware" and refuses to say
+the project is finished. Running it on a suitable machine should turn them all green without
+code changes.
+</p>
+
+<h2>6. How to run it yourself</h2>
+<pre>git clone https://github.com/RithvikReddy0-0/5g-observability.git
+cd 5g-observability
+
+bash scripts/verify_env.sh      # is this machine suitable?
+bash scripts/bootstrap.sh       # download exact software versions
+
+# start the core (details in docs/runbooks/clean-install.md)
+
+bash scripts/provision_subscribers.sh --delete-all
+COUNT=10 START=1  SD=010203 bash scripts/provision_subscribers.sh
+COUNT=10 START=11 SD=112233 bash scripts/provision_subscribers.sh
+COUNT=10 COUNT_B=10 TEMPO=600 bash scripts/start_ues.sh
+
+bash tests/acceptance.sh        # run all the checks
+bash scripts/collect_evidence.sh</pre>
+
+<div class="box">
+<b>One thing to remember:</b> always re-create the SIM cards immediately before starting the
+devices. A security counter moves forward every time a device connects, and restarted devices
+start from zero — if they drift apart, connection fails in a way that looks like a wrong SIM key.
+</div>
+
+<h2>7. Where everything lives</h2>
+<table>
+<tr><th>Folder</th><th>Contents</th></tr>
+<tr><td><code>docs/RESULTS.md</code></td><td>All measured results in detail</td></tr>
+<tr><td><code>docs/evidence/</code></td><td>Six timestamped raw-data captures</td></tr>
+<tr><td><code>docs/screenshots/</code></td><td>The images in this report</td></tr>
+<tr><td><code>docs/runbooks/</code></td><td>Step-by-step setup instructions</td></tr>
+<tr><td><code>docs/interfaces/</code></td><td>Reference for every network connection type</td></tr>
+<tr><td><code>diagrams/</code></td><td>Diagrams of how a device connects</td></tr>
+<tr><td><code>scripts/</code>, <code>tests/</code></td><td>All automation and the test suite</td></tr>
+</table>
+
+<div class="foot">
+Every number in this report was measured on a running system, not estimated. The raw captures
+behind each figure are in <code>docs/evidence/</code>, so any claim here can be checked
+independently.
+</div>
+
+</body>
+</html>
