@@ -72,12 +72,36 @@ tags or build-from-source). Recorded in `VERSIONS.lock.container_images`.
 
 ---
 
-## 3. Deferred to the lab ODE (NOT done here)
+## 3a. Bootstrap — EXECUTED AND FULLY VALIDATED
 
-- `scripts/bootstrap.sh` was **written but not executed** here (not requested for this pass; a
-  full free5GC + submodules clone is heavy and `external/` is git-ignored). Network *was*
-  confirmed available (ls-remote succeeded), so bootstrap is not blocked — it simply runs on
-  the ODE. Determinism proof (`--clean` then re-run → identical SHAs) is an ODE step.
+`scripts/bootstrap.sh` has now been run for real. Every bootstrap-related M0 acceptance
+criterion passes on this machine (none of them depend on the ODE — only the gtp5g build does):
+
+| Criterion | Result |
+|---|---|
+| Materialize `external/` and verify all pins | `BOOTSTRAP: PASS` |
+| free5GC submodules in sync with superproject | ✓ (15 submodules) |
+| `--verify-only` on the materialized tree | `PASS` (rc=0) |
+| `--verify-only` **fails on a drifted tree** | gtp5g moved back one commit → `[FAIL]` + `BOOTSTRAP: FAIL` ✓ |
+| `--clean` then re-run → **identical SHAs** | **IDENTICAL** — 18/18 lines (3 pins + 15 submodule SHAs), re-clone took 262 s |
+| `--verify-only` after the clean rebuild | `PASS` |
+| `external/` git-ignored and untracked | ignored; **0** tracked files |
+
+Pinned SHAs reproduced byte-for-byte across a full wipe-and-re-clone:
+
+```
+free5gc   3b34a08e93a9b334f0f4005d3a3a9f79b66d59b9   (+15 submodules, all matching)
+ueransim  6bf5a1a96aaef6ae8778b9d8b477ac6e2bbf8156
+gtp5g     952fb419130f5fc44cac1874e8183312006b746c
+```
+
+**Prerequisite change:** `jq` is not installed here and installing it needs interactive sudo,
+so `bootstrap.sh` now uses `jq` when present and falls back to `python3` (which ships with
+Ubuntu). The brief names jq but leaves bootstrap's mechanics to the implementer, so this
+removes an undocumented prerequisite from the clean-install runbook rather than changing the
+contract.
+
+## 3b. Still deferred to the lab ODE (NOT done here)
 - `scripts/validate_gtp5g.sh` was **written but deliberately not run** — it refuses to run on
   WSL2 unless `ALLOW_NON_BASELINE=1`. gtp5g build+load is the central ODE objective.
 - Environment half of `VERSIONS.lock` (exact point release, `uname -r`, Docker/Compose versions,
