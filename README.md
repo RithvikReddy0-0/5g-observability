@@ -54,6 +54,19 @@ external/                   fetched upstreams — GIT-IGNORED (ADR-002)
 
 ## Quick start
 
+Easiest way — a Makefile wraps everything:
+
+```bash
+make up      # start the whole stack
+make ues     # connect 20 devices across both slices
+make status  # see what is running
+make test    # run the acceptance checks
+make down    # stop everything (keeps data)
+make help    # list every command
+```
+
+Manual equivalents below.
+
 Full detail in [the runbook](docs/runbooks/clean-install.md).
 
 ```bash

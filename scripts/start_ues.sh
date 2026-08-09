@@ -36,7 +36,33 @@ COUNT_B="${COUNT_B:-0}"
 UE_CFG_B="${UE_CFG_B:-./config/uecfg-slice-b.yaml}"
 LOG_B=/tmp/ue-b.log
 
-dc() { (cd "$COMPOSE_DIR" && docker compose "$@" 2>/dev/null); }
+# Plain `docker` against the container name, NOT `docker compose`: Docker Desktop drops the
+# compose plugin (a symlink into /mnt/wsl/docker-desktop/) whenever it restarts, while the
+# daemon keeps working. With the plugin gone this script used to report the gNB as "not
+# running" even though the container was up.
+UERANSIM_CONTAINER="${UERANSIM_CONTAINER:-ueransim}"
+
+dc() {
+  local sub="$1"; shift
+  case "$sub" in
+    exec)
+      local detach=""
+      [ "${1:-}" = "-T" ] && shift
+      [ "${1:-}" = "-d" ] && { detach="-d"; shift; }
+      shift  # drop the service name; this script only ever execs into ueransim
+      if [ -n "$detach" ]; then
+        docker exec -d "$UERANSIM_CONTAINER" "$@" 2>/dev/null
+      else
+        docker exec -i "$UERANSIM_CONTAINER" "$@" 2>/dev/null
+      fi
+      ;;
+    *) docker "$sub" "$@" 2>/dev/null ;;
+  esac
+}
+
+gnb_running() {
+  docker inspect "$UERANSIM_CONTAINER" --format '{{.State.Running}}' 2>/dev/null | grep -q true
+}
 
 count_in_log() {
   dc exec -T ueransim sh -c \
@@ -70,7 +96,7 @@ case "${1:-}" in
     ;;
 esac
 
-if ! dc ps --services --filter status=running | grep -q '^ueransim$'; then
+if ! gnb_running; then
   echo "gNB (ueransim) is not running. Start it first:"
   echo "  cd deployments/compose && docker compose up -d --no-deps ueransim"
   exit 1
