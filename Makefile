@@ -63,8 +63,9 @@ up: ## Start everything (core + monitoring + slice exporter)
 	    fi; \
 	    echo "  attempt $$i: gNB not up yet"; \
 	done
-	@echo "▶ starting slice exporter ..."
+	@echo "▶ starting slice exporter and orchestrator ..."
 	@bash scripts/start_slice_exporter.sh >/dev/null 2>&1 || true
+	@bash scripts/start_orchestrator.sh >/dev/null 2>&1 || true
 	@echo ""
 	@$(MAKE) --no-print-directory status
 
@@ -83,8 +84,9 @@ create: ## First-time creation of containers (needs the docker compose plugin)
 	cd $(OBS_DIR) && docker compose up -d
 
 down: ## Stop everything (keeps all data)
-	@echo "▶ stopping UEs and slice exporter ..."
+	@echo "▶ stopping UEs, slice exporter and orchestrator ..."
 	@bash scripts/start_slice_exporter.sh --stop >/dev/null 2>&1 || true
+	@bash scripts/start_orchestrator.sh --stop >/dev/null 2>&1 || true
 	@docker exec -i ueransim pkill nr-ue >/dev/null 2>&1 || true
 	@echo "▶ stopping containers ..."
 	@docker stop $(ALL) >/dev/null 2>&1 || true
@@ -97,8 +99,21 @@ restart: down up ## Stop then start everything
 ues: ## Re-provision SIMs and connect 20 devices across both slices
 	@echo "▶ re-provisioning subscribers (resets the SQN counter — required) ..."
 	@bash scripts/provision_subscribers.sh --delete-all >/dev/null 2>&1 || true
-	@COUNT=$(N_A) START=1            SD=$(SLICE_A) bash scripts/provision_subscribers.sh | tail -1
-	@COUNT=$(N_B) START=$$(($(N_A)+1)) SD=$(SLICE_B) bash scripts/provision_subscribers.sh | tail -1
+	@set -a; . deployments/slices.env; set +a; \
+	 COUNT=$$SLICE_A_SUBSCRIBERS START=1 SST=$$SLICE_A_SST SD=$$SLICE_A_SD \
+	   ALSO_NSSAI="{\"sst\":$$SLICE_B_SST,\"sd\":\"$$SLICE_B_SD\"}" \
+	   FIVEQI=$$SLICE_A_5QI ARP_PRIORITY=$$SLICE_A_ARP_PRIORITY \
+	   ARP_PREEMPT_CAP="$$SLICE_A_ARP_PREEMPT_CAP" ARP_PREEMPT_VULN="$$SLICE_A_ARP_PREEMPT_VULN" \
+	   SESSION_AMBR_DL="$$SLICE_A_SESSION_AMBR_DL" SESSION_AMBR_UL="$$SLICE_A_SESSION_AMBR_UL" \
+	   UE_AMBR_DL="$$SLICE_A_UE_AMBR_DL" UE_AMBR_UL="$$SLICE_A_UE_AMBR_UL" \
+	   bash scripts/provision_subscribers.sh | tail -1; \
+	 COUNT=$$SLICE_B_SUBSCRIBERS START=$$(($$SLICE_A_SUBSCRIBERS+1)) SST=$$SLICE_B_SST SD=$$SLICE_B_SD \
+	   ALSO_NSSAI="{\"sst\":$$SLICE_A_SST,\"sd\":\"$$SLICE_A_SD\"}" \
+	   FIVEQI=$$SLICE_B_5QI ARP_PRIORITY=$$SLICE_B_ARP_PRIORITY \
+	   ARP_PREEMPT_CAP="$$SLICE_B_ARP_PREEMPT_CAP" ARP_PREEMPT_VULN="$$SLICE_B_ARP_PREEMPT_VULN" \
+	   SESSION_AMBR_DL="$$SLICE_B_SESSION_AMBR_DL" SESSION_AMBR_UL="$$SLICE_B_SESSION_AMBR_UL" \
+	   UE_AMBR_DL="$$SLICE_B_UE_AMBR_DL" UE_AMBR_UL="$$SLICE_B_UE_AMBR_UL" \
+	   bash scripts/provision_subscribers.sh | tail -1
 	@echo "▶ making sure the slice-B config is inside the container ..."
 	@docker cp $(COMPOSE_DIR)/config/uecfg-slice-b.yaml ueransim:/ueransim/config/uecfg-slice-b.yaml >/dev/null 2>&1 || true
 	@echo "▶ connecting devices ..."
@@ -106,6 +121,22 @@ ues: ## Re-provision SIMs and connect 20 devices across both slices
 
 stop-ues: ## Disconnect all devices
 	@bash scripts/start_ues.sh --stop
+
+## ─────────────────────── slice allocation (orchestrator) ─────────────────
+
+traffic: ## Send traffic demands and watch them routed to slices by requirement
+	@bash scripts/start_orchestrator.sh >/dev/null 2>&1 || true
+	@cd tools/slice-orchestrator && DURATION=$${DURATION:-30} RATE=$${RATE:-5} python3 traffic_gen.py
+
+slices: ## Show slice capacity, utilisation and how traffic was allocated
+	@bash scripts/start_orchestrator.sh >/dev/null 2>&1 || true
+	@echo "── slice definitions & load ───────────────────────────────────"
+	@curl -s --max-time 20 http://localhost:9110/metrics 2>/dev/null \
+	    | grep -E '^slice_(capacity|allocated|utilization)' | sed 's/^/  /' \
+	    || echo "  (orchestrator not reachable)"
+	@echo "── allocation decisions ───────────────────────────────────────"
+	@curl -s --max-time 20 http://localhost:9110/metrics 2>/dev/null \
+	    | grep -E '^slice_(admitted|rejected)' | sed 's/^/  /' || true
 
 ## ─────────────────────────── checking things ─────────────────────────────
 

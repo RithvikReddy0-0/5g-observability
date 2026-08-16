@@ -47,6 +47,16 @@ scrape_configs:
       - targets: ["10.100.200.1:9105"]
         labels: { component: slice-exporter }
 
+  # Slice orchestrator — per-slice capacity, utilisation and admission decisions.
+  # Runs on the HOST (it reads the subscriber DB via docker exec), same gateway trick as
+  # the slice exporter above.
+  - job_name: slice-orchestrator
+    metrics_path: /metrics
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["10.100.200.1:9110"]
+        labels: { component: slice-orchestrator }
+
   - job_name: prometheus
     static_configs:
       - targets: ["localhost:9090"]

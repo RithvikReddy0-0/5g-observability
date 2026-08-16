@@ -30,7 +30,7 @@ configuration:
       supportedSnssaiList: # Supported S-NSSAIs of the PLMN
         - sst: 1 # Slice/Service Type (uinteger, range: 0~255)
           sd: 010203 # slice A
-        - sst: 1 # Slice/Service Type (uinteger, range: 0~255)
+        - sst: 2 # Slice/Service Type (uinteger, range: 0~255)
           sd: 112233 # slice B (Phase 1.5)
   nsiList: # List of available Network Slice Instance (NSI)
     - snssai: # S-NSSAI of this NSI
@@ -84,7 +84,7 @@ configuration:
           nsiId: 22
     # PHASE 1.5 — Network Slice Instance for slice B.
     - snssai: # S-NSSAI of this NSI
-        sst: 1 # Slice/Service Type (uinteger, range: 0~255)
+        sst: 2 # Slice/Service Type (uinteger, range: 0~255)
         sd: 112233 # Slice Differentiator (3 bytes hex string, range: 000000~FFFFFF)
       nsiInformationList: # Information list of this NSI
         - nrfId: http://nrf.free5gc.org:8000/nnrf-nfm/v1/nf-instances
@@ -246,7 +246,7 @@ configuration:
       supportedSnssaiList:
         - sst: 1
           sd: 010203
-        - sst: 1
+        - sst: 2
           sd: 112233
     - tai: # Tracking Area Identity
         plmnId: # Public Land Mobile Network ID, <PLMN ID> = <MCC><MNC>

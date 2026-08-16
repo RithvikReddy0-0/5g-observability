@@ -34,6 +34,35 @@ SST="${SST:-1}"
 SD="${SD:-010203}"
 DNN="${DNN:-internet}"
 
+# --- Per-slice QoS -----------------------------------------------------------------
+# This is where a slice actually becomes a different *service*, not just a different label.
+# Defaults describe the eMBB slice; the URLLC slice overrides them (see slices.env).
+#
+#   FIVEQI  5QI / QoS Identifier. 9 = non-GBR best effort (bulk data).
+#           82 = delay-critical GBR, 10 ms packet delay budget (URLLC).
+#   ARP_*   Allocation and Retention Priority. priorityLevel 1 = highest, 15 = lowest.
+#           A URLLC slice should be able to preempt bulk traffic and resist preemption.
+#   *_AMBR  Aggregate Maximum Bit Rate — the bandwidth ceiling for the session / the UE.
+#
+# NOTE: these values are provisioned into the subscriber record and are real 3GPP
+# parameters, but they are only ENFORCED once a user plane (UPF) exists. On a host without
+# gtp5g they are descriptive, not operative.
+FIVEQI="${FIVEQI:-9}"
+ARP_PRIORITY="${ARP_PRIORITY:-8}"
+ARP_PREEMPT_CAP="${ARP_PREEMPT_CAP:-}"
+ARP_PREEMPT_VULN="${ARP_PREEMPT_VULN:-}"
+SESSION_AMBR_DL="${SESSION_AMBR_DL:-200 Mbps}"
+SESSION_AMBR_UL="${SESSION_AMBR_UL:-200 Mbps}"
+UE_AMBR_DL="${UE_AMBR_DL:-2 Gbps}"
+UE_AMBR_UL="${UE_AMBR_UL:-1 Gbps}"
+
+# ADDITIONAL allowed slices, as a JSON fragment for nssai.singleNssais — e.g.
+#   ALSO_NSSAI='{"sst":2,"sd":"112233"}'
+# In 3GPP a subscriber has a DEFAULT S-NSSAI plus other permitted ones, and the UE may use
+# any of them. Provisioning only one slice per subscriber makes slice choice predetermined;
+# listing both is what lets an allocator genuinely pick per traffic type.
+ALSO_NSSAI="${ALSO_NSSAI:-}"
+
 # Credentials shared by all test UEs (matches ran/config/free5gc-ue.yaml).
 KEY="${KEY:-8baf473f2f8fd09487cccbd7097c6862}"
 OPC="${OPC:-8e27b6af0e692e750f32667a3b14605d}"
@@ -83,17 +112,17 @@ subscriber_json() {
   },
   "AccessAndMobilitySubscriptionData": {
     "gpsis": ["$gpsi"],
-    "nssai": { "defaultSingleNssais": [{ "sst": $SST, "sd": "$SD" }], "singleNssais": [] },
-    "subscribedUeAmbr": { "downlink": "2 Gbps", "uplink": "1 Gbps" }
+    "nssai": { "defaultSingleNssais": [{ "sst": $SST, "sd": "$SD" }], "singleNssais": [$ALSO_NSSAI] },
+    "subscribedUeAmbr": { "downlink": "$UE_AMBR_DL", "uplink": "$UE_AMBR_UL" }
   },
   "SessionManagementSubscriptionData": [
     {
       "singleNssai": { "sst": $SST, "sd": "$SD" },
       "dnnConfigurations": {
         "$DNN": {
-          "5gQosProfile": { "5qi": 9, "arp": { "preemptCap": "", "preemptVuln": "", "priorityLevel": 8 }, "priorityLevel": 8 },
+          "5gQosProfile": { "5qi": $FIVEQI, "arp": { "preemptCap": "$ARP_PREEMPT_CAP", "preemptVuln": "$ARP_PREEMPT_VULN", "priorityLevel": $ARP_PRIORITY }, "priorityLevel": $ARP_PRIORITY },
           "pduSessionTypes": { "allowedSessionTypes": ["IPV4"], "defaultSessionType": "IPV4" },
-          "sessionAmbr": { "downlink": "200 Mbps", "uplink": "200 Mbps" },
+          "sessionAmbr": { "downlink": "$SESSION_AMBR_DL", "uplink": "$SESSION_AMBR_UL" },
           "sscModes": { "allowedSscModes": ["SSC_MODE_2","SSC_MODE_3"], "defaultSscMode": "SSC_MODE_1" }
         }
       }

@@ -284,6 +284,82 @@
         "overrides": []
       },
       "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi" } }
+    },
+    {
+      "id": 13,
+      "type": "row",
+      "title": "Slice allocation — traffic routed to slices by demand (orchestrator)",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 29 },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 14,
+      "type": "timeseries",
+      "title": "Slice utilisation",
+      "description": "slice_allocated_mbps / slice_capacity_mbps. Capacity comes from the AMBR provisioned into each slice's subscribers. 1.0 means the slice is full and further demands are refused.",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 30 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "refId": "A", "expr": "slice_utilization_ratio", "legendFormat": "{{slice}} (sst {{sst}}/{{sd}})" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit", "min": 0, "max": 1,
+          "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 18, "showPoints": "never" },
+          "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "orange", "value": 0.8 }, { "color": "red", "value": 0.95 } ] }
+        },
+        "overrides": []
+      },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi" } }
+    },
+    {
+      "id": 15,
+      "type": "timeseries",
+      "title": "Allocated vs capacity (Mbps)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 30 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "refId": "A", "expr": "slice_allocated_mbps", "legendFormat": "{{slice}} allocated" },
+        { "refId": "B", "expr": "slice_capacity_mbps", "legendFormat": "{{slice}} capacity" }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "Mbits", "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 8, "showPoints": "never" } },
+        "overrides": []
+      },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi" } }
+    },
+    {
+      "id": 16,
+      "type": "timeseries",
+      "title": "Admitted demands by traffic class (rate)",
+      "description": "Which slice each kind of traffic was routed to. video/file should land on eMBB; blog/control on URLLC.",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 38 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "refId": "A", "expr": "sum by (traffic_class, sst_sd) (rate(slice_admitted_total[2m]))", "legendFormat": "{{traffic_class}} → {{sst_sd}}" }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "reqps", "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 8, "showPoints": "never" } },
+        "overrides": []
+      },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi" } }
+    },
+    {
+      "id": 17,
+      "type": "timeseries",
+      "title": "Refused demands by reason (rate)",
+      "description": "capacity = the slice was full; latency = no permitted slice could meet the delay budget. Refusals are the admission control working, not an error.",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 38 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "refId": "A", "expr": "sum by (reason, traffic_class) (rate(slice_rejected_total[2m]))", "legendFormat": "{{traffic_class}} — {{reason}}" }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "reqps", "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 8, "showPoints": "never" } },
+        "overrides": []
+      },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi" } }
     }
   ]
 }

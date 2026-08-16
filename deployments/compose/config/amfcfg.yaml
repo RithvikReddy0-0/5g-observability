@@ -43,7 +43,7 @@ configuration:
       snssaiList: # the S-NSSAI (Single Network Slice Selection Assistance Information) list supported by this AMF
         - sst: 1 # Slice/Service Type (uinteger, range: 0~255)
           sd: 010203 # slice A
-        - sst: 1 # Slice/Service Type (uinteger, range: 0~255)
+        - sst: 2 # URLLC — a genuinely different service type, not just another SD
           sd: 112233 # slice B (Phase 1.5)
   supportDnnList:  # the DNN (Data Network Name) list supported by this AMF
     - internet
