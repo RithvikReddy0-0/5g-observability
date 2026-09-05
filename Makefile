@@ -31,7 +31,7 @@ N_A     := 10
 N_B     := 10
 
 .PHONY: help up create down restart stop-ues ues status test evidence screenshots report \
-        bootstrap verify clean logs urls nuke
+        bootstrap verify clean logs urls nuke gate gate-test
 
 help: ## Show this help
 	@echo ""
@@ -158,6 +158,12 @@ status: ## Show what's running and how many devices are connected
 
 test: ## Run the acceptance checks
 	@bash tests/acceptance.sh
+
+gate: ## Check the running deployment against the KPI thresholds (fails if breached)
+	@python3 tools/kpi-gate/kpi_gate.py --wait 20
+
+gate-test: ## Prove the KPI gate can fail (no running stack needed)
+	@python3 tools/kpi-gate/kpi_gate.py --self-test
 
 verify: ## Check the machine and that pinned versions haven't drifted
 	@bash scripts/verify_env.sh || true

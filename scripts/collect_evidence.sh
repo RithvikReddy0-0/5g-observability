@@ -197,6 +197,13 @@ rm -f "$combined"
   curl -s --max-time 8 http://localhost:3000/api/datasources | head -c 400 || true
 } > "$OUT_DIR/08-grafana.txt" 2>&1
 
+# --- 8b. KPI gate verdict -------------------------------------------------
+# The bundle records not just what was measured but whether it PASSED. Delegates to the
+# gate so the evidence can never disagree with what CI enforces (docs/kpi-gate.md).
+echo "  [8b] KPI gate verdict"
+NO_COLOR=1 python3 tools/kpi-gate/kpi_gate.py --json "$OUT_DIR/09-kpi-verdict.json"   > "$OUT_DIR/09-kpi-gate.txt" 2>&1
+KPI_VERDICT="$(python3 -c "import json,sys;print(json.load(open(sys.argv[1]))['verdict'])"   "$OUT_DIR/09-kpi-verdict.json" 2>/dev/null || echo 'NOT RUN')"
+
 # --- 8. summary -----------------------------------------------------------
 REG_COUNT="$(dc exec -T ueransim sh -c "cat /tmp/ue.log /tmp/ue-b.log 2>/dev/null | grep 'Initial Registration is successful' | grep -oE '20893[0-9]+' | sort -u | wc -l" | tr -d ' \r')"
 SUB_COUNT="$(dc exec -T db mongo free5gc --quiet --eval 'print(db["subscriptionData.provisionedData.amData"].count())' | tr -d ' \r')"
@@ -238,6 +245,8 @@ conforming ODE (SPEC ADR-003). Registration is the success criterion here.
 | \`07-prometheus.txt\` | target health + selected dashboard queries |
 | \`07b-slice-metrics.txt\` | **slice-labeled metrics** (sst/sd) from the slice exporter |
 | \`08-grafana.txt\` | Grafana health, provisioned dashboards, datasources |
+| \`09-kpi-gate.txt\` | **KPI gate verdict** — pass/fail against \`deployments/kpi-gates.json\` |
+| \`09-kpi-verdict.json\` | the same verdict, machine-readable, for the pipeline |
 
 ## Notes
 
@@ -256,3 +265,4 @@ echo "summary: $OUT_DIR/00-summary.md"
 echo "  NFs registered   : $NF_COUNT"
 echo "  subscribers      : $SUB_COUNT"
 echo "  UEs registered   : $REG_COUNT"
+echo "  KPI gate         : $KPI_VERDICT"

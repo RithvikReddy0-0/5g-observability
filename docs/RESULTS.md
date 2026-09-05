@@ -22,6 +22,7 @@ the ratified ODE. That distinction determines what could and could not be proven
 | Prometheus targets healthy | **10 / 10** | Prometheus API |
 | Slice-labeled metrics | **working** | `sst`/`sd` labels queryable |
 | Phase-1 acceptance (runnable subset) | **PASS=12, FAIL=0** | `tests/acceptance.sh` |
+| KPI gate enforces thresholds in CI | **10 enforced, 2 ODE-only** | `make gate`, verified to reject breaches |
 | PDU session / user-plane data path | **BLOCKED** | needs gtp5g — ODE only |
 
 ---
@@ -41,10 +42,17 @@ slices, each authenticating with real 5G-AKA.
 **Two network slices**, modeled consistently across AMF, SMF, NSSF, gNB, UE configs and
 subscriber provisioning:
 
-| Slice | S-NSSAI | Subscribers | UE IP pool |
-|---|---|---|---|
-| A | SST 1 / SD `010203` | `imsi-…001`–`010` | `10.60.0.0/16` |
-| B | SST 1 / SD `112233` | `imsi-…011`–`020` | `10.61.0.0/16` |
+| Slice | S-NSSAI | 5QI | ARP | Session AMBR | Subscribers | UE IP pool |
+|---|---|---|---|---|---|---|
+| A — eMBB | SST **1** / SD `010203` | 9 | 8 | 200 Mbps | `imsi-…001`–`010` | `10.60.0.0/16` |
+| B — URLLC | SST **2** / SD `112233` | 82 | 2 | 20 Mbps | `imsi-…011`–`020` | `10.61.0.0/16` |
+
+Both slices are defined once in [`deployments/slices.env`](../deployments/slices.env), which
+provisioning and the orchestrator both read, so they cannot drift apart. Slice B was
+originally SST 1 as well — two labels over one service. It was changed to SST 2 with genuinely
+different QoS when it became clear that identical service types are not two slices in any
+meaningful sense. Evidence bundles captured before that change still show `sst="1"` for
+SD `112233`; that is the older state, not a discrepancy.
 
 **Observability plane** — Prometheus + Grafana as a separate compose project attached to the
 core's network, so free5GC stays unaware it is observed and data flows one way only.
@@ -111,6 +119,27 @@ PASS=12  FAIL=0  SKIP-ODE=7  GAP=1
 RESULT: PASS (non-baseline) — every runnable criterion passed.
         Phase 1 is NOT complete: 7 criteria require the ODE, 1 documented gap.
 ```
+
+### 3.7 KPI gate
+
+Twelve KPIs are declared in [`deployments/kpi-gates.json`](../deployments/kpi-gates.json) and
+enforced by `make gate`. Ten are runnable on this host; the two user-plane KPIs report
+`SKIP-ODE` rather than passing.
+
+The gate's own behaviour was verified against a stub Prometheus returning known values —
+because a gate that has never been observed rejecting anything is indistinguishable from one
+that always passes:
+
+| Scenario | Expected | Observed |
+|---|---|---|
+| All KPIs conforming | exit 0, `GATE PASSED` | exit 0 |
+| 2 NFs unscrapeable, 5xx at 1.7 req/s | exit 1, `GATE FAILED` | exit 1, 2 gates failed |
+| Slice at 0.99 utilisation (advisory) | `WARN`, build not failed | `WARN`, build not failed |
+| Prometheus unreachable | exit 2 | exit 2 |
+
+The same four checks run in CI on every push, using
+[`tools/kpi-gate/stub_prometheus.py`](../tools/kpi-gate/stub_prometheus.py). Detail in
+[`docs/kpi-gate.md`](kpi-gate.md).
 
 ---
 
@@ -200,6 +229,10 @@ module, which needs a standard Linux kernel; WSL2's kernel cannot load it.
 | **Baseline tag (M5 freeze)** | **no regression oracle for Phase 2** |
 
 Plus one accepted gap: structured JSON logging (§4.4).
+
+**KPI enforcement is half-closed.** The gate now detects a failing deployment and stops the
+pipeline (§3.7), but nothing yet reverts to the last known-good deployment. The loop is
+closed on detection, not on remediation.
 
 **Phase 1 is therefore not complete and has not been frozen.** `tests/acceptance.sh` enforces
 this — it refuses to print "Phase 1 acceptance complete" while any `SKIP-ODE` remains.

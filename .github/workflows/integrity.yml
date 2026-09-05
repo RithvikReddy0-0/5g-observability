@@ -101,7 +101,63 @@ jobs:
       - name: shell scripts are syntactically valid
         run: |
           rc=0
-          for s in scripts/*.sh tests/*.sh; do
+          for s in scripts/*.sh tests/*.sh ci/scripts/*.sh; do
             bash -n "$s" || { echo "::error file=$s::syntax error"; rc=1; }
           done
           exit $rc
+
+  kpi-gate:
+    name: KPI gate is defined and effective
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: KPI definitions are structurally valid
+        run: |
+          # Rejects a missing field, a duplicate id, an unknown operator or severity.
+          python3 tools/kpi-gate/kpi_gate.py --self-test
+
+      - name: gate PASSES a conforming deployment
+        run: |
+          python3 tools/kpi-gate/stub_prometheus.py 19091 --mode good &
+          for _ in $(seq 20); do
+            curl -sf "http://127.0.0.1:19091/api/v1/query?query=up" >/dev/null && break
+            sleep 0.5
+          done
+          NO_COLOR=1 python3 tools/kpi-gate/kpi_gate.py --prometheus http://127.0.0.1:19091
+
+      - name: gate FAILS a broken deployment
+        run: |
+          # The point of the whole job. A gate that has never been seen to reject anything
+          # is indistinguishable from one that always passes — the same reasoning as the
+          # "verify-only FAILS on a drifted tree" step above.
+          python3 tools/kpi-gate/stub_prometheus.py 19092 --mode bad &
+          for _ in $(seq 20); do
+            curl -sf "http://127.0.0.1:19092/api/v1/query?query=up" >/dev/null && break
+            sleep 0.5
+          done
+          if NO_COLOR=1 python3 tools/kpi-gate/kpi_gate.py --prometheus http://127.0.0.1:19092; then
+            echo "::error::the KPI gate PASSED a deployment with 2 NFs down and 1.7 req/s of 5xx"
+            exit 1
+          fi
+          echo "breach correctly rejected"
+
+      - name: an unreachable Prometheus is not a pass
+        run: |
+          # Exit 2, never 0: a gate that could not run has not verified anything.
+          NO_COLOR=1 python3 tools/kpi-gate/kpi_gate.py --prometheus http://127.0.0.1:19099 \
+            && { echo "::error::gate passed with no Prometheus"; exit 1; }
+          rc=$?
+          [ "$rc" = "2" ] || { echo "::error::expected exit 2, got $rc"; exit 1; }
+          echo "unreachable Prometheus correctly reported as unverified (exit 2)"
+
+      - name: thresholds are defined in exactly one place
+        run: |
+          # A second copy of a threshold is a drift bug waiting to happen. Nothing outside
+          # the definitions file may hardcode one.
+          if grep -rnE '(0\.2 req|>= *20 UEs|p95.*1\.0)' --include='*.sh' --include='*.py' \
+               scripts/ tools/ ci/ tests/ 2>/dev/null | grep -v kpi-gates.json; then
+            echo "::error::a KPI threshold appears outside deployments/kpi-gates.json"
+            exit 1
+          fi
+          echo "thresholds live only in deployments/kpi-gates.json"

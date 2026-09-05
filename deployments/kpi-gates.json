@@ -1,0 +1,154 @@
+{
+  "schema_version": "1",
+  "_comment": [
+    "KPI gates — the pass/fail contract a deployment must satisfy before it is accepted.",
+    "",
+    "This file is the SINGLE source of truth for what 'a working deployment' means. It is read",
+    "by tools/kpi-gate/kpi_gate.py (the gate) and by ci/scripts/collect-kpis.sh (the snapshot),",
+    "so a threshold can never drift between what CI enforces and what is reported.",
+    "",
+    "Every 'expr' is written against metric names VERIFIED in docs/evidence/ — not guessed.",
+    "",
+    "Deliberately absent: free5gc_amf_business_ue_connectivity and",
+    "free5gc_amf_business_ue_cm_gmm_state_count. Measured against nr-cli ground truth at the",
+    "same instant they read 3 and 63 while 20/20 UEs were genuinely registered — wrong in",
+    "opposite directions. They leak on aborted procedures and never reset. A gate built on an",
+    "untrustworthy signal is worse than no gate, so UE population is taken from the slice",
+    "exporter, which derives it from AMF logs."
+  ],
+  "prometheus": "http://localhost:9090",
+  "gates": [
+    {
+      "id": "nf-exporters-up",
+      "title": "All 8 control-plane NFs are scrapeable",
+      "expr": "count(up{job=\"free5gc\"} == 1)",
+      "op": "gte",
+      "threshold": 8,
+      "unit": "NFs",
+      "severity": "gate",
+      "requires": "core",
+      "why": "An NF that cannot be scraped is either down or has metrics disabled. Either way the deployment is not observable, which is the thing this project exists to guarantee."
+    },
+    {
+      "id": "no-scrape-failures",
+      "title": "No configured target is down",
+      "expr": "count(up == 0)",
+      "op": "eq",
+      "threshold": 0,
+      "unit": "targets",
+      "severity": "gate",
+      "requires": "core",
+      "why": "Catches the failure mode where the core is healthy but the observability plane itself has broken — a silently blind pipeline still reports green without this."
+    },
+    {
+      "id": "ues-registered",
+      "title": "Expected UE population is registered",
+      "expr": "sum(slice_ues_observed_registered)",
+      "op": "gte",
+      "threshold": 20,
+      "unit": "UEs",
+      "severity": "gate",
+      "requires": "slice-exporter",
+      "why": "The deployment is only accepted if devices actually attached. Sourced from the slice exporter (AMF logs), not the AMF gauges, which are known to be wrong."
+    },
+    {
+      "id": "both-slices-carrying-ues",
+      "title": "Both slices have registered UEs",
+      "expr": "count(slice_ues_observed_registered > 0)",
+      "op": "gte",
+      "threshold": 2,
+      "unit": "slices",
+      "severity": "gate",
+      "requires": "slice-exporter",
+      "why": "20 UEs all on one slice would pass a naive count while slicing is entirely broken. This is the check that would have caught the 'AMF can not select an target AMF by NRF' failure."
+    },
+    {
+      "id": "subscribers-provisioned",
+      "title": "Subscriber records exist for both slices",
+      "expr": "sum(slice_provisioned_subscribers)",
+      "op": "gte",
+      "threshold": 20,
+      "unit": "subscribers",
+      "severity": "gate",
+      "requires": "slice-exporter",
+      "why": "Provisioning silently under-running is a real observed failure (duplicate GPSI aborts the loop part-way), and it looks identical to a RAN problem from the UE side."
+    },
+    {
+      "id": "sbi-5xx-rate",
+      "title": "SBI server-error rate is below threshold",
+      "expr": "sum(rate(free5gc_sbi_inbound_request_total{status_code=~\"5.*\",path!~\".*sm-contexts.*\"}[5m]))",
+      "op": "lte",
+      "threshold": 0.2,
+      "unit": "req/s",
+      "severity": "gate",
+      "requires": "core",
+      "why": "Sustained 5xx between network functions means the core is misconfigured even when every container is up. PDU-session paths are excluded because they fail by design without a UPF (R-01)."
+    },
+    {
+      "id": "sbi-latency-p95",
+      "title": "SBI p95 latency within budget",
+      "expr": "histogram_quantile(0.95, sum by (le) (rate(free5gc_sbi_inbound_request_duration_seconds_bucket[5m])))",
+      "op": "lte",
+      "threshold": 1.0,
+      "unit": "seconds",
+      "severity": "gate",
+      "requires": "core",
+      "why": "Inter-NF latency is the earliest signal that the host is too loaded to serve the core honestly. Mirrors the SbiLatencyHigh alert so the gate and the alerting agree."
+    },
+    {
+      "id": "slice-capacity-published",
+      "title": "Both slices publish capacity",
+      "expr": "count(slice_capacity_mbps > 0)",
+      "op": "gte",
+      "threshold": 2,
+      "unit": "slices",
+      "severity": "gate",
+      "requires": "orchestrator",
+      "why": "If the orchestrator cannot read the subscriber database it reports no capacity, and every later allocation number would be meaningless."
+    },
+    {
+      "id": "slice-not-saturated",
+      "title": "No slice is saturated",
+      "expr": "max(slice_utilization_ratio)",
+      "op": "lte",
+      "threshold": 0.95,
+      "unit": "ratio",
+      "severity": "advisory",
+      "requires": "orchestrator",
+      "why": "Advisory, not a gate: saturation under a deliberate load test is the correct behaviour, not a defect. It is reported so a regression in allocation policy is visible."
+    },
+    {
+      "id": "no-latency-rejections",
+      "title": "No demand refused for want of a low-latency slice",
+      "expr": "sum(increase(slice_rejected_total{reason=\"latency\"}[10m]))",
+      "op": "eq",
+      "threshold": 0,
+      "unit": "demands",
+      "severity": "advisory",
+      "requires": "orchestrator",
+      "why": "A latency refusal means no permitted slice could meet the requirement — a provisioning gap rather than a capacity one. Advisory because it is a property of the offered load."
+    },
+    {
+      "id": "pdu-session-success",
+      "title": "PDU session establishment succeeds",
+      "expr": "sum(rate(free5gc_smf_pdu_session_success_total[5m])) / sum(rate(free5gc_smf_pdu_session_attempt_total[5m]))",
+      "op": "gte",
+      "threshold": 0.99,
+      "unit": "ratio",
+      "severity": "gate",
+      "requires": "ode",
+      "why": "The real user-plane KPI. Requires gtp5g and therefore the ODE; reported SKIP-ODE here rather than silently passing, because a gate that cannot run has not been met."
+    },
+    {
+      "id": "user-plane-throughput",
+      "title": "Per-slice throughput matches the provisioned AMBR",
+      "expr": "max by (slice) (rate(slice_user_plane_bytes_total[5m]) * 8 / 1e6)",
+      "op": "gte",
+      "threshold": 1.0,
+      "unit": "Mbps",
+      "severity": "gate",
+      "requires": "ode",
+      "why": "Closes the loop from modelled capacity to measured throughput. Impossible without a UPF, so it is declared here and skipped, keeping the gap explicit instead of forgotten."
+    }
+  ]
+}

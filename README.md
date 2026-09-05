@@ -10,6 +10,8 @@ gtp5g) are pinned by SHA in [`manifest.lock`](manifest.lock) and fetched into a 
 - **M0 run report:** [`docs/runbooks/m0-report.md`](docs/runbooks/m0-report.md).
 - **Runbook:** [`docs/runbooks/clean-install.md`](docs/runbooks/clean-install.md).
 - **Results & findings:** [`docs/RESULTS.md`](docs/RESULTS.md) — all measured outcomes in one place.
+- **KPI gate:** [`docs/kpi-gate.md`](docs/kpi-gate.md) — the pass/fail contract a deployment must meet.
+- **Review deck:** [`docs/presentation/`](docs/presentation/) — Phase 2 Review 1 slides (LaTeX Beamer).
 
 > **Baseline environment (ODE):** bare-metal **Ubuntu 24.04 LTS, x86_64, ≥16 GB RAM** (ADR-003).
 > **WSL2 / VMs / cloud are non-baseline.** The user plane (UPF/gtp5g) runs only on a conforming ODE.
