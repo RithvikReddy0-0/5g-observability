@@ -134,11 +134,33 @@ def load_defs(path):
         if g["severity"] not in ("gate", "advisory"):
             raise SystemExit("%s: gate %r has unknown severity %r"
                              % (path, g["id"], g["severity"]))
+        if needs_zero_fallback(g):
+            raise SystemExit(
+                "%s: gate %r counts or sums towards a healthy value of 'at most %s', but has no "
+                "`or vector(0)` fallback. PromQL returns an EMPTY result when there is nothing to "
+                "count, the gate treats that as no data, and a healthy deployment would FAIL."
+                % (path, g["id"], g["threshold"]))
     ids = [g["id"] for g in doc["gates"]]
     dupes = sorted({i for i in ids if ids.count(i) > 1})
     if dupes:
         raise SystemExit("%s: duplicate gate ids %s" % (path, dupes))
     return doc
+
+
+def needs_zero_fallback(gate):
+    """
+    True when a gate is shaped to break on a healthy system.
+
+    `count(up == 0)` and `sum(rate(errors[5m]))` return no series at all when nothing is down or
+    no error has ever occurred — not a zero. A gate whose passing condition is "at most N" over
+    such an aggregation must supply `or vector(0)`. Found on a live Prometheus after the stub
+    used in CI had been returning a literal 0 and hiding it.
+    """
+    expr = gate.get("expr", "").replace(" ", "")
+    aggregates = expr.startswith(("count(", "sum("))
+    upper_bound = gate.get("op") in ("eq", "lt", "lte")
+    return (gate.get("requires") != "ode" and aggregates and upper_bound
+            and "orvector(" not in expr)
 
 
 # --------------------------------------------------------------------------- self-test
@@ -188,6 +210,24 @@ def self_test(defs_path):
         print("  [%s] %-45s -> %s" % (mark, desc, got))
         if not ok:
             print("          expected %s, got %s (%s)" % (expected, got, detail))
+
+    # The empty-vector trap: a healthy system returns NO series for these, not 0.
+    lint_cases = [
+        ("count(up==0) without fallback is rejected",
+         {"expr": "count(up == 0)", "op": "eq", "threshold": 0}, True),
+        ("count(up==0) or vector(0) is accepted",
+         {"expr": "count(up == 0) or vector(0)", "op": "eq", "threshold": 0}, False),
+        ("sum(rate(errors)) <= N without fallback is rejected",
+         {"expr": "sum(rate(err_total[5m]))", "op": "lte", "threshold": 0.2}, True),
+        ("lower-bound gate needs no fallback (no data must fail)",
+         {"expr": "count(up == 1)", "op": "gte", "threshold": 8}, False),
+    ]
+    for desc, gate, expected in lint_cases:
+        got = needs_zero_fallback(gate)
+        ok = got == expected
+        bad += 0 if ok else 1
+        mark = "%sok%s" % (C[PASS], C["off"]) if ok else "%sFAILED%s" % (C[FAIL], C["off"])
+        print("  [%s] %-45s -> %s" % (mark, desc, "rejected" if got else "accepted"))
 
     print("\n%sdefinitions%s" % (C["bold"], C["off"]))
     doc = load_defs(defs_path)

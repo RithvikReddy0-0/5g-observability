@@ -14,7 +14,18 @@
     "same instant they read 3 and 63 while 20/20 UEs were genuinely registered — wrong in",
     "opposite directions. They leak on aborted procedures and never reset. A gate built on an",
     "untrustworthy signal is worse than no gate, so UE population is taken from the slice",
-    "exporter, which derives it from AMF logs."
+    "exporter, which derives it from AMF logs.",
+    "",
+    "Found 2026-09-14 on a live healthy deployment: these three gates referenced",
+    "`slice_*` while the exporter emits `free5gc_slice_*`, so they had never matched a real",
+    "series — and the exporter's registered count had read 0 since 2026-08-03 because it",
+    "matched a DEBUG-only AMF log line. The CI stub was keyed by the same wrong names, which",
+    "is why neither was caught. Both are fixed; see docs/kpi-gate.md.",
+    "",
+    "Every gate whose healthy value is 'nothing happened' ends in `or vector(0)`. PromQL returns",
+    "an EMPTY result, not 0, when there is nothing to count (no target down, no 5xx series), and",
+    "the gate correctly treats no data as a failure — so without the fallback a perfectly",
+    "healthy deployment fails. kpi_gate.py refuses to load a definition that has this shape."
   ],
   "prometheus": "http://localhost:9090",
   "gates": [
@@ -32,7 +43,7 @@
     {
       "id": "no-scrape-failures",
       "title": "No configured target is down",
-      "expr": "count(up == 0)",
+      "expr": "count(up == 0) or vector(0)",
       "op": "eq",
       "threshold": 0,
       "unit": "targets",
@@ -43,7 +54,7 @@
     {
       "id": "ues-registered",
       "title": "Expected UE population is registered",
-      "expr": "sum(slice_ues_observed_registered)",
+      "expr": "sum(free5gc_slice_ues_observed_registered)",
       "op": "gte",
       "threshold": 20,
       "unit": "UEs",
@@ -54,7 +65,7 @@
     {
       "id": "both-slices-carrying-ues",
       "title": "Both slices have registered UEs",
-      "expr": "count(slice_ues_observed_registered > 0)",
+      "expr": "count(free5gc_slice_ues_observed_registered > 0)",
       "op": "gte",
       "threshold": 2,
       "unit": "slices",
@@ -65,7 +76,7 @@
     {
       "id": "subscribers-provisioned",
       "title": "Subscriber records exist for both slices",
-      "expr": "sum(slice_provisioned_subscribers)",
+      "expr": "sum(free5gc_slice_provisioned_subscribers)",
       "op": "gte",
       "threshold": 20,
       "unit": "subscribers",
@@ -76,7 +87,7 @@
     {
       "id": "sbi-5xx-rate",
       "title": "SBI server-error rate is below threshold",
-      "expr": "sum(rate(free5gc_sbi_inbound_request_total{status_code=~\"5.*\",path!~\".*sm-contexts.*\"}[5m]))",
+      "expr": "sum(rate(free5gc_sbi_inbound_request_total{status_code=~\"5.*\",path!~\".*sm-contexts.*\"}[5m])) or vector(0)",
       "op": "lte",
       "threshold": 0.2,
       "unit": "req/s",
@@ -120,7 +131,7 @@
     {
       "id": "no-latency-rejections",
       "title": "No demand refused for want of a low-latency slice",
-      "expr": "sum(increase(slice_rejected_total{reason=\"latency\"}[10m]))",
+      "expr": "sum(increase(slice_rejected_total{reason=\"latency\"}[10m])) or vector(0)",
       "op": "eq",
       "threshold": 0,
       "unit": "demands",

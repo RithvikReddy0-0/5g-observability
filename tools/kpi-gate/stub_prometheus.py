@@ -24,10 +24,10 @@ from urllib.parse import urlparse, parse_qs
 # "no data" rather than silently reusing a stale number.
 GOOD = {
     'count(up{job="free5gc"} == 1)': 8,
-    "count(up == 0)": 0,
-    "sum(slice_ues_observed_registered)": 20,
-    "count(slice_ues_observed_registered > 0)": 2,
-    "sum(slice_provisioned_subscribers)": 20,
+    "count(up == 0) or vector(0)": 0,
+    "sum(free5gc_slice_ues_observed_registered)": 20,
+    "count(free5gc_slice_ues_observed_registered > 0)": 2,
+    "sum(free5gc_slice_provisioned_subscribers)": 20,
     "count(slice_capacity_mbps > 0)": 2,
     "max(slice_utilization_ratio)": 0.41,
     "_sbi_5xx": 0.0,

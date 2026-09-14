@@ -65,8 +65,14 @@ SELECT_SMF_RE = re.compile(
 )
 
 # [supi:SUPI:imsi-208930000000004] ... GmmMessageEvent at GMM State[Registered]
+# A UE counts as registered when the AMF logs that it completed registration. Two forms:
+#   INFO : [supi:SUPI:imsi-…] Handle Registration Complete      <- present at the configured level
+#   DEBUG: [supi:SUPI:imsi-…] GmmMessageEvent at GMM State[Registered]
+# The first version matched only the DEBUG form. The AMF runs at `level: info`, so that line
+# stopped appearing on 2026-08-03 and this metric silently read 0 from then on, while nr-cli
+# showed 20/20 registered. Found when the KPI gate was first run against a live deployment.
 REGISTERED_STATE_RE = re.compile(
-    r"supi:SUPI:(?P<supi>imsi-\d+)\].*?GMM State\[Registered\]"
+    r"supi:SUPI:(?P<supi>imsi-\d+)\].*?(?:Handle Registration Complete|GMM State\[Registered\])"
 )
 
 _lock = threading.Lock()
@@ -93,7 +99,20 @@ def docker_exec(container, args, timeout=60):
 
 
 def docker_logs(container, tail, timeout=90):
-    return _run(["docker", "logs", "--tail", str(tail), container], timeout)
+    """A container's log, BOTH streams.
+
+    free5GC NFs log to stderr. `docker compose logs` merged the streams onto stdout, but plain
+    `docker logs` keeps them apart — so after this exporter moved to plain `docker`, reading
+    stdout alone returned ~20 stray lines out of 20000 and every log-derived metric read 0.
+    Found 2026-09-14 when the KPI gate was first run against a live, healthy deployment.
+    """
+    try:
+        out = subprocess.run(["docker", "logs", "--tail", str(tail), container], cwd=COMPOSE_DIR,
+                             stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
+                             timeout=timeout)
+        return out.stdout
+    except Exception:
+        return ""
 
 
 def provisioned_by_slice():
