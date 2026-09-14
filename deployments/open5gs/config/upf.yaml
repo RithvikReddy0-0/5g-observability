@@ -1,0 +1,34 @@
+# Open5GS v2.8.0 — UPF
+# Generated from deployments/slices.env by the Open5GS migration; edit slices.env for slice
+# changes. Addresses follow the static plan in deployments/open5gs/docker-compose.yaml.
+# No logger.file: NFs log to stdout so `docker logs` is the single log source.
+
+logger:
+  level: info
+
+global:
+  max:
+    ue: 1024
+
+# User plane in USERSPACE over TUN devices — no gtp5g kernel module. This is the property
+# that lets the data path run on a WSL2 kernel, where free5GC's UPF could not.
+upf:
+  pfcp:
+    server:
+      - address: 10.53.0.7
+  gtpu:
+    server:
+      - address: 10.53.0.7
+  session:
+    - subnet: 10.45.0.0/16
+      gateway: 10.45.0.1
+      dnn: internet
+      dev: ogstun
+    - subnet: 10.46.0.0/16
+      gateway: 10.46.0.1
+      dnn: urllc
+      dev: ogstun2
+  metrics:
+    server:
+      - address: 10.53.0.7
+        port: 9090

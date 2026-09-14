@@ -1,0 +1,207 @@
+# Open5GS 5G Standalone core + UERANSIM, with a working user plane.
+#
+# Runs beside the free5GC stack, not instead of it: separate network (10.53.0.0/24), separate
+# database, every container prefixed "o5gs-". The free5GC deployment and its results are
+# untouched. See docs/adr/ADR-010-open5gs-core.md.
+#
+#   make o5gs-build     build the images from the SHAs in manifest.lock
+#   make o5gs-up        start the core, provision subscribers, attach 20 UEs
+#
+# Address plan (Open5GS configs take IPs, and N2/N3 must be stable for UERANSIM):
+#   .2 mongodb   .4 smf   .5 amf   .7 upf   .10 nrf   .11 ausf   .12 udm   .13 pcf
+#   .14 nssf   .15 bsf   .20 udr   .200 scp   .30 gnb   .31 ue   .41 prometheus   .42 grafana
+#
+# Two exporters run INSIDE the containers whose network they measure — the UPF (:9120,
+# per-slice traffic) and the UE container (:9121, per-slice reachability and latency).
+# They were sidecars sharing those network namespaces at first; a sidecar is stranded in a
+# dead namespace when its target restarts, and Docker gave up restarting it.
+
+x-nf: &nf
+  image: o5gs/open5gs:v2.8.0
+  restart: unless-stopped
+  volumes:
+    - ./config:/etc/open5gs:ro
+  depends_on:
+    - nrf
+
+services:
+  mongodb:
+    container_name: o5gs-mongodb
+    image: mongo@sha256:4be76f674fc4b27859816811b8baa3c51830eb1dbf4ca81a51e26b79edd662ef  # 4.4
+    restart: unless-stopped
+    command: ["mongod", "--bind_ip", "0.0.0.0"]
+    volumes:
+      - o5gs-db:/data/db
+    networks:
+      o5gs: { ipv4_address: 10.53.0.2 }
+
+  nrf:
+    <<: *nf
+    container_name: o5gs-nrf
+    command: ["open5gs-nrfd", "-c", "/etc/open5gs/nrf.yaml"]
+    depends_on: [mongodb]
+    networks:
+      o5gs: { ipv4_address: 10.53.0.10 }
+
+  scp:
+    <<: *nf
+    container_name: o5gs-scp
+    command: ["open5gs-scpd", "-c", "/etc/open5gs/scp.yaml"]
+    networks:
+      o5gs: { ipv4_address: 10.53.0.200 }
+
+  ausf:
+    <<: *nf
+    container_name: o5gs-ausf
+    command: ["open5gs-ausfd", "-c", "/etc/open5gs/ausf.yaml"]
+    networks:
+      o5gs: { ipv4_address: 10.53.0.11 }
+
+  udm:
+    <<: *nf
+    container_name: o5gs-udm
+    command: ["open5gs-udmd", "-c", "/etc/open5gs/udm.yaml"]
+    networks:
+      o5gs: { ipv4_address: 10.53.0.12 }
+
+  udr:
+    <<: *nf
+    container_name: o5gs-udr
+    command: ["open5gs-udrd", "-c", "/etc/open5gs/udr.yaml"]
+    depends_on: [nrf, mongodb]
+    networks:
+      o5gs: { ipv4_address: 10.53.0.20 }
+
+  pcf:
+    <<: *nf
+    container_name: o5gs-pcf
+    command: ["open5gs-pcfd", "-c", "/etc/open5gs/pcf.yaml"]
+    depends_on: [nrf, mongodb]
+    networks:
+      o5gs: { ipv4_address: 10.53.0.13 }
+
+  bsf:
+    <<: *nf
+    container_name: o5gs-bsf
+    command: ["open5gs-bsfd", "-c", "/etc/open5gs/bsf.yaml"]
+    networks:
+      o5gs: { ipv4_address: 10.53.0.15 }
+
+  nssf:
+    <<: *nf
+    container_name: o5gs-nssf
+    command: ["open5gs-nssfd", "-c", "/etc/open5gs/nssf.yaml"]
+    networks:
+      o5gs: { ipv4_address: 10.53.0.14 }
+
+  amf:
+    <<: *nf
+    container_name: o5gs-amf
+    command: ["open5gs-amfd", "-c", "/etc/open5gs/amf.yaml"]
+    networks:
+      o5gs: { ipv4_address: 10.53.0.5 }
+
+  smf:
+    <<: *nf
+    container_name: o5gs-smf
+    command: ["open5gs-smfd", "-c", "/etc/open5gs/smf.yaml"]
+    depends_on: [nrf, upf]
+    networks:
+      o5gs: { ipv4_address: 10.53.0.4 }
+
+  upf:
+    <<: *nf
+    container_name: o5gs-upf
+    init: true      # reaps exited children: the exporter loop and test iperf3 daemons
+    entrypoint: ["/bin/sh", "/upf-entrypoint.sh"]
+    command: []
+    depends_on: []
+    environment:
+      SLICE_DEVICES: "ogstun:1:010203:eMBB ogstun2:2:112233:URLLC"
+    volumes:
+      - ./config:/etc/open5gs:ro
+      - ./upf-entrypoint.sh:/upf-entrypoint.sh:ro
+      - ./observability:/opt/o5gs-obs:ro     # upf_slice_exporter.py, served on :9120
+    cap_add: [NET_ADMIN]
+    devices: ["/dev/net/tun:/dev/net/tun"]
+    sysctls:
+      net.ipv4.ip_forward: "1"
+    networks:
+      o5gs: { ipv4_address: 10.53.0.7 }
+
+  gnb:
+    container_name: o5gs-gnb
+    image: o5gs/ueransim:v3.3.0
+    restart: unless-stopped
+    command: ["nr-gnb", "-c", "/etc/ueransim/gnb.yaml"]
+    volumes:
+      - ./ran:/etc/ueransim:ro
+    depends_on: [amf]
+    networks:
+      o5gs: { ipv4_address: 10.53.0.30 }
+
+  # 20 UEs (10 per slice), one supervised process each, run as this container's own workload:
+  # they survive an engine restart, and a UE whose user plane dies is restarted on its own.
+  # See ran/ue-entrypoint.sh. Set UES_PER_SLICE=0 to start the container idle.
+  ue:
+    container_name: o5gs-ue
+    image: o5gs/ueransim:v3.3.0
+    restart: unless-stopped
+    init: true      # reaps UE processes the supervisor restarts
+    entrypoint: ["/bin/sh", "/etc/ueransim/ue-entrypoint.sh"]
+    environment:
+      UES_PER_SLICE: "10"
+      SLICE_POOLS: "10.45.:10.45.0.1:eMBB 10.46.:10.46.0.1:URLLC"
+    volumes:
+      - ./ran:/etc/ueransim:ro
+      - ./observability:/opt/o5gs-obs:ro     # ue_probe_exporter.py, served on :9121
+    cap_add: [NET_ADMIN]
+    devices: ["/dev/net/tun:/dev/net/tun"]
+    depends_on: [gnb]
+    networks:
+      o5gs: { ipv4_address: 10.53.0.31 }
+
+  # ------------------------------------------------------------------ observability
+  # Its own Prometheus and Grafana, so this stack never shows up as dead targets in the
+  # free5GC one (and its KPI gate), and vice versa. Same versions as observability/.
+
+  prometheus:
+    container_name: o5gs-prometheus
+    image: prom/prometheus@sha256:6559acbd5d770b15bb3c954629ce190ac3cbbdb2b7f1c30f0385c4e05104e218  # v3.1.0
+    restart: unless-stopped
+    command: ["--config.file=/etc/prometheus/prometheus.yml", "--storage.tsdb.retention.time=7d"]
+    volumes:
+      - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - o5gs-prom:/prometheus
+    ports: ["9091:9090"]
+    networks:
+      o5gs: { ipv4_address: 10.53.0.41 }
+
+  grafana:
+    container_name: o5gs-grafana
+    image: grafana/grafana@sha256:8b37a2f028f164ce7b9889e1765b9d6ee23fec80f871d156fbf436d6198d32b7  # 11.5.2
+    restart: unless-stopped
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"          # dev-only, same as the free5GC stack
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/open5gs-slices.json
+    volumes:
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - o5gs-grafana:/var/lib/grafana
+    ports: ["3001:3000"]
+    depends_on: [prometheus]
+    networks:
+      o5gs: { ipv4_address: 10.53.0.42 }
+
+networks:
+  o5gs:
+    name: o5gs_net
+    ipam:
+      config:
+        - subnet: 10.53.0.0/24
+
+volumes:
+  o5gs-db:
+  o5gs-prom:
+  o5gs-grafana:

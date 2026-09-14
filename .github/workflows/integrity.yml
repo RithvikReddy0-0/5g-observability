@@ -25,7 +25,7 @@ jobs:
           m = json.load(open("manifest.lock"))
           assert m.get("schema_version") == "1", "unexpected schema_version"
           deps = m["dependencies"]
-          assert {d["name"] for d in deps} == {"free5gc", "ueransim", "gtp5g"}, "unexpected dependency set"
+          assert {d["name"] for d in deps} == {"free5gc", "ueransim", "gtp5g", "open5gs"}, "unexpected dependency set"
           bad = [d["name"] for d in deps if not re.fullmatch(r"[0-9a-f]{40}", d["commit"])]
           if bad:
               sys.exit(f"pins are not full 40-char SHAs: {bad}")
@@ -73,7 +73,9 @@ jobs:
                           + glob.glob("deployments/compose/**/*.yml", recursive=True)
                           + glob.glob("observability/**/*.yml", recursive=True)
                           + glob.glob("observability/**/*.yaml", recursive=True)
-                          + glob.glob("ran/config/*.yaml")):
+                          + glob.glob("ran/config/*.yaml")
+                          + glob.glob("deployments/open5gs/**/*.yaml", recursive=True)
+                          + glob.glob("deployments/open5gs/**/*.yml", recursive=True)):
               try:
                   yaml.safe_load(open(f))
               except Exception as e:
@@ -98,13 +100,52 @@ jobs:
             echo "slice $sd present in AMF, SMF, NSSF and gNB config"
           done
 
+      - name: Open5GS slice consistency — every UE slice and DNN exists in every plane
+        run: |
+          # ADR-010. A UE requesting an S-NSSAI the AMF, NSSF or gNB does not advertise is
+          # rejected at registration; a DNN the SMF and UPF have no pool for fails at session
+          # establishment. Both fail far from the file that is wrong.
+          python3 - <<'PY'
+          import glob, sys, yaml
+          base = "deployments/open5gs"
+          load = lambda f: yaml.safe_load(open(f))
+          amf, nssf = load(f"{base}/config/amf.yaml"), load(f"{base}/config/nssf.yaml")
+          smf, upf, gnb = load(f"{base}/config/smf.yaml"), load(f"{base}/config/upf.yaml"), load(f"{base}/ran/gnb.yaml")
+          norm = lambda sst, sd: (int(sst), int(str(sd), 16) if isinstance(sd, str) else int(sd))
+          amf_s = {norm(x["sst"], x["sd"]) for p in amf["amf"]["plmn_support"] for x in p["s_nssai"]}
+          nssf_s = {norm(n["s_nssai"]["sst"], n["s_nssai"]["sd"]) for n in nssf["nssf"]["sbi"]["client"]["nsi"]}
+          gnb_s = {norm(x["sst"], x["sd"]) for x in gnb["slices"]}
+          smf_d = {x.get("dnn") for x in smf["smf"]["session"]}
+          upf_d = {x.get("dnn") for x in upf["upf"]["session"]}
+          bad = 0
+          for f in sorted(glob.glob(f"{base}/ran/ue-*.yaml")):
+              for sess in load(f)["sessions"]:
+                  sl, dnn = norm(sess["slice"]["sst"], sess["slice"]["sd"]), sess["apn"]
+                  for plane, have in (("AMF", amf_s), ("NSSF", nssf_s), ("gNB", gnb_s)):
+                      if sl not in have:
+                          print(f"::error file={f}::slice {sl} not advertised by {plane}"); bad += 1
+                  for plane, have in (("SMF", smf_d), ("UPF", upf_d)):
+                      if dnn not in have:
+                          print(f"::error file={f}::DNN {dnn!r} has no pool in {plane}"); bad += 1
+                  print(f"{f}: slice {sl} DNN {dnn!r} checked in AMF, NSSF, gNB, SMF, UPF")
+          sys.exit(1 if bad else 0)
+          PY
+
       - name: shell scripts are syntactically valid
         run: |
           rc=0
-          for s in scripts/*.sh tests/*.sh ci/scripts/*.sh; do
+          for s in scripts/*.sh scripts/open5gs/*.sh tests/*.sh ci/scripts/*.sh; do
             bash -n "$s" || { echo "::error file=$s::syntax error"; rc=1; }
           done
+          # Container entrypoints run under /bin/sh, so they are checked as POSIX sh.
+          for s in deployments/open5gs/*.sh deployments/open5gs/ran/*.sh; do
+            sh -n "$s" || { echo "::error file=$s::syntax error"; rc=1; }
+          done
           exit $rc
+
+      - name: Python tools and exporters compile
+        run: |
+          python3 -m py_compile tools/kpi-gate/*.py scripts/open5gs/*.py             deployments/open5gs/observability/*.py             && echo "all Python compiles"
 
   kpi-gate:
     name: KPI gate is defined and effective
@@ -114,8 +155,17 @@ jobs:
 
       - name: KPI definitions are structurally valid
         run: |
-          # Rejects a missing field, a duplicate id, an unknown operator or severity.
+          # Rejects a missing field, a duplicate id, an unknown operator or severity, and a
+          # count/sum gate with no `or vector(0)` fallback (it would fail a healthy system).
           python3 tools/kpi-gate/kpi_gate.py --self-test
+          python3 tools/kpi-gate/kpi_gate.py --self-test --defs deployments/open5gs/kpi-gates.json
+
+      - name: every repo-exported metric a gate queries is really exported
+        run: |
+          # The stub below is built from the gates' own expressions, so it cannot catch a gate
+          # querying a metric name nobody emits. Three free5GC gates did exactly that until a
+          # live run exposed it. This checks the names against the exporters' source.
+          python3 tools/kpi-gate/check_metric_names.py
 
       - name: gate PASSES a conforming deployment
         run: |

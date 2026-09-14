@@ -1,0 +1,40 @@
+# Prometheus for the Open5GS stack only (ADR-010: the two cores stay independent, so a
+# free5GC-only run never shows dead Open5GS targets, and vice versa).
+#
+# Open5GS exports native metrics from four NFs. Unlike free5GC, the SMF's series carry the
+# slice: fivegs_smffunction_sm_sessionnbr{plmnid,snssai} and friends.
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+  external_labels:
+    deployment: open5gs
+
+scrape_configs:
+  - job_name: open5gs
+    static_configs:
+      - targets: ["10.53.0.5:9090"]
+        labels: { nf: amf }
+      - targets: ["10.53.0.4:9090"]
+        labels: { nf: smf }
+      - targets: ["10.53.0.7:9090"]
+        labels: { nf: upf }
+      - targets: ["10.53.0.13:9090"]
+        labels: { nf: pcf }
+
+  # Per-slice user-plane counters read from the UPF's own TUN devices (ogstun = eMBB,
+  # ogstun2 = URLLC). See observability/upf_slice_exporter.py for why these are needed.
+  - job_name: upf-slice-traffic
+    static_configs:
+      - targets: ["10.53.0.7:9120"]   # sidecar shares the UPF network namespace
+        labels: { component: upf-slice-exporter }
+
+  # Reachability and RTT measured from each UE's own interface through the UPF. The core's
+  # metrics do not notice UEs that vanish, so liveness must come from the UE side.
+  - job_name: ue-probe
+    static_configs:
+      - targets: ["10.53.0.31:9121"]   # sidecar shares the UE container's network namespace
+        labels: { component: ue-probe-exporter }
+
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]

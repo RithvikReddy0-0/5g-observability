@@ -22,7 +22,9 @@ the ratified ODE. That distinction determines what could and could not be proven
 | Prometheus targets healthy | **10 / 10** | Prometheus API |
 | Slice-labeled metrics | **working** | `sst`/`sd` labels queryable |
 | Phase-1 acceptance (runnable subset) | **PASS=12, FAIL=0** | `tests/acceptance.sh` |
-| KPI gate enforces thresholds in CI | **10 enforced, 2 ODE-only** | `make gate`, verified to reject breaches |
+| KPI gate enforces thresholds in CI | **10 enforced, 2 ODE-only** | `make gate`: 10/10 PASS on a live deployment, exit 1 with an NF stopped |
+| **Open5GS: UEs with a working PDU session** | **20 / 20** | interface per UE + ping/iperf3 through the UPF |
+| **Open5GS: KPI gate incl. user plane** | **17 / 17 PASS** | live stack; fails with UEs stopped |
 | PDU session / user-plane data path | **BLOCKED** | needs gtp5g — ODE only |
 
 ---
@@ -239,7 +241,49 @@ this — it refuses to print "Phase 1 acceptance complete" while any `SKIP-ODE` 
 
 ---
 
-## 6. Where the evidence lives
+## 6. Open5GS stack (ADR-010)
+
+A second core, added on the project owner's decision, runs beside free5GC. Its userspace UPF
+needs no kernel module, so the items §5 lists as blocked by gtp5g **are demonstrated on this
+laptop on the Open5GS stack** — not on free5GC, whose results above are unchanged. Full detail:
+[`docs/open5gs.md`](open5gs.md). Evidence:
+[`evidence/open5gs-20260914-060008Z`](evidence/open5gs-20260914-060008Z/00-summary.md).
+
+| Result | Value |
+|---|---|
+| UEs with a PDU session (10 per slice, own address pool per slice) | 20 / 20 |
+| Ping through the UPF, both slices; internet egress | 5/5, ~2 ms; 8.8.8.8 reachable |
+| Single-flow throughput | eMBB 256 Mbps · URLLC 24 Mbps (4 s) |
+| URLLC session AMBR (20 Mbps) over 20 s | 20.08 Mbps — enforced by UERANSIM's gNB, not the core |
+| KPI gate, steady state | 17 / 17 |
+
+Findings that change how this system should be read:
+
+1. **R-02 is closed for sessions, not traffic.** The SMF's `sm_sessionnbr{snssai}` is exact;
+   the UPF's volume counters carry only QFI. Per-slice traffic is measured from the slice TUN
+   devices.
+2. **Native gauges that read wrong:** `sm_qos_flow_nbr` leaks on re-attach,
+   `sm_pdusessioncreationsucc` double-counts, `upf_sessionnbr` over-counts after a UE restart.
+3. **The core cannot see a UE that vanished or lost its user plane.** With every UE stopped the
+   core still reported 20 UEs and 20 sessions. After a simulated radio link failure a UE shows
+   CM-CONNECTED with a dead user plane. Liveness is now probed from the UEs, and such a UE is
+   restarted on its own (reproduced and verified).
+4. **Slices share fate on this host.** Saturating eMBB made URLLC lose up to 4 of 10 probes per
+   round without raising its average RTT; URLLC's 10 ms worst-case budget is missed even at
+   idle (three runs).
+5. **The free5GC KPI gate had never been checked against a live deployment, and had three bugs**
+   the stub hid: `count(up == 0)` returns no data rather than 0 (a healthy deployment failed);
+   three gates queried metric names the exporter never emits; and the slice exporter read only
+   stdout of `docker logs` while free5GC logs to stderr, so its registered-UE metric had read 0
+   since August. All fixed and verified live: 10/10 PASS healthy, exit 1 with an NF stopped. A
+   CI check now rejects gates that query unexported repo metrics ([`docs/kpi-gate.md`](kpi-gate.md)).
+6. **Engine outages were misdiagnosed.** Not Docker Desktop: WSL idles the Ubuntu distro, which
+   runs the Docker engine. 11 stops in 12 minutes without a session held, 0 in 15 minutes with
+   one.
+
+---
+
+## 7. Where the evidence lives
 
 [`docs/evidence/`](evidence/) holds timestamped bundles, each with environment + ODE
 conformance, container status, NRF registrations, subscriber counts and SUPIs, per-UE
@@ -251,7 +295,7 @@ Regenerate any time with `bash scripts/collect_evidence.sh`.
 
 ---
 
-## 7. Reproducing these results
+## 8. Reproducing these results
 
 ```bash
 bash scripts/verify_env.sh                 # environment conformance

@@ -1,0 +1,62 @@
+==============================================================================
+KPI gate — 2026-09-14T06:00:23Z
+Prometheus: http://localhost:9091   definitions: deployments/open5gs/kpi-gates.json
+==============================================================================
+
+  [  PASS  ] All 4 Open5GS metric exporters are scrapeable
+             4 >= 4 NFs
+
+  [  PASS  ] No configured target is down
+             0 == 0 targets
+
+  [  PASS  ] SMF and UPF are associated over N4
+             1 >= 1 peers
+
+  [  PASS  ] The gNB is connected over N2
+             1 >= 1 gNBs
+
+  [  PASS  ] All 20 UEs are attached
+             20 >= 20 UEs
+
+  [  PASS  ] Every UE has a user-plane session at the UPF
+             21 >= 20 sessions
+
+  [  PASS  ] Each slice holds its 10 PDU sessions
+             10 >= 10 sessions
+
+  [  PASS  ] Both slices appear in the SMF's slice-labelled metrics
+             2 >= 2 slices
+
+  [  PASS  ] The UPF holds QoS flows for both slices' DNNs
+             2 >= 2 DNNs
+
+  [  PASS  ] Both slices' UPF devices are measurable
+             2 >= 2 slices
+
+  [  PASS  ] Every UE on each slice answered through the UPF within 30 s
+             10 >= 10 UEs
+
+  [  PASS  ] URLLC average round-trip time within its 10 ms budget (1 min)
+             3.55 <= 10 ms
+
+  [  PASS  ] eMBB worst round-trip time within its 300 ms budget (1 min)
+             18.64 <= 300 ms
+
+  [  PASS  ] URLLC worst-case round-trip time within 10 ms (1 min)
+             9.543 <= 10 ms
+
+  [  PASS  ] No URLLC probe lost in the last minute
+             10 >= 10 UEs
+
+  [  PASS  ] No UE registration failures in the last 5 minutes
+             0 == 0 failures
+
+  [  PASS  ] Both slices carried user traffic in the last 5 minutes
+             2 >= 2 slices
+
+==============================================================================
+  17 passed   0 failed   0 advisory   0 skipped (ODE)
+==============================================================================
+
+GATE PASSED
+  verdict written to docs/evidence/open5gs-20260914-060008Z/07-kpi-verdict.json

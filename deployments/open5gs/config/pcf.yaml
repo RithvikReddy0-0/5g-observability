@@ -1,0 +1,26 @@
+# Open5GS v2.8.0 — PCF
+# Generated from deployments/slices.env by the Open5GS migration; edit slices.env for slice
+# changes. Addresses follow the static plan in deployments/open5gs/docker-compose.yaml.
+# No logger.file: NFs log to stdout so `docker logs` is the single log source.
+
+logger:
+  level: info
+
+global:
+  max:
+    ue: 1024
+
+db_uri: mongodb://10.53.0.2/open5gs
+
+pcf:
+  sbi:
+    server:
+      - address: 10.53.0.13
+        port: 7777
+    client:
+      scp:
+        - uri: http://10.53.0.200:7777
+  metrics:
+    server:
+      - address: 10.53.0.13
+        port: 9090

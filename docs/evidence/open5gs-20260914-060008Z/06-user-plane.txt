@@ -1,0 +1,25 @@
+===================================================================
+Open5GS user-plane verification — 2026-09-14T06:00:09Z
+===================================================================
+
+-- PDU sessions --
+  [ PASS ] 20 UEs hold a PDU session address
+
+-- slice A (eMBB): pool 10.45.0.0/16, UPF device ogstun --
+  [ PASS ] UE interface uesimtun0 has 10.45.0.53 (address came from the slice's own pool)
+  [ PASS ] ping 10.45.0.1 via uesimtun0: 5/5 replies, avg rtt 1.803 ms
+  [ PASS ] UPF ogstun received 420 bytes during the ping — traffic went through the UPF
+  [ PASS ] iperf3 through slice A: 255.9 Mbps
+
+-- slice B (URLLC): pool 10.46.0.0/16, UPF device ogstun2 --
+  [ PASS ] UE interface uesimtun10 has 10.46.0.52 (address came from the slice's own pool)
+  [ PASS ] ping 10.46.0.1 via uesimtun10: 5/5 replies, avg rtt 2.096 ms
+  [ PASS ] UPF ogstun2 received 420 bytes during the ping — traffic went through the UPF
+  [ PASS ] iperf3 through slice B: 24.4 Mbps
+
+-- beyond the core --
+  [ PASS ] UE on slice A reached 8.8.8.8 through the UPF's NAT (real internet egress)
+
+===================================================================
+  PASS=10  FAIL=0  WARN=0
+===================================================================

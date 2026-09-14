@@ -1,0 +1,21 @@
+# Open5GS v2.8.0 — NRF
+# Generated from deployments/slices.env by the Open5GS migration; edit slices.env for slice
+# changes. Addresses follow the static plan in deployments/open5gs/docker-compose.yaml.
+# No logger.file: NFs log to stdout so `docker logs` is the single log source.
+
+logger:
+  level: info
+
+global:
+  max:
+    ue: 1024
+
+nrf:
+  serving:
+    - plmn_id:
+        mcc: 208
+        mnc: 93
+  sbi:
+    server:
+      - address: 10.53.0.10
+        port: 7777

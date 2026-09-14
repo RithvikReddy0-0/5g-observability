@@ -1,0 +1,15 @@
+== phase 1: idle, 60s
+== phase 2: eMBB saturated (3 downlink flows), URLLC idle, 60s
+     == downlink, 60s, 3 UEs on each loaded slice (embb) — flows run simultaneously
+     
+       eMBB  (session AMBR 200 Mbps)
+         UE 10.45.0.53      95.2 Mbps
+         UE 10.45.0.54      90.5 Mbps
+         UE 10.45.0.55      94.0 Mbps
+         total   279.7 Mbps   mean per session   93.2 Mbps   (47% of AMBR over 60s)
+     
+       URLLC  (session AMBR 20 Mbps)
+
+== result (Prometheus, per phase window)
+  idle      URLLC rtt avg   5.47 ms  worst  47.46 ms  min reachable 10.00/10 |  eMBB  rtt avg   3.42 ms  worst   9.33 ms  min reachable 10.00/10 |  eMBB DL peak 26.68 Mbps
+  loaded    URLLC rtt avg   3.68 ms  worst   7.42 ms  min reachable 9.00/10 |  eMBB  rtt avg   4.46 ms  worst   9.99 ms  min reachable 7.00/10 |  eMBB DL peak 303.00 Mbps

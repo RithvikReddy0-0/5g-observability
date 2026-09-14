@@ -1,0 +1,1043 @@
+{
+  "uid": "open5gs-slices",
+  "title": "Open5GS \u2014 slices, sessions and traffic",
+  "editable": true,
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "5s",
+  "time": {
+    "from": "now-15m",
+    "to": "now"
+  },
+  "tags": [
+    "open5gs",
+    "slicing"
+  ],
+  "panels": [
+    {
+      "type": "row",
+      "title": "Core \u2014 control plane (native Open5GS metrics)",
+      "id": 1,
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "type": "stat",
+      "title": "gNBs connected",
+      "id": 2,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prom-o5gs"
+      },
+      "description": "AMF metric `gnb`.",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 1
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#2E6E8E"
+          }
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "sum(gnb)",
+          "instant": true
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "UEs on the RAN",
+      "id": 3,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prom-o5gs"
+      },
+      "description": "AMF metric `ran_ue`.",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 1
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#2E6E8E"
+          }
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "sum(ran_ue)",
+          "instant": true
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "PDU sessions at the UPF",
+      "id": 4,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prom-o5gs"
+      },
+      "description": "UPF gauge. A lower bound: after a UE restart it read 21 for 20 real sessions. The exact per-slice count is the SMF panel below.",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 1
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#2E6E8E"
+          }
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "sum(fivegs_upffunction_upf_sessionnbr)",
+          "instant": true
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Scrape targets up",
+      "id": 5,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prom-o5gs"
+      },
+      "description": "All Open5GS exporters plus the slice traffic exporter.",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 1
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#2E6E8E"
+          }
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "sum(up)",
+          "instant": true
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "PDU sessions per slice",
+      "id": 6,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prom-o5gs"
+      },
+      "description": "Native SMF gauge, labelled by S-NSSAI \u2014 slice identity that free5GC's metrics never carried.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 5
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "min": 0,
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "stacking": {
+              "mode": "none"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(eMBB|1-010203|internet).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#2E6E8E"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(URLLC|2-112233|urllc).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#C7601F"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "sum by (snssai) (fivegs_smffunction_sm_sessionnbr)",
+          "legendFormat": "S-NSSAI {{snssai}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "User-plane QoS flows per slice (UPF, by DNN)",
+      "id": 7,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prom-o5gs"
+      },
+      "description": "UPF gauge; DNN internet = eMBB, urllc = URLLC. Presence per slice; can over-count after a UE restart. The SMF's qos_flow_nbr{snssai,fiveqi} is NOT shown: it read 20/20 against 10/10 real flows because it is never decremented on re-attach.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 5
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "min": 0,
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "stacking": {
+              "mode": "none"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(eMBB|1-010203|internet).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#2E6E8E"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(URLLC|2-112233|urllc).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#C7601F"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "sum by (dnn) (fivegs_upffunction_upf_qosflows)",
+          "legendFormat": "DNN {{dnn}}"
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "Liveness and latency \u2014 measured from the UEs",
+      "id": 8,
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 13
+      }
+    },
+    {
+      "type": "stat",
+      "title": "eMBB UEs reachable",
+      "id": 9,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prom-o5gs"
+      },
+      "description": "UEs whose probe through the UPF answered in the last 5 s round. Core metrics do not notice vanished UEs; this does.",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 14
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#2E6E8E"
+          }
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "sum(ue_probe_reachable{slice=\"eMBB\"})",
+          "instant": true
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "URLLC UEs reachable",
+      "id": 10,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prom-o5gs"
+      },
+      "description": "",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 14
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#2E6E8E"
+          }
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "sum(ue_probe_reachable{slice=\"URLLC\"})",
+          "instant": true
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "URLLC worst RTT (budget 10 ms)",
+      "id": 11,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prom-o5gs"
+      },
+      "description": "Worst UE of the last round, UE -> gNB -> UPF gateway. SLICE_B_MAX_LATENCY_MS = 10.",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 14
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "decimals": 2,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#2E6E8E"
+          }
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "max(ue_probe_rtt_ms{slice=\"URLLC\",stat=\"max\"})",
+          "instant": true
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "eMBB worst RTT (budget 300 ms)",
+      "id": 12,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prom-o5gs"
+      },
+      "description": "",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 14
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "decimals": 2,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#2E6E8E"
+          }
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "max(ue_probe_rtt_ms{slice=\"eMBB\",stat=\"max\"})",
+          "instant": true
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Round-trip time per slice (avg and worst UE)",
+      "id": 13,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prom-o5gs"
+      },
+      "description": "Probed every 5 s from every UE interface. Measured: with eMBB saturated, URLLC average RTT did not rise but up to 4 of 10 URLLC probes per round went unanswered; its worst case exceeded 10 ms even at idle.",
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 18
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "min": 0,
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "stacking": {
+              "mode": "none"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(eMBB|1-010203|internet).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#2E6E8E"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(URLLC|2-112233|urllc).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#C7601F"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "max by (slice) (ue_probe_rtt_ms{stat=\"avg\"})",
+          "legendFormat": "{{slice}} avg"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "max by (slice) (ue_probe_rtt_ms{stat=\"max\"})",
+          "legendFormat": "{{slice}} worst"
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "User plane \u2014 measured traffic per slice",
+      "id": 14,
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 28
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Downlink throughput per slice",
+      "id": 15,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prom-o5gs"
+      },
+      "description": "Measured from the slice's own UPF TUN device (ogstun = eMBB, ogstun2 = URLLC). Open5GS's native UPF volume counters are labelled only by QFI and cannot separate slices.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 29
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Mbits",
+          "min": 0,
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "stacking": {
+              "mode": "none"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(eMBB|1-010203|internet).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#2E6E8E"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(URLLC|2-112233|urllc).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#C7601F"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "sum by (slice) (rate(upf_slice_downlink_bytes_total[15s])) * 8 / 1e6",
+          "legendFormat": "{{slice}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Uplink throughput per slice",
+      "id": 16,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prom-o5gs"
+      },
+      "description": "Measured from the slice's own UPF TUN device.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 29
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Mbits",
+          "min": 0,
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "stacking": {
+              "mode": "none"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(eMBB|1-010203|internet).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#2E6E8E"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(URLLC|2-112233|urllc).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#C7601F"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "sum by (slice) (rate(upf_slice_uplink_bytes_total[15s])) * 8 / 1e6",
+          "legendFormat": "{{slice}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Packets per second per slice",
+      "id": 17,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prom-o5gs"
+      },
+      "description": "",
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 0,
+        "y": 37
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "pps",
+          "min": 0,
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "stacking": {
+              "mode": "none"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(eMBB|1-010203|internet).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#2E6E8E"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(URLLC|2-112233|urllc).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#C7601F"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "sum by (slice) (rate(upf_slice_downlink_packets_total[15s]))",
+          "legendFormat": "{{slice}} downlink"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "sum by (slice) (rate(upf_slice_uplink_packets_total[15s]))",
+          "legendFormat": "{{slice}} uplink"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Dropped packets per slice",
+      "id": 18,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prom-o5gs"
+      },
+      "description": "Drops on the slice's UPF device. AMBR policing happens in the gNB, so it does not show here.",
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 12,
+        "y": 37
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "pps",
+          "min": 0,
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "stacking": {
+              "mode": "none"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(eMBB|1-010203|internet).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#2E6E8E"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(URLLC|2-112233|urllc).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#C7601F"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "sum by (slice) (rate(upf_slice_dropped_packets_total[1m]))",
+          "legendFormat": "{{slice}}"
+        }
+      ]
+    }
+  ]
+}

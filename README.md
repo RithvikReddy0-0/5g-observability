@@ -12,9 +12,11 @@ gtp5g) are pinned by SHA in [`manifest.lock`](manifest.lock) and fetched into a 
 - **Results & findings:** [`docs/RESULTS.md`](docs/RESULTS.md) — all measured outcomes in one place.
 - **KPI gate:** [`docs/kpi-gate.md`](docs/kpi-gate.md) — the pass/fail contract a deployment must meet.
 - **Review deck:** [`docs/presentation/`](docs/presentation/) — Phase 2 Review 1 slides (LaTeX Beamer).
+- **Open5GS stack:** [`docs/open5gs.md`](docs/open5gs.md) — a second core ([ADR-010](docs/adr/ADR-010-open5gs-core.md)) with a **working user plane on this laptop**. `make o5gs-build && make o5gs-up`.
 
 > **Baseline environment (ODE):** bare-metal **Ubuntu 24.04 LTS, x86_64, ≥16 GB RAM** (ADR-003).
-> **WSL2 / VMs / cloud are non-baseline.** The user plane (UPF/gtp5g) runs only on a conforming ODE.
+> **WSL2 / VMs / cloud are non-baseline.** free5GC's user plane (UPF/gtp5g) runs only on a conforming ODE;
+> the Open5GS stack's userspace UPF runs on WSL2 too.
 
 ## Current state
 
@@ -27,7 +29,9 @@ gtp5g) are pinned by SHA in [`manifest.lock`](manifest.lock) and fetched into a 
 | Slices | ✅ two modeled S-NSSAIs, NSSF selects each independently |
 | Observability | ✅ Prometheus + Grafana on free5GC-native metrics |
 | Slice-labeled metrics | ✅ derived exporter (closes risk R-02) |
-| **User plane (PDU session, N3/N6)** | 🔒 **ODE-only** — needs the gtp5g kernel module |
+| **User plane (PDU session, N3/N6)** — free5GC | 🔒 **ODE-only** — needs the gtp5g kernel module |
+| **User plane — Open5GS stack** | ✅ 20/20 PDU sessions, traffic through the UPF per slice, AMBR enforced ([details](docs/open5gs.md)) |
+| KPI gate — Open5GS | ✅ 17/17 on the live stack, including user-plane, liveness and latency KPIs |
 | Structured JSON logs | ⚠️ not configurable upstream — documented gap ([`docs/logging.md`](docs/logging.md)) |
 | Phase 1 freeze / baseline tag | ❌ not possible without the user plane |
 

@@ -1,0 +1,53 @@
+--- PDU-session interfaces ---
+uesimtun0 10.45.0.53/16
+uesimtun1 10.45.0.54/16
+uesimtun2 10.45.0.55/16
+uesimtun3 10.45.0.56/16
+uesimtun4 10.45.0.57/16
+uesimtun5 10.45.0.58/16
+uesimtun6 10.45.0.59/16
+uesimtun7 10.45.0.60/16
+uesimtun8 10.45.0.61/16
+uesimtun9 10.45.0.62/16
+uesimtun10 10.46.0.52/16
+uesimtun11 10.46.0.53/16
+uesimtun12 10.46.0.54/16
+uesimtun13 10.46.0.55/16
+uesimtun14 10.46.0.56/16
+uesimtun15 10.46.0.57/16
+uesimtun16 10.46.0.58/16
+uesimtun17 10.46.0.59/16
+uesimtun18 10.46.0.60/16
+uesimtun19 10.46.0.61/16
+
+interfaces total: 20
+  eMBB  (10.45/16): 10
+  URLLC (10.46/16): 10
+
+--- per-UE session lines from the UE logs (one log per UE process) ---
+[app] [info] Connection setup for PDU session[1] is successful, TUN interface[uesimtun0, 10.45.0.53] is up.
+[app] [info] Connection setup for PDU session[1] is successful, TUN interface[uesimtun1, 10.45.0.54] is up.
+[app] [info] Connection setup for PDU session[1] is successful, TUN interface[uesimtun2, 10.45.0.55] is up.
+[app] [info] Connection setup for PDU session[1] is successful, TUN interface[uesimtun3, 10.45.0.56] is up.
+[app] [info] Connection setup for PDU session[1] is successful, TUN interface[uesimtun4, 10.45.0.57] is up.
+[app] [info] Connection setup for PDU session[1] is successful, TUN interface[uesimtun5, 10.45.0.58] is up.
+[app] [info] Connection setup for PDU session[1] is successful, TUN interface[uesimtun6, 10.45.0.59] is up.
+[app] [info] Connection setup for PDU session[1] is successful, TUN interface[uesimtun7, 10.45.0.60] is up.
+[app] [info] Connection setup for PDU session[1] is successful, TUN interface[uesimtun8, 10.45.0.61] is up.
+[app] [info] Connection setup for PDU session[1] is successful, TUN interface[uesimtun9, 10.45.0.62] is up.
+[app] [info] Connection setup for PDU session[1] is successful, TUN interface[uesimtun10, 10.46.0.52] is up.
+[app] [info] Connection setup for PDU session[1] is successful, TUN interface[uesimtun11, 10.46.0.53] is up.
+[app] [info] Connection setup for PDU session[1] is successful, TUN interface[uesimtun12, 10.46.0.54] is up.
+[app] [info] Connection setup for PDU session[1] is successful, TUN interface[uesimtun13, 10.46.0.55] is up.
+[app] [info] Connection setup for PDU session[1] is successful, TUN interface[uesimtun14, 10.46.0.56] is up.
+[app] [info] Connection setup for PDU session[1] is successful, TUN interface[uesimtun15, 10.46.0.57] is up.
+[app] [info] Connection setup for PDU session[1] is successful, TUN interface[uesimtun16, 10.46.0.58] is up.
+[app] [info] Connection setup for PDU session[1] is successful, TUN interface[uesimtun17, 10.46.0.59] is up.
+[app] [info] Connection setup for PDU session[1] is successful, TUN interface[uesimtun18, 10.46.0.60] is up.
+[app] [info] Connection setup for PDU session[1] is successful, TUN interface[uesimtun19, 10.46.0.61] is up.
+
+--- UEs restarted by the supervisor (user plane lost after radio link failure) ---
+2026-09-14T05:48:47Z imsi-208930000000007 eMBB no reply through the UPF on uesimtun6
+
+--- gNB ---
+[2026-09-14 05:23:22.284] [ngap] [info] NG Setup procedure is successful

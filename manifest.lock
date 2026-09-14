@@ -25,6 +25,15 @@
       "ref_hint": "v0.10.2",
       "dest": "external/gtp5g",
       "recurse_submodules": false
+    },
+    {
+      "name": "open5gs",
+      "url": "https://github.com/open5gs/open5gs.git",
+      "commit": "157f611a530e292e40ec50f9d23f0ef5d4fcd6a6",
+      "ref_hint": "v2.8.0",
+      "dest": "external/open5gs",
+      "recurse_submodules": false,
+      "_note": "Pin is the PEELED commit. refs/tags/v2.8.0 itself resolves to the annotated tag object f2808a2f, which is not a checkout target. Its meson subprojects track branches upstream; they are pinned by SHA in deployments/open5gs/images/open5gs.Dockerfile. ADR-010."
     }
   ]
 }

@@ -1,0 +1,22 @@
+# UERANSIM gNB for the Open5GS stack. One cell advertising both slices.
+mcc: "208"
+mnc: "93"
+nci: "0x000000010"
+idLength: 32
+tac: 1
+
+linkIp: 10.53.0.30     # radio link simulation (UEs find the cell here)
+ngapIp: 10.53.0.30     # N2 towards the AMF
+gtpIp: 10.53.0.30      # N3 towards the UPF — real GTP-U on this stack
+
+amfConfigs:
+  - address: 10.53.0.5
+    port: 38412
+
+slices:
+  - sst: 0x1
+    sd: 0x010203
+  - sst: 0x2
+    sd: 0x112233
+
+ignoreStreamIds: true

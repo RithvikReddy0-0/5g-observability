@@ -1,0 +1,42 @@
+# UERANSIM UE template — slice A, eMBB (SST 1).
+# Launched with `nr-ue -n 10`, which increments the SUPI for each instance, so this one file
+# brings up imsi-208930000000001 and the nine that follow it.
+supi: "imsi-208930000000001"
+mcc: "208"
+mnc: "93"
+key: "8baf473f2f8fd09487cccbd7097c6862"
+op: "8e27b6af0e692e750f32667a3b14605d"
+opType: "OPC"
+amf: "8000"
+imei: "356938035643803"
+imeiSv: "4370816125816151"
+
+gnbSearchList:
+  - 10.53.0.30
+
+uacAic: { mps: false, mcs: false }
+uacAcc: { normalClass: 0, class11: false, class12: false, class13: false, class14: false, class15: false }
+
+# The PDU session this UE opens. Its DNN selects the address pool, and so the UPF TUN
+# device, that carries this slice's traffic.
+sessions:
+  - type: "IPv4"
+    apn: "internet"
+    slice:
+      sst: 0x01
+      sd: 0x010203
+
+# Requested at registration: its own slice plus the other one it is subscribed to.
+configured-nssai:
+  - sst: 0x01
+    sd: 0x010203
+  - sst: 0x02
+    sd: 0x112233
+
+default-nssai:
+  - sst: 0x01
+    sd: 0x010203
+
+integrity: { IA1: true, IA2: true, IA3: true }
+ciphering: { EA1: true, EA2: true, EA3: true }
+integrityMaxRate: { uplink: "full", downlink: "full" }

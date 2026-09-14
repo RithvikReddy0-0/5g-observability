@@ -1,0 +1,20 @@
+# Open5GS v2.8.0 — UDM
+# Generated from deployments/slices.env by the Open5GS migration; edit slices.env for slice
+# changes. Addresses follow the static plan in deployments/open5gs/docker-compose.yaml.
+# No logger.file: NFs log to stdout so `docker logs` is the single log source.
+
+logger:
+  level: info
+
+global:
+  max:
+    ue: 1024
+
+udm:
+  sbi:
+    server:
+      - address: 10.53.0.12
+        port: 7777
+    client:
+      scp:
+        - uri: http://10.53.0.200:7777

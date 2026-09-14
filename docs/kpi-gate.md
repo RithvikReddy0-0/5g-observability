@@ -69,7 +69,7 @@ Measured against `nr-cli` ground truth at the same instant, with 20/20 UEs genui
 registered, those gauges read **3** and **63** — wrong in opposite directions. They are
 adjusted on state transitions and leak whenever a procedure aborts or the AMF restarts.
 
-UE population is therefore taken from `slice_ues_observed_registered`, which the slice
+UE population is therefore taken from `free5gc_slice_ues_observed_registered`, which the slice
 exporter derives from AMF logs. Counter series (`*_total`) and `up` are reliable and are
 used freely. This is a concrete instance of the ADR-004 question of whether NF-native
 telemetry is sufficient: here, it is not.
@@ -91,6 +91,32 @@ The HTTP path was additionally exercised against a stub Prometheus returning kno
 | Two NFs down, 5xx at 1.7 req/s | exit 1, `GATE FAILED` | exit 1, 2 gates failed |
 | Slice at 0.99 utilisation | advisory `WARN`, does not fail the build | `WARN`, build not failed |
 | Prometheus unreachable | exit 2 | exit 2 |
+
+## What the first live runs found (2026-09-14)
+
+Everything above was verified against a **stub** Prometheus. The first runs against real
+deployments found three defects the stub could not, because the stub was written from the same
+assumptions as the gate:
+
+| Defect | Effect | Fix |
+|---|---|---|
+| `count(up == 0)` and `sum(rate(…5xx…))` return **no series**, not 0, when nothing is wrong | a **healthy** deployment failed `no-scrape-failures`, `sbi-5xx-rate`, `no-latency-rejections` | `or vector(0)`; the gate now refuses to load count/sum upper-bound gates without it |
+| Three gates queried `slice_*`; the exporter emits `free5gc_slice_*` | those gates had **never matched a series** | names corrected; [`check_metric_names.py`](../tools/kpi-gate/check_metric_names.py) runs in CI and fails on the old definitions |
+| The slice exporter read only **stdout** of `docker logs`, and free5GC logs to **stderr** | `free5gc_slice_ues_observed_registered` read 0 in every bundle since August while 20/20 UEs were registered | exporter merges both streams, and also matches the INFO-level `Handle Registration Complete` line |
+
+After the fixes, on a live free5GC deployment with 20/20 UEs (nr-cli ground truth):
+
+| Scenario | Result |
+|---|---|
+| Healthy | **10 passed, 0 failed**, 2 skipped (ODE) — exit 0 |
+| NSSF container stopped | `All 8 NFs scrapeable` 7/8 and `No target down` 1 — **exit 1** |
+| NSSF started again | 10 passed — exit 0 |
+
+**Known limitation that remains:** `free5gc_slice_ues_observed_registered` counts SUPIs that
+completed registration *within the AMF log window* — not UEs registered right now. It matched
+ground truth here, but it will over-count after UEs leave. free5GC has no user plane on this
+host to probe liveness through; the Open5GS stack measures liveness from the UEs instead
+([`docs/open5gs.md`](open5gs.md)).
 
 ## Changing a threshold
 

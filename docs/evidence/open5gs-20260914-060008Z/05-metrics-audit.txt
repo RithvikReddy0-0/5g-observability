@@ -1,0 +1,35 @@
+ground truth: 20 UE interfaces (10 per slice expected)
+
+--- AMF ---
+gnb 1
+fivegs_amffunction_rm_reginitreq 121
+fivegs_amffunction_rm_reginitsucc 121
+amf_session 20
+ran_ue 20
+fivegs_amffunction_rm_registeredsubnbr{plmnid="20893",snssai="1-010203"} 20
+fivegs_amffunction_rm_registeredsubnbr{plmnid="20893",snssai="2-112233"} 20
+--- SMF ---
+pfcp_peers_active 1
+ues_active 20
+pfcp_sessions_active 20
+fivegs_smffunction_sm_sessionnbr{plmnid="20893",snssai="1-010203"} 10
+fivegs_smffunction_sm_sessionnbr{plmnid="20893",snssai="2-112233"} 10
+fivegs_smffunction_sm_pdusessioncreationreq{plmnid="",snssai=""} 121
+fivegs_smffunction_sm_pdusessioncreationreq{plmnid="20893",snssai="1-010203"} 61
+fivegs_smffunction_sm_pdusessioncreationreq{plmnid="20893",snssai="2-112233"} 60
+fivegs_smffunction_sm_pdusessioncreationsucc{plmnid="20893",snssai="1-010203"} 122
+fivegs_smffunction_sm_pdusessioncreationsucc{plmnid="20893",snssai="2-112233"} 120
+fivegs_smffunction_sm_qos_flow_nbr{plmnid="20893",snssai="1-010203",fiveqi="9"} 61
+fivegs_smffunction_sm_qos_flow_nbr{plmnid="20893",snssai="2-112233",fiveqi="82"} 60
+--- UPF ---
+fivegs_upffunction_upf_sessionnbr 21
+pfcp_peers_active 1
+fivegs_upffunction_upf_qosflows{dnn="internet"} 11
+fivegs_upffunction_upf_qosflows{dnn="urllc"} 10
+
+Interpretation (docs/open5gs.md, 'Which metrics can be trusted'):
+  exact   : ran_ue, amf_session, ues_active, sm_sessionnbr{snssai}
+  lower bound only: upf_sessionnbr, upf_qosflows{dnn} -- this very bundle shows 21 sessions and 11 flows for 20/10 real, after one supervisor restart
+  NOT     : sm_qos_flow_nbr (never decremented on re-attach), sm_pdusessioncreationsucc (counts
+            each success twice), sm_pdusessioncreationreq (unlabelled duplicate series)
+  NONE of the core's gauges notices a UE that has vanished or lost its user plane.

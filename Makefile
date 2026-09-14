@@ -31,13 +31,13 @@ N_A     := 10
 N_B     := 10
 
 .PHONY: help up create down restart stop-ues ues status test evidence screenshots report \
-        bootstrap verify clean logs urls nuke gate gate-test
+        bootstrap verify clean logs urls nuke gate gate-test \n        o5gs-build o5gs-up o5gs-ues o5gs-status o5gs-ping o5gs-traffic o5gs-gate o5gs-evidence o5gs-urls \n        o5gs-down o5gs-logs o5gs-clean
 
 help: ## Show this help
 	@echo ""
 	@echo "  5G Observability — available commands"
 	@echo "  ────────────────────────────────────────────────────────────────"
-	@grep -hE '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
+	@grep -hE '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
 	  | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[1m%-14s\033[0m %s\n", $$1, $$2}'
 	@echo ""
 	@echo "  Typical session:   make up  →  make ues  →  make status"
@@ -196,6 +196,71 @@ report: ## Rebuild the shareable PDF report
 	    --no-pdf-header-footer --virtual-time-budget=30000 \
 	    --print-to-pdf=/work/5G-Observability-Report.pdf file:///work/report.html >/dev/null 2>&1
 	@ls -la docs/5G-Observability-Report.pdf
+
+## ─────────────────────────── Open5GS core (ADR-010) ──────────────────────
+# A second, independent stack. Runs beside free5GC on its own network (10.53.0.0/24) with
+# its own database; nothing below touches the free5GC containers.
+
+O5GS_DIR      := deployments/open5gs
+O5GS_COMMIT    = $$(python3 -c "import json;print(next(d['commit'] for d in json.load(open('$(CURDIR)/manifest.lock'))['dependencies'] if d['name']=='open5gs'))")
+UERANSIM_COMMIT = $$(python3 -c "import json;print(next(d['commit'] for d in json.load(open('$(CURDIR)/manifest.lock'))['dependencies'] if d['name']=='ueransim'))")
+O5GS_NF       := o5gs-mongodb o5gs-nrf o5gs-scp o5gs-ausf o5gs-udm o5gs-udr o5gs-pcf o5gs-bsf o5gs-nssf o5gs-upf o5gs-smf o5gs-amf o5gs-gnb o5gs-ue \n                 o5gs-prometheus o5gs-grafana
+
+o5gs-build: ## Open5GS: build core + UERANSIM images from the SHAs in manifest.lock
+	@cd $(O5GS_DIR)/images && \
+	  docker build -f open5gs.Dockerfile  --build-arg OPEN5GS_COMMIT=$(O5GS_COMMIT)   -t o5gs/open5gs:v2.8.0 . && \
+	  docker build -f ueransim.Dockerfile --build-arg UERANSIM_COMMIT=$(UERANSIM_COMMIT) -t o5gs/ueransim:v3.3.0 .
+
+o5gs-up: ## Open5GS: start the core and gNB, then attach 20 UEs with PDU sessions
+	@if [ "$(HAVE_COMPOSE)" = "yes" ]; then \
+	    cd $(O5GS_DIR) && docker compose up -d; \
+	else \
+	    docker start $(O5GS_NF) >/dev/null || { echo "containers not created yet and the compose plugin is unavailable (it is provided by Docker Desktop's WSL integration) — start Docker Desktop, then retry"; exit 1; }; \
+	fi
+	@bash scripts/open5gs/start_ues.sh
+	@echo ""
+	@echo "  Keep this WSL terminal OPEN while the stack runs. Docker runs inside the Ubuntu distro,"
+	@echo "  and WSL shuts the distro down ~30-60 s after the last terminal closes, stopping every"
+	@echo "  container with it (measured: 11 engine stops in 12 min idle, 0 in 15 min held open)."
+	@echo "  The UEs re-attach on their own when it comes back. Grafana: http://localhost:3001"
+
+o5gs-ues: ## Open5GS: re-provision and re-attach the 20 UEs
+	@bash scripts/open5gs/start_ues.sh
+
+o5gs-status: ## Open5GS: containers, UEs and their slice addresses
+	@docker ps -a --filter name=o5gs- --format "  {{.Names}}\t{{.Status}}" | sort
+	@echo ""
+	@docker exec o5gs-ue sh -c "ip -4 -o addr show | awk '/uesimtun/ {print \"  \" \$$2 \"  \" \$$4}'" 2>/dev/null || echo "  (no UEs attached)"
+
+o5gs-ping: ## Open5GS: prove the user plane — ping through the UPF from both slices
+	@bash scripts/open5gs/verify_user_plane.sh
+
+o5gs-traffic: ## Open5GS: real traffic through both slices at once. Use: make o5gs-traffic T=60 N=3
+	@bash scripts/open5gs/traffic.sh $(or $(T),60) $(or $(N),3) $(or $(DIR),down)
+
+o5gs-gate: ## Open5GS: KPI gate against the live stack (fails if a threshold is breached)
+	@python3 tools/kpi-gate/kpi_gate.py --defs deployments/open5gs/kpi-gates.json --wait 20
+
+o5gs-evidence: ## Open5GS: save a timestamped proof bundle (traffic + isolation test, ~4 min)
+	@bash scripts/open5gs/collect_evidence.sh $(or $(T),30)
+
+o5gs-urls: ## Open5GS: web addresses
+	@echo "  Grafana     http://localhost:3001   (no login; dashboard 'Open5GS — slices, sessions and traffic')"
+	@echo "  Prometheus  http://localhost:9091"
+
+o5gs-logs: ## Open5GS: follow an NF log. Use: make o5gs-logs C=smf
+	@docker logs -f --tail 50 o5gs-$(or $(C),amf)
+
+o5gs-down: ## Open5GS: stop the stack (keeps subscribers)
+	@docker stop $(O5GS_NF) >/dev/null 2>&1 || true
+	@echo "✓ Open5GS stopped — 'make o5gs-up' to resume"
+
+o5gs-clean: ## Open5GS: delete its containers and database (free5GC untouched)
+	@read -p "Delete the Open5GS containers and subscriber DB? Type yes: " a; [ "$$a" = "yes" ] || { echo "cancelled"; exit 1; }
+	@docker rm -f $(O5GS_NF) >/dev/null 2>&1 || true
+	@docker volume rm open5gs_o5gs-db open5gs_o5gs-prom open5gs_o5gs-grafana >/dev/null 2>&1 || true
+	@docker network rm o5gs_net >/dev/null 2>&1 || true
+	@echo "✓ removed"
 
 ## ─────────────────────────── destructive ─────────────────────────────────
 

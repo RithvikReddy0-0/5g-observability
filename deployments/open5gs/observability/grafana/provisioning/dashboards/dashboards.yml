@@ -1,0 +1,7 @@
+apiVersion: 1
+providers:
+  - name: open5gs
+    folder: Open5GS
+    type: file
+    options:
+      path: /var/lib/grafana/dashboards

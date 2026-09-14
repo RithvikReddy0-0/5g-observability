@@ -1,0 +1,17 @@
+NAMES             IMAGE                  STATUS
+o5gs-upf          o5gs/open5gs:v2.8.0    Up 13 minutes
+o5gs-ue           o5gs/ueransim:v3.3.0   Up 2 minutes
+o5gs-gnb          o5gs/ueransim:v3.3.0   Up 36 minutes
+o5gs-smf          o5gs/open5gs:v2.8.0    Up 36 minutes
+o5gs-amf          o5gs/open5gs:v2.8.0    Up 36 minutes
+o5gs-scp          o5gs/open5gs:v2.8.0    Up 36 minutes
+o5gs-bsf          o5gs/open5gs:v2.8.0    Up 36 minutes
+o5gs-nssf         o5gs/open5gs:v2.8.0    Up 36 minutes
+o5gs-udr          o5gs/open5gs:v2.8.0    Up 36 minutes
+o5gs-pcf          o5gs/open5gs:v2.8.0    Up 36 minutes
+o5gs-ausf         o5gs/open5gs:v2.8.0    Up 36 minutes
+o5gs-udm          o5gs/open5gs:v2.8.0    Up 36 minutes
+o5gs-nrf          o5gs/open5gs:v2.8.0    Up 36 minutes
+o5gs-grafana      grafana/grafana        Up 40 minutes
+o5gs-prometheus   prom/prometheus        Up 40 minutes
+o5gs-mongodb      mongo                  Up 40 minutes

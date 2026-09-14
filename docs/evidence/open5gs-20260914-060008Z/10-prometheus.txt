@@ -1,0 +1,19 @@
+target open5gs            10.53.0.5:9090   up
+target open5gs            10.53.0.4:9090   up
+target open5gs            10.53.0.7:9090   up
+target open5gs            10.53.0.13:9090  up
+target prometheus         localhost:9090   up
+target ue-probe           10.53.0.31:9121  up
+target upf-slice-traffic  10.53.0.7:9120   up
+
+query: max_over_time((sum by (slice) (rate(upf_slice_downlink_bytes_total[15s])) * 8 / 1e6)[10m:5s])
+  {'slice': 'eMBB'} = 353.21
+  {'slice': 'URLLC'} = 65.10
+
+query: sum by (snssai) (fivegs_smffunction_sm_sessionnbr)
+  {'snssai': '1-010203'} = 10.00
+  {'snssai': '2-112233'} = 10.00
+
+query: sum by (dnn) (fivegs_upffunction_upf_qosflows)
+  {'dnn': 'internet'} = 11.00
+  {'dnn': 'urllc'} = 10.00

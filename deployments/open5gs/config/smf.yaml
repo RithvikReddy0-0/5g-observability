@@ -1,0 +1,46 @@
+# Open5GS v2.8.0 — SMF
+# Generated from deployments/slices.env by the Open5GS migration; edit slices.env for slice
+# changes. Addresses follow the static plan in deployments/open5gs/docker-compose.yaml.
+# No logger.file: NFs log to stdout so `docker logs` is the single log source.
+
+logger:
+  level: info
+
+global:
+  max:
+    ue: 1024
+
+# eMBB (sst 1/010203) -> DNN "internet" -> 10.45.0.0/16
+# URLLC (sst 2/112233) -> DNN "urllc"    -> 10.46.0.0/16
+smf:
+  sbi:
+    server:
+      - address: 10.53.0.4
+        port: 7777
+    client:
+      scp:
+        - uri: http://10.53.0.200:7777
+  pfcp:
+    server:
+      - address: 10.53.0.4
+    client:
+      upf:
+        - address: 10.53.0.7
+  gtpu:
+    server:
+      - address: 10.53.0.4
+  metrics:
+    server:
+      - address: 10.53.0.4
+        port: 9090
+  session:
+    - subnet: 10.45.0.0/16
+      gateway: 10.45.0.1
+      dnn: internet
+    - subnet: 10.46.0.0/16
+      gateway: 10.46.0.1
+      dnn: urllc
+  dns:
+    - 8.8.8.8
+    - 8.8.4.4
+  mtu: 1400

@@ -178,6 +178,15 @@ That proves the *warm* cycle. The **stronger** acceptance item — `docker compo
 (destroying volumes) then rebuilding from step 4 including re-provisioning — has **not** been
 run, and belongs on the ODE alongside the user-plane validation.
 
-All core services now carry `restart: unless-stopped`. This matters: Docker Desktop bounced
-several times during development, exiting every core container with code 255 at once; without
-a restart policy only the observability stack recovered.
+All core services now carry `restart: unless-stopped`. This matters: the Docker engine stopped
+many times during development, taking every container down at once; without a restart policy
+only the observability stack recovered.
+
+**Cause (diagnosed 2026-09-14; earlier notes blamed Docker Desktop, which was wrong).** On this
+host the engine is a native `docker-ce` running under systemd *inside the Ubuntu WSL distro*;
+only the CLI plugins (`docker compose`, `buildx`) are symlinks from Docker Desktop. WSL shuts
+the Ubuntu distro down shortly after the last terminal attached to it closes, and systemd stops
+`docker.service` as part of that. Measured: 11 engine stops in 12 minutes of one-shot `wsl`
+commands, **0 stops in 15 minutes** with a session held open, and a stop again within ~45 s of
+releasing it. **Keep a WSL terminal open while the stack runs.** The Open5GS stack additionally
+restarts its UEs automatically when the engine returns (`deployments/open5gs/ran/ue-entrypoint.sh`).
