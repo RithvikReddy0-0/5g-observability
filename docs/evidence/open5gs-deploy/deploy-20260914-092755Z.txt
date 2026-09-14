@@ -1,0 +1,23 @@
+Open5GS deployment — 20260914-092755Z
+commit: fb1c65f182a7f37e5984255fe25d7c7c7165be6b + uncommitted changes in the candidate
+== 09:27:55 1. validate the candidate (static, the running stack is not touched)
+  YAML: ok
+  deployments/open5gs/ran/ue-slice-a.yaml: slice (1, 66051), DNN 'internet' -> gNB ['10.53.0.30'] -> UPF 10.53.0.7: consistent
+  deployments/open5gs/ran/ue-slice-b.yaml: slice (2, 1122867), DNN 'urllc' -> gNB ['10.53.0.32'] -> UPF 10.53.0.8: consistent
+  2 UE session definition(s) checked, 0 inconsistency(ies)
+  KPI definitions: ok
+== 09:27:57 2. last known-good
+  known-good snapshot from 2026-09-14 08:16:12, commit fb1c65f182a7f37e5984255fe25d7c7c7165be6b
+  candidate differs from known-good:
+    Files .deploy/cmp/deployments/open5gs/config/amf.yaml and deployments/open5gs/config/amf.yaml differ
+== 09:28:01 3. apply the candidate
+    UEs registered        : 20 / 20
+    UEs with PDU session  : 20 / 20
+    slice A interfaces    : 10 / 10   (10.45.0.0/16, eMBB)
+    slice B interfaces    : 10 / 10   (10.46.0.0/16, URLLC)
+    TUN allocation errors : 0
+  waiting 75 s so every gate window holds only post-deploy samples
+== 09:30:04 4. KPI gate on the candidate
+    17 passed   0 failed   1 advisory   0 skipped (ODE)
+  GATE PASSED
+DECISION: DEPLOYED — the candidate passed the gate and is the new known-good

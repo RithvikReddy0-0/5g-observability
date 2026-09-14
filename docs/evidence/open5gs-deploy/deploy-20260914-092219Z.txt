@@ -1,0 +1,8 @@
+Open5GS deployment — 20260914-092219Z
+commit: fb1c65f182a7f37e5984255fe25d7c7c7165be6b + uncommitted changes in the candidate
+== 09:22:25 1. validate the candidate (static, the running stack is not touched)
+  YAML: ok
+  deployments/open5gs/ran/ue-slice-a.yaml: slice (1, 66051), DNN 'internet' -> gNB ['10.53.0.30'] -> UPF 10.53.0.7: consistent
+  ::error file=/mnt/c/Users/Rithvik Reddy/Desktop/5g-observability/deployments/open5gs/ran/ue-slice-b.yaml::SMF routes DNN 'urllc' to 10.53.0.7, which has no pool for it
+  2 UE session definition(s) checked, 1 inconsistency(ies)
+DECISION: REJECTED before deployment — static validation failed; the running stack is unchanged

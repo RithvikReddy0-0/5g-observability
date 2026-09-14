@@ -1,0 +1,50 @@
+Open5GS deployment — 20260914-092251Z
+commit: fb1c65f182a7f37e5984255fe25d7c7c7165be6b + uncommitted changes in the candidate
+== 09:22:56 1. validate the candidate (static, the running stack is not touched)
+  YAML: ok
+  deployments/open5gs/ran/ue-slice-a.yaml: slice (1, 66051), DNN 'internet' -> gNB ['10.53.0.30'] -> UPF 10.53.0.7: consistent
+  deployments/open5gs/ran/ue-slice-b.yaml: slice (2, 1122867), DNN 'urllc' -> gNB ['10.53.0.32'] -> UPF 10.53.0.8: consistent
+  2 UE session definition(s) checked, 0 inconsistency(ies)
+  KPI definitions: ok
+== 09:22:58 2. last known-good
+  known-good snapshot from 2026-09-14 08:16:12, commit fb1c65f182a7f37e5984255fe25d7c7c7165be6b
+  candidate differs from known-good:
+    Files .deploy/cmp/deployments/open5gs/ran/gnb-urllc.yaml and deployments/open5gs/ran/gnb-urllc.yaml differ
+== 09:23:01 3. apply the candidate
+    gnb: [2026-09-14 09:23:21.216] [sctp] [info] Trying to establish SCTP connection... (10.53.0.5:38413)
+    gnb: [2026-09-14 09:23:21.237] [sctp] [error] Connecting to 10.53.0.5:38413 failed. SCTP could not connect: Connection refused
+    gnb: [2026-09-14 09:23:21.302] [rrc] [debug] UE[1] new signal detected
+    gnb: [2026-09-14 09:23:23.307] [rls] [debug] UE[1] signal lost
+    gnb: [2026-09-14 09:23:38.280] [rrc] [debug] UE[2] new signal detected
+  waiting 75 s so every gate window holds only post-deploy samples
+== 09:25:17 4. KPI gate on the candidate
+    [  FAIL  ] Both slice gNBs are connected over N2
+               1 gNBs — required >= 2
+    [  FAIL  ] All 20 UEs are attached
+               10 UEs — required >= 20
+    [  FAIL  ] Every UE has a user-plane session at the UPF
+               10 sessions — required >= 20
+    [  FAIL  ] Each slice's own UPF holds sessions
+               1 UPFs — required >= 2
+    [  FAIL  ] Both slices appear in the SMF's slice-labelled metrics
+               1 slices — required >= 2
+    [  FAIL  ] The UPF holds QoS flows for both slices' DNNs
+               1 DNNs — required >= 2
+    [  FAIL  ] Every UE on each slice answered through the UPF within 30 s
+               0 UEs — required >= 10
+    [  FAIL  ] URLLC average round-trip time within its 10 ms budget (1 min)
+               no data — the metric is not being reported
+    8 passed   8 failed   2 advisory   0 skipped (ODE)
+  GATE FAILED — this deployment must not be promoted.
+== 09:25:18 5. ROLLBACK — the candidate failed the gate
+  rejected candidate saved to .deploy/rejected/20260914-092251Z (nothing is discarded)
+  known-good files restored
+    UEs registered        : 20 / 20
+    UEs with PDU session  : 20 / 20
+    slice A interfaces    : 10 / 10   (10.45.0.0/16, eMBB)
+    slice B interfaces    : 10 / 10   (10.46.0.0/16, URLLC)
+    TUN allocation errors : 0
+  waiting 75 s so every gate window holds only post-deploy samples
+    17 passed   0 failed   1 advisory   0 skipped (ODE)
+  GATE PASSED
+DECISION: REJECTED and ROLLED BACK — the stack is on the known-good configuration and passes the gate

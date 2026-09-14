@@ -1,0 +1,52 @@
+Open5GS on Kubernetes — 20260914-095105Z
+commit: fb1c65f182a7f37e5984255fe25d7c7c7165be6b
+
+== 09:51:05 4. core bring-up
+  [ PASS ] both gNBs completed NG Setup
+  [ PASS ] SMF associated with both UPFs over PFCP
+
+== 09:52:05 5. subscribers and UEs
+  UE session addresses: 20
+  [ PASS ] 20 UEs with a PDU session
+  [ PASS ] 10 per slice, each from its own pool (eMBB 10, URLLC 10)
+
+== 09:52:07 6. user plane, per slice
+  [ PASS ] eMBB: ping 10.45.0.1 through its UPF from uesimtun0 (10.45.0.8)
+  [ PASS ] eMBB: bytes arrived on upf-embb's ogstun (29400 -> 30492)
+  [ PASS ] eMBB: iperf3 UE -> upf-embb -> dn-embb (257.8 Mbps)
+  [ PASS ] URLLC: ping 10.46.0.1 through its UPF from uesimtun10 (10.46.0.2)
+  [ PASS ] URLLC: bytes arrived on upf-urllc's ogstun2 (29652 -> 29904)
+  [ PASS ] URLLC: iperf3 UE -> upf-urllc -> dn-urllc (25.1 Mbps)
+
+== 09:52:27 7. the same KPI gate as compose, against the in-cluster Prometheus
+    [  WARN  ] URLLC worst-case round-trip time within 10 ms (1 min)
+               17.62 ms — required <= 10
+    17 passed   0 failed   1 advisory   0 skipped (ODE)
+  ==============================================================================
+  GATE PASSED
+    verdict written to docs/evidence/open5gs-k8s/k8s-20260914-095105Z-gate.json
+  [ PASS ] KPI gate passes on Kubernetes
+
+== 09:53:52 resources
+NAME                         READY  STATUS   RESTARTS
+amf-67c859bb8d-bckx9         1/1    Running  0
+ausf-677d9c5986-rqsjh        1/1    Running  0
+bsf-5679776d96-9thlp         1/1    Running  0
+dn-embb-6fb7f85dcb-r6kct     1/1    Running  0
+dn-urllc-58db97844d-8h7kf    1/1    Running  0
+gnb-embb-686476886c-8k259    1/1    Running  0
+gnb-urllc-66d787f6c9-d4svm   1/1    Running  0
+mongodb-795bdd6f8b-xvzgn     1/1    Running  0
+nrf-89ff849bd-pkmms          1/1    Running  0
+nssf-754b4c5566-vsxm6        1/1    Running  0
+pcf-67d955cc6f-fj7fn         1/1    Running  0
+prometheus-76d97f7788-zt827  1/1    Running  0
+scp-6cdb9758c6-8782p         1/1    Running  0
+smf-58b6689dc6-bqbdb         1/1    Running  0
+udm-78fb7b5696-hrq8h         1/1    Running  0
+udr-684546777-n65qf          1/1    Running  0
+ue-6db6dc4bb5-sf59h          1/1    Running  0
+upf-embb-6569475759-gxkjv    1/1    Running  0
+upf-urllc-66c7fd884d-5jm5b   1/1    Running  0
+
+RESULT: PASS — the Open5GS stack runs on Kubernetes and passes the same checks as compose

@@ -1,0 +1,62 @@
+# One PDU session release + establishment, captured in the AMF, SMF, UPF-eMBB and gNB-eMBB
+# network namespaces at once (scripts/open5gs/capture_pdu_session.sh), merged by time and
+# de-duplicated. The same packet seen at both ends appears once. Full capture: capture.pcap.
+# UE imsi-208930000000003, slice eMBB SST 1/010203, DNN internet.
+# One SMF->SCP call after the PFCP modification did not decode (HTTP/2 header compression
+# state predates the capture); Open5GS source shows it is the UDM SMF registration PUT
+# (src/smf/n4-handler.c:818).
+
+   4.0654  gNB-eMBB               -> AMF                    NGAP/NAS-5GS           UplinkNASTransport
+   4.0780  AMF                    -> SCP                    HTTP2/JSON/NAS-5GS     HEADERS[5275]: POST /nsmf-pdusession/v1/sm-contexts/189/modify, DATA[5275], JSON (application/json), PDU session release request (Regular deactivation
+   4.0790  SCP                    -> SMF                    HTTP2/JSON/NAS-5GS     HEADERS[13]: POST /nsmf-pdusession/v1/sm-contexts/189/modify, DATA[13], JSON (application/json), PDU session release request (Regular deactivation)
+   4.0859  SMF                    -> UPF-eMBB               PFCP                   PFCP Session Deletion Request
+   4.0864  UPF-eMBB               -> SMF                    PFCP                   PFCP Session Deletion Response
+   4.0948  SMF                    -> SCP                    HTTP2                  HEADERS[13]: 200 OK
+   4.0949  SMF                    -> SCP                    HTTP2/JSON/NAS-5GS/NGAP DATA[13], JSON (application/json), PDU session release command (Regular deactivation)
+   4.0953  SCP                    -> AMF                    HTTP2                  HEADERS[5275]: 200 OK
+   4.0954  SCP                    -> AMF                    HTTP2/JSON/NAS-5GS/NGAP DATA[5275], JSON (application/json), PDU session release command (Regular deactivation)
+   4.0991  AMF                    -> gNB-eMBB               NGAP/NAS-5GS           SACK (Ack=0, Arwnd=106496) , PDUSessionResourceReleaseCommand
+   4.0997  gNB-eMBB               -> AMF                    NGAP                   SACK (Ack=0, Arwnd=106496) , PDUSessionResourceReleaseResponse
+   4.1007  AMF                    -> SCP                    HTTP2/JSON/NGAP        HEADERS[5277]: POST /nsmf-pdusession/v1/sm-contexts/189/modify, DATA[5277], JSON (application/json)
+   4.1011  SCP                    -> SMF                    HTTP2/JSON/NGAP        HEADERS[15]: POST /nsmf-pdusession/v1/sm-contexts/189/modify, DATA[15], JSON (application/json)
+   4.1014  SMF                    -> SCP                    HTTP2                  HEADERS[15]: 204 No Content
+   4.1017  SCP                    -> AMF                    HTTP2                  HEADERS[5277]: 204 No Content
+   4.3015  gNB-eMBB               -> AMF                    NGAP/NAS-5GS           UplinkNASTransport, UplinkNASTransport
+   4.3045  AMF                    -> SCP                    HTTP2/JSON/NAS-5GS     HEADERS[5279]: POST /nsmf-pdusession/v1/sm-contexts/189/modify, DATA[5279], JSON (application/json), PDU session release complete
+   4.3056  SCP                    -> SMF                    HTTP2/JSON/NAS-5GS     HEADERS[17]: POST /nsmf-pdusession/v1/sm-contexts/189/modify, DATA[17], JSON (application/json), PDU session release complete
+   4.3065  SMF                    -> SCP                    HTTP2                  HEADERS[17]: 204 No Content
+   4.3069  SMF                    -> SCP                    HTTP2                  HEADERS[3945]: POST /npcf-smpolicycontrol/v1/sm-policies/160/delete, DATA[3945]
+   4.3076  AMF                    -> SCP                    HTTP2/JSON/NAS-5GS     HEADERS[5281]: POST /nsmf-pdusession/v1/sm-contexts, DATA[5281], JSON (application/json), PDU session establishment request
+   4.3077  SCP                    -> AMF                    HTTP2                  HEADERS[5279]: 204 No Content
+   4.3087  SCP                    -> SMF                    HTTP2/JSON/NAS-5GS     HEADERS[19]: POST /nsmf-pdusession/v1/sm-contexts, DATA[19], JSON (application/json), PDU session establishment request
+   4.3162  SCP                    -> SMF                    HTTP2                  HEADERS[3945]: 204 No Content
+   4.3184  SMF                    -> SCP                    HTTP2                  HEADERS[3947]: GET /nudm-sdm/v2/imsi-208930000000003/sm-data?single-nssai=%7B%22sst%22%3A1%2C%22sd%22%3A%22010203%22%7D&dnn=internet&plmn-id=%7B%22mcc
+   4.3314  SCP                    -> SMF                    HTTP2                  HEADERS[3947]: 200 OK
+   4.3326  SMF                    -> SCP                    HTTP2                  HEADERS[3949]: POST /nudm-sdm/v2/imsi-208930000000003/sdm-subscriptions, DATA[3949]
+   4.3349  SCP                    -> SMF                    HTTP2                  HEADERS[3949]
+   4.3365  SMF                    -> SCP                    HTTP2                  HEADERS[19]
+   4.3371  SMF                    -> SCP                    HTTP2/JSON             HEADERS[3951]: POST /npcf-smpolicycontrol/v1/sm-policies, DATA[3951], JSON (application/json)
+   4.3388  SCP                    -> AMF                    HTTP2                  HEADERS[5281]
+   4.3537  SCP                    -> SMF                    HTTP2                  HEADERS[3951]
+   4.3544  SMF                    -> UPF-eMBB               PFCP                   PFCP Session Establishment Request
+   4.3559  UPF-eMBB               -> SMF                    PFCP                   PFCP Session Establishment Response
+   4.3589  SMF                    -> SCP                    HTTP2/JSON/NAS-5GS/NGAP HEADERS[3953]: POST /namf-comm/v1/ue-contexts/imsi-208930000000003/n1-n2-messages, DATA[3953], JSON (application/json), PDU session establishment acce
+   4.3600  SCP                    -> AMF                    HTTP2/JSON/NAS-5GS/NGAP HEADERS[5]: POST /namf-comm/v1/ue-contexts/imsi-208930000000003/n1-n2-messages, DATA[5], JSON (application/json), PDU session establishment accept
+   4.3609  AMF                    -> SCP                    HTTP2                  HEADERS[5]: 200 OK
+   4.3614  AMF                    -> gNB-eMBB               NGAP/NAS-5GS           SACK (Ack=3, Arwnd=106496) , PDUSessionResourceSetupRequest
+   4.3623  SCP                    -> SMF                    HTTP2                  HEADERS[3953]: 200 OK
+   4.3658  gNB-eMBB               -> AMF                    NGAP                   SACK (Ack=1, Arwnd=106496) , PDUSessionResourceSetupResponse
+   4.3668  AMF                    -> SCP                    HTTP2/JSON/NGAP        HEADERS[5283]: POST /nsmf-pdusession/v1/sm-contexts/209/modify, DATA[5283], JSON (application/json)
+   4.3680  SCP                    -> SMF                    HTTP2/JSON/NGAP        HEADERS[21]: POST /nsmf-pdusession/v1/sm-contexts/209/modify, DATA[21], JSON (application/json)
+   4.3688  SMF                    -> UPF-eMBB               PFCP                   PFCP Session Modification Request
+   4.3697  UPF-eMBB               -> SMF                    PFCP                   PFCP Session Modification Response
+   4.3712  SMF                    -> SCP                    HTTP2/JSON             HEADERS[3955], DATA[3955], JSON (application/json)
+   4.3786  SCP                    -> SMF                    HTTP2                  HEADERS[3955]: 200 OK
+   4.3797  SMF                    -> SCP                    HTTP2                  HEADERS[21]: 204 No Content
+   4.3805  SCP                    -> AMF                    HTTP2                  HEADERS[5283]: 204 No Content
+  11.7536  gNB-eMBB,10.45.0.134   -> UPF-eMBB,DN-eMBB       GTP <ICMP>             Echo (ping) request  id=0xb254, seq=1/256, ttl=64
+  11.7551  UPF-eMBB,DN-eMBB       -> gNB-eMBB,10.45.0.134   GTP <ICMP>             Echo (ping) reply    id=0xb254, seq=1/256, ttl=63 (request in 244)
+  11.7551  UPF-eMBB,DN-eMBB       -> gNB-eMBB,10.45.0.134   GTP <ICMP>             Echo (ping) reply    id=0xb254, seq=1/256, ttl=63
+  12.7522  gNB-eMBB,10.45.0.134   -> UPF-eMBB,DN-eMBB       GTP <ICMP>             Echo (ping) request  id=0xb254, seq=2/512, ttl=64
+  12.7524  UPF-eMBB,DN-eMBB       -> gNB-eMBB,10.45.0.134   GTP <ICMP>             Echo (ping) reply    id=0xb254, seq=2/512, ttl=63 (request in 248)
+  12.7524  UPF-eMBB,DN-eMBB       -> gNB-eMBB,10.45.0.134   GTP <ICMP>             Echo (ping) reply    id=0xb254, seq=2/512, ttl=63

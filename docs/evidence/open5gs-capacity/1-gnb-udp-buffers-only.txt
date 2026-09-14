@@ -1,0 +1,14 @@
+calibration: 15s per step, one UDP downlink flow per device, rate split evenly
+
+  slice     offered    delivered     loss  verdict
+  eMBB       40 Mbps     40.0 Mbps    0.31%  delivered
+  eMBB       80 Mbps     79.9 Mbps    7.93%  NOT delivered
+
+  slice     offered    delivered     loss  verdict
+  URLLC       5 Mbps      5.0 Mbps    0.03%  delivered
+  URLLC      10 Mbps     10.0 Mbps    0.02%  delivered
+  URLLC      15 Mbps     15.0 Mbps    0.00%  delivered
+  URLLC      20 Mbps     20.0 Mbps    0.00%  delivered
+
+deliverable capacity: eMBB=40 URLLC=20
+CAPACITY_OVERRIDE="eMBB=40 URLLC=20"

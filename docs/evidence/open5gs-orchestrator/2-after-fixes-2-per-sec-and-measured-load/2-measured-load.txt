@@ -1,0 +1,23 @@
+== experiment 2: unmanaged load on eMBB, then a video demand
+-- before the flood:
+ADMIT  video -> eMBB  admitted 8.0 / measured 0.0 / capacity 200 Mbps
+-- flooding eMBB with traffic the orchestrator never admitted (TCP, 3 devices, 70 s)
+-- during the flood (admitted load on eMBB is ~0):
+slice_allocated_mbps{sst="1",sd="010203",slice="eMBB"} 0.000
+slice_measured_mbps{sst="1",sd="010203",slice="eMBB"} 483.200
+REFUSE slice 1/010203 (eMBB) full: 483.2/200.0 Mbps in use (admitted 0.0, measured 483.2), video needs 8.0
+REFUSE slice 1/010203 (eMBB) full: 483.2/200.0 Mbps in use (admitted 0.0, measured 483.2), file needs 15.0
+REFUSE slice 1/010203 (eMBB) full: 483.2/200.0 Mbps in use (admitted 0.0, measured 483.2), video needs 8.0
+REFUSE slice 1/010203 (eMBB) full: 483.2/200.0 Mbps in use (admitted 0.0, measured 483.2), file needs 15.0
+REFUSE slice 1/010203 (eMBB) full: 483.2/200.0 Mbps in use (admitted 0.0, measured 483.2), video needs 8.0
+REFUSE slice 1/010203 (eMBB) full: 483.2/200.0 Mbps in use (admitted 0.0, measured 483.2), file needs 15.0
+-- after the flood:
+slice_allocated_mbps{sst="1",sd="010203",slice="eMBB"} 0.000
+slice_measured_mbps{sst="1",sd="010203",slice="eMBB"} 0.004
+ADMIT  video -> eMBB  admitted 8.0 / measured 0.0 / capacity 200 Mbps
+
+  eMBB  (session AMBR 200 Mbps)
+    UE 10.45.0.117    178.1 Mbps
+    UE 10.45.0.118    180.7 Mbps
+    UE 10.45.0.122    183.6 Mbps
+    total   542.4 Mbps   mean per session  180.8 Mbps   (90% of AMBR over 70s)

@@ -1,0 +1,16 @@
+== topology: 2 gNB(s): o5gs-gnb-embb o5gs-gnb-urllc 
+== phase 1: idle, 60s
+== phase 2: eMBB saturated (3 downlink flows), URLLC idle, 60s
+     == downlink, 60s, 3 UEs on each loaded slice (embb) — flows run simultaneously
+     
+       eMBB  (session AMBR 200 Mbps)
+         UE 10.45.0.52      92.7 Mbps
+         UE 10.45.0.53      94.6 Mbps
+         UE 10.45.0.54      95.6 Mbps
+         total   282.9 Mbps   mean per session   94.3 Mbps   (47% of AMBR over 60s)
+     
+       URLLC  (session AMBR 20 Mbps)
+
+== result (Prometheus, per phase window)
+  idle    URLLC avg  4.28 ms  worst  11.34 ms  min reach 10.00/10 | eMBB  avg  3.78 ms  worst   9.97 ms  min reach 10.00/10 | eMBB DL peak 0.00 Mbps | gNB UDP drops: gnb-embb +0  gnb-urllc +0  
+  loaded  URLLC avg  2.63 ms  worst   6.99 ms  min reach 10.00/10 | eMBB  avg  5.48 ms  worst  24.39 ms  min reach  9.00/10 | eMBB DL peak 317.87 Mbps | gNB UDP drops: gnb-embb +14014  gnb-urllc +0  

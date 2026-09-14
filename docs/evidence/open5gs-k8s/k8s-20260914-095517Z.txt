@@ -1,0 +1,77 @@
+Open5GS on Kubernetes — 20260914-095517Z
+commit: fb1c65f182a7f37e5984255fe25d7c7c7165be6b
+
+== 09:55:17 1. cluster
+  Server Version: v1.35.1
+  pausing the compose Open5GS stack (both cores at once would distort every measurement)
+
+== 09:55:18 2. images built from the pinned commits, loaded into the cluster
+  loaded o5gs/open5gs:v2.8.0
+  loaded o5gs/ueransim:v3.3.0-udpbuf
+
+== 09:55:45 3. apply the manifests generated from the compose deployment
+  rendered open5gs/k8s/generated/o5gs.yaml: {"Namespace": 1, "ConfigMap": 4, "PersistentVolumeClaim": 1, "Service": 19, "Deployment": 19}
+  service/gnb-embb created
+  deployment.apps/gnb-embb created
+  service/gnb-urllc created
+  deployment.apps/gnb-urllc created
+  service/ue created
+  deployment.apps/ue created
+  service/prometheus created
+  deployment.apps/prometheus created
+mongodb nrf scp ausf udm udr pcf bsf nssf amf upf-embb upf-urllc smf dn-embb dn-urllc gnb-embb gnb-urllc ue prometheus 
+
+== 09:56:07 4. core bring-up
+  [ PASS ] both gNBs completed NG Setup
+  [ PASS ] SMF associated with both UPFs over PFCP
+
+== 09:56:09 5. subscribers and UEs
+  provisioning 20 subscribers into deploy/mongodb in namespace o5gs (database open5gs)
+  upserted 20 subscribers
+  total in db: 20
+    home slice sst 1/010203  dnn=internet  5qi=9  -> 10 subscribers
+    home slice sst 2/112233  dnn=urllc  5qi=82  -> 10 subscribers
+  UE session addresses: 20
+  [ PASS ] 20 UEs with a PDU session
+  [ PASS ] 10 per slice, each from its own pool (eMBB 10, URLLC 10)
+
+== 09:57:12 6. user plane, per slice
+  [ PASS ] eMBB: ping 10.45.0.1 through its UPF from uesimtun0 (10.45.0.7)
+  [ PASS ] eMBB: bytes arrived on upf-embb's ogstun (3696 -> 4704)
+  [ PASS ] eMBB: iperf3 UE -> upf-embb -> dn-embb (254.9 Mbps)
+  [ PASS ] URLLC: ping 10.46.0.1 through its UPF from uesimtun10 (10.46.0.2)
+  [ PASS ] URLLC: bytes arrived on upf-urllc's ogstun2 (4116 -> 4368)
+  [ PASS ] URLLC: iperf3 UE -> upf-urllc -> dn-urllc (24.1 Mbps)
+
+== 09:57:32 7. the same KPI gate as compose, against the in-cluster Prometheus
+    [  WARN  ] URLLC worst-case round-trip time within 10 ms (1 min)
+               20.67 ms — required <= 10
+    17 passed   0 failed   1 advisory   0 skipped (ODE)
+  ==============================================================================
+  GATE PASSED
+    verdict written to docs/evidence/open5gs-k8s/k8s-20260914-095517Z-gate.json
+  [ PASS ] KPI gate passes on Kubernetes
+
+== 09:58:55 resources
+NAME                         READY  STATUS   RESTARTS
+amf-67c859bb8d-8bhlp         1/1    Running  0
+ausf-677d9c5986-msr5b        1/1    Running  0
+bsf-5679776d96-s5b6w         1/1    Running  0
+dn-embb-6fb7f85dcb-ctxxq     1/1    Running  0
+dn-urllc-58db97844d-rmdrx    1/1    Running  0
+gnb-embb-686476886c-jjpzn    1/1    Running  0
+gnb-urllc-66d787f6c9-6qffx   1/1    Running  0
+mongodb-795bdd6f8b-8sf7c     1/1    Running  0
+nrf-89ff849bd-tpkgj          1/1    Running  0
+nssf-754b4c5566-l8n6x        1/1    Running  0
+pcf-67d955cc6f-m8p9d         1/1    Running  0
+prometheus-76d97f7788-9g4jp  1/1    Running  0
+scp-6cdb9758c6-tn7zg         1/1    Running  0
+smf-58b6689dc6-j2ssx         1/1    Running  0
+udm-78fb7b5696-7bn4m         1/1    Running  0
+udr-684546777-chckl          1/1    Running  0
+ue-55bf85c8f7-mbnd6          1/1    Running  0
+upf-embb-6569475759-62rfl    1/1    Running  0
+upf-urllc-66c7fd884d-z7989   1/1    Running  0
+
+RESULT: PASS — the Open5GS stack runs on Kubernetes and passes the same checks as compose

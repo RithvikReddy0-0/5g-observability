@@ -1,0 +1,9 @@
+== downlink, 70s, 3 UEs on each loaded slice (embb) — flows run simultaneously
+
+  eMBB  (session AMBR 200 Mbps)
+    UE 10.45.0.53      79.2 Mbps
+    UE 10.45.0.54      81.2 Mbps
+    UE 10.45.0.55      78.6 Mbps
+    total   239.0 Mbps   mean per session   79.7 Mbps   (40% of AMBR over 70s)
+
+  URLLC  (session AMBR 20 Mbps)

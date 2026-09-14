@@ -1,0 +1,11 @@
+Open5GS deployment — 20260914-081601Z
+commit: fb1c65f182a7f37e5984255fe25d7c7c7165be6b + uncommitted changes in the candidate
+== 08:16:08 1. validate the candidate (static, the running stack is not touched)
+  YAML: ok
+  deployments/open5gs/ran/ue-slice-a.yaml: slice (1, 66051), DNN 'internet' -> gNB ['10.53.0.30'] -> UPF 10.53.0.7: consistent
+  deployments/open5gs/ran/ue-slice-b.yaml: slice (2, 1122867), DNN 'urllc' -> gNB ['10.53.0.32'] -> UPF 10.53.0.8: consistent
+  2 UE session definition(s) checked, 0 inconsistency(ies)
+  KPI definitions: ok
+== 08:16:10 2. last known-good
+  known-good established from the running stack (33 files, gate passed)
+DECISION: INITIALISED — change files, then run scripts/open5gs/deploy.sh

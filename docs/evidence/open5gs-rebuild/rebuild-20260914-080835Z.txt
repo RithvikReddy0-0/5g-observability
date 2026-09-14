@@ -1,0 +1,49 @@
+Open5GS teardown/rebuild — 20260914-080835Z
+commit: fb1c65f182a7f37e5984255fe25d7c7c7165be6b (uncommitted changes present)
+image o5gs/open5gs:v2.8.0 sha256:d3eb63d8ff14ad5000d109b5f0737ab93b4926dc8b9d90ad25a644d1f6419add
+image o5gs/ueransim:v3.3.0-udpbuf sha256:192d0c9935a01df695405ea7feef2693df58b908a352a674a6e6b2540a414ab2
+
+== 08:08:40 1. teardown (down -v)
+open5gs orchestrator stopped
+  removed objects: 24
+
+== 08:08:49 2. nothing left
+  [ PASS ] no o5gs-* containers
+  [ PASS ] no open5gs_* volumes
+  [ PASS ] network o5gs_net gone
+
+== 08:08:50 3. rebuild (up -d)
+  started/created: 44
+  [ PASS ] subscriber database starts EMPTY
+
+== 08:08:58 4. provision + attach
+
+  UEs registered        : 20 / 20
+  UEs with PDU session  : 20 / 20
+  slice A interfaces    : 10 / 10   (10.45.0.0/16, eMBB)
+  slice B interfaces    : 10 / 10   (10.46.0.0/16, URLLC)
+  TUN allocation errors : 0
+  [ PASS ] 20 subscribers provisioned
+  [ PASS ] 20 UE session addresses live
+
+== 08:09:26 5. user plane
+  [ PASS ] 20 UEs hold a PDU session address
+  [ PASS ] UE interface uesimtun0 has 10.45.0.2 (address came from the slice's own pool)
+  [ PASS ] ping 10.45.0.1 via uesimtun0: 5/5 replies, avg rtt 5.015 ms
+  [ PASS ] UPF ogstun received 1260 bytes during the ping — traffic went through the UPF
+  [ PASS ] iperf3 UE -> o5gs-upf-embb -> o5gs-dn-embb: 105.3 Mbps
+  [ PASS ] UE interface uesimtun10 has 10.46.0.2 (address came from the slice's own pool)
+  [ PASS ] ping 10.46.0.1 via uesimtun10: 5/5 replies, avg rtt 5.430 ms
+  [ PASS ] UPF ogstun2 received 420 bytes during the ping — traffic went through the UPF
+  [ PASS ] iperf3 UE -> o5gs-upf-urllc -> o5gs-dn-urllc: 32.8 Mbps
+  [ PASS ] UE on slice A reached 8.8.8.8 through the UPF's NAT (real internet egress)
+  PASS=10  FAIL=0  WARN=0
+  [ PASS ] user-plane verification passes
+
+== 08:09:55 6. KPI gate (after 75 s, so the 1-minute windows hold only the rebuilt stack)
+  [  WARN  ] URLLC worst-case round-trip time within 10 ms (1 min)
+  17 passed   0 failed   1 advisory   0 skipped (ODE)
+GATE PASSED
+  [ PASS ] KPI gate passes
+
+RESULT: PASS — teardown with volumes and rebuild returned to a working stack
