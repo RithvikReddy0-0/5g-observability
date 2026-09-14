@@ -24,8 +24,12 @@ smf:
     server:
       - address: 10.53.0.4
     client:
+      # One UPF per slice (ADR-011), selected by DNN — src/smf/context.c compare_ue_info().
       upf:
-        - address: 10.53.0.7
+        - address: 10.53.0.7      # eMBB user plane
+          dnn: internet
+        - address: 10.53.0.8      # URLLC user plane
+          dnn: urllc
   gtpu:
     server:
       - address: 10.53.0.4

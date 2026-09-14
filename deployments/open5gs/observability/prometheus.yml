@@ -17,15 +17,17 @@ scrape_configs:
       - targets: ["10.53.0.4:9090"]
         labels: { nf: smf }
       - targets: ["10.53.0.7:9090"]
-        labels: { nf: upf }
+        labels: { nf: upf, slice: eMBB }
+      - targets: ["10.53.0.8:9090"]
+        labels: { nf: upf, slice: URLLC }
       - targets: ["10.53.0.13:9090"]
         labels: { nf: pcf }
 
-  # Per-slice user-plane counters read from the UPF's own TUN devices (ogstun = eMBB,
-  # ogstun2 = URLLC). See observability/upf_slice_exporter.py for why these are needed.
+  # Per-slice user-plane counters from each slice's UPF TUN device, served by an exporter
+  # inside each UPF container. See observability/upf_slice_exporter.py for why these are needed.
   - job_name: upf-slice-traffic
     static_configs:
-      - targets: ["10.53.0.7:9120"]   # sidecar shares the UPF network namespace
+      - targets: ["10.53.0.7:9120", "10.53.0.8:9120"]
         labels: { component: upf-slice-exporter }
 
   # Reachability and RTT measured from each UE's own interface through the UPF. The core's
@@ -34,6 +36,12 @@ scrape_configs:
     static_configs:
       - targets: ["10.53.0.31:9121"]   # sidecar shares the UE container's network namespace
         labels: { component: ue-probe-exporter }
+
+  # Slice orchestrator (measured + executed), a host process reached via the o5gs_net gateway.
+  - job_name: slice-orchestrator
+    static_configs:
+      - targets: ["10.53.0.1:9111"]
+        labels: { component: slice-orchestrator }
 
   - job_name: prometheus
     static_configs:

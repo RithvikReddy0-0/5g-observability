@@ -15,8 +15,9 @@ APP="$REPO_ROOT/tools/slice-orchestrator/orchestrator.py"
 LOG=/tmp/slice_orchestrator.log
 PORT="${PORT:-9110}"
 
-# The [o] bracket stops the pattern matching this script's own command line.
-PATTERN="[o]rchestrator.py"
+# The [o] bracket stops the pattern matching this script's own command line; the trailing $
+# stops it matching the Open5GS instance ("orchestrator.py --instance open5gs").
+PATTERN="[o]rchestrator.py$"
 
 case "${1:-}" in
   --stop)

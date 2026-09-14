@@ -8,9 +8,9 @@ the only label is `qfi`. The default QoS flow of every PDU session is QFI 1 rega
 slice, so those counters mix eMBB and URLLC traffic together. They cannot answer "how much
 is each slice carrying" — the same R-02 gap free5GC had, narrower but still real.
 
-This deployment gives each slice its own DNN, address pool and UPF TUN device
-(deployments/open5gs/config/upf.yaml). Every packet on `ogstun` is eMBB and every packet on
-`ogstun2` is URLLC, by construction. Reading the kernel's counters for those devices is
+This deployment gives each slice its own DNN, address pool, UPF and TUN device
+(deployments/open5gs/config/upf-*.yaml, ADR-011). Every packet on `ogstun` is eMBB and every
+packet on `ogstun2` is URLLC, by construction. Reading the kernel's counters for those devices is
 therefore an exact per-slice measurement, not an estimate.
 
 It runs inside the UPF container, started by upf-entrypoint.sh, because those devices only

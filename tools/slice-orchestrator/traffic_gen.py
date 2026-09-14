@@ -38,14 +38,22 @@ DURATION = float(os.environ.get("DURATION", "0"))  # 0 = run forever
 MIX = os.environ.get("MIX", "video:4 file:3 blog:2 control:1")
 
 
+CORE = os.environ.get("CORE", "free5gc")
+
+
 def real_supis():
-    """Read the provisioned subscribers from the live core."""
+    """Read the provisioned subscribers from the live core (free5GC or Open5GS)."""
     js = ('var a=[];db["subscriptionData.provisionedData.amData"]'
           '.find({},{_id:0,ueId:1}).forEach(function(d){a.push(d.ueId);});'
           'print(JSON.stringify(a));')
+    db = "free5gc"
+    if CORE == "open5gs":
+        db = "open5gs"
+        js = ('var a=[];db.subscribers.find({},{_id:0,imsi:1})'
+              '.forEach(function(d){a.push("imsi-"+d.imsi);});print(JSON.stringify(a));')
     try:
         out = subprocess.run(
-            ["docker", "exec", "-i", DB_CONTAINER, "mongo", "free5gc", "--quiet", "--eval", js],
+            ["docker", "exec", "-i", DB_CONTAINER, "mongo", db, "--quiet", "--eval", js],
             capture_output=True, text=True, timeout=30).stdout
         for line in out.splitlines():
             if line.strip().startswith("["):
@@ -102,9 +110,12 @@ def main():
             if res.get("admitted"):
                 admitted += 1
                 s = res["slice"]
-                print("  ADMIT  %-8s %s -> %-6s (sst %d/%s)  %.1f/%.0f Mbps"
+                fl = res.get("flow") or {}
+                print("  ADMIT  %-8s %s -> %-6s (sst %d/%s)  %.1f/%.0f Mbps%s"
                       % (cls, supi[-4:], s["name"], s["sst"], s["sd"],
-                         res["slice_used_mbps"], res["slice_capacity_mbps"]))
+                         res["slice_used_mbps"], res["slice_capacity_mbps"],
+                         "  measured %.1f  flow on %s" % (res.get("slice_measured_mbps", 0), fl.get("device"))
+                         if fl.get("started") else ""))
             else:
                 refused += 1
                 why = res.get("reason", "?")

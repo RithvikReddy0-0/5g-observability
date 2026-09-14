@@ -17,12 +17,12 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/../.." >/dev/null 2>&1 && pwd)"
 N="$(docker inspect -f '{{range .Config.Env}}{{println .}}{{end}}' o5gs-ue 2>/dev/null | sed -n 's/^UES_PER_SLICE=//p')"
 N="${N:-10}"
 UE=o5gs-ue
-GNB=o5gs-gnb
+GNBS="o5gs-gnb-embb o5gs-gnb-urllc"   # one gNB per slice (ADR-011)
 WAIT="${UE_WAIT:-90}"
 
 running() { [ "$(docker inspect -f '{{.State.Running}}' "$1" 2>/dev/null)" = "true" ]; }
 
-for c in o5gs-mongodb o5gs-amf o5gs-smf o5gs-upf "$GNB" "$UE"; do
+for c in o5gs-mongodb o5gs-amf o5gs-smf o5gs-upf-embb o5gs-upf-urllc $GNBS "$UE"; do
   running "$c" || { echo "error: $c is not running — start the stack with 'make o5gs-up'"; exit 1; }
 done
 
@@ -30,18 +30,20 @@ done
 # restart, so an unscoped grep would accept an NG Setup that belongs to a dead association.
 # grep -c, not grep -q: under `set -o pipefail`, grep -q exits on the first match, docker logs
 # dies of SIGPIPE (141), and the pipeline reports failure even though the line was found.
-gnb_ng_setup() {
+gnb_ng_setup() {   # <gnb container>
   local n
-  n=$(docker logs --since "$(docker inspect -f '{{.State.StartedAt}}' "$GNB")" "$GNB" 2>&1 \
+  n=$(docker logs --since "$(docker inspect -f '{{.State.StartedAt}}' "$1")" "$1" 2>&1 \
         | grep -c "NG Setup procedure is successful")
   [ "${n:-0}" -gt 0 ]
 }
-for _ in $(seq 30); do gnb_ng_setup && break; sleep 1; done
-if ! gnb_ng_setup; then
-  echo "error: the gNB has not completed NG Setup with the AMF since it last started"
-  docker logs --tail 5 "$GNB" 2>&1 | sed 's/^/  gnb: /'
-  exit 1
-fi
+for g in $GNBS; do
+  for _ in $(seq 30); do gnb_ng_setup "$g" && break; sleep 1; done
+  if ! gnb_ng_setup "$g"; then
+    echo "error: $g has not completed NG Setup with the AMF since it last started"
+    docker logs --tail 5 "$g" 2>&1 | sed 's/^/  gnb: /'
+    exit 1
+  fi
+done
 
 echo "== provisioning subscribers"
 python3 "$REPO_ROOT/scripts/open5gs/provision_subscribers.py" || exit 1
@@ -69,8 +71,10 @@ wait_tuns '10\.46\.' "$N" "slice B (URLLC)"
 
 want=$((N * 2))
 logs="/tmp/ue-2089*.log"   # one log per UE: ran/ue-entrypoint.sh runs a process per UE
-reg=$(docker exec "$UE" sh -c "cat $logs | grep 'Initial Registration is successful' | grep -oE '\[[0-9]{15}' | sort -u | wc -l" | tr -d '\r ')
-pdu=$(docker exec "$UE" sh -c "cat $logs | grep 'PDU Session establishment is successful' | grep -oE '\[[0-9]{15}' | sort -u | wc -l" | tr -d '\r ')
+# One log per UE, so count the LOGS containing each line. Single-UE nr-ue logs carry no IMSI
+# tag; the earlier "[<imsi>|" pattern matched nothing and reported 0/20 with 20 UEs attached.
+reg=$(docker exec "$UE" sh -c "grep -l 'Initial Registration is successful' $logs 2>/dev/null | wc -l" | tr -d '\r ')
+pdu=$(docker exec "$UE" sh -c "grep -l 'PDU Session establishment is successful' $logs 2>/dev/null | wc -l" | tr -d '\r ')
 tunfail=$(docker exec "$UE" sh -c "cat $logs | grep -c 'TUN allocation failure'" | tr -d '\r')
 tuns_a=$(tuns '10\.45\.'); tuns_b=$(tuns '10\.46\.')
 

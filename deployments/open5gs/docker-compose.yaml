@@ -8,8 +8,12 @@
 #   make o5gs-up        start the core, provision subscribers, attach 20 UEs
 #
 # Address plan (Open5GS configs take IPs, and N2/N3 must be stable for UERANSIM):
-#   .2 mongodb   .4 smf   .5 amf   .7 upf   .10 nrf   .11 ausf   .12 udm   .13 pcf
-#   .14 nssf   .15 bsf   .20 udr   .200 scp   .30 gnb   .31 ue   .41 prometheus   .42 grafana
+#   .2 mongodb   .4 smf   .5 amf   .7 upf-embb   .8 upf-urllc   .10 nrf   .11 ausf   .12 udm
+#   .13 pcf   .14 nssf   .15 bsf   .20 udr   .200 scp   .30 gnb-embb   .32 gnb-urllc   .31 ue
+#   .41 prometheus   .42 grafana   .51 dn-embb   .52 dn-urllc
+#
+# Slices are dedicated end to end in the user plane (ADR-011): own gNB, own UPF, own DNN and
+# address pool. They share the control plane (AMF, SMF, NRF, …), as slices normally do.
 #
 # Two exporters run INSIDE the containers whose network they measure — the UPF (:9120,
 # per-slice traffic) and the UE container (:9121, per-slice reachability and latency).
@@ -105,19 +109,26 @@ services:
     <<: *nf
     container_name: o5gs-smf
     command: ["open5gs-smfd", "-c", "/etc/open5gs/smf.yaml"]
-    depends_on: [nrf, upf]
+    depends_on: [nrf, upf-embb, upf-urllc]
     networks:
       o5gs: { ipv4_address: 10.53.0.4 }
 
-  upf:
+  # One UPF per slice (ADR-011). The SMF steers each DNN to its own UPF, so eMBB and URLLC
+  # user traffic never share a forwarding process.
+  upf-embb:
     <<: *nf
-    container_name: o5gs-upf
+    container_name: o5gs-upf-embb
     init: true      # reaps exited children: the exporter loop and test iperf3 daemons
     entrypoint: ["/bin/sh", "/upf-entrypoint.sh"]
     command: []
     depends_on: []
     environment:
-      SLICE_DEVICES: "ogstun:1:010203:eMBB ogstun2:2:112233:URLLC"
+      UPF_CONFIG: /etc/open5gs/upf-embb.yaml
+      TUN_DEV: ogstun
+      TUN_GATEWAY: 10.45.0.1/16
+      TUN_POOL: 10.45.0.0/16
+      SLICE_DEVICES: "ogstun:1:010203:eMBB"
+      DN_SUBNET: 10.53.0.48/28
     volumes:
       - ./config:/etc/open5gs:ro
       - ./upf-entrypoint.sh:/upf-entrypoint.sh:ro
@@ -129,35 +140,107 @@ services:
     networks:
       o5gs: { ipv4_address: 10.53.0.7 }
 
-  gnb:
-    container_name: o5gs-gnb
-    image: o5gs/ueransim:v3.3.0
+  upf-urllc:
+    <<: *nf
+    container_name: o5gs-upf-urllc
+    init: true
+    entrypoint: ["/bin/sh", "/upf-entrypoint.sh"]
+    command: []
+    depends_on: []
+    environment:
+      UPF_CONFIG: /etc/open5gs/upf-urllc.yaml
+      TUN_DEV: ogstun2
+      TUN_GATEWAY: 10.46.0.1/16
+      TUN_POOL: 10.46.0.0/16
+      SLICE_DEVICES: "ogstun2:2:112233:URLLC"
+      DN_SUBNET: 10.53.0.48/28
+    volumes:
+      - ./config:/etc/open5gs:ro
+      - ./upf-entrypoint.sh:/upf-entrypoint.sh:ro
+      - ./observability:/opt/o5gs-obs:ro
+    cap_add: [NET_ADMIN]
+    devices: ["/dev/net/tun:/dev/net/tun"]
+    sysctls:
+      net.ipv4.ip_forward: "1"
+    networks:
+      o5gs: { ipv4_address: 10.53.0.8 }
+
+  # One gNB per slice (ADR-011). With one shared gNB, an eMBB flood overflowed its UDP receive
+  # buffer and URLLC packets were dropped with it.
+  # One data network per slice (ADR-012): where user traffic goes to and comes from. Test
+  # traffic used to be generated INSIDE the UPF containers, where iperf3's UDP pacing loops took
+  # ~970 % CPU from the UPF they were measuring and capped eMBB at 120 Mbps. Each DN reaches its
+  # slice's UE pool through that slice's UPF.
+  dn-embb:
+    container_name: o5gs-dn-embb
+    image: o5gs/open5gs:v2.8.0
     restart: unless-stopped
-    command: ["nr-gnb", "-c", "/etc/ueransim/gnb.yaml"]
+    init: true
+    cap_add: [NET_ADMIN]
+    entrypoint: ["/bin/sh", "-c", "ip route replace 10.45.0.0/16 via 10.53.0.7 && exec sleep infinity"]
+    depends_on: [upf-embb]
+    networks:
+      o5gs: { ipv4_address: 10.53.0.51 }
+
+  dn-urllc:
+    container_name: o5gs-dn-urllc
+    image: o5gs/open5gs:v2.8.0
+    restart: unless-stopped
+    init: true
+    cap_add: [NET_ADMIN]
+    entrypoint: ["/bin/sh", "-c", "ip route replace 10.46.0.0/16 via 10.53.0.8 && exec sleep infinity"]
+    depends_on: [upf-urllc]
+    networks:
+      o5gs: { ipv4_address: 10.53.0.52 }
+
+  gnb-embb:
+    container_name: o5gs-gnb-embb
+    image: o5gs/ueransim:v3.3.0-udpbuf
+    restart: unless-stopped
+    command: ["nr-gnb", "-c", "/etc/ueransim/gnb-embb.yaml"]
+    # 8 MiB UDP buffers (ADR-012). NET_ADMIN lets SO_RCVBUFFORCE exceed the kernel's rmem_max.
+    environment:
+      UERANSIM_UDP_BUFFER_BYTES: "8388608"
+    cap_add: [NET_ADMIN]
     volumes:
       - ./ran:/etc/ueransim:ro
     depends_on: [amf]
     networks:
       o5gs: { ipv4_address: 10.53.0.30 }
 
+  gnb-urllc:
+    container_name: o5gs-gnb-urllc
+    image: o5gs/ueransim:v3.3.0-udpbuf
+    restart: unless-stopped
+    command: ["nr-gnb", "-c", "/etc/ueransim/gnb-urllc.yaml"]
+    environment:
+      UERANSIM_UDP_BUFFER_BYTES: "8388608"
+    cap_add: [NET_ADMIN]
+    volumes:
+      - ./ran:/etc/ueransim:ro
+    depends_on: [amf]
+    networks:
+      o5gs: { ipv4_address: 10.53.0.32 }
+
   # 20 UEs (10 per slice), one supervised process each, run as this container's own workload:
   # they survive an engine restart, and a UE whose user plane dies is restarted on its own.
   # See ran/ue-entrypoint.sh. Set UES_PER_SLICE=0 to start the container idle.
   ue:
     container_name: o5gs-ue
-    image: o5gs/ueransim:v3.3.0
+    image: o5gs/ueransim:v3.3.0-udpbuf
     restart: unless-stopped
     init: true      # reaps UE processes the supervisor restarts
     entrypoint: ["/bin/sh", "/etc/ueransim/ue-entrypoint.sh"]
     environment:
       UES_PER_SLICE: "10"
+      UERANSIM_UDP_BUFFER_BYTES: "8388608"     # ADR-012
       SLICE_POOLS: "10.45.:10.45.0.1:eMBB 10.46.:10.46.0.1:URLLC"
     volumes:
       - ./ran:/etc/ueransim:ro
       - ./observability:/opt/o5gs-obs:ro     # ue_probe_exporter.py, served on :9121
     cap_add: [NET_ADMIN]
     devices: ["/dev/net/tun:/dev/net/tun"]
-    depends_on: [gnb]
+    depends_on: [gnb-embb, gnb-urllc]
     networks:
       o5gs: { ipv4_address: 10.53.0.31 }
 

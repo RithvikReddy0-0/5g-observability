@@ -115,12 +115,51 @@ REFUSE video    0013 -> slice 1/010203 (eMBB) full: 193.0/200.0 Mbps used, video
 Bulk traffic on the big slice, latency-sensitive traffic on the small one, and refusals once
 a slice fills. That is demand-based allocation against real, finite resources.
 
+## Open5GS mode — measured capacity, real traffic
+
+On the Open5GS stack ([`docs/open5gs.md`](../../docs/open5gs.md)) the same decision logic runs
+with a working user plane:
+
+```bash
+make o5gs-orchestrate    # demands at RATE/s for DURATION s, each admitted one run as a real flow
+make o5gs-slices         # capacity, admitted, MEASURED load, delivered flows
+scripts/open5gs/orchestrator_demo.sh   # the two experiments below, saved as evidence
+```
+
+| | free5GC mode | Open5GS mode |
+|---|---|---|
+| Subscribers and permitted slices | free5GC database | Open5GS database |
+| Capacity counted | admitted demand | **max(admitted, measured at each slice's UPF)** |
+| Admitted demand | a reservation | **a real UDP flow at that bitrate**, device ↔ gNB ↔ UPF ↔ data network |
+| Result per demand | none | delivered Mbps and loss; `met` = ≥ 95 % of the rate with ≤ 2 % loss |
+
+**Boundary:** each device holds a session on its home slice only, and a slice's gNB serves only
+that slice (ADR-011). An admitted flow therefore runs on the least-busy device *of the chosen
+slice*. The requesting subscriber must still be permitted on that slice.
+
+**Premium capacity is protected.** A demand is placed only on the least specialised slices that
+meet its latency need and is refused if they are full. Found on real traffic: with eMBB full,
+video was admitted onto URLLC and took 16 of its 20 Mbps. `SPILLOVER=1` restores that behaviour.
+
+Measured ([`docs/evidence/open5gs-orchestrator/`](../../docs/evidence/open5gs-orchestrator/README.md)):
+
+| Experiment | Result |
+|---|---|
+| 3 demands/s for 120 s | both slices admitted to exactly 200/200 and 20/20 Mbps; 15 refused; **164 of 165 flows delivered their rate** |
+| eMBB flooded by 483 Mbps the orchestrator never admitted | every eMBB demand refused on measured load alone, none spilled onto URLLC; admitted again once the flood ended |
+| Before the data-path fixes (ADR-012) | 0 of 78 eMBB flows delivered — the reason those fixes exist |
+
+`CAPACITY_OVERRIDE="eMBB=… URLLC=…"` admits against what a host can actually deliver when that is
+below policy; `scripts/open5gs/calibrate_capacity.sh` measures it. This laptop delivers the full
+policy capacity, so it is not set.
+
 ## Honest limitations
 
-- **Capacity is modelled, not measured.** Without a UPF nothing enforces AMBR; these are
-  bookkeeping decisions against provisioned numbers.
+- **free5GC mode: capacity is modelled, not measured.** Without a UPF nothing enforces AMBR; these are
+  bookkeeping decisions against provisioned numbers. Open5GS mode measures it (above).
 - **This is not a 3GPP function.** Do not present it as something free5GC does.
 - **Allocation is per demand, not per PDU session.** A real implementation would tie each
   admission to an actual PDU session, which requires the user plane.
-- On the ODE with gtp5g present, the natural next step is to drive admission from *measured*
-  throughput per slice rather than declared demand.
+- Admission from measured throughput is implemented in Open5GS mode. A slice *aggregate* is still
+  enforced only by admission: the gNB polices each session's AMBR, and an unmanaged TCP flood reached
+  542 Mbps on the 200 Mbps eMBB slice.

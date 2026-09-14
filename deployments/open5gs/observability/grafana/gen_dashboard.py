@@ -105,6 +105,30 @@ ts("Dropped packets per slice", [
    12, y, h=10, unit="pps", desc="Drops on the slice's UPF device. AMBR policing happens in the gNB, so it does not show here.")
 y += 10
 
+row("Slice orchestrator — demands admitted by measured capacity, run as real flows", y); y += 1
+ts("eMBB: capacity, admitted, measured", [
+    {"expr": 'max(slice_capacity_mbps{slice="eMBB"})', "legendFormat": "capacity"},
+    {"expr": 'max(slice_allocated_mbps{slice="eMBB"})', "legendFormat": "admitted"},
+    {"expr": 'max(slice_measured_mbps{slice="eMBB"})', "legendFormat": "measured at the UPF"}],
+   0, y, unit="Mbits", desc=("Admission uses max(admitted, measured): load the orchestrator never admitted still "
+                            "uses up capacity. Requires scripts/open5gs/start_orchestrator.sh."))
+ts("URLLC: capacity, admitted, measured", [
+    {"expr": 'max(slice_capacity_mbps{slice="URLLC"})', "legendFormat": "capacity"},
+    {"expr": 'max(slice_allocated_mbps{slice="URLLC"})', "legendFormat": "admitted"},
+    {"expr": 'max(slice_measured_mbps{slice="URLLC"})', "legendFormat": "measured at the UPF"}],
+   12, y, unit="Mbits", desc="Best-effort demand never spills into URLLC when eMBB is full (ADR-012).")
+y += 8
+stat("Executed flows that got their rate", 'sum(slice_flows_completed_total{outcome="met"}) / sum(slice_flows_completed_total)', 0, y, w=8,
+     desc="met = >= 95 % of the admitted bitrate delivered with <= 2 % loss.")
+panels[-1]["fieldConfig"]["defaults"].update({"unit": "percentunit", "decimals": 1})
+stat("Demands refused (capacity), last 15 min", 'sum(increase(slice_rejected_total{reason="capacity"}[15m])) or vector(0)', 8, y, w=8)
+stat("Demands admitted, last 15 min", 'sum(increase(slice_admitted_total[15m])) or vector(0)', 16, y, w=8)
+y += 4
+ts("Delivered / admitted rate per slice (last 200 flows)", [
+    {"expr": "max by (slice) (slice_flow_delivery_ratio)", "legendFormat": "{{slice}}"}],
+   0, y, w=24, unit="percentunit")
+y += 8
+
 dash = {
     "uid": "open5gs-slices", "title": "Open5GS — slices, sessions and traffic", "editable": True,
     "schemaVersion": 39, "version": 1, "refresh": "5s",

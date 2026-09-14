@@ -1,4 +1,4 @@
-# Open5GS v2.8.0 — UPF
+# Open5GS v2.8.0 — UPF for ONE slice
 # Generated from deployments/slices.env by the Open5GS migration; edit slices.env for slice
 # changes. Addresses follow the static plan in deployments/open5gs/docker-compose.yaml.
 # No logger.file: NFs log to stdout so `docker logs` is the single log source.
@@ -12,23 +12,22 @@ global:
 
 # User plane in USERSPACE over TUN devices — no gtp5g kernel module. This is the property
 # that lets the data path run on a WSL2 kernel, where free5GC's UPF could not.
+# Dedicated user plane for the URLLC slice (ADR-011). The SMF sends only DNN "urllc" here
+# (smf.yaml pfcp.client.upf), so this process and its CPU carry URLLC traffic and nothing else.
+# Userspace forwarding over TUN — no gtp5g kernel module (ADR-010).
 upf:
   pfcp:
     server:
-      - address: 10.53.0.7
+      - address: 10.53.0.8
   gtpu:
     server:
-      - address: 10.53.0.7
+      - address: 10.53.0.8
   session:
-    - subnet: 10.45.0.0/16
-      gateway: 10.45.0.1
-      dnn: internet
-      dev: ogstun
     - subnet: 10.46.0.0/16
       gateway: 10.46.0.1
       dnn: urllc
       dev: ogstun2
   metrics:
     server:
-      - address: 10.53.0.7
+      - address: 10.53.0.8
         port: 9090

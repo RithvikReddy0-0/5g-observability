@@ -1,0 +1,37 @@
+--- a/src/utils/network.cpp
++++ b/src/utils/network.cpp
+@@ -9,6 +9,7 @@
+ #include "network.hpp"
+ #include "libc_error.hpp"
+ 
++#include <cstdlib>
+ #include <cstring>
+ 
+ #include <arpa/inet.h>
+@@ -119,6 +120,26 @@
+         throw LibError("Socket could not be created:", errno);
+     this->fd = sd;
+     this->domain = domain;
++
++    // 5g-observability patch (docs/adr/ADR-012-ueransim-udp-buffers.md):
++    // UERANSIM never sizes its UDP socket buffers, so they get the kernel default (~212 KB).
++    // Under a UDP flood the eMBB gNB overflowed that buffer (128 382 drops) and admitted flows
++    // lost their packets. When UERANSIM_UDP_BUFFER_BYTES is set, size both buffers to it.
++    // SO_*BUFFORCE exceeds net.core.[rw]mem_max, which cannot be changed from inside a
++    // container on this kernel; it needs CAP_NET_ADMIN, and falls back to the capped option.
++    if (type == SOCK_DGRAM)
++    {
++        const char *env = std::getenv("UERANSIM_UDP_BUFFER_BYTES");
++        long bytes = env ? std::strtol(env, nullptr, 10) : 0;
++        if (bytes > 0)
++        {
++            int v = static_cast<int>(bytes);
++            if (setsockopt(sd, SOL_SOCKET, SO_RCVBUFFORCE, &v, sizeof(v)) != 0)
++                setsockopt(sd, SOL_SOCKET, SO_RCVBUF, &v, sizeof(v));
++            if (setsockopt(sd, SOL_SOCKET, SO_SNDBUFFORCE, &v, sizeof(v)) != 0)
++                setsockopt(sd, SOL_SOCKET, SO_SNDBUF, &v, sizeof(v));
++        }
++    }
+ }
+ 
+ Socket Socket::CreateUdp4()

@@ -31,7 +31,11 @@ N_A     := 10
 N_B     := 10
 
 .PHONY: help up create down restart stop-ues ues status test evidence screenshots report \
-        bootstrap verify clean logs urls nuke gate gate-test \n        o5gs-build o5gs-up o5gs-ues o5gs-status o5gs-ping o5gs-traffic o5gs-gate o5gs-evidence o5gs-urls \n        o5gs-down o5gs-logs o5gs-clean
+        bootstrap verify clean logs urls nuke gate gate-test \
+        o5gs-build o5gs-up o5gs-ues o5gs-status o5gs-ping o5gs-traffic o5gs-gate o5gs-evidence o5gs-urls o5gs-orchestrate o5gs-slices \
+        o5gs-test o5gs-deploy o5gs-deploy-init o5gs-rebuild o5gs-calibrate o5gs-isolation o5gs-capture \
+        o5gs-k8s-up o5gs-k8s-verify o5gs-k8s-down \
+        o5gs-down o5gs-logs o5gs-clean
 
 help: ## Show this help
 	@echo ""
@@ -204,12 +208,12 @@ report: ## Rebuild the shareable PDF report
 O5GS_DIR      := deployments/open5gs
 O5GS_COMMIT    = $$(python3 -c "import json;print(next(d['commit'] for d in json.load(open('$(CURDIR)/manifest.lock'))['dependencies'] if d['name']=='open5gs'))")
 UERANSIM_COMMIT = $$(python3 -c "import json;print(next(d['commit'] for d in json.load(open('$(CURDIR)/manifest.lock'))['dependencies'] if d['name']=='ueransim'))")
-O5GS_NF       := o5gs-mongodb o5gs-nrf o5gs-scp o5gs-ausf o5gs-udm o5gs-udr o5gs-pcf o5gs-bsf o5gs-nssf o5gs-upf o5gs-smf o5gs-amf o5gs-gnb o5gs-ue \n                 o5gs-prometheus o5gs-grafana
+O5GS_NF       := o5gs-mongodb o5gs-nrf o5gs-scp o5gs-ausf o5gs-udm o5gs-udr o5gs-pcf o5gs-bsf o5gs-nssf o5gs-upf-embb o5gs-upf-urllc o5gs-smf o5gs-amf o5gs-gnb-embb o5gs-gnb-urllc o5gs-ue \n                 o5gs-prometheus o5gs-grafana
 
 o5gs-build: ## Open5GS: build core + UERANSIM images from the SHAs in manifest.lock
 	@cd $(O5GS_DIR)/images && \
 	  docker build -f open5gs.Dockerfile  --build-arg OPEN5GS_COMMIT=$(O5GS_COMMIT)   -t o5gs/open5gs:v2.8.0 . && \
-	  docker build -f ueransim.Dockerfile --build-arg UERANSIM_COMMIT=$(UERANSIM_COMMIT) -t o5gs/ueransim:v3.3.0 .
+	  docker build -f ueransim.Dockerfile --build-arg UERANSIM_COMMIT=$(UERANSIM_COMMIT) -t o5gs/ueransim:v3.3.0-udpbuf .
 
 o5gs-up: ## Open5GS: start the core and gNB, then attach 20 UEs with PDU sessions
 	@if [ "$(HAVE_COMPOSE)" = "yes" ]; then \
@@ -237,6 +241,43 @@ o5gs-ping: ## Open5GS: prove the user plane — ping through the UPF from both s
 
 o5gs-traffic: ## Open5GS: real traffic through both slices at once. Use: make o5gs-traffic T=60 N=3
 	@bash scripts/open5gs/traffic.sh $(or $(T),60) $(or $(N),3) $(or $(DIR),down)
+
+o5gs-orchestrate: ## Open5GS: demands admitted by MEASURED capacity and run as real flows. Use: DURATION=120 RATE=1
+	@bash scripts/open5gs/start_orchestrator.sh >/dev/null
+	@cd tools/slice-orchestrator && CORE=open5gs DB_CONTAINER=o5gs-mongodb ORCH_URL=http://localhost:9111 	  DURATION=$${DURATION:-120} RATE=$${RATE:-1} python3 traffic_gen.py
+
+o5gs-slices: ## Open5GS: slice capacity, admitted vs measured load, and delivered flows
+	@curl -s --max-time 20 http://localhost:9111/metrics 2>/dev/null 	  | grep -E '^slice_(capacity|allocated|measured|utilization|flows_completed|flow_delivery|rejected)' | sed 's/^/  /' 	  || echo "  (orchestrator not running: scripts/open5gs/start_orchestrator.sh)"
+
+o5gs-test: ## Open5GS: SPEC acceptance criteria on the running stack (user plane included)
+	@bash tests/acceptance-open5gs.sh
+
+o5gs-deploy-init: ## Open5GS: record the running, gate-passing stack as the known-good rollback target
+	@bash scripts/open5gs/deploy.sh --init
+
+o5gs-deploy: ## Open5GS: deploy the current config behind the KPI gate; roll back automatically if it fails
+	@bash scripts/open5gs/deploy.sh
+
+o5gs-rebuild: ## Open5GS: DESTRUCTIVE teardown (down -v) and rebuild, proving it returns to a working stack
+	@bash tests/open5gs-rebuild.sh --yes
+
+o5gs-calibrate: ## Open5GS: measure how much UDP each slice can actually deliver
+	@bash scripts/open5gs/calibrate_capacity.sh
+
+o5gs-isolation: ## Open5GS: does saturating eMBB hurt URLLC? (idle vs loaded, 60 s each)
+	@bash scripts/open5gs/isolation_test.sh
+
+o5gs-capture: ## Open5GS: packet-capture one real PDU session establishment
+	@bash scripts/open5gs/capture_pdu_session.sh
+
+o5gs-k8s-up: ## Open5GS on Kubernetes (minikube profile o5gs): deploy from compose configs, verify, gate
+	@bash scripts/open5gs/k8s_up.sh
+
+o5gs-k8s-verify: ## Open5GS on Kubernetes: re-run the checks and the KPI gate on the running cluster
+	@bash scripts/open5gs/k8s_up.sh --verify
+
+o5gs-k8s-down: ## Open5GS on Kubernetes: delete the namespace and stop the o5gs cluster
+	@bash scripts/open5gs/k8s_up.sh --down
 
 o5gs-gate: ## Open5GS: KPI gate against the live stack (fails if a threshold is breached)
 	@python3 tools/kpi-gate/kpi_gate.py --defs deployments/open5gs/kpi-gates.json --wait 20

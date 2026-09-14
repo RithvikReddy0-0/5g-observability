@@ -162,6 +162,8 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[1])
     ap.add_argument("--container", default=os.environ.get("O5GS_DB", "o5gs-mongodb"))
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--kubernetes", metavar="NAMESPACE",
+                    help="provision the Kubernetes deployment instead: kubectl exec into deploy/mongodb")
     args = ap.parse_args()
 
     script, count = build_script(load_env(SLICES_ENV))
@@ -169,12 +171,18 @@ def main():
         print(script)
         return 0
 
-    print("provisioning %d subscribers into %s (database open5gs)" % (count, args.container))
+    if args.kubernetes:
+        target = "deploy/mongodb in namespace %s" % args.kubernetes
+        exec_prefix = ["kubectl", "-n", args.kubernetes, "exec", "-i", "deploy/mongodb", "--"]
+    else:
+        target = args.container
+        exec_prefix = ["docker", "exec", "-i", args.container]
+    print("provisioning %d subscribers into %s (database open5gs)" % (count, target))
     # Run as a script FILE, not piped stdin: the legacy mongo shell reads stdin line by line
     # with a ~4 KB line limit, which silently truncates the subscriber array and then fails
     # every following line with an unrelated-looking SyntaxError.
-    r = subprocess.run(["docker", "exec", "-i", args.container, "sh", "-c",
-                        "cat > /tmp/provision.js && mongo open5gs --quiet /tmp/provision.js"],
+    r = subprocess.run(exec_prefix + ["sh", "-c",
+                                      "cat > /tmp/provision.js && mongo open5gs --quiet /tmp/provision.js"],
                        input=script, text=True, capture_output=True)
     sys.stdout.write(r.stdout)
     if r.returncode != 0 or "Error" in r.stdout or "exception" in r.stdout:

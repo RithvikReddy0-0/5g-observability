@@ -19,10 +19,12 @@ N="${2:-3}"
 DIR="${3:-down}"
 ONLY="${4:-both}"
 UE=o5gs-ue
-UPF=o5gs-upf
+# Each slice's traffic goes to and from its own data network (ADR-012), reached through that
+# slice's UPF. Never generate test traffic inside a UPF container: it competes for the CPU it measures.
+dn_for() { case $1 in 10.53.0.51) echo o5gs-dn-embb ;; *) echo o5gs-dn-urllc ;; esac; }
 [ "$DIR" = "down" ] && R="-R" || R=""
 
-for c in "$UE" "$UPF"; do
+for c in "$UE" o5gs-dn-embb o5gs-dn-urllc; do
   [ "$(docker inspect -f '{{.State.Running}}' "$c" 2>/dev/null)" = "true" ] \
     || { echo "error: $c is not running (make o5gs-up)"; exit 1; }
 done
@@ -42,21 +44,22 @@ case "$ONLY" in
   *) echo "error: slice selector must be both, embb or urllc"; exit 1 ;;
 esac
 
-docker exec "$UPF" sh -c 'pkill -x iperf3 2>/dev/null; true'
+for u in o5gs-dn-embb o5gs-dn-urllc; do docker exec "$u" sh -c 'pkill -x iperf3 2>/dev/null; true'; done
 port=5300
 jobs=()
 start() {   # <slice> <gateway> <ue-ip>
-  docker exec "$UPF" iperf3 -s -B "$2" -p "$port" -D --one-off
+  DN=$(dn_for "$2")
+  docker exec "$DN" iperf3 -s -B "$2" -p "$port" -D --one-off
   # Wait until it is actually listening: starting clients on a fixed sleep lost one of six
   # flows in an early run with "connection refused".
   for _ in $(seq 25); do
-    docker exec "$UPF" sh -c "ss -ltn | grep -q '$2:$port'" && break; sleep 0.2
+    docker exec "$DN" sh -c "ss -ltn | grep -q '$2:$port'" && break; sleep 0.2
   done
   jobs+=("$1 $3 $port $2")
   port=$((port + 1))
 }
-for l in ${A[@]+"${A[@]}"}; do set -- $l; start eMBB 10.45.0.1 "$2"; done
-for l in ${B[@]+"${B[@]}"}; do set -- $l; start URLLC 10.46.0.1 "$2"; done
+for l in ${A[@]+"${A[@]}"}; do set -- $l; start eMBB 10.53.0.51 "$2"; done
+for l in ${B[@]+"${B[@]}"}; do set -- $l; start URLLC 10.53.0.52 "$2"; done
 sleep 1
 
 echo "== ${DIR}link, ${T}s, $N UEs on each loaded slice ($ONLY) — flows run simultaneously"
@@ -90,4 +93,4 @@ for sl in ("eMBB", "URLLC"):
               f"({per / ambr[sl] * 100:.0f}% of AMBR over {T}s)")
 PY
 rm -rf "$tmp"
-docker exec "$UPF" sh -c 'pkill -x iperf3 2>/dev/null; true'
+for u in o5gs-dn-embb o5gs-dn-urllc; do docker exec "$u" sh -c 'pkill -x iperf3 2>/dev/null; true'; done

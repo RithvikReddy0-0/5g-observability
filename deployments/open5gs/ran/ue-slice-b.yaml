@@ -12,7 +12,7 @@ imei: "356938035643803"
 imeiSv: "4370816125816151"
 
 gnbSearchList:
-  - 10.53.0.30
+  - 10.53.0.32   # the URLLC gNB
 
 uacAic: { mps: false, mcs: false }
 uacAcc: { normalClass: 0, class11: false, class12: false, class13: false, class14: false, class15: false }

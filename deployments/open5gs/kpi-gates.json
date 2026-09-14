@@ -26,47 +26,47 @@
   "gates": [
     {
       "id": "exporters-up",
-      "title": "All 4 Open5GS metric exporters are scrapeable",
+      "title": "All 5 Open5GS metric exporters are scrapeable",
       "expr": "count(up{job=\"open5gs\"} == 1)",
       "op": "gte",
-      "threshold": 4,
+      "threshold": 5,
       "unit": "NFs",
       "severity": "gate",
       "requires": "core",
-      "why": "AMF, SMF, UPF and PCF are the only NFs that export metrics; losing one blinds the gate to that part of the network."
+      "why": "AMF, SMF, PCF and the two per-slice UPFs are the NFs that export metrics; losing one blinds the gate to that part of the network."
     },
     {
       "id": "no-scrape-failures",
-      "title": "No configured target is down",
-      "expr": "count(up == 0) or vector(0)",
+      "title": "No network or exporter target is down",
+      "expr": "count(up{job!=\"slice-orchestrator\"} == 0) or vector(0)",
       "op": "eq",
       "threshold": 0,
       "unit": "targets",
       "severity": "gate",
       "requires": "core",
-      "why": "Includes the per-slice traffic exporter. A broken observability plane must fail the gate rather than report a silent green."
+      "why": "Includes the per-slice traffic and UE probe exporters: a broken observability plane must fail the gate rather than report a silent green. The slice orchestrator is excluded — it is an optional host process above the network, and a stopped orchestrator once failed this gate on a healthy stack; it has its own advisory."
     },
     {
       "id": "pfcp-associated",
-      "title": "SMF and UPF are associated over N4",
-      "expr": "min(pfcp_peers_active)",
+      "title": "The SMF is associated over N4 with both slice UPFs",
+      "expr": "sum(pfcp_peers_active{nf=\"smf\"})",
       "op": "gte",
-      "threshold": 1,
+      "threshold": 2,
       "unit": "peers",
       "severity": "gate",
       "requires": "core",
-      "why": "Without a PFCP association the SMF cannot install forwarding rules, and no PDU session can carry traffic even if it is accepted."
+      "why": "One UPF per slice (ADR-011). Without a PFCP association the SMF cannot install forwarding rules for that slice, and its sessions carry nothing even if they are accepted."
     },
     {
       "id": "gnb-connected",
-      "title": "The gNB is connected over N2",
+      "title": "Both slice gNBs are connected over N2",
       "expr": "sum(gnb)",
       "op": "gte",
-      "threshold": 1,
+      "threshold": 2,
       "unit": "gNBs",
       "severity": "gate",
       "requires": "core",
-      "why": "No NG Setup means no radio access at all; every later KPI would be measuring an empty network."
+      "why": "One gNB per slice (ADR-011). A missing gNB means an entire slice has no radio access, while the other slice keeps every KPI green."
     },
     {
       "id": "ues-on-ran",
@@ -89,6 +89,17 @@
       "severity": "gate",
       "requires": "core",
       "why": "Counted where traffic is carried, not where it is signalled: a session the UPF does not hold cannot forward a packet (ODE-only on free5GC). A LOWER bound only: after one UE was restarted the UPF reported 21 sessions for 20 real ones while the SMF correctly reported 20, so this gauge can over-count and must never be used as an exact total."
+    },
+    {
+      "id": "upf-sessions-per-slice",
+      "title": "Each slice's own UPF holds sessions",
+      "expr": "count(fivegs_upffunction_upf_sessionnbr > 0)",
+      "op": "gte",
+      "threshold": 2,
+      "unit": "UPFs",
+      "severity": "gate",
+      "requires": "core",
+      "why": "With a UPF per slice, the UPF's native session gauge becomes per-slice. Presence only: the gauge over-counts after UE restarts, so it is never used as an exact count."
     },
     {
       "id": "sessions-per-slice",
@@ -210,6 +221,17 @@
       "severity": "advisory",
       "requires": "core",
       "why": "Advisory: an idle network is not a broken one. Reported so that a demo or test run shows traffic genuinely reached both slices."
+    },
+    {
+      "id": "orchestrator-reachable",
+      "title": "The slice orchestrator is being scraped",
+      "expr": "max(up{job=\"slice-orchestrator\"})",
+      "op": "gte",
+      "threshold": 1,
+      "unit": "up",
+      "severity": "advisory",
+      "requires": "core",
+      "why": "Advisory: demand admission is unavailable while it is down, but the network itself is unaffected. Start it with scripts/open5gs/start_orchestrator.sh."
     }
   ]
 }

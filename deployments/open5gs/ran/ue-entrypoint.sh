@@ -48,8 +48,19 @@ if [ "$N" -le 0 ]; then
   log "UES_PER_SLICE=0, idling"; exec sleep infinity
 fi
 
-tun_of() {   # <imsi> -> "uesimtunN" from that UE's own log, or empty
-  sed -n 's/.*TUN interface\[\(uesimtun[0-9]*\), .*/\1/p' "/tmp/ue-$1.log" 2>/dev/null | tail -1
+# A UE is identified by its PDU-session ADDRESS, never by its interface NAME. Names are reused:
+# when a session drops, its uesimtunN is destroyed and the next session anywhere may take the
+# same name. Checking by name once marked two dead UEs healthy — their logs named an interface
+# that now belonged to another UE, and pings through it succeeded. Addresses are allocated
+# uniquely by the SMF, so an address can only ever mean one live session.
+ip_of() {    # <imsi> -> the UE's latest session address from its own log, or empty
+  sed -n 's/.*TUN interface\[uesimtun[0-9]*, \([0-9.]*\)\].*/\1/p' "/tmp/ue-$1.log" 2>/dev/null | tail -1
+}
+
+tun_of() {   # <imsi> -> the interface CURRENTLY holding that UE's address, or empty
+  a=$(ip_of "$1")
+  [ -n "$a" ] || return 0
+  ip -4 -o addr show 2>/dev/null | awk -v a="$a" '/uesimtun/ { split($4, p, "/"); if (p[1] == a) { print $2; exit } }'
 }
 
 start_ue() {   # <imsi> <config>
@@ -60,8 +71,7 @@ start_ue() {   # <imsi> <config>
   # Wait for this UE's interface before starting the next one (TUN name race).
   w=0
   while [ "$w" -lt "$START_WAIT" ]; do
-    t=$(tun_of "$1")
-    [ -n "$t" ] && ip link show "$t" >/dev/null 2>&1 && return 0
+    [ -n "$(tun_of "$1")" ] && return 0
     kill -0 "$(cat "$STATE/$1.pid")" 2>/dev/null || return 1
     w=$((w + 1)); sleep 1
   done
@@ -101,12 +111,12 @@ while true; do
     t=$(tun_of "$imsi")
     if ! kill -0 "$pid" 2>/dev/null; then
       reason="process exited"
-    elif [ -z "$t" ] || ! ip link show "$t" >/dev/null 2>&1; then
-      reason="no PDU-session interface"
+    elif [ -z "$t" ]; then
+      reason="its session address $(ip_of "$imsi") is on no interface"
     elif ping -I "$t" -c 1 -W 2 "$gw" >/dev/null 2>&1; then
       echo 0 > "$STATE/$imsi.strikes"; continue
     else
-      reason="no reply through the UPF on $t"
+      reason="no reply through the UPF on $t ($(ip_of "$imsi"))"
     fi
     s=$(( $(cat "$STATE/$imsi.strikes" 2>/dev/null || echo 0) + 1 ))
     echo "$s" > "$STATE/$imsi.strikes"

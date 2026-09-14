@@ -1,4 +1,6 @@
-# UERANSIM gNB for the Open5GS stack. One cell advertising both slices.
+# UERANSIM gNB dedicated to the eMBB slice (ADR-011).
+# One gNB per slice: with a single shared gNB, an eMBB flood overflowed its UDP
+# receive buffer (12 817 drops in 60 s) and dropped URLLC packets along with it.
 mcc: "208"
 mnc: "93"
 nci: "0x000000010"
@@ -16,7 +18,5 @@ amfConfigs:
 slices:
   - sst: 0x1
     sd: 0x010203
-  - sst: 0x2
-    sd: 0x112233
 
 ignoreStreamIds: true

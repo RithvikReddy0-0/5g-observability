@@ -30,3 +30,6 @@ Thumbs.db
 
 # --- Claude Code local machine state ---
 .claude/settings.local.json
+
+# scripts/open5gs/deploy.sh state: known-good and rejected snapshots (local, never committed)
+/.deploy/

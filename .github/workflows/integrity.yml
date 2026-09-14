@@ -77,7 +77,7 @@ jobs:
                           + glob.glob("deployments/open5gs/**/*.yaml", recursive=True)
                           + glob.glob("deployments/open5gs/**/*.yml", recursive=True)):
               try:
-                  yaml.safe_load(open(f))
+                  list(yaml.safe_load_all(open(f)))   # multi-document files (Kubernetes manifests)
               except Exception as e:
                   bad.append((f, str(e).splitlines()[0]))
           for f, e in bad:
@@ -100,36 +100,22 @@ jobs:
             echo "slice $sd present in AMF, SMF, NSSF and gNB config"
           done
 
-      - name: Open5GS slice consistency — every UE slice and DNN exists in every plane
+      - name: Open5GS slice consistency — every UE slice and DNN is served by every plane
         run: |
-          # ADR-010. A UE requesting an S-NSSAI the AMF, NSSF or gNB does not advertise is
-          # rejected at registration; a DNN the SMF and UPF have no pool for fails at session
-          # establishment. Both fail far from the file that is wrong.
-          python3 - <<'PY'
-          import glob, sys, yaml
-          base = "deployments/open5gs"
-          load = lambda f: yaml.safe_load(open(f))
-          amf, nssf = load(f"{base}/config/amf.yaml"), load(f"{base}/config/nssf.yaml")
-          smf, upf, gnb = load(f"{base}/config/smf.yaml"), load(f"{base}/config/upf.yaml"), load(f"{base}/ran/gnb.yaml")
-          norm = lambda sst, sd: (int(sst), int(str(sd), 16) if isinstance(sd, str) else int(sd))
-          amf_s = {norm(x["sst"], x["sd"]) for p in amf["amf"]["plmn_support"] for x in p["s_nssai"]}
-          nssf_s = {norm(n["s_nssai"]["sst"], n["s_nssai"]["sd"]) for n in nssf["nssf"]["sbi"]["client"]["nsi"]}
-          gnb_s = {norm(x["sst"], x["sd"]) for x in gnb["slices"]}
-          smf_d = {x.get("dnn") for x in smf["smf"]["session"]}
-          upf_d = {x.get("dnn") for x in upf["upf"]["session"]}
-          bad = 0
-          for f in sorted(glob.glob(f"{base}/ran/ue-*.yaml")):
-              for sess in load(f)["sessions"]:
-                  sl, dnn = norm(sess["slice"]["sst"], sess["slice"]["sd"]), sess["apn"]
-                  for plane, have in (("AMF", amf_s), ("NSSF", nssf_s), ("gNB", gnb_s)):
-                      if sl not in have:
-                          print(f"::error file={f}::slice {sl} not advertised by {plane}"); bad += 1
-                  for plane, have in (("SMF", smf_d), ("UPF", upf_d)):
-                      if dnn not in have:
-                          print(f"::error file={f}::DNN {dnn!r} has no pool in {plane}"); bad += 1
-                  print(f"{f}: slice {sl} DNN {dnn!r} checked in AMF, NSSF, gNB, SMF, UPF")
-          sys.exit(1 if bad else 0)
-          PY
+          # ADR-010/011: AMF and NSSF support the slice, the UE's own gNB advertises it, the SMF
+          # has the DNN's pool and steers it to a UPF that has that pool.
+          python3 tools/check_open5gs_slices.py
+
+      - name: Kubernetes manifests are current with the compose deployment
+        run: |
+          # ADR-013: k8s/generated/o5gs.yaml is derived from the compose configs by render.py.
+          # A config change without a re-render would silently leave the two deployments different.
+          python3 deployments/open5gs/k8s/render.py
+          if ! git diff --exit-code --stat deployments/open5gs/k8s/generated/; then
+            echo "::error::deployments/open5gs/k8s/generated/o5gs.yaml is stale — run deployments/open5gs/k8s/render.py and commit"
+            exit 1
+          fi
+          echo "generated Kubernetes manifests match the compose deployment"
 
       - name: shell scripts are syntactically valid
         run: |
@@ -145,7 +131,7 @@ jobs:
 
       - name: Python tools and exporters compile
         run: |
-          python3 -m py_compile tools/kpi-gate/*.py scripts/open5gs/*.py             deployments/open5gs/observability/*.py             && echo "all Python compiles"
+          python3 -m py_compile tools/kpi-gate/*.py tools/check_open5gs_slices.py tools/slice-orchestrator/*.py deployments/open5gs/k8s/render.py scripts/open5gs/*.py             deployments/open5gs/observability/*.py             && echo "all Python compiles"
 
   kpi-gate:
     name: KPI gate is defined and effective
@@ -166,6 +152,12 @@ jobs:
           # querying a metric name nobody emits. Three free5GC gates did exactly that until a
           # live run exposed it. This checks the names against the exporters' source.
           python3 tools/kpi-gate/check_metric_names.py
+
+      - name: slice orchestrator placement rules
+        run: |
+          # Each rule came from a real failure: cheapest adequate slice, no spill-over of
+          # best-effort demand into URLLC, measured load counts, permission is enforced.
+          python3 tools/slice-orchestrator/test_decide.py
 
       - name: gate PASSES a conforming deployment
         run: |

@@ -14,7 +14,7 @@
 set -uo pipefail
 
 UE=o5gs-ue
-UPF=o5gs-upf
+UPF=o5gs-upf-embb   # reassigned per slice below: one UPF per slice (ADR-011)
 pass=0; fail=0; warn=0
 ok()   { printf '  [ PASS ] %s\n' "$1"; pass=$((pass+1)); }
 no()   { printf '  [ FAIL ] %s\n' "$1"; fail=$((fail+1)); }
@@ -31,7 +31,7 @@ echo "==================================================================="
 echo "Open5GS user-plane verification — $(date -u +%Y-%m-%dT%H:%M:%SZ)"
 echo "==================================================================="
 
-for c in "$UE" "$UPF"; do
+for c in "$UE" o5gs-upf-embb o5gs-upf-urllc o5gs-dn-embb o5gs-dn-urllc; do
   [ "$(docker inspect -f '{{.State.Running}}' "$c" 2>/dev/null)" = "true" ] \
     || { echo "error: $c is not running (make o5gs-up)"; exit 2; }
 done
@@ -43,12 +43,12 @@ if [ "${sessions:-0}" -ge 20 ]; then ok "$sessions UEs hold a PDU session addres
 elif [ "${sessions:-0}" -gt 0 ]; then no "only $sessions of 20 UEs hold a PDU session address"
 else no "no UE has a PDU session address — nothing to test"; exit 1; fi
 
-for slice in "A eMBB 10.45. 10.45.0.1 ogstun" "B URLLC 10.46. 10.46.0.1 ogstun2"; do
+for slice in "A eMBB 10.45. 10.45.0.1 ogstun o5gs-upf-embb o5gs-dn-embb 10.53.0.51" "B URLLC 10.46. 10.46.0.1 ogstun2 o5gs-upf-urllc o5gs-dn-urllc 10.53.0.52"; do
   set -- $slice
-  key=$1; name=$2; pool=$3; gw=$4; dev=$5
+  key=$1; name=$2; pool=$3; gw=$4; dev=$5; UPF=$6; DN=$7; dnip=$8
 
   echo
-  echo "-- slice $key ($name): pool ${pool}0.0/16, UPF device $dev --"
+  echo "-- slice $key ($name): pool ${pool}0.0/16, $UPF device $dev --"
   read -r tun cidr <<<"$(tun_for "$pool")"
   if [ -z "${tun:-}" ]; then no "no UE on slice $key has an address"; continue; fi
   ip=${cidr%/*}
@@ -69,15 +69,16 @@ for slice in "A eMBB 10.45. 10.45.0.1 ogstun" "B URLLC 10.46. 10.46.0.1 ogstun2"
   # Throughput through the slice, measured from the UE side.
   # pkill -x (exact process name), never pkill -f: the pattern would match this very
   # `sh -c` command line, and pkill killed its own shell before the server ever started.
-  upf "pkill -x iperf3 2>/dev/null; sleep 0.3; iperf3 -s -B $gw -D --one-off" >/dev/null 2>&1
+  # To and from the slice's data network, through the UPF — not from inside the UPF (ADR-012).
+  docker exec "$DN" sh -c "pkill -x iperf3 2>/dev/null; sleep 0.3; iperf3 -s -B $dnip -D --one-off" >/dev/null 2>&1
   for _ in 1 2 3 4 5 6 7 8 9 10; do
-    upf "ss -ltn | grep -q '$gw:5201'" && break; sleep 0.2
+    docker exec "$DN" sh -c "ss -ltn | grep -q '$dnip:5201'" && break; sleep 0.2
   done
-  mbps=$(ue "iperf3 -c $gw -B $ip -t 3 -J 2>/dev/null" \
+  mbps=$(ue "iperf3 -c $dnip -B $ip -t 3 -J 2>/dev/null" \
          | python3 -c "import json,sys
 try: print('%.1f' % (json.load(sys.stdin)['end']['sum_received']['bits_per_second']/1e6))
 except Exception: print('')" 2>/dev/null)
-  if [ -n "$mbps" ]; then ok "iperf3 through slice $key: $mbps Mbps"
+  if [ -n "$mbps" ]; then ok "iperf3 UE -> $UPF -> $DN: $mbps Mbps"
   else note "iperf3 through slice $key did not complete (ping already proved the path)"; fi
 done
 

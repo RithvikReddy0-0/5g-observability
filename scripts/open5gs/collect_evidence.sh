@@ -40,7 +40,7 @@ for d in json.load(open("manifest.lock"))["dependencies"]:
     print("pin  %-9s %s  (%s)" % (d["name"], d["commit"], d["ref_hint"]))
 PY
   echo
-  for i in o5gs/open5gs:v2.8.0 o5gs/ueransim:v3.3.0; do
+  for i in o5gs/open5gs:v2.8.0 o5gs/ueransim:v3.3.0-udpbuf; do
     echo "image $i  $(docker image inspect "$i" --format '{{.Id}} {{.Size}}' 2>&1)"
   done
   echo "open5gs binary commit: $(docker exec o5gs-amf cat /opt/open5gs/COMMIT 2>&1)"
@@ -79,7 +79,9 @@ step 4 "UE registration and PDU sessions (UE side, ground truth)"
   docker exec o5gs-ue sh -c 'cat /tmp/ues/restarts.log 2>/dev/null || echo none'
   echo
   echo "--- gNB ---"
-  docker logs o5gs-gnb 2>&1 | grep -E 'NG Setup procedure is successful' | tail -1
+  for g in o5gs-gnb-embb o5gs-gnb-urllc; do
+    echo "$g: $(docker logs "$g" 2>&1 | grep -E 'NG Setup procedure is successful' | tail -1)"
+  done
 } > "$OUT/04-ue-sessions.txt" 2>&1
 
 step 5 "ground-truth audit of the core's own gauges"
@@ -89,7 +91,8 @@ step 5 "ground-truth audit of the core's own gauges"
   echo
   echo "--- AMF ---";  metrics 10.53.0.5:9090  | grep -E '^(gnb|ran_ue|amf_session|fivegs_amffunction_rm_(reginit|registeredsubnbr))'
   echo "--- SMF ---";  metrics 10.53.0.4:9090  | grep -E '^(ues_active|pfcp_|fivegs_smffunction_sm_(sessionnbr|qos_flow_nbr|pdusessioncreation))'
-  echo "--- UPF ---";  metrics 10.53.0.7:9090  | grep -E '^(pfcp_peers_active|fivegs_upffunction_upf_(sessionnbr|qosflows))'
+  echo "--- UPF eMBB ---";  metrics 10.53.0.7:9090  | grep -E '^(pfcp_peers_active|fivegs_upffunction_upf_(sessionnbr|qosflows))'
+  echo "--- UPF URLLC ---"; metrics 10.53.0.8:9090  | grep -E '^(pfcp_peers_active|fivegs_upffunction_upf_(sessionnbr|qosflows))'
   echo
   echo "Interpretation (docs/open5gs.md, 'Which metrics can be trusted'):"
   echo "  exact   : ran_ue, amf_session, ues_active, sm_sessionnbr{snssai}"
