@@ -1,0 +1,76 @@
+%% PDU Session Establishment on the Open5GS stack — AUTHORED FROM OBSERVED BEHAVIOUR.
+%%
+%% Source: docs/evidence/open5gs-pdu-session-capture/{capture.pcap,sequence.txt}, captured by
+%% scripts/open5gs/capture_pdu_session.sh inside the AMF, SMF, UPF-eMBB and gNB-eMBB network
+%% namespaces at once. Every arrow below is a message on the wire, in the observed order, with
+%% its observed timestamp (seconds into the capture). One exception is marked (source-inferred).
+%%
+%% UE imsi-208930000000003, slice eMBB SST 1/010203, DNN internet, UPF-eMBB (ADR-011).
+%% Indirect SBI: every NF-to-NF HTTP/2 call goes through the SCP; drawn as NF -> SCP -> NF.
+%% UE <-> gNB arrows ride UERANSIM's simulated radio link (UDP 4997), which the capture filter
+%% excluded: those NAS messages were observed inside the NGAP transports, not on the UE side.
+%% Unlike diagrams/pdu-session-establishment.mmd (free5GC), the data path is NOT design-only:
+%% the final GTP-U packets were captured.
+
+sequenceDiagram
+    autonumber
+    participant UE as UE (UERANSIM)
+    participant gNB as gNB-eMBB
+    participant AMF
+    participant SCP
+    participant SMF
+    participant UDM
+    participant PCF
+    participant UPF as UPF-eMBB
+    participant DN as DN-eMBB
+
+    Note over UE,DN: Release of the previous session (4.065 – 4.306 s)
+    UE->>gNB: NAS PDU Session Release Request
+    gNB->>AMF: NGAP UplinkNASTransport
+    AMF->>SCP: POST /nsmf-pdusession/v1/sm-contexts/{id}/modify
+    SCP->>SMF: (forwarded)
+    SMF->>UPF: PFCP Session Deletion Request
+    UPF-->>SMF: PFCP Session Deletion Response
+    SMF-->>AMF: 200 OK + NAS PDU Session Release Command
+    AMF->>gNB: NGAP PDUSessionResourceReleaseCommand
+    gNB-->>AMF: NGAP PDUSessionResourceReleaseResponse
+    UE->>gNB: NAS PDU Session Release Complete
+    SMF->>SCP: POST /npcf-smpolicycontrol/v1/sm-policies/{id}/delete
+
+    Note over UE,DN: Establishment (4.3077 – 4.3805 s: 73 ms of control plane)
+    UE->>gNB: NAS PDU Session Establishment Request (S-NSSAI 1/010203, DNN internet)
+    gNB->>AMF: NGAP UplinkNASTransport
+    AMF->>SCP: POST /nsmf-pdusession/v1/sm-contexts  (4.3077)
+    SCP->>SMF: (forwarded)
+    SMF->>SCP: GET /nudm-sdm/v2/{supi}/sm-data?single-nssai=1/010203&dnn=internet  (4.3184)
+    SCP->>UDM: (forwarded)
+    UDM-->>SMF: 200 OK — subscribed session QoS for this slice
+    SMF->>SCP: POST /nudm-sdm/v2/{supi}/sdm-subscriptions  (4.3326)
+    SCP->>UDM: (forwarded)
+    SMF-->>AMF: SM context created  (4.3365)
+    SMF->>SCP: POST /npcf-smpolicycontrol/v1/sm-policies  (4.3371)
+    SCP->>PCF: (forwarded)
+    PCF-->>SMF: SM policy  (4.3537)
+    SMF->>UPF: PFCP Session Establishment Request  (4.3544)
+    UPF-->>SMF: PFCP Session Establishment Response  (4.3560)
+    SMF->>SCP: POST /namf-comm/v1/ue-contexts/{supi}/n1-n2-messages  (4.3589)
+    SCP->>AMF: NAS Establishment Accept + NGAP resource setup transfer
+    AMF-->>SMF: 200 OK
+    AMF->>gNB: NGAP PDUSessionResourceSetupRequest  (4.3614)
+    gNB->>UE: NAS PDU Session Establishment Accept (UE address 10.45.0.134)
+    gNB-->>AMF: NGAP PDUSessionResourceSetupResponse — gNB N3 tunnel  (4.3658)
+    AMF->>SCP: POST /nsmf-pdusession/v1/sm-contexts/{id}/modify  (4.3668)
+    SCP->>SMF: (forwarded)
+    SMF->>UPF: PFCP Session Modification Request — downlink to the gNB tunnel  (4.3688)
+    UPF-->>SMF: PFCP Session Modification Response  (4.3697)
+    SMF->>SCP: PUT /nudm-uecm/.../smf-registrations  (4.3712, source-inferred: src/smf/n4-handler.c:818)
+    SCP-->>SMF: 200 OK  (4.3786)
+    SMF-->>AMF: 204 No Content  (4.3805)
+
+    Note over UE,DN: User data on the new session (11.75 s)
+    UE->>gNB: ICMP echo 10.45.0.134 -> 10.53.0.51
+    gNB->>UPF: GTP-U (N3)
+    UPF->>DN: IP, routed (N6)
+    DN-->>UPF: ICMP echo reply
+    UPF-->>gNB: GTP-U (N3)
+    gNB-->>UE: reply, TTL 63 — one routed hop through the UPF

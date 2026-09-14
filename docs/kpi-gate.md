@@ -126,8 +126,13 @@ gate, the CI job and the evidence snapshot all load that one file, so they canno
 Adding a KPI needs `id`, `title`, `expr`, `op`, `threshold`, `severity` and `why`; the CI job
 rejects a definition missing any of them, a duplicate id, or an unknown operator.
 
-## What is still missing
+## Rollback
 
-Automatic **rollback** on a failed gate. At present a failure stops the pipeline and reports
-why; it does not yet revert to the previous known-good deployment. That is the next step, and
-it is honest to say the loop is closed on detection but not yet on remediation.
+**Open5GS stack:** closed on remediation. [`scripts/open5gs/deploy.sh`](../scripts/open5gs/deploy.sh)
+validates a candidate, applies it, runs this gate against `deployments/open5gs/kpi-gates.json`, and
+on failure restores the last known-good configuration and re-gates. Demonstrated on a broken gNB
+config: 8 KPIs failed, rolled back automatically, gate passed again
+([evidence](evidence/open5gs-deploy/README.md), [`docs/open5gs.md`](open5gs.md#deploy-and-rollback)).
+
+**free5GC stack:** still missing. A failure stops the pipeline and reports why; it does not revert.
+The loop there is closed on detection, not on remediation.

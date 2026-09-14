@@ -91,8 +91,14 @@ Full detail and evidence in [`docs/open5gs.md`](../open5gs.md).
 - **The core does not notice UEs that vanish or lose their user plane.** Liveness is measured
   from the UE side, and a UE whose user plane dies after a simulated radio link failure is
   restarted individually.
-- **Slices are not isolated in compute.** Saturating eMBB costs URLLC packet loss (up to 4 of 10
-  probes per round), not delay; URLLC's 10 ms tail budget is missed even at idle on this host.
+- **Slices were not isolated on a shared gNB and UPF.** Saturating eMBB cost URLLC packet loss (up
+  to 4 of 10 probes per round), not delay. Superseded by
+  [ADR-011](ADR-011-dedicated-user-plane-per-slice.md): with a gNB and UPF per slice URLLC holds
+  10/10. CPU is still shared, and URLLC's 10 ms tail budget is missed in some idle minutes.
+
+Follow-on decisions: [ADR-011](ADR-011-dedicated-user-plane-per-slice.md) (user plane per slice),
+[ADR-012](ADR-012-ueransim-udp-buffers.md) (delivering the admitted capacity),
+[ADR-013](ADR-013-kubernetes-open5gs.md) (Kubernetes).
 - **The "Docker Desktop bounces" diagnosis was wrong.** The engine runs inside the Ubuntu WSL
   distro and stops when WSL idles it; proven by holding a session open (0 stops in 15 min vs 11
   in 12 min).

@@ -24,7 +24,12 @@ the ratified ODE. That distinction determines what could and could not be proven
 | Phase-1 acceptance (runnable subset) | **PASS=12, FAIL=0** | `tests/acceptance.sh` |
 | KPI gate enforces thresholds in CI | **10 enforced, 2 ODE-only** | `make gate`: 10/10 PASS on a live deployment, exit 1 with an NF stopped |
 | **Open5GS: UEs with a working PDU session** | **20 / 20** | interface per UE + ping/iperf3 through the UPF |
-| **Open5GS: KPI gate incl. user plane** | **17 / 17 PASS** | live stack; fails with UEs stopped |
+| **Open5GS: KPI gate incl. user plane** | **PASS, 0 failed** (18 passed, 1 advisory) | live stack; fails with UEs stopped |
+| **Open5GS: URLLC isolated from a saturated eMBB** | **10 / 10** reachable, 3 of 3 runs | `isolation_test.sh`, a gNB + UPF per slice |
+| **Open5GS: orchestrator flows delivered** | **164 / 165** | real UDP flows, both slices saturated |
+| **Open5GS: acceptance** | **PASS=22, FAIL=0** | `tests/acceptance-open5gs.sh` |
+| **Open5GS: broken deploy rolled back** | **automatic** | `deploy.sh`, gate failed 8 KPIs |
+| **Open5GS on Kubernetes** | **same gate PASS** | minikube, 19 pods, 20 UEs |
 | PDU session / user-plane data path | **BLOCKED** | needs gtp5g — ODE only |
 
 ---
@@ -252,10 +257,19 @@ laptop on the Open5GS stack** — not on free5GC, whose results above are unchan
 | Result | Value |
 |---|---|
 | UEs with a PDU session (10 per slice, own address pool per slice) | 20 / 20 |
+| Topology | shared control plane; a dedicated gNB, UPF and data network per slice ([ADR-011](adr/ADR-011-dedicated-user-plane-per-slice.md)) |
 | Ping through the UPF, both slices; internet egress | 5/5, ~2 ms; 8.8.8.8 reachable |
 | Single-flow throughput | eMBB 256 Mbps · URLLC 24 Mbps (4 s) |
 | URLLC session AMBR (20 Mbps) over 20 s | 20.08 Mbps — enforced by UERANSIM's gNB, not the core |
-| KPI gate, steady state | 17 / 17 |
+| Deliverable UDP capacity | eMBB 200 Mbps (0.43 % loss) · URLLC 20 Mbps ([ADR-012](adr/ADR-012-ueransim-udp-buffers.md)) |
+| URLLC reachable with eMBB saturated | 10/10 in 3 of 3 runs (shared gNB + UPF: 6, 8, 9, 10) |
+| Orchestrator, 3 demands/s for 120 s | eMBB 200/200, URLLC 20/20 Mbps admitted; 15 refused; 164/165 flows delivered |
+| PDU session establishment on the wire | captured at AMF, SMF, UPF and gNB; [diagram](../diagrams/open5gs-pdu-session-establishment.mmd) |
+| Teardown (`down -v`) and rebuild | PASS, working stack in ~2.5 min |
+| Deploy behind the gate | static reject · gate-fail with automatic rollback · deploy — all three shown |
+| SPEC acceptance | PASS=22, FAIL=0, SKIP-ODE=1, GAP=1, OWNER=1 |
+| Kubernetes (minikube, manifests generated from compose) | 19 pods, 20 UEs, iperf3 eMBB 258 / URLLC 25 Mbps, same gate PASS ([ADR-013](adr/ADR-013-kubernetes-open5gs.md)) |
+| KPI gate, steady state | 18 passed, 0 failed, 1 advisory (URLLC tail latency) |
 
 Findings that change how this system should be read:
 
@@ -268,16 +282,26 @@ Findings that change how this system should be read:
    core still reported 20 UEs and 20 sessions. After a simulated radio link failure a UE shows
    CM-CONNECTED with a dead user plane. Liveness is now probed from the UEs, and such a UE is
    restarted on its own (reproduced and verified).
-4. **Slices share fate on this host.** Saturating eMBB made URLLC lose up to 4 of 10 probes per
-   round without raising its average RTT; URLLC's 10 ms worst-case budget is missed even at
-   idle (three runs).
-5. **The free5GC KPI gate had never been checked against a live deployment, and had three bugs**
+4. **Slices shared fate through a shared gNB; they no longer do, except for CPU.** With one gNB
+   and UPF, saturating eMBB made URLLC lose up to 4 of 10 probes per round — the shared gNB's
+   UDP receive buffer overflowed (12 817 drops in 60 s). With a gNB and UPF per slice, URLLC
+   held 10/10 in three runs and its gNB dropped nothing. URLLC's 10 ms worst-case budget is
+   still missed in some idle minutes: a laptop CPU is shared.
+5. **The orchestrator's admitted capacity was not deliverable at first.** 0 of 78 eMBB flows got
+   their rate. Accounting for every lost packet found three bottlenecks in turn — UERANSIM's
+   default UDP buffers, the UPF TUN queue, and traffic generators competing with the UPF for
+   CPU — and fixing them raised deliverable eMBB from under 40 to 200 Mbps. Two orchestrator
+   bugs surfaced only under real traffic: video spilled onto URLLC when eMBB was full, and
+   iperf3's reverse mode reported the sender's rate as delivered.
+6. **A UE supervisor that checked interface names kept dead UEs marked healthy** (names are
+   reused). The KPI gate caught it (9/10 reachable); identity is now the session address.
+7. **The free5GC KPI gate had never been checked against a live deployment, and had three bugs**
    the stub hid: `count(up == 0)` returns no data rather than 0 (a healthy deployment failed);
    three gates queried metric names the exporter never emits; and the slice exporter read only
    stdout of `docker logs` while free5GC logs to stderr, so its registered-UE metric had read 0
    since August. All fixed and verified live: 10/10 PASS healthy, exit 1 with an NF stopped. A
    CI check now rejects gates that query unexported repo metrics ([`docs/kpi-gate.md`](kpi-gate.md)).
-6. **Engine outages were misdiagnosed.** Not Docker Desktop: WSL idles the Ubuntu distro, which
+8. **Engine outages were misdiagnosed.** Not Docker Desktop: WSL idles the Ubuntu distro, which
    runs the Docker engine. 11 stops in 12 minutes without a session held, 0 in 15 minutes with
    one.
 

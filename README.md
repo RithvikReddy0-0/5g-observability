@@ -13,6 +13,7 @@ gtp5g) are pinned by SHA in [`manifest.lock`](manifest.lock) and fetched into a 
 - **KPI gate:** [`docs/kpi-gate.md`](docs/kpi-gate.md) — the pass/fail contract a deployment must meet.
 - **Review deck:** [`docs/presentation/`](docs/presentation/) — Phase 2 Review 1 slides (LaTeX Beamer).
 - **Open5GS stack:** [`docs/open5gs.md`](docs/open5gs.md) — a second core ([ADR-010](docs/adr/ADR-010-open5gs-core.md)) with a **working user plane on this laptop**. `make o5gs-build && make o5gs-up`.
+- **Open5GS completion report:** [`docs/reports/2026-09-14-open5gs-completion-report.md`](docs/reports/2026-09-14-open5gs-completion-report.md) — what was built, every problem found and how it was fixed, final measured state, what is not done.
 
 > **Baseline environment (ODE):** bare-metal **Ubuntu 24.04 LTS, x86_64, ≥16 GB RAM** (ADR-003).
 > **WSL2 / VMs / cloud are non-baseline.** free5GC's user plane (UPF/gtp5g) runs only on a conforming ODE;
@@ -30,13 +31,19 @@ gtp5g) are pinned by SHA in [`manifest.lock`](manifest.lock) and fetched into a 
 | Observability | ✅ Prometheus + Grafana on free5GC-native metrics |
 | Slice-labeled metrics | ✅ derived exporter (closes risk R-02) |
 | **User plane (PDU session, N3/N6)** — free5GC | 🔒 **ODE-only** — needs the gtp5g kernel module |
-| **User plane — Open5GS stack** | ✅ 20/20 PDU sessions, traffic through the UPF per slice, AMBR enforced ([details](docs/open5gs.md)) |
-| KPI gate — Open5GS | ✅ 17/17 on the live stack, including user-plane, liveness and latency KPIs |
+| **User plane — Open5GS stack** | ✅ 20/20 PDU sessions, a gNB + UPF per slice, AMBR enforced ([details](docs/open5gs.md)) |
+| Slice isolation — Open5GS | ✅ URLLC 10/10 reachable with eMBB saturated, 3 of 3 runs ([ADR-011](docs/adr/ADR-011-dedicated-user-plane-per-slice.md)); CPU not isolated |
+| Deliverable capacity — Open5GS | ✅ eMBB 200 Mbps, URLLC 20 Mbps of real UDP ([ADR-012](docs/adr/ADR-012-ueransim-udp-buffers.md)) |
+| Slice orchestrator on real traffic | ✅ 164/165 admitted flows delivered their rate; refuses on measured load, no spill-over |
+| KPI gate — Open5GS | ✅ 0 failed on the live stack (19 KPIs: 14 enforced, 5 advisory) |
+| Deploy with automatic rollback | ✅ `scripts/open5gs/deploy.sh` — static reject, gate-fail rollback, deploy all demonstrated |
+| Kubernetes — Open5GS | ✅ minikube, manifests generated from compose, same KPI gate passes ([ADR-013](docs/adr/ADR-013-kubernetes-open5gs.md)) |
 | Structured JSON logs | ⚠️ not configurable upstream — documented gap ([`docs/logging.md`](docs/logging.md)) |
 | Phase 1 freeze / baseline tag | ❌ not possible without the user plane |
 
 Run the checks yourself: `tests/acceptance.sh` (currently PASS=12, FAIL=0, SKIP-ODE=7, GAP=1).
 It refuses to report Phase 1 complete on a non-baseline host.
+Open5GS stack: `make o5gs-test` (currently PASS=22, FAIL=0, SKIP-ODE=1, GAP=1, OWNER=1).
 
 ## Repository layout
 
