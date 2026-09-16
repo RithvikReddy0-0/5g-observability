@@ -1,0 +1,51 @@
+==============================================================================
+KPI gate — 2026-09-16T05:53:32Z
+Prometheus: http://localhost:9090   definitions: deployments/kpi-gates.json
+==============================================================================
+
+  [  PASS  ] All 8 control-plane NFs are scrapeable
+             8 >= 8 NFs
+
+  [  FAIL  ] No configured target is down
+             1 targets — required == 0
+             why this matters: Catches the failure mode where the core is healthy but the observability plane itself has broken — a silently blind pipeline still reports green without this.
+
+  [  PASS  ] Expected UE population is registered
+             20 >= 20 UEs
+
+  [  PASS  ] Both slices have registered UEs
+             2 >= 2 slices
+
+  [  PASS  ] Subscriber records exist for both slices
+             20 >= 20 subscribers
+
+  [  PASS  ] SBI server-error rate is below threshold
+             0 <= 0.2 req/s
+
+  [  FAIL  ] SBI p95 latency within budget
+             expression evaluated to NaN
+             why this matters: Inter-NF latency is the earliest signal that the host is too loaded to serve the core honestly. Mirrors the SbiLatencyHigh alert so the gate and the alerting agree.
+
+  [  FAIL  ] Both slices publish capacity
+             no data — the metric is not being reported
+             why this matters: If the orchestrator cannot read the subscriber database it reports no capacity, and every later allocation number would be meaningless.
+
+  [  WARN  ] No slice is saturated
+             no data — the metric is not being reported
+             why this matters: Advisory, not a gate: saturation under a deliberate load test is the correct behaviour, not a defect. It is reported so a regression in allocation policy is visible.
+
+  [  PASS  ] No demand refused for want of a low-latency slice
+             0 == 0 demands
+
+  [SKIP-ODE] PDU session establishment succeeds
+             requires the user plane (gtp5g); not runnable on this host
+
+  [SKIP-ODE] Per-slice throughput matches the provisioned AMBR
+             requires the user plane (gtp5g); not runnable on this host
+
+==============================================================================
+  6 passed   3 failed   1 advisory   2 skipped (ODE)
+==============================================================================
+
+GATE FAILED — this deployment must not be promoted.
+  verdict written to /home/administrator/Desktop/RAKJ23UG005/5g-observability/docs/evidence/run-20260916-055327Z/09-kpi-verdict.json

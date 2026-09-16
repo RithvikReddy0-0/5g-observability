@@ -41,13 +41,13 @@
       "id": 2,
       "type": "stat",
       "title": "UEs connected (AMF)",
-      "description": "Number of UEs currently in the Registered 5GMM state on 3GPP access.",
+      "description": "free5gc_amf_business_ue_connectivity (cm-connected + gmm-registered, 3GPP). CAVEAT: on free5GC v4.2.0 this gauge does NOT match ground truth after registration churn or an AMF restart — measured 3 while nr-cli showed 20/20 registered and connected. Verify with: docker compose exec ueransim ./nr-cli <supi> -e status. See observability/README.md.",
       "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [
         {
           "refId": "A",
-          "expr": "sum(free5gc_amf_business_ue_gmm_state_count{access_type=\"3GPP_ACCESS\",gmm_state=\"Registered\"})",
+          "expr": "free5gc_amf_business_ue_connectivity{access_type=\"3GPP_ACCESS\"}",
           "legendFormat": "UEs"
         }
       ],

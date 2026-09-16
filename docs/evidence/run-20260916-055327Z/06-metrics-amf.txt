@@ -1,0 +1,212 @@
+# HELP free5gc_amf_business_active_pdu_session_current_count Number of PDU Session currently active (source AMF side)
+# TYPE free5gc_amf_business_active_pdu_session_current_count gauge
+free5gc_amf_business_active_pdu_session_current_count{access_type="3GPP_ACCESS"} 20
+free5gc_amf_business_active_pdu_session_current_count{access_type="NON_3GPP_ACCESS"} 0
+# HELP free5gc_amf_business_handover_current_count Number of UEs currently in handover procedure (source AMF side)
+# TYPE free5gc_amf_business_handover_current_count gauge
+free5gc_amf_business_handover_current_count{type="ngap"} 0
+free5gc_amf_business_handover_current_count{type="xn"} 0
+# HELP free5gc_amf_business_pdu_session_events_total Count of pdu events (setup, release, modification)
+# TYPE free5gc_amf_business_pdu_session_events_total counter
+free5gc_amf_business_pdu_session_events_total{access_type="3GPP_ACCESS",event="creation"} 50
+free5gc_amf_business_pdu_session_events_total{access_type="3GPP_ACCESS",event="release"} 30
+# HELP free5gc_amf_business_ue_cm_gmm_state_count Count of the UE in each Connection Management State (CM_IDLE, CM_CONNECTED) in the AMF
+# TYPE free5gc_amf_business_ue_cm_gmm_state_count gauge
+free5gc_amf_business_ue_cm_gmm_state_count{access_type="3GPP_ACCESS",state="cm-connected"} 20
+free5gc_amf_business_ue_cm_gmm_state_count{access_type="3GPP_ACCESS",state="cm-idle"} 70
+free5gc_amf_business_ue_cm_gmm_state_count{access_type="NON_3GPP_ACCESS",state="cm-connected"} 0
+free5gc_amf_business_ue_cm_gmm_state_count{access_type="NON_3GPP_ACCESS",state="cm-idle"} 0
+# HELP free5gc_amf_business_ue_connectivity Number of user equipment that are connected to the core network (cm-connected + gmm-registered)
+# TYPE free5gc_amf_business_ue_connectivity gauge
+free5gc_amf_business_ue_connectivity{access_type="3GPP_ACCESS"} -10
+free5gc_amf_business_ue_connectivity{access_type="NON_3GPP_ACCESS"} 0
+# HELP free5gc_amf_business_ue_gmm_state_count Current number of UEs in each 5GMM state in the AMF
+# TYPE free5gc_amf_business_ue_gmm_state_count gauge
+free5gc_amf_business_ue_gmm_state_count{access_type="3GPP_ACCESS",gmm_state="Authentication"} 0
+free5gc_amf_business_ue_gmm_state_count{access_type="3GPP_ACCESS",gmm_state="ContextSetup"} 0
+free5gc_amf_business_ue_gmm_state_count{access_type="3GPP_ACCESS",gmm_state="Registered"} 20
+free5gc_amf_business_ue_gmm_state_count{access_type="3GPP_ACCESS",gmm_state="SecurityMode"} 0
+# HELP free5gc_amf_business_ue_gmm_state_duration_seconds Duration that UEs spend in a given GMM state before transitioning
+# TYPE free5gc_amf_business_ue_gmm_state_duration_seconds histogram
+free5gc_amf_business_ue_gmm_state_duration_seconds_bucket{access_type="3GPP_ACCESS",gmm_state="Authentication",le="0.0001"} 0
+free5gc_amf_business_ue_gmm_state_duration_seconds_bucket{access_type="3GPP_ACCESS",gmm_state="Authentication",le="0.005"} 0
+free5gc_amf_business_ue_gmm_state_duration_seconds_bucket{access_type="3GPP_ACCESS",gmm_state="Authentication",le="0.01"} 0
+free5gc_amf_business_ue_gmm_state_duration_seconds_bucket{access_type="3GPP_ACCESS",gmm_state="Authentication",le="0.02"} 0
+free5gc_amf_business_ue_gmm_state_duration_seconds_bucket{access_type="3GPP_ACCESS",gmm_state="Authentication",le="0.025"} 4
+free5gc_amf_business_ue_gmm_state_duration_seconds_bucket{access_type="3GPP_ACCESS",gmm_state="Authentication",le="0.05"} 109
+free5gc_amf_business_ue_gmm_state_duration_seconds_bucket{access_type="3GPP_ACCESS",gmm_state="Authentication",le="+Inf"} 120
+free5gc_amf_business_ue_gmm_state_duration_seconds_sum{access_type="3GPP_ACCESS",gmm_state="Authentication"} 6.444699116000003
+free5gc_amf_business_ue_gmm_state_duration_seconds_count{access_type="3GPP_ACCESS",gmm_state="Authentication"} 120
+free5gc_amf_business_ue_gmm_state_duration_seconds_bucket{access_type="3GPP_ACCESS",gmm_state="ContextSetup",le="0.0001"} 0
+free5gc_amf_business_ue_gmm_state_duration_seconds_bucket{access_type="3GPP_ACCESS",gmm_state="ContextSetup",le="0.005"} 0
+free5gc_amf_business_ue_gmm_state_duration_seconds_bucket{access_type="3GPP_ACCESS",gmm_state="ContextSetup",le="0.01"} 0
+free5gc_amf_business_ue_gmm_state_duration_seconds_bucket{access_type="3GPP_ACCESS",gmm_state="ContextSetup",le="0.02"} 5
+free5gc_amf_business_ue_gmm_state_duration_seconds_bucket{access_type="3GPP_ACCESS",gmm_state="ContextSetup",le="0.025"} 60
+free5gc_amf_business_ue_gmm_state_duration_seconds_bucket{access_type="3GPP_ACCESS",gmm_state="ContextSetup",le="0.05"} 71
+free5gc_amf_business_ue_gmm_state_duration_seconds_bucket{access_type="3GPP_ACCESS",gmm_state="ContextSetup",le="+Inf"} 120
+free5gc_amf_business_ue_gmm_state_duration_seconds_sum{access_type="3GPP_ACCESS",gmm_state="ContextSetup"} 12.534415107000006
+free5gc_amf_business_ue_gmm_state_duration_seconds_count{access_type="3GPP_ACCESS",gmm_state="ContextSetup"} 120
+free5gc_amf_business_ue_gmm_state_duration_seconds_bucket{access_type="3GPP_ACCESS",gmm_state="Registered",le="0.0001"} 0
+free5gc_amf_business_ue_gmm_state_duration_seconds_bucket{access_type="3GPP_ACCESS",gmm_state="Registered",le="0.005"} 0
+free5gc_amf_business_ue_gmm_state_duration_seconds_bucket{access_type="3GPP_ACCESS",gmm_state="Registered",le="0.01"} 0
+free5gc_amf_business_ue_gmm_state_duration_seconds_bucket{access_type="3GPP_ACCESS",gmm_state="Registered",le="0.02"} 0
+free5gc_amf_business_ue_gmm_state_duration_seconds_bucket{access_type="3GPP_ACCESS",gmm_state="Registered",le="0.025"} 0
+free5gc_amf_business_ue_gmm_state_duration_seconds_bucket{access_type="3GPP_ACCESS",gmm_state="Registered",le="0.05"} 0
+free5gc_amf_business_ue_gmm_state_duration_seconds_bucket{access_type="3GPP_ACCESS",gmm_state="Registered",le="+Inf"} 30
+free5gc_amf_business_ue_gmm_state_duration_seconds_sum{access_type="3GPP_ACCESS",gmm_state="Registered"} 7101.83576098
+free5gc_amf_business_ue_gmm_state_duration_seconds_count{access_type="3GPP_ACCESS",gmm_state="Registered"} 30
+free5gc_amf_business_ue_gmm_state_duration_seconds_bucket{access_type="3GPP_ACCESS",gmm_state="SecurityMode",le="0.0001"} 0
+free5gc_amf_business_ue_gmm_state_duration_seconds_bucket{access_type="3GPP_ACCESS",gmm_state="SecurityMode",le="0.005"} 106
+free5gc_amf_business_ue_gmm_state_duration_seconds_bucket{access_type="3GPP_ACCESS",gmm_state="SecurityMode",le="0.01"} 107
+free5gc_amf_business_ue_gmm_state_duration_seconds_bucket{access_type="3GPP_ACCESS",gmm_state="SecurityMode",le="0.02"} 110
+free5gc_amf_business_ue_gmm_state_duration_seconds_bucket{access_type="3GPP_ACCESS",gmm_state="SecurityMode",le="0.025"} 111
+free5gc_amf_business_ue_gmm_state_duration_seconds_bucket{access_type="3GPP_ACCESS",gmm_state="SecurityMode",le="0.05"} 111
+free5gc_amf_business_ue_gmm_state_duration_seconds_bucket{access_type="3GPP_ACCESS",gmm_state="SecurityMode",le="+Inf"} 120
+free5gc_amf_business_ue_gmm_state_duration_seconds_sum{access_type="3GPP_ACCESS",gmm_state="SecurityMode"} 2.8757151449999996
+free5gc_amf_business_ue_gmm_state_duration_seconds_count{access_type="3GPP_ACCESS",gmm_state="SecurityMode"} 120
+# HELP free5gc_amf_business_ue_gmm_transitions_total Count of UE GMM state transitions in the AMF
+# TYPE free5gc_amf_business_ue_gmm_transitions_total counter
+free5gc_amf_business_ue_gmm_transitions_total{from_state="Authentication",to_state="SecurityMode"} 120
+free5gc_amf_business_ue_gmm_transitions_total{from_state="ContextSetup",to_state="Deregistered"} 70
+free5gc_amf_business_ue_gmm_transitions_total{from_state="ContextSetup",to_state="Registered"} 50
+free5gc_amf_business_ue_gmm_transitions_total{from_state="Deregistered",to_state="Authentication"} 90
+free5gc_amf_business_ue_gmm_transitions_total{from_state="Registered",to_state="Authentication"} 30
+free5gc_amf_business_ue_gmm_transitions_total{from_state="SecurityMode",to_state="ContextSetup"} 120
+# HELP free5gc_nas_msg_received_total Total number of received NAS message
+# TYPE free5gc_nas_msg_received_total counter
+free5gc_nas_msg_received_total{cause="",name="AuthenticationResponse",nf_type="amf",status="successful"} 120
+free5gc_nas_msg_received_total{cause="",name="RegistrationComplete",nf_type="amf",status="successful"} 50
+free5gc_nas_msg_received_total{cause="",name="RegistrationRequest",nf_type="amf",status="successful"} 120
+free5gc_nas_msg_received_total{cause="",name="SecurityModeComplete",nf_type="amf",status="successful"} 120
+free5gc_nas_msg_received_total{cause="",name="ULNASTransport",nf_type="amf",status="successful"} 50
+# HELP free5gc_nas_nas_msg_sent_total Total number of NAS message sent
+# TYPE free5gc_nas_nas_msg_sent_total counter
+free5gc_nas_nas_msg_sent_total{cause="",name="AuthenticationRequest",nf_type="amf",status="successful"} 120
+free5gc_nas_nas_msg_sent_total{cause="",name="ConfigurationUpdateCommand",nf_type="amf",status="successful"} 50
+free5gc_nas_nas_msg_sent_total{cause="",name="RegistrationAccept",nf_type="amf",status="successful"} 50
+free5gc_nas_nas_msg_sent_total{cause="",name="SecurityModeCommand",nf_type="amf",status="successful"} 120
+# HELP free5gc_ngap_msg_received_total Total number of received NGAP message
+# TYPE free5gc_ngap_msg_received_total counter
+free5gc_ngap_msg_received_total{cause="",name="InitialContextSetupResponse",nf_type="amf",status="successful"} 50
+free5gc_ngap_msg_received_total{cause="",name="InitialUEMessage",nf_type="amf",status="successful"} 120
+free5gc_ngap_msg_received_total{cause="",name="NGSetupRequest",nf_type="amf",status="successful"} 2
+free5gc_ngap_msg_received_total{cause="",name="PDUSessionResourceSetupResponse",nf_type="amf",status="successful"} 50
+free5gc_ngap_msg_received_total{cause="",name="UEContextReleaseComplete",nf_type="amf",status="successful"} 90
+free5gc_ngap_msg_received_total{cause="",name="UEContextReleaseRequest",nf_type="amf",status="successful"} 90
+free5gc_ngap_msg_received_total{cause="",name="UplinkNASTransport",nf_type="amf",status="successful"} 340
+# HELP free5gc_ngap_msg_sent_total Total number of NGAP message sent
+# TYPE free5gc_ngap_msg_sent_total counter
+free5gc_ngap_msg_sent_total{cause="",name="DownlinkNasTransport",nf_type="amf",status="successful"} 290
+free5gc_ngap_msg_sent_total{cause="",name="InitialContextSetupRequest",nf_type="amf",status="successful"} 50
+free5gc_ngap_msg_sent_total{cause="",name="NGSetupResponse",nf_type="amf",status="successful"} 2
+free5gc_ngap_msg_sent_total{cause="",name="PDUSessionResourceSetupRequest",nf_type="amf",status="successful"} 50
+free5gc_ngap_msg_sent_total{cause="",name="UEContextReleaseCommand",nf_type="amf",status="successful"} 90
+free5gc_ngap_msg_sent_total{cause="Could not build NAS message",name="RerouteNasRequest",nf_type="amf",status="failure"} 70
+# HELP free5gc_sbi_inbound_request_duration_seconds Histogram of request latencies
+# TYPE free5gc_sbi_inbound_request_duration_seconds histogram
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="amf",path="/namf-comm/v1/ue-contexts/:ueContextId/n1-n2-messages",status_code="200 OK",le="0.0001"} 0
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="amf",path="/namf-comm/v1/ue-contexts/:ueContextId/n1-n2-messages",status_code="200 OK",le="0.005"} 50
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="amf",path="/namf-comm/v1/ue-contexts/:ueContextId/n1-n2-messages",status_code="200 OK",le="0.01"} 50
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="amf",path="/namf-comm/v1/ue-contexts/:ueContextId/n1-n2-messages",status_code="200 OK",le="0.02"} 50
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="amf",path="/namf-comm/v1/ue-contexts/:ueContextId/n1-n2-messages",status_code="200 OK",le="0.025"} 50
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="amf",path="/namf-comm/v1/ue-contexts/:ueContextId/n1-n2-messages",status_code="200 OK",le="0.05"} 50
+free5gc_sbi_inbound_request_duration_seconds_bucket{method="POST",nf_type="amf",path="/namf-comm/v1/ue-contexts/:ueContextId/n1-n2-messages",status_code="200 OK",le="+Inf"} 50
+free5gc_sbi_inbound_request_duration_seconds_sum{method="POST",nf_type="amf",path="/namf-comm/v1/ue-contexts/:ueContextId/n1-n2-messages",status_code="200 OK"} 0.018529
+free5gc_sbi_inbound_request_duration_seconds_count{method="POST",nf_type="amf",path="/namf-comm/v1/ue-contexts/:ueContextId/n1-n2-messages",status_code="200 OK"} 50
+# HELP free5gc_sbi_inbound_request_total Total number of SBI inbound requests received by the NF
+# TYPE free5gc_sbi_inbound_request_total counter
+free5gc_sbi_inbound_request_total{cause="",method="POST",nf_type="amf",path="/namf-comm/v1/ue-contexts/:ueContextId/n1-n2-messages",status_code="200 OK"} 50
+# HELP free5gc_sbi_outbound_request_duration_seconds Histogram of request latencies
+# TYPE free5gc_sbi_outbound_request_duration_seconds histogram
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="amf",status_code="200 OK",target_service_name="nnrf-disc",le="0.0001"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="amf",status_code="200 OK",target_service_name="nnrf-disc",le="0.005"} 490
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="amf",status_code="200 OK",target_service_name="nnrf-disc",le="0.01"} 490
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="amf",status_code="200 OK",target_service_name="nnrf-disc",le="0.02"} 490
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="amf",status_code="200 OK",target_service_name="nnrf-disc",le="0.025"} 490
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="amf",status_code="200 OK",target_service_name="nnrf-disc",le="0.05"} 490
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="amf",status_code="200 OK",target_service_name="nnrf-disc",le="+Inf"} 490
+free5gc_sbi_outbound_request_duration_seconds_sum{method="GET",nf_type="amf",status_code="200 OK",target_service_name="nnrf-disc"} 0.5020299790000003
+free5gc_sbi_outbound_request_duration_seconds_count{method="GET",nf_type="amf",status_code="200 OK",target_service_name="nnrf-disc"} 490
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="amf",status_code="200 OK",target_service_name="nudm-sdm",le="0.0001"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="amf",status_code="200 OK",target_service_name="nudm-sdm",le="0.005"} 141
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="amf",status_code="200 OK",target_service_name="nudm-sdm",le="0.01"} 150
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="amf",status_code="200 OK",target_service_name="nudm-sdm",le="0.02"} 150
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="amf",status_code="200 OK",target_service_name="nudm-sdm",le="0.025"} 150
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="amf",status_code="200 OK",target_service_name="nudm-sdm",le="0.05"} 150
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="GET",nf_type="amf",status_code="200 OK",target_service_name="nudm-sdm",le="+Inf"} 150
+free5gc_sbi_outbound_request_duration_seconds_sum{method="GET",nf_type="amf",status_code="200 OK",target_service_name="nudm-sdm"} 0.6182327379999997
+free5gc_sbi_outbound_request_duration_seconds_count{method="GET",nf_type="amf",status_code="200 OK",target_service_name="nudm-sdm"} 150
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="amf",status_code="200 OK",target_service_name="nsmf-pdusession",le="0.0001"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="amf",status_code="200 OK",target_service_name="nsmf-pdusession",le="0.005"} 70
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="amf",status_code="200 OK",target_service_name="nsmf-pdusession",le="0.01"} 70
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="amf",status_code="200 OK",target_service_name="nsmf-pdusession",le="0.02"} 70
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="amf",status_code="200 OK",target_service_name="nsmf-pdusession",le="0.025"} 70
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="amf",status_code="200 OK",target_service_name="nsmf-pdusession",le="0.05"} 70
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="amf",status_code="200 OK",target_service_name="nsmf-pdusession",le="+Inf"} 70
+free5gc_sbi_outbound_request_duration_seconds_sum{method="POST",nf_type="amf",status_code="200 OK",target_service_name="nsmf-pdusession"} 0.12798017799999997
+free5gc_sbi_outbound_request_duration_seconds_count{method="POST",nf_type="amf",status_code="200 OK",target_service_name="nsmf-pdusession"} 70
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="amf",status_code="201 Created",target_service_name="nausf-auth",le="0.0001"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="amf",status_code="201 Created",target_service_name="nausf-auth",le="0.005"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="amf",status_code="201 Created",target_service_name="nausf-auth",le="0.01"} 5
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="amf",status_code="201 Created",target_service_name="nausf-auth",le="0.02"} 120
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="amf",status_code="201 Created",target_service_name="nausf-auth",le="0.025"} 120
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="amf",status_code="201 Created",target_service_name="nausf-auth",le="0.05"} 120
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="amf",status_code="201 Created",target_service_name="nausf-auth",le="+Inf"} 120
+free5gc_sbi_outbound_request_duration_seconds_sum{method="POST",nf_type="amf",status_code="201 Created",target_service_name="nausf-auth"} 1.5199915490000002
+free5gc_sbi_outbound_request_duration_seconds_count{method="POST",nf_type="amf",status_code="201 Created",target_service_name="nausf-auth"} 120
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="amf",status_code="201 Created",target_service_name="nsmf-pdusession",le="0.0001"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="amf",status_code="201 Created",target_service_name="nsmf-pdusession",le="0.005"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="amf",status_code="201 Created",target_service_name="nsmf-pdusession",le="0.01"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="amf",status_code="201 Created",target_service_name="nsmf-pdusession",le="0.02"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="amf",status_code="201 Created",target_service_name="nsmf-pdusession",le="0.025"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="amf",status_code="201 Created",target_service_name="nsmf-pdusession",le="0.05"} 26
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="amf",status_code="201 Created",target_service_name="nsmf-pdusession",le="+Inf"} 50
+free5gc_sbi_outbound_request_duration_seconds_sum{method="POST",nf_type="amf",status_code="201 Created",target_service_name="nsmf-pdusession"} 2.706543049
+free5gc_sbi_outbound_request_duration_seconds_count{method="POST",nf_type="amf",status_code="201 Created",target_service_name="nsmf-pdusession"} 50
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="amf",status_code="201 Created",target_service_name="nudm-sdm",le="0.0001"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="amf",status_code="201 Created",target_service_name="nudm-sdm",le="0.005"} 19
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="amf",status_code="201 Created",target_service_name="nudm-sdm",le="0.01"} 20
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="amf",status_code="201 Created",target_service_name="nudm-sdm",le="0.02"} 20
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="amf",status_code="201 Created",target_service_name="nudm-sdm",le="0.025"} 20
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="amf",status_code="201 Created",target_service_name="nudm-sdm",le="0.05"} 20
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="amf",status_code="201 Created",target_service_name="nudm-sdm",le="+Inf"} 20
+free5gc_sbi_outbound_request_duration_seconds_sum{method="POST",nf_type="amf",status_code="201 Created",target_service_name="nudm-sdm"} 0.08333949799999998
+free5gc_sbi_outbound_request_duration_seconds_count{method="POST",nf_type="amf",status_code="201 Created",target_service_name="nudm-sdm"} 20
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="amf",status_code="204 No Content",target_service_name="nsmf-pdusession",le="0.0001"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="amf",status_code="204 No Content",target_service_name="nsmf-pdusession",le="0.005"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="amf",status_code="204 No Content",target_service_name="nsmf-pdusession",le="0.01"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="amf",status_code="204 No Content",target_service_name="nsmf-pdusession",le="0.02"} 9
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="amf",status_code="204 No Content",target_service_name="nsmf-pdusession",le="0.025"} 30
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="amf",status_code="204 No Content",target_service_name="nsmf-pdusession",le="0.05"} 30
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="POST",nf_type="amf",status_code="204 No Content",target_service_name="nsmf-pdusession",le="+Inf"} 30
+free5gc_sbi_outbound_request_duration_seconds_sum{method="POST",nf_type="amf",status_code="204 No Content",target_service_name="nsmf-pdusession"} 0.6096044749999999
+free5gc_sbi_outbound_request_duration_seconds_count{method="POST",nf_type="amf",status_code="204 No Content",target_service_name="nsmf-pdusession"} 30
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="amf",status_code="200 OK",target_service_name="nausf-auth",le="0.0001"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="amf",status_code="200 OK",target_service_name="nausf-auth",le="0.005"} 1
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="amf",status_code="200 OK",target_service_name="nausf-auth",le="0.01"} 119
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="amf",status_code="200 OK",target_service_name="nausf-auth",le="0.02"} 120
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="amf",status_code="200 OK",target_service_name="nausf-auth",le="0.025"} 120
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="amf",status_code="200 OK",target_service_name="nausf-auth",le="0.05"} 120
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="amf",status_code="200 OK",target_service_name="nausf-auth",le="+Inf"} 120
+free5gc_sbi_outbound_request_duration_seconds_sum{method="PUT",nf_type="amf",status_code="200 OK",target_service_name="nausf-auth"} 0.9873165119999998
+free5gc_sbi_outbound_request_duration_seconds_count{method="PUT",nf_type="amf",status_code="200 OK",target_service_name="nausf-auth"} 120
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="amf",status_code="201 Created",target_service_name="nnrf-nfm",le="0.0001"} 0
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="amf",status_code="201 Created",target_service_name="nnrf-nfm",le="0.005"} 1
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="amf",status_code="201 Created",target_service_name="nnrf-nfm",le="0.01"} 1
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="amf",status_code="201 Created",target_service_name="nnrf-nfm",le="0.02"} 1
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="amf",status_code="201 Created",target_service_name="nnrf-nfm",le="0.025"} 1
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="amf",status_code="201 Created",target_service_name="nnrf-nfm",le="0.05"} 1
+free5gc_sbi_outbound_request_duration_seconds_bucket{method="PUT",nf_type="amf",status_code="201 Created",target_service_name="nnrf-nfm",le="+Inf"} 1
+free5gc_sbi_outbound_request_duration_seconds_sum{method="PUT",nf_type="amf",status_code="201 Created",target_service_name="nnrf-nfm"} 0.004756339
+free5gc_sbi_outbound_request_duration_seconds_count{method="PUT",nf_type="amf",status_code="201 Created",target_service_name="nnrf-nfm"} 1
+# HELP free5gc_sbi_outbound_request_total Total number of SBI outbound requests attempted or sent by the NF
+# TYPE free5gc_sbi_outbound_request_total counter
+free5gc_sbi_outbound_request_total{method="GET",nf_type="amf",status_code="200 OK",target_service_name="nnrf-disc"} 490
+free5gc_sbi_outbound_request_total{method="GET",nf_type="amf",status_code="200 OK",target_service_name="nudm-sdm"} 150
+free5gc_sbi_outbound_request_total{method="POST",nf_type="amf",status_code="200 OK",target_service_name="nsmf-pdusession"} 70
+free5gc_sbi_outbound_request_total{method="POST",nf_type="amf",status_code="201 Created",target_service_name="nausf-auth"} 120
+free5gc_sbi_outbound_request_total{method="POST",nf_type="amf",status_code="201 Created",target_service_name="nsmf-pdusession"} 50
+free5gc_sbi_outbound_request_total{method="POST",nf_type="amf",status_code="201 Created",target_service_name="nudm-sdm"} 20
+free5gc_sbi_outbound_request_total{method="POST",nf_type="amf",status_code="204 No Content",target_service_name="nsmf-pdusession"} 30
+free5gc_sbi_outbound_request_total{method="PUT",nf_type="amf",status_code="200 OK",target_service_name="nausf-auth"} 120
+free5gc_sbi_outbound_request_total{method="PUT",nf_type="amf",status_code="201 Created",target_service_name="nnrf-nfm"} 1

@@ -1,0 +1,36 @@
+captured (UTC): 20260916-055327Z
+kernel        : 6.8.0-136-generic
+os            : Ubuntu 24.04.3 LTS
+cpu threads   : 32
+memory        : 31.0 GiB
+docker        : 29.1.2
+compose       : 5.0.0
+
+--- ODE conformance (scripts/verify_env.sh) ---
+===================================================================
+verify_env.sh — ODE conformance check (SPEC ADR-003)
+date: 2026-09-16T05:53:27Z
+===================================================================
+  OS                     : PASS  Ubuntu 24.04 LTS
+  Arch                   : PASS  x86_64
+  Not-WSL (hard)         : PASS  no WSL signature in /proc/version
+  Virtualization         : WARN  none
+unknown (baseline requires bare-metal)
+  CPU threads            : PASS  32 (>=8)
+  RAM                    : PASS  31 GiB (>=16 GB)
+  Free disk              : FAIL  91 GiB on /home/administrator/Desktop/RAKJ23UG005/5g-observability (<100 GB)
+  sudo                   : WARN  could not confirm non-interactive sudo (required on ODE for gtp5g)
+  Docker Engine          : PASS  29.1.2
+  Docker Compose v2      : PASS  5.0.0
+-------------------------------------------------------------------
+discovered: kernel=6.8.0-136-generic os=ubuntu-24.04 arch=x86_64 nproc=32 ram=31GiB virt=none
+unknown
+summary: PASS=7  WARN=2  FAIL=1
+
+###################################################################
+#  NON-BASELINE ENVIRONMENT                                        #
+#  This machine does NOT satisfy the ODE (SPEC ADR-003).           #
+#  File/authoring work is fine here, but the M0 sign-off checklist #
+#  (build+load gtp5g, freeze VERSIONS.lock) MUST be completed on a #
+#  conforming bare-metal Ubuntu 24.04 ODE.                         #
+###################################################################

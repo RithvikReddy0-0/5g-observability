@@ -1,0 +1,145 @@
+{
+  "timestamp": "2026-09-16T05:53:32Z",
+  "prometheus": "http://localhost:9090",
+  "verdict": "FAILED",
+  "summary": {
+    "passed": 6,
+    "failed": 3,
+    "advisory": 1,
+    "skipped_ode": 2
+  },
+  "results": [
+    {
+      "id": "nf-exporters-up",
+      "title": "All 8 control-plane NFs are scrapeable",
+      "status": "PASS",
+      "value": 8.0,
+      "threshold": 8,
+      "op": "gte",
+      "unit": "NFs",
+      "severity": "gate",
+      "detail": "8 >= 8 NFs"
+    },
+    {
+      "id": "no-scrape-failures",
+      "title": "No configured target is down",
+      "status": "FAIL",
+      "value": 1.0,
+      "threshold": 0,
+      "op": "eq",
+      "unit": "targets",
+      "severity": "gate",
+      "detail": "1 targets \u2014 required == 0"
+    },
+    {
+      "id": "ues-registered",
+      "title": "Expected UE population is registered",
+      "status": "PASS",
+      "value": 20.0,
+      "threshold": 20,
+      "op": "gte",
+      "unit": "UEs",
+      "severity": "gate",
+      "detail": "20 >= 20 UEs"
+    },
+    {
+      "id": "both-slices-carrying-ues",
+      "title": "Both slices have registered UEs",
+      "status": "PASS",
+      "value": 2.0,
+      "threshold": 2,
+      "op": "gte",
+      "unit": "slices",
+      "severity": "gate",
+      "detail": "2 >= 2 slices"
+    },
+    {
+      "id": "subscribers-provisioned",
+      "title": "Subscriber records exist for both slices",
+      "status": "PASS",
+      "value": 20.0,
+      "threshold": 20,
+      "op": "gte",
+      "unit": "subscribers",
+      "severity": "gate",
+      "detail": "20 >= 20 subscribers"
+    },
+    {
+      "id": "sbi-5xx-rate",
+      "title": "SBI server-error rate is below threshold",
+      "status": "PASS",
+      "value": 0.0,
+      "threshold": 0.2,
+      "op": "lte",
+      "unit": "req/s",
+      "severity": "gate",
+      "detail": "0 <= 0.2 req/s"
+    },
+    {
+      "id": "sbi-latency-p95",
+      "title": "SBI p95 latency within budget",
+      "status": "FAIL",
+      "value": null,
+      "threshold": 1.0,
+      "op": "lte",
+      "unit": "seconds",
+      "severity": "gate",
+      "detail": "expression evaluated to NaN"
+    },
+    {
+      "id": "slice-capacity-published",
+      "title": "Both slices publish capacity",
+      "status": "FAIL",
+      "value": null,
+      "threshold": 2,
+      "op": "gte",
+      "unit": "slices",
+      "severity": "gate",
+      "detail": "no data \u2014 the metric is not being reported"
+    },
+    {
+      "id": "slice-not-saturated",
+      "title": "No slice is saturated",
+      "status": "WARN",
+      "value": null,
+      "threshold": 0.95,
+      "op": "lte",
+      "unit": "ratio",
+      "severity": "advisory",
+      "detail": "no data \u2014 the metric is not being reported"
+    },
+    {
+      "id": "no-latency-rejections",
+      "title": "No demand refused for want of a low-latency slice",
+      "status": "PASS",
+      "value": 0.0,
+      "threshold": 0,
+      "op": "eq",
+      "unit": "demands",
+      "severity": "advisory",
+      "detail": "0 == 0 demands"
+    },
+    {
+      "id": "pdu-session-success",
+      "title": "PDU session establishment succeeds",
+      "status": "SKIP-ODE",
+      "value": null,
+      "threshold": 0.99,
+      "op": "gte",
+      "unit": "ratio",
+      "severity": "gate",
+      "detail": "requires the user plane (gtp5g); not runnable on this host"
+    },
+    {
+      "id": "user-plane-throughput",
+      "title": "Per-slice throughput matches the provisioned AMBR",
+      "status": "SKIP-ODE",
+      "value": null,
+      "threshold": 1.0,
+      "op": "gte",
+      "unit": "Mbps",
+      "severity": "gate",
+      "detail": "requires the user plane (gtp5g); not runnable on this host"
+    }
+  ]
+}

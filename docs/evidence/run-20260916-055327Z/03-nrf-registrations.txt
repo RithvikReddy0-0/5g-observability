@@ -1,0 +1,74 @@
+[
+	{
+		"nfType" : "UDM",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfType" : "AUSF",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfType" : "AMF",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfType" : "UDR",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfType" : "NSSF",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfType" : "AF",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfType" : "PCF",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfType" : "SMF",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfType" : "UDR",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfType" : "AUSF",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfType" : "CHF",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfType" : "PCF",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfType" : "UDM",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfStatus" : "REGISTERED",
+		"nfType" : "NEF"
+	},
+	{
+		"nfStatus" : "REGISTERED",
+		"nfType" : "NSSF"
+	},
+	{
+		"nfType" : "SMF",
+		"nfStatus" : "REGISTERED"
+	},
+	{
+		"nfStatus" : "REGISTERED",
+		"nfType" : "AF"
+	},
+	{
+		"nfType" : "AMF",
+		"nfStatus" : "REGISTERED"
+	}
+]
