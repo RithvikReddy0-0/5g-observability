@@ -91,7 +91,7 @@ sudo dmesg > "$DMESG_LOG" 2>/dev/null || true
 # --- Validate (all must hold) ---
 echo "== validating =="
 OK=1
-if lsmod | grep -q '^gtp5g'; then echo "  [ OK ] lsmod shows gtp5g"; else echo "  [FAIL] gtp5g not present in lsmod"; OK=0; fi
+if sudo lsmod | grep '^gtp5g' >/dev/null; then echo "  [ OK ] lsmod shows gtp5g"; else echo "  [FAIL] gtp5g not present in lsmod"; OK=0; fi
 if grep -qiE 'gtp5g.*(error|fail|taint)' "$DMESG_LOG" 2>/dev/null; then echo "  [FAIL] dmesg shows gtp5g error/taint"; OK=0; else echo "  [ OK ] no gtp5g error/taint in dmesg"; fi
 GMODVER="$(modinfo gtp5g 2>/dev/null | awk '/^version:/{print $2}')"
 if [ -n "${GMODVER:-}" ]; then echo "  [ OK ] modinfo version: $GMODVER"; else echo "  [WARN] modinfo returned no version string"; fi
