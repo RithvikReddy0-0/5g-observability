@@ -1,0 +1,86 @@
+# Phase 2b — 100 UEs, three slices, KPI scorecard: work division
+
+**Team 23UG005 · Panel 4** — Anvita Arasavilli, Janhavi Nilesh Parate,
+Keerthi Devarajan Anuradha, Mukkara Rithvik Reddy.
+
+**What this phase delivers.** One hundred UEs are provisioned and attached in three classes —
+10 time-sensitive (URLLC), 20 bandwidth-hungry (eMBB) and 70 IoT devices (mMTC) that send ten
+bytes periodically and then sleep. Each class becomes a network slice with its own KPI: latency
+for URLLC, throughput and its share of system bandwidth for eMBB, and device density with
+delivery of small packets for mMTC. Every KPI is measured on the running system and compared
+against published industry targets (ITU-R M.2410 for IMT-2020 values, 3GPP TS 28.554 for the
+per-slice KPI definitions), weighted per slice into a score, and exported to an Excel report that
+records every instance while one parameter is varied. The orchestrator then grows from admitting
+demands to prioritising inside a slice and deciding how resources are allocated. Fault diagnosis
+is deliberately left to the phase after this one.
+
+The work splits into four tracks that can run in parallel once the first one lands the slice and
+the UEs. Names below are a proposal — the tracks matter more than who holds them, and they can be
+swapped as long as each track keeps one owner.
+
+## Track 1 — Slice and scale (owner: Rithvik)
+
+Rithvik extends the running Open5GS deployment from two slices to three and from twenty UEs to a
+hundred. This means an mMTC slice on the standard SST 3 with its own DNN, address pool, UPF and
+gNB — following the pattern already proven for the other two, where a shared gNB was what destroyed
+isolation — plus provisioning that hardcodes the 10/20/70 split, a UE supervisor that can start and
+watch a hundred processes rather than twenty, and the deployment, gate and CI updated to the new
+topology. The track's obligation to the others is a stack that reliably holds 100 attached UEs
+across three slices, since every other track measures against it. Its own finding is the cost of
+that scale: what a hundred simultaneous registrations do to the control plane, and where this
+laptop stops.
+
+## Track 2 — Traffic profiles and instruments (owner: Janhavi)
+
+Janhavi builds what each slice actually carries and how it is measured. URLLC needs small packets
+sent at a fixed interval with a per-packet latency record, not an averaged ping; eMBB needs bulk
+flows that saturate the slice so throughput is a real measurement rather than a configured number;
+mMTC needs seventy devices each waking to send ten bytes and sleeping again, with every packet
+accounted for so delivery can be computed. Seventy such devices amount to only a few kilobits per
+second, which is exactly the point — the mMTC instrument must count devices and delivered packets,
+because measuring its bandwidth would say nothing. This track owns the traffic generators and the
+exporters that turn their results into metrics, and it hands Track 3 a clean, named metric for
+every KPI.
+
+## Track 3 — KPI definitions, targets and scoring (owner: Keerthi)
+
+Keerthi decides what each KPI means, what number the industry expects, and how far the system is
+from it. That is three pieces of work: writing the per-slice KPI set against the 3GPP catalogue so
+the names and methods are defensible; recording the IMT-2020 target for each one with its source
+clause, rather than a remembered figure; and defining the weights that turn several measurements
+into one score per slice — latency dominating URLLC, throughput dominating eMBB, density dominating
+mMTC. The honest part of this track is the gap: URLLC's target is one millisecond and this hardware
+delivers a few, so every score must carry the reason for its distance from the target. A score
+without that explanation would mislead the reader, and this track owns making sure it never does.
+
+## Track 4 — Sweeps, reporting and review material (owner: Anvita)
+
+Anvita turns measurements into the report the review asks for. The requirement is an Excel record
+of the KPIs at all instances while one parameter is varied, so this track designs the sweeps —
+which parameter moves (number of UEs, offered load, IoT reporting interval, packet size, or the
+split of capacity between slices), which stay fixed, how long each point settles so the numbers are
+comparable, and how a run is repeated. It then produces the workbook itself, with a sheet per sweep
+and the per-slice scores alongside the raw KPIs, the Grafana panels that show the same story live,
+and the slides and figures for the next review. Where a sweep shows something unexpected, this
+track is responsible for saying so in the report rather than smoothing it.
+
+## Shared and later work
+
+The orchestrator extension — priority within the URLLC slice, deciding how many slices a demand set
+needs, and allocating from monitored load — is shared between Track 1 and Track 3, because it is an
+architecture decision carrying a measurement question, and it starts only once the KPI definitions
+are settled. Fault diagnosis is the following phase and is not started here.
+
+## Sequence and hand-offs
+
+| Order | What must happen | Blocks |
+|---|---|---|
+| 1 | mMTC slice up and 100 UEs attached (Track 1) | every measurement |
+| 2 | Traffic profiles and exporters per class (Track 2) | KPI values |
+| 3 | KPI set, targets and weights agreed (Track 3) | scoring, sweeps |
+| 4 | Sweep design and workbook (Track 4) | the review report |
+| 5 | Orchestrator: priority and allocation (Tracks 1 + 3) | next review |
+
+Tracks 2, 3 and 4 can begin on the current two-slice, twenty-UE stack before Track 1 finishes;
+none of them needs to wait idle. The one rule that keeps the tracks from colliding is that a KPI
+is defined in one place only — the definitions file Track 3 owns — and everyone else reads it.
