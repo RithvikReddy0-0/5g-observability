@@ -1,0 +1,14 @@
+Open5GS scale test — 20260925-050013Z
+commit: 80ca3fc3f41c941c21685adc81f90a69f345660a + uncommitted changes
+host: 12 CPUs, 7783 MiB, 4493 MiB available at start
+UERANSIM: ueransim-udp-socket-buffers ueransim-monotonic-clock
+
+== 05:00:17 part 1 — attach burst: 100 UEs, START_BATCH = 1 10 25 100
+  batch   1: 100/100 attached in 134s · registration p50 54 ms p95 96 ms max 131 ms · PDU p50 228 ms p95 246 ms · reg failures 0 · AMF peak 2.7% · SMF peak 2.5% · AUSF 1.8% · UDM 2.3%
+  batch  10: 98/100 attached in 35s · registration p50 160 ms p95 277 ms max 317 ms · PDU p50 52 ms p95 228 ms · reg failures 0 · AMF peak 13.2% · SMF peak 9.5% · AUSF 3.9% · UDM 11.9%
+  batch  25: 100/100 attached in 15s · registration p50 290 ms p95 376 ms max 392 ms · PDU p50 83 ms p95 139 ms · reg failures 0 · AMF peak 17.6% · SMF peak 12.9% · AUSF 5.8% · UDM 14.8%
+  batch 100: 96/100 attached in 5s · registration p50 1173 ms p95 1356 ms max 1401 ms · PDU p50 224 ms p95 382 ms · reg failures 0 · AMF peak 40.0% · SMF peak 25.6% · AUSF 22.2% · UDM 36.4%
+
+== 05:04:18 part 2 — scale steps: total UEs = 100 150 200 300 (eMBB 20 + URLLC 10 + the rest mMTC)
+    home slice sst 3/334455  dnn=iot  5qi=9  -> 70 subscribers
+  100 UEs: 92/100 attached in 17s; settling 60s

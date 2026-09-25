@@ -1,0 +1,44 @@
+Open5GS deployment — 20260925-045501Z
+commit: 80ca3fc3f41c941c21685adc81f90a69f345660a + uncommitted changes in the candidate
+== 04:55:01 1. validate the candidate (static, the running stack is not touched)
+  YAML: ok
+  deployments/open5gs/ran/ue-slice-c.yaml: slice (3, 3359829), DNN 'iot' -> gNB ['10.53.0.34'] -> UPF 10.53.0.9: consistent
+  3 UE session definition(s) checked, 0 inconsistency(ies)
+  UE plan matches O5GS_UES: eMBB 20, URLLC 10, mMTC 70 (100 UEs)
+  KPI definitions: ok
+== 04:55:02 2. last known-good
+  known-good snapshot from 2026-09-14 10:07:40, commit fb1c65f182a7f37e5984255fe25d7c7c7165be6b
+  candidate differs from known-good:
+    Files .deploy/cmp/deployments/open5gs/config/amf.yaml and deployments/open5gs/config/amf.yaml differ
+    Files .deploy/cmp/deployments/open5gs/config/nssf.yaml and deployments/open5gs/config/nssf.yaml differ
+    Files .deploy/cmp/deployments/open5gs/config/smf.yaml and deployments/open5gs/config/smf.yaml differ
+    Only in deployments/open5gs/config: upf-mmtc.yaml
+    Files .deploy/cmp/deployments/open5gs/docker-compose.yaml and deployments/open5gs/docker-compose.yaml differ
+    Only in deployments/open5gs/images/patches: ueransim-monotonic-clock.patch
+    Files .deploy/cmp/deployments/open5gs/images/ueransim.Dockerfile and deployments/open5gs/images/ueransim.Dockerfile differ
+    Files .deploy/cmp/deployments/open5gs/k8s/generated/o5gs.yaml and deployments/open5gs/k8s/generated/o5gs.yaml differ
+    Files .deploy/cmp/deployments/open5gs/k8s/render.py and deployments/open5gs/k8s/render.py differ
+    Files .deploy/cmp/deployments/open5gs/kpi-gates.json and deployments/open5gs/kpi-gates.json differ
+    Files .deploy/cmp/deployments/open5gs/observability/grafana/dashboards/open5gs-slices.json and deployments/open5gs/observability/grafana/dashboards/open5gs-slices.json differ
+    Files .deploy/cmp/deployments/open5gs/observability/grafana/gen_dashboard.py and deployments/open5gs/observability/grafana/gen_dashboard.py differ
+    Files .deploy/cmp/deployments/open5gs/observability/prometheus.yml and deployments/open5gs/observability/prometheus.yml differ
+    Only in deployments/open5gs/ran: gnb-mmtc.yaml
+    Files .deploy/cmp/deployments/open5gs/ran/ue-entrypoint.sh and deployments/open5gs/ran/ue-entrypoint.sh differ
+    Files .deploy/cmp/deployments/open5gs/ran/ue-slice-a.yaml and deployments/open5gs/ran/ue-slice-a.yaml differ
+    Files .deploy/cmp/deployments/open5gs/ran/ue-slice-b.yaml and deployments/open5gs/ran/ue-slice-b.yaml differ
+    Only in deployments/open5gs/ran: ue-slice-c.yaml
+    Files .deploy/cmp/deployments/slices.env and deployments/slices.env differ
+== 04:55:04 3. apply the candidate
+  
+    UEs registered        : 100 / 100
+    UEs with PDU session  : 100 / 100
+    eMBB   interfaces     : 20 / 20   (10.45.0.0/16)
+    URLLC  interfaces     : 10 / 10   (10.46.0.0/16)
+    mMTC   interfaces     : 70 / 70   (10.47.0.0/16)
+    TUN allocation errors : 0
+    all attached in       : 31s
+  waiting 75 s so every gate window holds only post-deploy samples
+== 04:57:10 4. KPI gate on the candidate
+    22 passed   0 failed   2 advisory   0 skipped (ODE)
+  GATE PASSED
+DECISION: DEPLOYED — the candidate passed the gate and is the new known-good
