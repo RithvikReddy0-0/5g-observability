@@ -13,6 +13,7 @@ gtp5g) are pinned by SHA in [`manifest.lock`](manifest.lock) and fetched into a 
 - **KPI gate:** [`docs/kpi-gate.md`](docs/kpi-gate.md) — the pass/fail contract a deployment must meet.
 - **Review deck:** [`docs/presentation/`](docs/presentation/) — Phase 2 Review 1 slides (LaTeX Beamer).
 - **Open5GS stack:** [`docs/open5gs.md`](docs/open5gs.md) — a second core ([ADR-010](docs/adr/ADR-010-open5gs-core.md)) with a **working user plane on this laptop**. `make o5gs-build && make o5gs-up`.
+- **Phase 2b (100 UEs, three slices):** [work division](docs/briefs/phase2b-work-division.md) · [Track 1 handover](docs/briefs/phase2b-track1-handover.md) · [ADR-014](docs/adr/ADR-014-mmtc-slice-and-100-ues.md).
 - **Open5GS completion report:** [`docs/reports/2026-09-14-open5gs-completion-report.md`](docs/reports/2026-09-14-open5gs-completion-report.md) — what was built, every problem found and how it was fixed, final measured state, what is not done.
 
 > **Baseline environment (ODE):** bare-metal **Ubuntu 24.04 LTS, x86_64, ≥16 GB RAM** (ADR-003).
@@ -31,13 +32,14 @@ gtp5g) are pinned by SHA in [`manifest.lock`](manifest.lock) and fetched into a 
 | Observability | ✅ Prometheus + Grafana on free5GC-native metrics |
 | Slice-labeled metrics | ✅ derived exporter (closes risk R-02) |
 | **User plane (PDU session, N3/N6)** — free5GC | 🔒 **ODE-only** — needs the gtp5g kernel module |
-| **User plane — Open5GS stack** | ✅ 20/20 PDU sessions, a gNB + UPF per slice, AMBR enforced ([details](docs/open5gs.md)) |
+| **User plane — Open5GS stack** | ✅ 100/100 PDU sessions in three slices — eMBB 20, URLLC 10, mMTC 70 — a gNB + UPF per slice, AMBR enforced ([details](docs/open5gs.md), [ADR-014](docs/adr/ADR-014-mmtc-slice-and-100-ues.md)) |
+| 100 UEs attach | ✅ 35 s ten at a time, 7 s all at once; survives VM clock steps (UERANSIM monotonic-clock patch); this laptop tops out near 300 UEs ([scale](docs/evidence/open5gs-scale/README.md)) |
 | Slice isolation — Open5GS | ✅ URLLC 10/10 reachable with eMBB saturated, 3 of 3 runs ([ADR-011](docs/adr/ADR-011-dedicated-user-plane-per-slice.md)); CPU not isolated |
 | Deliverable capacity — Open5GS | ✅ eMBB 200 Mbps, URLLC 20 Mbps of real UDP ([ADR-012](docs/adr/ADR-012-ueransim-udp-buffers.md)) |
 | Slice orchestrator on real traffic | ✅ 164/165 admitted flows delivered their rate; refuses on measured load, no spill-over |
-| KPI gate — Open5GS | ✅ 0 failed on the live stack (19 KPIs: 14 enforced, 5 advisory) |
-| Deploy with automatic rollback | ✅ `scripts/open5gs/deploy.sh` — static reject, gate-fail rollback, deploy all demonstrated |
-| Kubernetes — Open5GS | ✅ minikube, manifests generated from compose, same KPI gate passes ([ADR-013](docs/adr/ADR-013-kubernetes-open5gs.md)) |
+| KPI gate — Open5GS | ✅ 0 failed on the live stack (24 KPIs: 19 enforced, 5 advisory; each slice at its own size) |
+| Deploy with automatic rollback | ✅ `scripts/open5gs/deploy.sh` — static reject, gate-fail rollback, deploy all demonstrated; the three-slice topology itself was deployed through it |
+| Kubernetes — Open5GS | ✅ minikube, manifests generated from compose; three slices and 100 UEs, same KPI gate passes ([ADR-013](docs/adr/ADR-013-kubernetes-open5gs.md)) |
 | Structured JSON logs | ⚠️ not configurable upstream — documented gap ([`docs/logging.md`](docs/logging.md)) |
 | Phase 1 freeze / baseline tag | ❌ not possible without the user plane |
 

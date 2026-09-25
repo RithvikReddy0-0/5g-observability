@@ -23,13 +23,14 @@ the ratified ODE. That distinction determines what could and could not be proven
 | Slice-labeled metrics | **working** | `sst`/`sd` labels queryable |
 | Phase-1 acceptance (runnable subset) | **PASS=12, FAIL=0** | `tests/acceptance.sh` |
 | KPI gate enforces thresholds in CI | **10 enforced, 2 ODE-only** | `make gate`: 10/10 PASS on a live deployment, exit 1 with an NF stopped |
-| **Open5GS: UEs with a working PDU session** | **20 / 20** | interface per UE + ping/iperf3 through the UPF |
-| **Open5GS: KPI gate incl. user plane** | **PASS, 0 failed** (18 passed, 1 advisory) | live stack; fails with UEs stopped |
+| **Open5GS: UEs with a working PDU session** | **100 / 100** in three slices (eMBB 20, URLLC 10, mMTC 70) | interface per UE + ping/iperf3 through each slice's UPF |
+| **Open5GS: where this laptop stops** | **~300 UEs** (clean up to 200) | `scale_test.sh`: attach bursts and steps, cgroup CPU |
+| **Open5GS: KPI gate incl. user plane** | **PASS, 0 failed** (22 passed, 2 advisory, 24 KPIs) | live stack, each slice at its own size |
 | **Open5GS: URLLC isolated from a saturated eMBB** | **10 / 10** reachable, 3 of 3 runs | `isolation_test.sh`, a gNB + UPF per slice |
 | **Open5GS: orchestrator flows delivered** | **164 / 165** | real UDP flows, both slices saturated |
 | **Open5GS: acceptance** | **PASS=22, FAIL=0** | `tests/acceptance-open5gs.sh` |
 | **Open5GS: broken deploy rolled back** | **automatic** | `deploy.sh`, gate failed 8 KPIs |
-| **Open5GS on Kubernetes** | **same gate PASS** | minikube, 19 pods, 20 UEs |
+| **Open5GS on Kubernetes** | **same gate PASS** | minikube, 22 pods, 100 UEs in three slices |
 | PDU session / user-plane data path | **BLOCKED** | needs gtp5g — ODE only |
 
 ---
@@ -304,6 +305,41 @@ Findings that change how this system should be read:
 8. **Engine outages were misdiagnosed.** Not Docker Desktop: WSL idles the Ubuntu distro, which
    runs the Docker engine. 11 stops in 12 minutes without a session held, 0 in 15 minutes with
    one.
+
+### 6.1 Phase 2b — three slices, 100 UEs (ADR-014)
+
+Track 1 of the [Phase 2b work division](briefs/phase2b-work-division.md): the stack every other
+track measures against. Handover for the team: [`briefs/phase2b-track1-handover.md`](briefs/phase2b-track1-handover.md).
+
+| Result | Value |
+|---|---|
+| Slices | eMBB 20 UEs · URLLC 10 · **mMTC 70** (SST 3, its own gNB, UPF and data network) |
+| UEs with a PDU session | **100 / 100**, each from its slice's own pool |
+| Deployed through `deploy.sh` | **DEPLOYED** — gate 22 passed, 0 failed; UPF sessions exactly 20 / 10 / 70 |
+| User plane | ping, UPF counters and iperf3 through all three UPFs; mMTC capped at 1.0 Mbps by its 1 Mbps AMBR |
+| Attach time for 100 UEs | 111 s one at a time · 35 s ten at a time (default) · **7 s all at once**, 0 registration failures at any batch size |
+| Where this laptop stops | **~300 UEs**: all attach and keep their sessions, but the host saturates (load 18.5 on 12 threads) and the liveness probe stops being trustworthy; clean up to 200 ([evidence](evidence/open5gs-scale/README.md)) |
+| KPI gate | 24 KPIs (19 enforced, 5 advisory), sessions and reachability checked per slice at its own size |
+
+Findings:
+
+1. **UERANSIM timed radio links with the wall clock.** On one boot the VM's clock was stepped by
+   +1.1 s every 32 s. Each step pushed a few UEs past the 2 s heartbeat timeout and cost them
+   their user plane: 6 of 20 reachable after two minutes. A patch moves every interval measurement
+   to a monotonic clock. Afterwards there were 6 steps in 130 s and 0 failures.
+2. **Parallel attach hit three races inside `nr-ue`:** its interface name, its routing-table id,
+   and the proc-table directory. Losers of the last one abort. All three are removed in the UE
+   entrypoint, without another patch.
+3. **Restarting the UPFs after the SMF is not enough.** The SMF associated with an outgoing URLLC
+   UPF process within 0.7 s of starting. All 10 URLLC sessions created in the following ~20 s had
+   addresses but no user plane. Deploys now stop the UPFs while the SMF restarts.
+4. **In a registration storm the SCP saturates first, not the AMF.** With 100 UEs at once the SCP
+   peaked at 83 % of a core, MongoDB at 56 % and the AMF at 52 %. Per-UE registration latency rose
+   from 39 ms (one at a time) to 2.4 s, with no failures: the core queues, it does not drop.
+5. **The observer breaks before the network does.** Holding UEs costs the core almost nothing
+   (AMF and SMF at ~0 % for 100–300 UEs). Simulating and pinging them costs the UE container about
+   0.6 % of a core per UE. At 300 the per-UE liveness probe started timing out while every UE was
+   still alive.
 
 ---
 
