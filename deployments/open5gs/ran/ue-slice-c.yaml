@@ -1,7 +1,7 @@
-# UERANSIM UE template — slice B, URLLC (SST 2).
+# UERANSIM UE template — slice C, mMTC (SST 3): the 70 IoT devices.
 # ran/ue-entrypoint.sh starts one `nr-ue -i <imsi>` per device from a copy of this file, so the
-# SUPI below is only a default; the IMSIs are 208930000000021-030 (deployments/slices.env).
-supi: "imsi-208930000000021"
+# SUPI below is only a default; the IMSIs are 208930000000031-100 (deployments/slices.env).
+supi: "imsi-208930000000031"
 mcc: "208"
 mnc: "93"
 key: "8baf473f2f8fd09487cccbd7097c6862"
@@ -12,7 +12,7 @@ imei: "356938035643803"
 imeiSv: "4370816125816151"
 
 gnbSearchList:
-  - 10.53.0.32   # the URLLC gNB
+  - 10.53.0.34   # the mMTC gNB
 
 uacAic: { mps: false, mcs: false }
 uacAcc: { normalClass: 0, class11: false, class12: false, class13: false, class14: false, class15: false }
@@ -21,21 +21,19 @@ uacAcc: { normalClass: 0, class11: false, class12: false, class13: false, class1
 # device, that carries this slice's traffic.
 sessions:
   - type: "IPv4"
-    apn: "urllc"
+    apn: "iot"
     slice:
-      sst: 0x02
-      sd: 0x112233
+      sst: 0x03
+      sd: 0x334455
 
-# Requested at registration: its own slice plus the other one it is subscribed to.
+# Requested at registration: its own slice only. IoT devices are subscribed to mMTC alone.
 configured-nssai:
-  - sst: 0x02
-    sd: 0x112233
-  - sst: 0x01
-    sd: 0x010203
+  - sst: 0x03
+    sd: 0x334455
 
 default-nssai:
-  - sst: 0x02
-    sd: 0x112233
+  - sst: 0x03
+    sd: 0x334455
 
 integrity: { IA1: true, IA2: true, IA3: true }
 ciphering: { EA1: true, EA2: true, EA3: true }

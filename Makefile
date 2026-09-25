@@ -33,7 +33,7 @@ N_B     := 10
 .PHONY: help up create down restart stop-ues ues status test evidence screenshots report \
         bootstrap verify clean logs urls nuke gate gate-test \
         o5gs-build o5gs-up o5gs-ues o5gs-status o5gs-ping o5gs-traffic o5gs-gate o5gs-evidence o5gs-urls o5gs-orchestrate o5gs-slices \
-        o5gs-test o5gs-deploy o5gs-deploy-init o5gs-rebuild o5gs-calibrate o5gs-isolation o5gs-capture \
+        o5gs-test o5gs-deploy o5gs-deploy-init o5gs-rebuild o5gs-calibrate o5gs-isolation o5gs-capture o5gs-scale \
         o5gs-k8s-up o5gs-k8s-verify o5gs-k8s-down \
         o5gs-down o5gs-logs o5gs-clean
 
@@ -208,14 +208,17 @@ report: ## Rebuild the shareable PDF report
 O5GS_DIR      := deployments/open5gs
 O5GS_COMMIT    = $$(python3 -c "import json;print(next(d['commit'] for d in json.load(open('$(CURDIR)/manifest.lock'))['dependencies'] if d['name']=='open5gs'))")
 UERANSIM_COMMIT = $$(python3 -c "import json;print(next(d['commit'] for d in json.load(open('$(CURDIR)/manifest.lock'))['dependencies'] if d['name']=='ueransim'))")
-O5GS_NF       := o5gs-mongodb o5gs-nrf o5gs-scp o5gs-ausf o5gs-udm o5gs-udr o5gs-pcf o5gs-bsf o5gs-nssf o5gs-upf-embb o5gs-upf-urllc o5gs-smf o5gs-amf o5gs-gnb-embb o5gs-gnb-urllc o5gs-ue \n                 o5gs-prometheus o5gs-grafana
+O5GS_NF       := o5gs-mongodb o5gs-nrf o5gs-scp o5gs-ausf o5gs-udm o5gs-udr o5gs-pcf o5gs-bsf o5gs-nssf \
+                 o5gs-upf-embb o5gs-upf-urllc o5gs-upf-mmtc o5gs-smf o5gs-amf \
+                 o5gs-dn-embb o5gs-dn-urllc o5gs-dn-mmtc o5gs-gnb-embb o5gs-gnb-urllc o5gs-gnb-mmtc o5gs-ue \
+                 o5gs-prometheus o5gs-grafana
 
 o5gs-build: ## Open5GS: build core + UERANSIM images from the SHAs in manifest.lock
 	@cd $(O5GS_DIR)/images && \
 	  docker build -f open5gs.Dockerfile  --build-arg OPEN5GS_COMMIT=$(O5GS_COMMIT)   -t o5gs/open5gs:v2.8.0 . && \
-	  docker build -f ueransim.Dockerfile --build-arg UERANSIM_COMMIT=$(UERANSIM_COMMIT) -t o5gs/ueransim:v3.3.0-udpbuf .
+	  docker build -f ueransim.Dockerfile --build-arg UERANSIM_COMMIT=$(UERANSIM_COMMIT) -t o5gs/ueransim:v3.3.0-udpbuf-mono .
 
-o5gs-up: ## Open5GS: start the core and gNB, then attach 20 UEs with PDU sessions
+o5gs-up: ## Open5GS: start the core and the three slice gNBs, then attach 100 UEs with PDU sessions
 	@if [ "$(HAVE_COMPOSE)" = "yes" ]; then \
 	    cd $(O5GS_DIR) && docker compose up -d; \
 	else \
@@ -228,7 +231,7 @@ o5gs-up: ## Open5GS: start the core and gNB, then attach 20 UEs with PDU session
 	@echo "  container with it (measured: 11 engine stops in 12 min idle, 0 in 15 min held open)."
 	@echo "  The UEs re-attach on their own when it comes back. Grafana: http://localhost:3001"
 
-o5gs-ues: ## Open5GS: re-provision and re-attach the 20 UEs
+o5gs-ues: ## Open5GS: re-provision and re-attach the 100 UEs
 	@bash scripts/open5gs/start_ues.sh
 
 o5gs-status: ## Open5GS: containers, UEs and their slice addresses
@@ -236,10 +239,10 @@ o5gs-status: ## Open5GS: containers, UEs and their slice addresses
 	@echo ""
 	@docker exec o5gs-ue sh -c "ip -4 -o addr show | awk '/uesimtun/ {print \"  \" \$$2 \"  \" \$$4}'" 2>/dev/null || echo "  (no UEs attached)"
 
-o5gs-ping: ## Open5GS: prove the user plane — ping through the UPF from both slices
+o5gs-ping: ## Open5GS: prove the user plane — ping through the UPF from every slice
 	@bash scripts/open5gs/verify_user_plane.sh
 
-o5gs-traffic: ## Open5GS: real traffic through both slices at once. Use: make o5gs-traffic T=60 N=3
+o5gs-traffic: ## Open5GS: real traffic through eMBB and URLLC at once. Use: make o5gs-traffic T=60 N=3
 	@bash scripts/open5gs/traffic.sh $(or $(T),60) $(or $(N),3) $(or $(DIR),down)
 
 o5gs-orchestrate: ## Open5GS: demands admitted by MEASURED capacity and run as real flows. Use: DURATION=120 RATE=1
@@ -269,6 +272,9 @@ o5gs-isolation: ## Open5GS: does saturating eMBB hurt URLLC? (idle vs loaded, 60
 
 o5gs-capture: ## Open5GS: packet-capture one real PDU session establishment
 	@bash scripts/open5gs/capture_pdu_session.sh
+
+o5gs-scale: ## Open5GS: cost of attaching and holding many UEs; where this laptop stops (~20 min)
+	@bash scripts/open5gs/scale_test.sh
 
 o5gs-k8s-up: ## Open5GS on Kubernetes (minikube profile o5gs): deploy from compose configs, verify, gate
 	@bash scripts/open5gs/k8s_up.sh

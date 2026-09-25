@@ -45,6 +45,8 @@ def ts(title, targets, x, y, w=12, h=8, unit="none", desc="", stack=False):
                              "properties": [{"id": "color", "value": {"mode": "fixed", "fixedColor": "#2E6E8E"}}]},
                             {"matcher": {"id": "byRegexp", "options": ".*(URLLC|2-112233|urllc).*"},
                              "properties": [{"id": "color", "value": {"mode": "fixed", "fixedColor": "#C7601F"}}]},
+                            {"matcher": {"id": "byRegexp", "options": ".*(mMTC|3-334455|iot).*"},
+                             "properties": [{"id": "color", "value": {"mode": "fixed", "fixedColor": "#5A8F3C"}}]},
                         ]},
         "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max"]},
                     "tooltip": {"mode": "multi"}},
@@ -66,19 +68,21 @@ ts("PDU sessions per slice", [
    0, y, desc="Native SMF gauge, labelled by S-NSSAI — slice identity that free5GC's metrics never carried.")
 ts("User-plane QoS flows per slice (UPF, by DNN)", [
     {"expr": "sum by (dnn) (fivegs_upffunction_upf_qosflows)", "legendFormat": "DNN {{dnn}}"}],
-   12, y, desc=("UPF gauge; DNN internet = eMBB, urllc = URLLC. Presence per slice; can over-count after a UE restart. The SMF's qos_flow_nbr{snssai,fiveqi} is NOT "
+   12, y, desc=("UPF gauge; DNN internet = eMBB, urllc = URLLC, iot = mMTC. Presence per slice; can over-count after a UE restart. The SMF's qos_flow_nbr{snssai,fiveqi} is NOT "
                "shown: it read 20/20 against 10/10 real flows because it is never decremented on re-attach."))
 y += 8
 
 row("Liveness and latency — measured from the UEs", y); y += 1
-stat("eMBB UEs reachable", 'sum(ue_probe_reachable{slice="eMBB"})', 0, y,
+stat("eMBB UEs reachable (of 20)", 'sum(ue_probe_reachable{slice="eMBB"})', 0, y, w=4,
      desc="UEs whose probe through the UPF answered in the last 5 s round. Core metrics do not notice vanished UEs; this does.")
-stat("URLLC UEs reachable", 'sum(ue_probe_reachable{slice="URLLC"})', 6, y)
-stat("URLLC worst RTT (budget 10 ms)", 'max(ue_probe_rtt_ms{slice="URLLC",stat="max"})', 12, y,
+stat("URLLC UEs reachable (of 10)", 'sum(ue_probe_reachable{slice="URLLC"})', 4, y, w=4)
+stat("mMTC UEs reachable (of 70)", 'sum(ue_probe_reachable{slice="mMTC"})', 8, y, w=4)
+stat("URLLC worst RTT (budget 10 ms)", 'max(ue_probe_rtt_ms{slice="URLLC",stat="max"})', 12, y, w=4,
      desc="Worst UE of the last round, UE -> gNB -> UPF gateway. SLICE_B_MAX_LATENCY_MS = 10.")
-stat("eMBB worst RTT (budget 300 ms)", 'max(ue_probe_rtt_ms{slice="eMBB",stat="max"})', 18, y)
-panels[-2]["fieldConfig"]["defaults"].update({"unit": "ms", "decimals": 2})
-panels[-1]["fieldConfig"]["defaults"].update({"unit": "ms", "decimals": 2})
+stat("eMBB worst RTT (budget 300 ms)", 'max(ue_probe_rtt_ms{slice="eMBB",stat="max"})', 16, y, w=4)
+stat("mMTC worst RTT (budget 1000 ms)", 'max(ue_probe_rtt_ms{slice="mMTC",stat="max"})', 20, y, w=4)
+for _p in panels[-3:]:
+    _p["fieldConfig"]["defaults"].update({"unit": "ms", "decimals": 2})
 y += 4
 ts("Round-trip time per slice (avg and worst UE)", [
     {"expr": 'max by (slice) (ue_probe_rtt_ms{stat="avg"})', "legendFormat": "{{slice}} avg"},
@@ -90,7 +94,7 @@ y += 10
 row("User plane — measured traffic per slice", y); y += 1
 ts("Downlink throughput per slice", [
     {"expr": "sum by (slice) (rate(upf_slice_downlink_bytes_total[15s])) * 8 / 1e6", "legendFormat": "{{slice}}"}],
-   0, y, unit="Mbits", desc=("Measured from the slice's own UPF TUN device (ogstun = eMBB, ogstun2 = URLLC). "
+   0, y, unit="Mbits", desc=("Measured from the slice's own UPF TUN device (ogstun = eMBB, ogstun2 = URLLC, ogstun3 = mMTC). "
                             "Open5GS's native UPF volume counters are labelled only by QFI and cannot separate slices."))
 ts("Uplink throughput per slice", [
     {"expr": "sum by (slice) (rate(upf_slice_uplink_bytes_total[15s])) * 8 / 1e6", "legendFormat": "{{slice}}"}],

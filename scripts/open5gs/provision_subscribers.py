@@ -1,16 +1,20 @@
 #!/usr/bin/env python3
 """
-provision_subscribers.py — write the 20 subscribers into the Open5GS database.
+provision_subscribers.py — write the 100 subscribers into the Open5GS database.
 
 Every QoS value comes from deployments/slices.env, the same file the free5GC provisioning and
 the slice orchestrator read, so the two cores are provisioned with identical slice
 definitions and a comparison between them is fair.
 
-Each subscriber is permitted on BOTH slices: its home slice is the default, the other is an
-additional allowed S-NSSAI. The home slice decides which PDU session the UE opens; being
-permitted on both is what gives the orchestrator a real choice.
+How many subscribers each slice gets is O5GS_UES in that file (Phase 2b: eMBB 20, URLLC 10,
+mMTC 70). IMSIs are assigned contiguously in slice order, A then B then C — the same rule the
+UE container follows (deployments/open5gs/ran/ue-entrypoint.sh), checked in CI.
 
-    scripts/open5gs/provision_subscribers.py            # upsert all 20
+A subscriber's home slice is its default S-NSSAI and decides which PDU session the UE opens.
+SLICE_<X>_ALSO_PERMITTED lists the other slices it may use: eMBB and URLLC devices may use
+each other's slice, which gives the orchestrator a real choice; IoT devices are mMTC only.
+
+    scripts/open5gs/provision_subscribers.py            # upsert all 100
     scripts/open5gs/provision_subscribers.py --dry-run  # print the mongo script instead
 
 Idempotent: records are replaced by IMSI, so re-running never creates duplicates. The
@@ -39,7 +43,7 @@ UNITS = {"bps": 0, "kbps": 1, "mbps": 2, "gbps": 3, "tbps": 4}
 PREEMPT_DISABLED, PREEMPT_ENABLED = 1, 2
 
 # Each slice's DNN selects its UE address pool (deployments/open5gs/config/smf.yaml).
-DNN = {"A": "internet", "B": "urllc"}
+DNN = {"A": "internet", "B": "urllc", "C": "iot"}
 
 
 def load_env(path):
@@ -73,7 +77,7 @@ def slice_def(env, s):
         "session_ul": bitrate(env[p + "SESSION_AMBR_UL"]),
         "ue_dl": bitrate(env[p + "UE_AMBR_DL"]),
         "ue_ul": bitrate(env[p + "UE_AMBR_UL"]),
-        "count": int(env[p + "SUBSCRIBERS"]),
+        "also": list(env.get(p + "ALSO_PERMITTED", "")),
     }
 
 
@@ -99,12 +103,12 @@ def slice_entry(sl, default):
     }
 
 
-def subscriber(imsi, home, other):
+def subscriber(imsi, home, others):
     return {
         "schema_version": 1,
         "imsi": imsi,
         "msisdn": [], "imeisv": [], "mme_host": [], "mm_realm": [], "purge_flag": [],
-        "slice": [slice_entry(home, True), slice_entry(other, False)],
+        "slice": [slice_entry(home, True)] + [slice_entry(o, False) for o in others],
         "security": {"k": KEY, "op": None, "opc": OPC, "amf": "8000", "sqn": 0},
         "ambr": {"downlink": home["ue_dl"], "uplink": home["ue_ul"]},
         "access_restriction_data": 32,
@@ -116,12 +120,29 @@ def subscriber(imsi, home, other):
     }
 
 
+def plan(env):
+    """[(slice letter, count)] in IMSI order, from O5GS_UES ("A=20 B=10 C=70").
+
+    The environment variable O5GS_UES overrides slices.env for one run — used only by
+    scripts/open5gs/scale_test.sh to provision extra mMTC devices while it measures scale.
+    """
+    out = []
+    for item in os.environ.get("O5GS_UES", env["O5GS_UES"]).split():
+        letter, count = item.split("=")
+        if "SLICE_%s_SST" % letter not in env:
+            raise SystemExit("O5GS_UES names slice %s, which slices.env does not define" % letter)
+        out.append((letter, int(count)))
+    return out
+
+
 def build_script(env):
-    a, b = slice_def(env, "A"), slice_def(env, "B")
+    slices = {letter: slice_def(env, letter) for letter, _ in plan(env)}
     docs, n = [], 1
-    for home, other in ((a, b), (b, a)):
-        for _ in range(home["count"]):
-            docs.append(subscriber("%s%s%010d" % (MCC, MNC, n), home, other))
+    for letter, count in plan(env):
+        home = slices[letter]
+        others = [slices[o] if o in slices else slice_def(env, o) for o in home["also"]]
+        for _ in range(count):
+            docs.append(subscriber("%s%s%010d" % (MCC, MNC, n), home, others))
             n += 1
 
     # NumberInt/NumberLong matter: Open5GS reads these with bson_iter_int32/int64 and a

@@ -12,6 +12,7 @@ global:
 
 # eMBB (sst 1/010203) -> DNN "internet" -> 10.45.0.0/16
 # URLLC (sst 2/112233) -> DNN "urllc"    -> 10.46.0.0/16
+# mMTC  (sst 3/334455) -> DNN "iot"      -> 10.47.0.0/16
 smf:
   sbi:
     server:
@@ -30,6 +31,8 @@ smf:
           dnn: internet
         - address: 10.53.0.8      # URLLC user plane
           dnn: urllc
+        - address: 10.53.0.9      # mMTC user plane
+          dnn: iot
   gtpu:
     server:
       - address: 10.53.0.4
@@ -44,6 +47,9 @@ smf:
     - subnet: 10.46.0.0/16
       gateway: 10.46.0.1
       dnn: urllc
+    - subnet: 10.47.0.0/16
+      gateway: 10.47.0.1
+      dnn: iot
   dns:
     - 8.8.8.8
     - 8.8.4.4

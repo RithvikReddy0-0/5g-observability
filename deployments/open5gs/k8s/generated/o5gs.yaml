@@ -16,9 +16,9 @@ data:
     \ eth0\n  metrics:\n    server:\n    - dev: eth0\n      port: 9090\n  guami:\n  - plmn_id:\n      mcc: 208\n      mnc:\
     \ 93\n    amf_id:\n      region: 2\n      set: 1\n  tai:\n  - plmn_id:\n      mcc: 208\n      mnc: 93\n    tac: 1\n  plmn_support:\n\
     \  - plmn_id:\n      mcc: 208\n      mnc: 93\n    s_nssai:\n    - sst: 1\n      sd: '010203'\n    - sst: 2\n      sd:\
-    \ '112233'\n  security:\n    integrity_order:\n    - NIA2\n    - NIA1\n    - NIA0\n    ciphering_order:\n    - NEA0\n\
-    \    - NEA1\n    - NEA2\n  network_name:\n    full: O5GS-Observability-Lab\n    short: O5GS\n  amf_name: open5gs-amf0\n\
-    \  time:\n    t3512:\n      value: 540\n"
+    \ '112233'\n    - sst: 3\n      sd: '334455'\n  security:\n    integrity_order:\n    - NIA2\n    - NIA1\n    - NIA0\n\
+    \    ciphering_order:\n    - NEA0\n    - NEA1\n    - NEA2\n  network_name:\n    full: O5GS-Observability-Lab\n    short:\
+    \ O5GS\n  amf_name: open5gs-amf0\n  time:\n    t3512:\n      value: 540\n"
   ausf.yaml: "logger:\n  level: info\nglobal:\n  max:\n    ue: 1024\nausf:\n  sbi:\n    server:\n    - dev: eth0\n      port:\
     \ 7777\n    client:\n      scp:\n      - uri: http://scp.o5gs.svc.cluster.local:7777\n"
   bsf.yaml: "logger:\n  level: info\nglobal:\n  max:\n    ue: 1024\nbsf:\n  sbi:\n    server:\n    - dev: eth0\n      port:\
@@ -28,7 +28,8 @@ data:
   nssf.yaml: "logger:\n  level: info\nglobal:\n  max:\n    ue: 1024\nnssf:\n  sbi:\n    server:\n    - dev: eth0\n      port:\
     \ 7777\n    client:\n      scp:\n      - uri: http://scp.o5gs.svc.cluster.local:7777\n      nsi:\n      - uri: http://nrf.o5gs.svc.cluster.local:7777\n\
     \        s_nssai:\n          sst: 1\n          sd: '010203'\n      - uri: http://nrf.o5gs.svc.cluster.local:7777\n   \
-    \     s_nssai:\n          sst: 2\n          sd: '112233'\n"
+    \     s_nssai:\n          sst: 2\n          sd: '112233'\n      - uri: http://nrf.o5gs.svc.cluster.local:7777\n      \
+    \  s_nssai:\n          sst: 3\n          sd: '334455'\n"
   pcf.yaml: "logger:\n  level: info\nglobal:\n  max:\n    ue: 1024\ndb_uri: mongodb://mongodb.o5gs.svc.cluster.local/open5gs\n\
     pcf:\n  sbi:\n    server:\n    - dev: eth0\n      port: 7777\n    client:\n      scp:\n      - uri: http://scp.o5gs.svc.cluster.local:7777\n\
     \  metrics:\n    server:\n    - dev: eth0\n      port: 9090\n"
@@ -37,9 +38,11 @@ data:
   smf.yaml: "logger:\n  level: info\nglobal:\n  max:\n    ue: 1024\nsmf:\n  sbi:\n    server:\n    - dev: eth0\n      port:\
     \ 7777\n    client:\n      scp:\n      - uri: http://scp.o5gs.svc.cluster.local:7777\n  pfcp:\n    server:\n    - dev:\
     \ eth0\n    client:\n      upf:\n      - address: upf-embb.o5gs.svc.cluster.local\n        dnn: internet\n      - address:\
-    \ upf-urllc.o5gs.svc.cluster.local\n        dnn: urllc\n  gtpu:\n    server:\n    - dev: eth0\n  metrics:\n    server:\n\
-    \    - dev: eth0\n      port: 9090\n  session:\n  - subnet: 10.45.0.0/16\n    gateway: 10.45.0.1\n    dnn: internet\n\
-    \  - subnet: 10.46.0.0/16\n    gateway: 10.46.0.1\n    dnn: urllc\n  dns:\n  - 8.8.8.8\n  - 8.8.4.4\n  mtu: 1400\n"
+    \ upf-urllc.o5gs.svc.cluster.local\n        dnn: urllc\n      - address: upf-mmtc.o5gs.svc.cluster.local\n        dnn:\
+    \ iot\n  gtpu:\n    server:\n    - dev: eth0\n  metrics:\n    server:\n    - dev: eth0\n      port: 9090\n  session:\n\
+    \  - subnet: 10.45.0.0/16\n    gateway: 10.45.0.1\n    dnn: internet\n  - subnet: 10.46.0.0/16\n    gateway: 10.46.0.1\n\
+    \    dnn: urllc\n  - subnet: 10.47.0.0/16\n    gateway: 10.47.0.1\n    dnn: iot\n  dns:\n  - 8.8.8.8\n  - 8.8.4.4\n  mtu:\
+    \ 1400\n"
   udm.yaml: "logger:\n  level: info\nglobal:\n  max:\n    ue: 1024\nudm:\n  sbi:\n    server:\n    - dev: eth0\n      port:\
     \ 7777\n    client:\n      scp:\n      - uri: http://scp.o5gs.svc.cluster.local:7777\n"
   udr.yaml: "logger:\n  level: info\nglobal:\n  max:\n    ue: 1024\ndb_uri: mongodb://mongodb.o5gs.svc.cluster.local/open5gs\n\
@@ -47,6 +50,9 @@ data:
   upf-embb.yaml: "logger:\n  level: info\nglobal:\n  max:\n    ue: 1024\nupf:\n  pfcp:\n    server:\n    - dev: eth0\n  gtpu:\n\
     \    server:\n    - dev: eth0\n  session:\n  - subnet: 10.45.0.0/16\n    gateway: 10.45.0.1\n    dnn: internet\n    dev:\
     \ ogstun\n  metrics:\n    server:\n    - dev: eth0\n      port: 9090\n"
+  upf-mmtc.yaml: "logger:\n  level: info\nglobal:\n  max:\n    ue: 1024\nupf:\n  pfcp:\n    server:\n    - dev: eth0\n  gtpu:\n\
+    \    server:\n    - dev: eth0\n  session:\n  - subnet: 10.47.0.0/16\n    gateway: 10.47.0.1\n    dnn: iot\n    dev: ogstun3\n\
+    \  metrics:\n    server:\n    - dev: eth0\n      port: 9090\n"
   upf-urllc.yaml: "logger:\n  level: info\nglobal:\n  max:\n    ue: 1024\nupf:\n  pfcp:\n    server:\n    - dev: eth0\n  gtpu:\n\
     \    server:\n    - dev: eth0\n  session:\n  - subnet: 10.46.0.0/16\n    gateway: 10.46.0.1\n    dnn: urllc\n    dev:\
     \ ogstun2\n  metrics:\n    server:\n    - dev: eth0\n      port: 9090\n"
@@ -60,6 +66,9 @@ data:
   gnb-embb.yaml: "mcc: '208'\nmnc: '93'\nnci: '0x000000010'\nidLength: 32\ntac: 1\nlinkIp: POD_IP\nngapIp: POD_IP\ngtpIp:\
     \ POD_IP\namfConfigs:\n- address: amf.o5gs.svc.cluster.local\n  port: 38412\nslices:\n- sst: 1\n  sd: 66051\nignoreStreamIds:\
     \ true\n"
+  gnb-mmtc.yaml: "mcc: '208'\nmnc: '93'\nnci: '0x000000030'\nidLength: 32\ntac: 1\nlinkIp: POD_IP\nngapIp: POD_IP\ngtpIp:\
+    \ POD_IP\namfConfigs:\n- address: amf.o5gs.svc.cluster.local\n  port: 38412\nslices:\n- sst: 3\n  sd: 3359829\nignoreStreamIds:\
+    \ true\n"
   gnb-urllc.yaml: "mcc: '208'\nmnc: '93'\nnci: '0x000000020'\nidLength: 32\ntac: 1\nlinkIp: POD_IP\nngapIp: POD_IP\ngtpIp:\
     \ POD_IP\namfConfigs:\n- address: amf.o5gs.svc.cluster.local\n  port: 38412\nslices:\n- sst: 2\n  sd: 1122867\nignoreStreamIds:\
     \ true\n"
@@ -70,65 +79,94 @@ data:
     - sst: 1\n  sd: 66051\n- sst: 2\n  sd: 1122867\ndefault-nssai:\n- sst: 1\n  sd: 66051\nintegrity:\n  IA1: true\n  IA2:\
     \ true\n  IA3: true\nciphering:\n  EA1: true\n  EA2: true\n  EA3: true\nintegrityMaxRate:\n  uplink: full\n  downlink:\
     \ full\n"
-  ue-slice-b.yaml: "supi: imsi-208930000000011\nmcc: '208'\nmnc: '93'\nkey: 8baf473f2f8fd09487cccbd7097c6862\nop: 8e27b6af0e692e750f32667a3b14605d\n\
+  ue-slice-b.yaml: "supi: imsi-208930000000021\nmcc: '208'\nmnc: '93'\nkey: 8baf473f2f8fd09487cccbd7097c6862\nop: 8e27b6af0e692e750f32667a3b14605d\n\
     opType: OPC\namf: '8000'\nimei: '356938035643803'\nimeiSv: '4370816125816151'\ngnbSearchList:\n- gnb-urllc.o5gs.svc.cluster.local\n\
     uacAic:\n  mps: false\n  mcs: false\nuacAcc:\n  normalClass: 0\n  class11: false\n  class12: false\n  class13: false\n\
     \  class14: false\n  class15: false\nsessions:\n- type: IPv4\n  apn: urllc\n  slice:\n    sst: 2\n    sd: 1122867\nconfigured-nssai:\n\
     - sst: 2\n  sd: 1122867\n- sst: 1\n  sd: 66051\ndefault-nssai:\n- sst: 2\n  sd: 1122867\nintegrity:\n  IA1: true\n  IA2:\
     \ true\n  IA3: true\nciphering:\n  EA1: true\n  EA2: true\n  EA3: true\nintegrityMaxRate:\n  uplink: full\n  downlink:\
     \ full\n"
-  ue-entrypoint.sh: "#!/bin/sh\n# ue-entrypoint.sh \u2014 run and SUPERVISE the 20 UEs as this container's own workload.\n\
-    #\n# WHY THE UEs LIVE HERE AND NOT IN `docker exec`\n# The Docker engine on this host runs inside the Ubuntu WSL distro,\
-    \ and WSL shuts that distro\n# down \u2014 engine included \u2014 soon after the last terminal closes (docs/open5gs.md,\
+  ue-slice-c.yaml: "supi: imsi-208930000000031\nmcc: '208'\nmnc: '93'\nkey: 8baf473f2f8fd09487cccbd7097c6862\nop: 8e27b6af0e692e750f32667a3b14605d\n\
+    opType: OPC\namf: '8000'\nimei: '356938035643803'\nimeiSv: '4370816125816151'\ngnbSearchList:\n- gnb-mmtc.o5gs.svc.cluster.local\n\
+    uacAic:\n  mps: false\n  mcs: false\nuacAcc:\n  normalClass: 0\n  class11: false\n  class12: false\n  class13: false\n\
+    \  class14: false\n  class15: false\nsessions:\n- type: IPv4\n  apn: iot\n  slice:\n    sst: 3\n    sd: 3359829\nconfigured-nssai:\n\
+    - sst: 3\n  sd: 3359829\ndefault-nssai:\n- sst: 3\n  sd: 3359829\nintegrity:\n  IA1: true\n  IA2: true\n  IA3: true\n\
+    ciphering:\n  EA1: true\n  EA2: true\n  EA3: true\nintegrityMaxRate:\n  uplink: full\n  downlink: full\n"
+  ue-entrypoint.sh: "#!/bin/sh\n# ue-entrypoint.sh \u2014 run and SUPERVISE the UEs (Phase 2b: 100) as this container's own\
+    \ workload.\n#\n# WHY THE UEs LIVE HERE AND NOT IN `docker exec`\n# The Docker engine on this host runs inside the Ubuntu\
+    \ WSL distro, and WSL shuts that distro\n# down \u2014 engine included \u2014 soon after the last terminal closes (docs/open5gs.md,\
     \ \"Engine\n# restarts\"). restart: unless-stopped brings every container back, but processes started\n# with `docker\
     \ exec` are not part of a container's definition and are simply gone. Launched\n# from the entrypoint, the UEs come back\
     \ with the container. No re-provisioning is needed:\n# when a UE's SQN is out of step, Open5GS completes AUTS resynchronisation\
     \ on the retry.\n#\n# WHY ONE nr-ue PROCESS PER UE, AND WHY SUPERVISED\n# UERANSIM declares radio link failure when a\
-    \ UE hears nothing from the gNB for 2 s\n# (HEARTBEAT_THRESHOLD in src/ue/rls/udp_task.cpp) \u2014 any 2-second stall\
-    \ of the simulator is\n# enough. The UE then recovers its registration with a Service Request, but its user plane\n# does\
-    \ not come back: the gNB logs \"Uplink data failure, PDU session not found\" for every\n# packet, while the UE still shows\
-    \ CM-CONNECTED and the core still counts the session.\n# Observed for 3 of 20 UEs within 20 minutes; only probing from\
-    \ the UE side revealed it.\n#\n# So each UE is its own process (`nr-ue -i <imsi>`), and every CHECK_EVERY seconds each\
-    \ one\n# pings its slice's UPF gateway through its own interface. A UE that fails CHECK_STRIKES\n# checks in a row is\
-    \ restarted on its own \u2014 the other 19 are untouched.\n#\n# UEs are started ONE AT A TIME: nr-ue takes the next free\
-    \ uesimtunN name, and processes\n# starting together race for the same name (\"TUNSETIFF: Device or resource busy\").\n\
-    set -u\n\nN=\"${UES_PER_SLICE:-10}\"\nCFG=/etc/ueransim\nCHECK_EVERY=\"${CHECK_EVERY:-10}\"\nCHECK_STRIKES=\"${CHECK_STRIKES:-3}\"\
-    \nSTART_WAIT=\"${UE_START_WAIT:-30}\"\nSTATE=/tmp/ues\nmkdir -p \"$STATE\"\n\n# Slice plan: <config>:<first imsi>:<gateway>:<name>.\
-    \ Matches deployments/slices.env and the\n# address pools in config/smf.yaml.\nSLICES=\"ue-slice-a.yaml:208930000000001:10.45.0.1:eMBB\
-    \ ue-slice-b.yaml:208930000000011:10.46.0.1:URLLC\"\n\nlog() { echo \"ue-entrypoint: $*\"; }\n\n# Per-slice reachability/latency\
-    \ exporter on :9121, measured from these UEs' own interfaces.\n# Runs here rather than as a sidecar: a sidecar sharing\
-    \ this network namespace is stranded\n# in a dead one when this container restarts. Respawned if it ever exits.\n( while\
-    \ true; do python3 -u /opt/o5gs-obs/ue_probe_exporter.py; sleep 2; done ) &\n\nif [ \"$N\" -le 0 ]; then\n  log \"UES_PER_SLICE=0,\
-    \ idling\"; exec sleep infinity\nfi\n\n# A UE is identified by its PDU-session ADDRESS, never by its interface NAME. Names\
-    \ are reused:\n# when a session drops, its uesimtunN is destroyed and the next session anywhere may take the\n# same name.\
-    \ Checking by name once marked two dead UEs healthy \u2014 their logs named an interface\n# that now belonged to another\
-    \ UE, and pings through it succeeded. Addresses are allocated\n# uniquely by the SMF, so an address can only ever mean\
-    \ one live session.\nip_of() {    # <imsi> -> the UE's latest session address from its own log, or empty\n  sed -n 's/.*TUN\
-    \ interface\\[uesimtun[0-9]*, \\([0-9.]*\\)\\].*/\\1/p' \"/tmp/ue-$1.log\" 2>/dev/null | tail -1\n}\n\ntun_of() {   #\
-    \ <imsi> -> the interface CURRENTLY holding that UE's address, or empty\n  a=$(ip_of \"$1\")\n  [ -n \"$a\" ] || return\
-    \ 0\n  ip -4 -o addr show 2>/dev/null | awk -v a=\"$a\" '/uesimtun/ { split($4, p, \"/\"); if (p[1] == a) { print $2;\
-    \ exit } }'\n}\n\nstart_ue() {   # <imsi> <config>\n  : > \"/tmp/ue-$1.log\"\n  nr-ue -c \"$CFG/$2\" -i \"imsi-$1\" >>\
-    \ \"/tmp/ue-$1.log\" 2>&1 &\n  echo $! > \"$STATE/$1.pid\"\n  echo 0 > \"$STATE/$1.strikes\"\n  # Wait for this UE's interface\
-    \ before starting the next one (TUN name race).\n  w=0\n  while [ \"$w\" -lt \"$START_WAIT\" ]; do\n    [ -n \"$(tun_of\
-    \ \"$1\")\" ] && return 0\n    kill -0 \"$(cat \"$STATE/$1.pid\")\" 2>/dev/null || return 1\n    w=$((w + 1)); sleep 1\n\
-    \  done\n  return 1\n}\n\nstop_ue() {   # <imsi>\n  pid=$(cat \"$STATE/$1.pid\" 2>/dev/null)\n  [ -n \"$pid\" ] || return\
-    \ 0\n  kill \"$pid\" 2>/dev/null\n  for _ in 1 2 3 4 5; do kill -0 \"$pid\" 2>/dev/null || return 0; sleep 1; done\n \
-    \ kill -9 \"$pid\" 2>/dev/null\n}\n\nplan() {   # every UE, one per line: <imsi> <config> <gateway> <slice>\n  for s in\
-    \ $SLICES; do\n    cfg=${s%%:*}; rest=${s#*:}; first=${rest%%:*}; rest=${rest#*:}; gw=${rest%%:*}; name=${rest#*:}\n \
-    \   k=0\n    while [ \"$k\" -lt \"$N\" ]; do\n      echo \"$((first + k)) $cfg $gw $name\"\n      k=$((k + 1))\n    done\n\
-    \  done\n}\n\nlog \"starting $N UEs per slice, one process each\"\nplan | while read -r imsi cfg gw name; do\n  if start_ue\
-    \ \"$imsi\" \"$cfg\"; then log \"$name imsi-$imsi up on $(tun_of \"$imsi\")\"\n  else log \"$name imsi-$imsi did not come\
-    \ up within ${START_WAIT}s; the supervisor will retry\"; fi\ndone\n\nlog \"supervising: ping each UE's gateway every ${CHECK_EVERY}s,\
-    \ restart after ${CHECK_STRIKES} misses\"\nwhile true; do\n  sleep \"$CHECK_EVERY\"\n  plan | while read -r imsi cfg gw\
-    \ name; do\n    pid=$(cat \"$STATE/$imsi.pid\" 2>/dev/null)\n    t=$(tun_of \"$imsi\")\n    if ! kill -0 \"$pid\" 2>/dev/null;\
-    \ then\n      reason=\"process exited\"\n    elif [ -z \"$t\" ]; then\n      reason=\"its session address $(ip_of \"$imsi\"\
-    ) is on no interface\"\n    elif ping -I \"$t\" -c 1 -W 2 \"$gw\" >/dev/null 2>&1; then\n      echo 0 > \"$STATE/$imsi.strikes\"\
-    ; continue\n    else\n      reason=\"no reply through the UPF on $t ($(ip_of \"$imsi\"))\"\n    fi\n    s=$(( $(cat \"\
-    $STATE/$imsi.strikes\" 2>/dev/null || echo 0) + 1 ))\n    echo \"$s\" > \"$STATE/$imsi.strikes\"\n    if [ \"$s\" -ge\
-    \ \"$CHECK_STRIKES\" ]; then\n      log \"$name imsi-$imsi unhealthy ($reason, $s checks): restarting this UE only\"\n\
-    \      echo \"$(date -u +%Y-%m-%dT%H:%M:%SZ) imsi-$imsi $name $reason\" >> \"$STATE/restarts.log\"\n      stop_ue \"$imsi\"\
-    \n      if start_ue \"$imsi\" \"$cfg\"; then log \"$name imsi-$imsi back on $(tun_of \"$imsi\")\"\n      else log \"$name\
-    \ imsi-$imsi restart did not complete; will retry\"; fi\n    fi\n  done\ndone\n"
+    \ UE hears nothing from the gNB for 2 s\n# (HEARTBEAT_THRESHOLD in src/ue/rls/udp_task.cpp). The UE then recovers its\
+    \ registration with\n# a Service Request, but its user plane does not come back: the gNB logs \"Uplink data failure,\n\
+    # PDU session not found\" for every packet, while the UE still shows CM-CONNECTED and the core\n# still counts the session.\
+    \ Only probing from the UE side reveals it.\n#\n# So each UE is its own process (`nr-ue -i <imsi>`), and every CHECK_EVERY\
+    \ seconds each one\n# pings its slice's UPF gateway through its own interface. A UE that fails CHECK_STRIKES\n# checks\
+    \ in a row is restarted on its own \u2014 every other UE is untouched.\n#\n# WHY UEs CAN START IN PARALLEL (ADR-014)\n\
+    # nr-ue names its interface <prefix><first free index>, and picks a policy-routing table id by\n# reading /etc/iproute2/rt_tables\
+    \ and appending the first free one. With a shared prefix, UEs\n# starting together raced for the same interface name (\"\
+    TUNSETIFF: Device or resource busy\"),\n# so 20 UEs were started one at a time. For 100 that is minutes after every engine\
+    \ restart.\n# Now every UE gets its OWN interface prefix (tunName, from its IMSI) and its routing table is\n# registered\
+    \ here, with a unique id, before any UE starts.\n# A third shared thing: every nr-ue registers itself in /tmp/UERANSIM.proc-table/\
+    \ (for nr-cli),\n# creating the directory if it is missing \u2014 check, then mkdir, and a hard failure on EEXIST\n# (io::CreateDirectory).\
+    \ On a fresh container the first UEs to start together raced for it and\n# the losers ABORTED (\"could not be created:\
+    \ File exists\"): 8 of 25 in one burst. The directory is\n# created here first, so nothing is left to race for.\n# START_BATCH\
+    \ UEs are started at once; START_BATCH=1 restores one at a time.\nset -u\n\nCFG=/etc/ueransim\nRUN=/tmp/ue-cfg\nCHECK_EVERY=\"\
+    ${CHECK_EVERY:-10}\"\nCHECK_STRIKES=\"${CHECK_STRIKES:-3}\"\nSTART_WAIT=\"${UE_START_WAIT:-60}\"\nSTART_BATCH=\"${START_BATCH:-10}\"\
+    \nFIRST_IMSI=\"${FIRST_IMSI:-208930000000001}\"\nSTATE=/tmp/ues\nmkdir -p \"$STATE\" \"$RUN\"\nmkdir -p /tmp/UERANSIM.proc-table\
+    \ && chmod 777 /tmp/UERANSIM.proc-table   # see \"a third shared thing\"\n\n# Slice plan, in IMSI order: <config>:<UEs>:<gateway>:<name>.\
+    \ IMSIs are assigned contiguously\n# from FIRST_IMSI in this order \u2014 the same rule as scripts/open5gs/provision_subscribers.py,\
+    \ and\n# the counts must equal O5GS_UES in deployments/slices.env (tools/check_open5gs_slices.py).\nUE_PLAN=\"${UE_PLAN:-ue-slice-a.yaml:20:10.45.0.1:eMBB\
+    \ ue-slice-b.yaml:10:10.46.0.1:URLLC ue-slice-c.yaml:70:10.47.0.1:mMTC}\"\n\nlog() { echo \"ue-entrypoint: $(date -u +%H:%M:%S)\
+    \ $*\"; }\n\n# Per-slice reachability/latency exporter on :9121, measured from these UEs' own interfaces.\n# Runs here\
+    \ rather than as a sidecar: a sidecar sharing this network namespace is stranded\n# in a dead one when this container\
+    \ restarts. Respawned if it ever exits.\n( while true; do python3 -u /opt/o5gs-obs/ue_probe_exporter.py; sleep 2; done\
+    \ ) &\n\nplan() {   # every UE, one per line: <imsi> <config> <gateway> <slice>\n  imsi=$FIRST_IMSI\n  for s in $UE_PLAN;\
+    \ do\n    cfg=${s%%:*}; rest=${s#*:}; n=${rest%%:*}; rest=${rest#*:}; gw=${rest%%:*}; name=${rest#*:}\n    k=0\n    while\
+    \ [ \"$k\" -lt \"$n\" ]; do\n      echo \"$imsi $cfg $gw $name\"\n      imsi=$((imsi + 1)); k=$((k + 1))\n    done\n \
+    \ done\n}\n\ntotal=$(plan | wc -l)\nif [ \"$total\" -le 0 ]; then\n  log \"UE_PLAN is empty, idling\"; exec sleep infinity\n\
+    fi\n\ntag_of() { printf '%04d' $(( $1 % 10000 )); }   # <imsi> -> its last four digits\n\n# Each UE's own interface prefix,\
+    \ \"uesimtun\" + the last four digits of its IMSI (UERANSIM allows\n# 12 characters). Its one session is then uesimtun<NNNN>0\
+    \ \u2014 still matched by every tool that\n# looks for \"uesimtun\" \u2014 and no prefix is the start of another, so no\
+    \ two UEs can collide.\n# The routing table nr-ue will ask for is rt_<interface>; give each a unique id up front, from\n\
+    # 2000 up \u2014 nr-ue itself allocates from 1000, so an entry left by an older run cannot collide.\nplan | while read\
+    \ -r imsi cfg gw name; do\n  t=$(tag_of \"$imsi\")\n  { cat \"$CFG/$cfg\"; echo; echo \"tunName: \\\"uesimtun$t\\\"\"\
+    ; } > \"$RUN/$imsi.yaml\"\n  grep -q \"[[:space:]]rt_uesimtun${t}0\\$\" /etc/iproute2/rt_tables 2>/dev/null \\\n    ||\
+    \ printf '%d\\trt_uesimtun%s0\\n' $(( 2000 + imsi % 10000 )) \"$t\" >> /etc/iproute2/rt_tables\ndone\n\n# A UE is identified\
+    \ by its PDU-session ADDRESS, never by its interface NAME. With the old shared\n# prefix, names were reused after a session\
+    \ dropped, and checking by name once marked two dead\n# UEs healthy. Addresses are allocated uniquely by the SMF, so an\
+    \ address can only ever mean one\n# live session; with per-UE prefixes this is now doubly safe.\nip_of() {    # <imsi>\
+    \ -> the UE's latest session address from its own log, or empty\n  sed -n 's/.*TUN interface\\[uesimtun[0-9]*, \\([0-9.]*\\\
+    )\\].*/\\1/p' \"/tmp/ue-$1.log\" 2>/dev/null | tail -1\n}\n\ntun_of() {   # <imsi> -> the interface CURRENTLY holding\
+    \ that UE's address, or empty\n  a=$(ip_of \"$1\")\n  [ -n \"$a\" ] || return 0\n  ip -4 -o addr show 2>/dev/null | awk\
+    \ -v a=\"$a\" '/uesimtun/ { split($4, p, \"/\"); if (p[1] == a) { print $2; exit } }'\n}\n\nlaunch_ue() {   # <imsi>:\
+    \ start it, do not wait\n  : > \"/tmp/ue-$1.log\"\n  nr-ue -c \"$RUN/$1.yaml\" -i \"imsi-$1\" < /dev/null >> \"/tmp/ue-$1.log\"\
+    \ 2>&1 &\n  echo $! > \"$STATE/$1.pid\"\n  echo 0 > \"$STATE/$1.strikes\"\n}\n\nwait_up() {     # <imsi>...: wait until\
+    \ each has its interface, has died, or START_WAIT passes\n  w=0\n  while [ \"$w\" -lt \"$START_WAIT\" ]; do\n    pending=0\n\
+    \    for i in \"$@\"; do\n      [ -n \"$(tun_of \"$i\")\" ] && continue\n      kill -0 \"$(cat \"$STATE/$i.pid\")\" 2>/dev/null\
+    \ && pending=$((pending + 1))\n    done\n    [ \"$pending\" -eq 0 ] && return 0\n    w=$((w + 1)); sleep 1\n  done\n}\n\
+    \nstop_ue() {   # <imsi>\n  pid=$(cat \"$STATE/$1.pid\" 2>/dev/null)\n  [ -n \"$pid\" ] || return 0\n  kill \"$pid\" 2>/dev/null\n\
+    \  for _ in 1 2 3 4 5; do kill -0 \"$pid\" 2>/dev/null || return 0; sleep 1; done\n  kill -9 \"$pid\" 2>/dev/null\n}\n\
+    \nlog \"starting $total UEs ($UE_PLAN), $START_BATCH at a time\"\nstarted=$(date +%s)\nplan > \"$STATE/plan\"\nbatch=\"\
+    \"\nn=0\nwhile read -r imsi cfg gw name; do\n  launch_ue \"$imsi\"\n  batch=\"$batch $imsi\"; n=$((n + 1))\n  if [ \"\
+    $n\" -ge \"$START_BATCH\" ]; then\n    # shellcheck disable=SC2086\n    wait_up $batch; batch=\"\"; n=0\n  fi\ndone <\
+    \ \"$STATE/plan\"\n# shellcheck disable=SC2086\n[ -n \"$batch\" ] && wait_up $batch\n\nup=0\nwhile read -r imsi cfg gw\
+    \ name; do\n  if [ -n \"$(tun_of \"$imsi\")\" ]; then up=$((up + 1))\n  else log \"$name imsi-$imsi did not come up within\
+    \ ${START_WAIT}s; the supervisor will retry\"; fi\ndone < \"$STATE/plan\"\nlog \"$up/$total UEs up in $(( $(date +%s)\
+    \ - started ))s\"\necho \"$up $total $(( $(date +%s) - started )) $START_BATCH\" > \"$STATE/startup\"\n\nlog \"supervising:\
+    \ ping each UE's gateway every ${CHECK_EVERY}s, restart after ${CHECK_STRIKES} misses\"\nwhile true; do\n  sleep \"$CHECK_EVERY\"\
+    \n  while read -r imsi cfg gw name; do\n    pid=$(cat \"$STATE/$imsi.pid\" 2>/dev/null)\n    t=$(tun_of \"$imsi\")\n \
+    \   if ! kill -0 \"$pid\" 2>/dev/null; then\n      reason=\"process exited\"\n    elif [ -z \"$t\" ]; then\n      reason=\"\
+    its session address $(ip_of \"$imsi\") is on no interface\"\n    elif ping -I \"$t\" -c 1 -W 2 \"$gw\" >/dev/null 2>&1;\
+    \ then\n      echo 0 > \"$STATE/$imsi.strikes\"; continue\n    else\n      reason=\"no reply through the UPF on $t ($(ip_of\
+    \ \"$imsi\"))\"\n    fi\n    s=$(( $(cat \"$STATE/$imsi.strikes\" 2>/dev/null || echo 0) + 1 ))\n    echo \"$s\" > \"\
+    $STATE/$imsi.strikes\"\n    if [ \"$s\" -ge \"$CHECK_STRIKES\" ]; then\n      log \"$name imsi-$imsi unhealthy ($reason,\
+    \ $s checks): restarting this UE only\"\n      echo \"$(date -u +%Y-%m-%dT%H:%M:%SZ) imsi-$imsi $name $reason\" >> \"\
+    $STATE/restarts.log\"\n      stop_ue \"$imsi\"\n      launch_ue \"$imsi\"\n      wait_up \"$imsi\"\n      if [ -n \"$(tun_of\
+    \ \"$imsi\")\" ]; then log \"$name imsi-$imsi back on $(tun_of \"$imsi\")\"\n      else log \"$name imsi-$imsi restart\
+    \ did not complete; will retry\"; fi\n    fi\n  done < \"$STATE/plan\"\ndone\n"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -259,10 +297,12 @@ data:
     scrape_configs:\n- job_name: open5gs\n  static_configs:\n  - targets:\n    - amf.o5gs.svc.cluster.local:9090\n    labels:\n\
     \      nf: amf\n  - targets:\n    - smf.o5gs.svc.cluster.local:9090\n    labels:\n      nf: smf\n  - targets:\n    - upf-embb.o5gs.svc.cluster.local:9090\n\
     \    labels:\n      nf: upf\n      slice: eMBB\n  - targets:\n    - upf-urllc.o5gs.svc.cluster.local:9090\n    labels:\n\
-    \      nf: upf\n      slice: URLLC\n  - targets:\n    - pcf.o5gs.svc.cluster.local:9090\n    labels:\n      nf: pcf\n\
-    - job_name: upf-slice-traffic\n  static_configs:\n  - targets:\n    - upf-embb.o5gs.svc.cluster.local:9120\n    - upf-urllc.o5gs.svc.cluster.local:9120\n\
-    \    labels:\n      component: upf-slice-exporter\n- job_name: ue-probe\n  static_configs:\n  - targets:\n    - ue.o5gs.svc.cluster.local:9121\n\
-    \    labels:\n      component: ue-probe-exporter\n- job_name: prometheus\n  static_configs:\n  - targets:\n    - localhost:9090\n"
+    \      nf: upf\n      slice: URLLC\n  - targets:\n    - upf-mmtc.o5gs.svc.cluster.local:9090\n    labels:\n      nf: upf\n\
+    \      slice: mMTC\n  - targets:\n    - pcf.o5gs.svc.cluster.local:9090\n    labels:\n      nf: pcf\n- job_name: upf-slice-traffic\n\
+    \  static_configs:\n  - targets:\n    - upf-embb.o5gs.svc.cluster.local:9120\n    - upf-urllc.o5gs.svc.cluster.local:9120\n\
+    \    - upf-mmtc.o5gs.svc.cluster.local:9120\n    labels:\n      component: upf-slice-exporter\n- job_name: ue-probe\n\
+    \  static_configs:\n  - targets:\n    - ue.o5gs.svc.cluster.local:9121\n    labels:\n      component: ue-probe-exporter\n\
+    - job_name: prometheus\n  static_configs:\n  - targets:\n    - localhost:9090\n"
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -928,8 +968,8 @@ spec:
         command:
         - /bin/sh
         - -c
-        - for n in scp.o5gs.svc.cluster.local upf-embb.o5gs.svc.cluster.local upf-urllc.o5gs.svc.cluster.local; do until getent
-          hosts $n >/dev/null; do echo waiting for $n; sleep 2; done; done
+        - for n in scp.o5gs.svc.cluster.local upf-embb.o5gs.svc.cluster.local upf-mmtc.o5gs.svc.cluster.local upf-urllc.o5gs.svc.cluster.local;
+          do until getent hosts $n >/dev/null; do echo waiting for $n; sleep 2; done; done
 ---
 apiVersion: v1
 kind: Service
@@ -991,6 +1031,89 @@ spec:
           value: 10.45.0.0/16
         - name: SLICE_DEVICES
           value: ogstun:1:010203:eMBB
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: config
+          mountPath: /etc/open5gs
+        - name: obs
+          mountPath: /opt/o5gs-obs
+        - name: entry
+          mountPath: /opt/o5gs-entry
+      volumes:
+      - name: config
+        configMap:
+          name: o5gs-config
+      - name: obs
+        configMap:
+          name: o5gs-obs
+      - name: entry
+        configMap:
+          name: o5gs-obs
+          items:
+          - key: upf-entrypoint.sh
+            path: upf-entrypoint.sh
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: upf-mmtc
+  namespace: o5gs
+spec:
+  clusterIP: None
+  selector:
+    app: upf-mmtc
+  ports:
+  - name: tcp-9090
+    port: 9090
+    protocol: TCP
+  - name: udp-8805
+    port: 8805
+    protocol: UDP
+  - name: udp-2152
+    port: 2152
+    protocol: UDP
+  - name: tcp-9120
+    port: 9120
+    protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: upf-mmtc
+  namespace: o5gs
+  labels:
+    app: upf-mmtc
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: upf-mmtc
+  template:
+    metadata:
+      labels:
+        app: upf-mmtc
+    spec:
+      containers:
+      - name: upf-mmtc
+        image: o5gs/open5gs:v2.8.0
+        imagePullPolicy: Never
+        command:
+        - /bin/sh
+        - /opt/o5gs-entry/upf-entrypoint.sh
+        env:
+        - name: UPF_CONFIG
+          value: /etc/open5gs/upf-mmtc.yaml
+        - name: TUN_DEV
+          value: ogstun3
+        - name: TUN_GATEWAY
+          value: 10.47.0.1/16
+        - name: TUN_POOL
+          value: 10.47.0.0/16
+        - name: SLICE_DEVICES
+          value: ogstun3:3:334455:mMTC
         securityContext:
           privileged: true
         volumeMounts:
@@ -1142,6 +1265,48 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  name: dn-mmtc
+  namespace: o5gs
+spec:
+  clusterIP: None
+  selector:
+    app: dn-mmtc
+  ports:
+  - name: tcp-5201
+    port: 5201
+    protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dn-mmtc
+  namespace: o5gs
+  labels:
+    app: dn-mmtc
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: dn-mmtc
+  template:
+    metadata:
+      labels:
+        app: dn-mmtc
+    spec:
+      containers:
+      - name: dn-mmtc
+        image: o5gs/open5gs:v2.8.0
+        imagePullPolicy: Never
+        command:
+        - sleep
+        - infinity
+      volumes: []
+---
+apiVersion: v1
+kind: Service
+metadata:
   name: dn-urllc
   namespace: o5gs
 spec:
@@ -1219,7 +1384,7 @@ spec:
     spec:
       containers:
       - name: gnb-embb
-        image: o5gs/ueransim:v3.3.0-udpbuf
+        image: o5gs/ueransim:v3.3.0-udpbuf-mono
         imagePullPolicy: Never
         command:
         - /bin/sh
@@ -1245,7 +1410,79 @@ spec:
           name: o5gs-ran
       initContainers:
       - name: wait-for-peers
-        image: o5gs/ueransim:v3.3.0-udpbuf
+        image: o5gs/ueransim:v3.3.0-udpbuf-mono
+        imagePullPolicy: Never
+        command:
+        - /bin/sh
+        - -c
+        - for n in amf.o5gs.svc.cluster.local; do until getent hosts $n >/dev/null; do echo waiting for $n; sleep 2; done;
+          done
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gnb-mmtc
+  namespace: o5gs
+spec:
+  clusterIP: None
+  selector:
+    app: gnb-mmtc
+  ports:
+  - name: udp-4997
+    port: 4997
+    protocol: UDP
+  - name: udp-2152
+    port: 2152
+    protocol: UDP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gnb-mmtc
+  namespace: o5gs
+  labels:
+    app: gnb-mmtc
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: gnb-mmtc
+  template:
+    metadata:
+      labels:
+        app: gnb-mmtc
+    spec:
+      containers:
+      - name: gnb-mmtc
+        image: o5gs/ueransim:v3.3.0-udpbuf-mono
+        imagePullPolicy: Never
+        command:
+        - /bin/sh
+        - -c
+        - sed "s/POD_IP/$POD_IP/g" /etc/ueransim/gnb-mmtc.yaml > /tmp/gnb.yaml && exec nr-gnb -c /tmp/gnb.yaml
+        env:
+        - name: UERANSIM_UDP_BUFFER_BYTES
+          value: '8388608'
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        securityContext:
+          capabilities:
+            add:
+            - NET_ADMIN
+        volumeMounts:
+        - name: ran
+          mountPath: /etc/ueransim
+      volumes:
+      - name: ran
+        configMap:
+          name: o5gs-ran
+      initContainers:
+      - name: wait-for-peers
+        image: o5gs/ueransim:v3.3.0-udpbuf-mono
         imagePullPolicy: Never
         command:
         - /bin/sh
@@ -1291,7 +1528,7 @@ spec:
     spec:
       containers:
       - name: gnb-urllc
-        image: o5gs/ueransim:v3.3.0-udpbuf
+        image: o5gs/ueransim:v3.3.0-udpbuf-mono
         imagePullPolicy: Never
         command:
         - /bin/sh
@@ -1317,7 +1554,7 @@ spec:
           name: o5gs-ran
       initContainers:
       - name: wait-for-peers
-        image: o5gs/ueransim:v3.3.0-udpbuf
+        image: o5gs/ueransim:v3.3.0-udpbuf-mono
         imagePullPolicy: Never
         command:
         - /bin/sh
@@ -1360,18 +1597,20 @@ spec:
     spec:
       containers:
       - name: ue
-        image: o5gs/ueransim:v3.3.0-udpbuf
+        image: o5gs/ueransim:v3.3.0-udpbuf-mono
         imagePullPolicy: Never
         command:
         - /bin/sh
         - /etc/ueransim/ue-entrypoint.sh
         env:
-        - name: UES_PER_SLICE
+        - name: UE_PLAN
+          value: ue-slice-a.yaml:20:10.45.0.1:eMBB ue-slice-b.yaml:10:10.46.0.1:URLLC ue-slice-c.yaml:70:10.47.0.1:mMTC
+        - name: START_BATCH
           value: '10'
         - name: UERANSIM_UDP_BUFFER_BYTES
           value: '8388608'
         - name: SLICE_POOLS
-          value: 10.45.:10.45.0.1:eMBB 10.46.:10.46.0.1:URLLC
+          value: 10.45.:10.45.0.1:eMBB 10.46.:10.46.0.1:URLLC 10.47.:10.47.0.1:mMTC
         securityContext:
           privileged: true
         volumeMounts:
@@ -1388,13 +1627,13 @@ spec:
           name: o5gs-obs
       initContainers:
       - name: wait-for-peers
-        image: o5gs/ueransim:v3.3.0-udpbuf
+        image: o5gs/ueransim:v3.3.0-udpbuf-mono
         imagePullPolicy: Never
         command:
         - /bin/sh
         - -c
-        - for n in gnb-embb.o5gs.svc.cluster.local gnb-urllc.o5gs.svc.cluster.local; do until getent hosts $n >/dev/null;
-          do echo waiting for $n; sleep 2; done; done
+        - for n in gnb-embb.o5gs.svc.cluster.local gnb-mmtc.o5gs.svc.cluster.local gnb-urllc.o5gs.svc.cluster.local; do until
+          getent hosts $n >/dev/null; do echo waiting for $n; sleep 2; done; done
 ---
 apiVersion: v1
 kind: Service

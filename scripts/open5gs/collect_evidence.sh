@@ -40,7 +40,7 @@ for d in json.load(open("manifest.lock"))["dependencies"]:
     print("pin  %-9s %s  (%s)" % (d["name"], d["commit"], d["ref_hint"]))
 PY
   echo
-  for i in o5gs/open5gs:v2.8.0 o5gs/ueransim:v3.3.0-udpbuf; do
+  for i in o5gs/open5gs:v2.8.0 o5gs/ueransim:v3.3.0-udpbuf-mono; do
     echo "image $i  $(docker image inspect "$i" --format '{{.Id}} {{.Size}}' 2>&1)"
   done
   echo "open5gs binary commit: $(docker exec o5gs-amf cat /opt/open5gs/COMMIT 2>&1)"
@@ -71,6 +71,7 @@ step 4 "UE registration and PDU sessions (UE side, ground truth)"
   echo "interfaces total: $(docker exec o5gs-ue ip -4 -o addr show | grep -c uesimtun)"
   echo "  eMBB  (10.45/16): $(docker exec o5gs-ue ip -4 -o addr show | grep -c 'uesimtun.* 10[.]45[.]')"
   echo "  URLLC (10.46/16): $(docker exec o5gs-ue ip -4 -o addr show | grep -c 'uesimtun.* 10[.]46[.]')"
+  echo "  mMTC  (10.47/16): $(docker exec o5gs-ue ip -4 -o addr show | grep -c 'uesimtun.* 10[.]47[.]')"
   echo
   echo "--- per-UE session lines from the UE logs (one log per UE process) ---"
   docker exec o5gs-ue sh -c 'cat /tmp/ue-2089*.log' | grep 'TUN interface' | sed -E 's/^\[[^]]+\] //'
@@ -79,7 +80,7 @@ step 4 "UE registration and PDU sessions (UE side, ground truth)"
   docker exec o5gs-ue sh -c 'cat /tmp/ues/restarts.log 2>/dev/null || echo none'
   echo
   echo "--- gNB ---"
-  for g in o5gs-gnb-embb o5gs-gnb-urllc; do
+  for g in o5gs-gnb-embb o5gs-gnb-urllc o5gs-gnb-mmtc; do
     echo "$g: $(docker logs "$g" 2>&1 | grep -E 'NG Setup procedure is successful' | tail -1)"
   done
 } > "$OUT/04-ue-sessions.txt" 2>&1
@@ -87,12 +88,13 @@ step 4 "UE registration and PDU sessions (UE side, ground truth)"
 step 5 "ground-truth audit of the core's own gauges"
 {
   truth=$(docker exec o5gs-ue ip -4 -o addr show | grep -c uesimtun)
-  echo "ground truth: $truth UE interfaces (10 per slice expected)"
+  echo "ground truth: $truth UE interfaces (eMBB 20, URLLC 10, mMTC 70 expected)"
   echo
   echo "--- AMF ---";  metrics 10.53.0.5:9090  | grep -E '^(gnb|ran_ue|amf_session|fivegs_amffunction_rm_(reginit|registeredsubnbr))'
   echo "--- SMF ---";  metrics 10.53.0.4:9090  | grep -E '^(ues_active|pfcp_|fivegs_smffunction_sm_(sessionnbr|qos_flow_nbr|pdusessioncreation))'
   echo "--- UPF eMBB ---";  metrics 10.53.0.7:9090  | grep -E '^(pfcp_peers_active|fivegs_upffunction_upf_(sessionnbr|qosflows))'
   echo "--- UPF URLLC ---"; metrics 10.53.0.8:9090  | grep -E '^(pfcp_peers_active|fivegs_upffunction_upf_(sessionnbr|qosflows))'
+  echo "--- UPF mMTC ---";  metrics 10.53.0.9:9090  | grep -E '^(pfcp_peers_active|fivegs_upffunction_upf_(sessionnbr|qosflows))'
   echo
   echo "Interpretation (docs/open5gs.md, 'Which metrics can be trusted'):"
   echo "  exact   : ran_ue, amf_session, ues_active, sm_sessionnbr{snssai}"
@@ -141,7 +143,7 @@ cat > "$OUT/00-summary.md" <<EOF
 
 | | |
 |---|---|
-| UE interfaces (ground truth) | $(grep -oE 'interfaces total: [0-9]+' "$OUT/04-ue-sessions.txt" | awk '{print $3}') / 20 |
+| UE interfaces (ground truth) | $(grep -oE 'interfaces total: [0-9]+' "$OUT/04-ue-sessions.txt" | awk '{print $3}') / 100 |
 | User-plane verification | ${up_pass:-not run} |
 | KPI gate (steady state, before load) | **$GATE** |
 | UEs restarted by the supervisor since the UE container started | ${restarts:-?} |

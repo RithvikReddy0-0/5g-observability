@@ -271,6 +271,21 @@
                 }
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(mMTC|3-334455|iot).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#5A8F3C"
+                }
+              }
+            ]
           }
         ]
       },
@@ -307,7 +322,7 @@
         "type": "prometheus",
         "uid": "prom-o5gs"
       },
-      "description": "UPF gauge; DNN internet = eMBB, urllc = URLLC. Presence per slice; can over-count after a UE restart. The SMF's qos_flow_nbr{snssai,fiveqi} is NOT shown: it read 20/20 against 10/10 real flows because it is never decremented on re-attach.",
+      "description": "UPF gauge; DNN internet = eMBB, urllc = URLLC, iot = mMTC. Presence per slice; can over-count after a UE restart. The SMF's qos_flow_nbr{snssai,fiveqi} is NOT shown: it read 20/20 against 10/10 real flows because it is never decremented on re-attach.",
       "gridPos": {
         "h": 8,
         "w": 12,
@@ -356,6 +371,21 @@
                 }
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(mMTC|3-334455|iot).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#5A8F3C"
+                }
+              }
+            ]
           }
         ]
       },
@@ -398,7 +428,7 @@
     },
     {
       "type": "stat",
-      "title": "eMBB UEs reachable",
+      "title": "eMBB UEs reachable (of 20)",
       "id": 9,
       "datasource": {
         "type": "prometheus",
@@ -407,7 +437,7 @@
       "description": "UEs whose probe through the UPF answered in the last 5 s round. Core metrics do not notice vanished UEs; this does.",
       "gridPos": {
         "h": 4,
-        "w": 6,
+        "w": 4,
         "x": 0,
         "y": 14
       },
@@ -445,7 +475,7 @@
     },
     {
       "type": "stat",
-      "title": "URLLC UEs reachable",
+      "title": "URLLC UEs reachable (of 10)",
       "id": 10,
       "datasource": {
         "type": "prometheus",
@@ -454,8 +484,8 @@
       "description": "",
       "gridPos": {
         "h": 4,
-        "w": 6,
-        "x": 6,
+        "w": 4,
+        "x": 4,
         "y": 14
       },
       "options": {
@@ -492,8 +522,55 @@
     },
     {
       "type": "stat",
-      "title": "URLLC worst RTT (budget 10 ms)",
+      "title": "mMTC UEs reachable (of 70)",
       "id": 11,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prom-o5gs"
+      },
+      "description": "",
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 8,
+        "y": 14
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#2E6E8E"
+          }
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "sum(ue_probe_reachable{slice=\"mMTC\"})",
+          "instant": true
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "URLLC worst RTT (budget 10 ms)",
+      "id": 12,
       "datasource": {
         "type": "prometheus",
         "uid": "prom-o5gs"
@@ -501,7 +578,7 @@
       "description": "Worst UE of the last round, UE -> gNB -> UPF gateway. SLICE_B_MAX_LATENCY_MS = 10.",
       "gridPos": {
         "h": 4,
-        "w": 6,
+        "w": 4,
         "x": 12,
         "y": 14
       },
@@ -540,7 +617,7 @@
     {
       "type": "stat",
       "title": "eMBB worst RTT (budget 300 ms)",
-      "id": 12,
+      "id": 13,
       "datasource": {
         "type": "prometheus",
         "uid": "prom-o5gs"
@@ -548,8 +625,8 @@
       "description": "",
       "gridPos": {
         "h": 4,
-        "w": 6,
-        "x": 18,
+        "w": 4,
+        "x": 16,
         "y": 14
       },
       "options": {
@@ -585,9 +662,56 @@
       ]
     },
     {
+      "type": "stat",
+      "title": "mMTC worst RTT (budget 1000 ms)",
+      "id": 14,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prom-o5gs"
+      },
+      "description": "",
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 20,
+        "y": 14
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "decimals": 2,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#2E6E8E"
+          }
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "max(ue_probe_rtt_ms{slice=\"mMTC\",stat=\"max\"})",
+          "instant": true
+        }
+      ]
+    },
+    {
       "type": "timeseries",
       "title": "Round-trip time per slice (avg and worst UE)",
-      "id": 13,
+      "id": 15,
       "datasource": {
         "type": "prometheus",
         "uid": "prom-o5gs"
@@ -641,6 +765,21 @@
                 }
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(mMTC|3-334455|iot).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#5A8F3C"
+                }
+              }
+            ]
           }
         ]
       },
@@ -681,7 +820,7 @@
     {
       "type": "row",
       "title": "User plane \u2014 measured traffic per slice",
-      "id": 14,
+      "id": 16,
       "collapsed": false,
       "gridPos": {
         "h": 1,
@@ -693,12 +832,12 @@
     {
       "type": "timeseries",
       "title": "Downlink throughput per slice",
-      "id": 15,
+      "id": 17,
       "datasource": {
         "type": "prometheus",
         "uid": "prom-o5gs"
       },
-      "description": "Measured from the slice's own UPF TUN device (ogstun = eMBB, ogstun2 = URLLC). Open5GS's native UPF volume counters are labelled only by QFI and cannot separate slices.",
+      "description": "Measured from the slice's own UPF TUN device (ogstun = eMBB, ogstun2 = URLLC, ogstun3 = mMTC). Open5GS's native UPF volume counters are labelled only by QFI and cannot separate slices.",
       "gridPos": {
         "h": 8,
         "w": 12,
@@ -747,6 +886,21 @@
                 }
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(mMTC|3-334455|iot).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#5A8F3C"
+                }
+              }
+            ]
           }
         ]
       },
@@ -778,7 +932,7 @@
     {
       "type": "timeseries",
       "title": "Uplink throughput per slice",
-      "id": 16,
+      "id": 18,
       "datasource": {
         "type": "prometheus",
         "uid": "prom-o5gs"
@@ -832,6 +986,21 @@
                 }
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(mMTC|3-334455|iot).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#5A8F3C"
+                }
+              }
+            ]
           }
         ]
       },
@@ -863,7 +1032,7 @@
     {
       "type": "timeseries",
       "title": "Packets per second per slice",
-      "id": 17,
+      "id": 19,
       "datasource": {
         "type": "prometheus",
         "uid": "prom-o5gs"
@@ -917,6 +1086,21 @@
                 }
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(mMTC|3-334455|iot).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#5A8F3C"
+                }
+              }
+            ]
           }
         ]
       },
@@ -957,7 +1141,7 @@
     {
       "type": "timeseries",
       "title": "Dropped packets per slice",
-      "id": 18,
+      "id": 20,
       "datasource": {
         "type": "prometheus",
         "uid": "prom-o5gs"
@@ -1011,6 +1195,21 @@
                 }
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(mMTC|3-334455|iot).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#5A8F3C"
+                }
+              }
+            ]
           }
         ]
       },
@@ -1042,7 +1241,7 @@
     {
       "type": "row",
       "title": "Slice orchestrator \u2014 demands admitted by measured capacity, run as real flows",
-      "id": 19,
+      "id": 21,
       "collapsed": false,
       "gridPos": {
         "h": 1,
@@ -1054,7 +1253,7 @@
     {
       "type": "timeseries",
       "title": "eMBB: capacity, admitted, measured",
-      "id": 20,
+      "id": 22,
       "datasource": {
         "type": "prometheus",
         "uid": "prom-o5gs"
@@ -1108,6 +1307,21 @@
                 }
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(mMTC|3-334455|iot).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#5A8F3C"
+                }
+              }
+            ]
           }
         ]
       },
@@ -1157,7 +1371,7 @@
     {
       "type": "timeseries",
       "title": "URLLC: capacity, admitted, measured",
-      "id": 21,
+      "id": 23,
       "datasource": {
         "type": "prometheus",
         "uid": "prom-o5gs"
@@ -1211,6 +1425,21 @@
                 }
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(mMTC|3-334455|iot).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#5A8F3C"
+                }
+              }
+            ]
           }
         ]
       },
@@ -1260,7 +1489,7 @@
     {
       "type": "stat",
       "title": "Executed flows that got their rate",
-      "id": 22,
+      "id": 24,
       "datasource": {
         "type": "prometheus",
         "uid": "prom-o5gs"
@@ -1307,7 +1536,7 @@
     {
       "type": "stat",
       "title": "Demands refused (capacity), last 15 min",
-      "id": 23,
+      "id": 25,
       "datasource": {
         "type": "prometheus",
         "uid": "prom-o5gs"
@@ -1354,7 +1583,7 @@
     {
       "type": "stat",
       "title": "Demands admitted, last 15 min",
-      "id": 24,
+      "id": 26,
       "datasource": {
         "type": "prometheus",
         "uid": "prom-o5gs"
@@ -1401,7 +1630,7 @@
     {
       "type": "timeseries",
       "title": "Delivered / admitted rate per slice (last 200 flows)",
-      "id": 25,
+      "id": 27,
       "datasource": {
         "type": "prometheus",
         "uid": "prom-o5gs"
@@ -1452,6 +1681,21 @@
                 "value": {
                   "mode": "fixed",
                   "fixedColor": "#C7601F"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(mMTC|3-334455|iot).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#5A8F3C"
                 }
               }
             ]

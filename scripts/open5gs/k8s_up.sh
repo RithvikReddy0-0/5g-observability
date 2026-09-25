@@ -54,14 +54,14 @@ bash scripts/open5gs/start_orchestrator.sh --stop >/dev/null
 docker ps -q --filter name=o5gs- | xargs -r docker stop >/dev/null
 
 say "2. images built from the pinned commits, loaded into the cluster"
-for i in o5gs/open5gs:v2.8.0 o5gs/ueransim:v3.3.0-udpbuf; do
+for i in o5gs/open5gs:v2.8.0 o5gs/ueransim:v3.3.0-udpbuf-mono; do
   minikube -p "$P" image load "$i" && echo "  loaded $i"
 done
 
 say "3. apply the manifests generated from the compose deployment"
 python3 deployments/open5gs/k8s/render.py | sed 's/^/  /'
 kubectl --context "$P" apply -f deployments/open5gs/k8s/generated/o5gs.yaml 2>&1 | grep -vE "unchanged" | sed 's/^/  /' | tail -8
-for d in mongodb nrf scp ausf udm udr pcf bsf nssf amf upf-embb upf-urllc smf dn-embb dn-urllc gnb-embb gnb-urllc ue prometheus; do
+for d in mongodb nrf scp ausf udm udr pcf bsf nssf amf upf-embb upf-urllc upf-mmtc smf dn-embb dn-urllc dn-mmtc gnb-embb gnb-urllc gnb-mmtc ue prometheus; do
   $K rollout status "deploy/$d" --timeout=300s >/dev/null 2>&1 && printf '%s ' "$d" || { printf '[%s NOT READY] ' "$d"; fail=$((fail + 1)); }
 done
 echo
@@ -69,11 +69,11 @@ echo
 fi   # VERIFY
 
 say "4. core bring-up"
-for g in gnb-embb gnb-urllc; do
+for g in gnb-embb gnb-urllc gnb-mmtc; do
   for _ in $(seq 60); do $K logs "deploy/$g" 2>/dev/null | grep -q "NG Setup procedure is successful" && break; sleep 2; done
 done
-check "both gNBs completed NG Setup" '[ "$( ( $K logs deploy/gnb-embb; $K logs deploy/gnb-urllc ) 2>/dev/null | grep -c "NG Setup procedure is successful")" -ge 2 ]'
-check "SMF associated with both UPFs over PFCP" '[ "$($K logs deploy/smf 2>/dev/null | grep -c "PFCP associated")" -ge 2 ]'
+check "all three gNBs completed NG Setup" '[ "$( ( $K logs deploy/gnb-embb; $K logs deploy/gnb-urllc; $K logs deploy/gnb-mmtc ) 2>/dev/null | grep -c "NG Setup procedure is successful")" -ge 3 ]'
+check "SMF associated with all three UPFs over PFCP" '[ "$($K logs deploy/smf 2>/dev/null | grep -c "PFCP associated")" -ge 3 ]'
 
 say "5. subscribers and UEs"
 if [ "$VERIFY" = 0 ]; then
@@ -81,18 +81,20 @@ if [ "$VERIFY" = 0 ]; then
   $K rollout restart deploy/ue >/dev/null && $K rollout status deploy/ue --timeout=300s >/dev/null
 fi
 live=0
-for _ in $(seq 60); do
+for _ in $(seq 100); do
   live=$(uex sh -c 'ip -4 -o addr show | grep -c uesimtun' 2>/dev/null | tr -d '\r')
-  [ "${live:-0}" -ge 20 ] && break; sleep 3
+  [ "${live:-0}" -ge 100 ] && break; sleep 3
 done
 echo "  UE session addresses: ${live:-0}"
-check "20 UEs with a PDU session" '[ "${live:-0}" -ge 20 ]'
+check "100 UEs with a PDU session" '[ "${live:-0}" -ge 100 ]'
 na=$(uex sh -c "ip -4 -o addr show | grep -c 'uesimtun.* 10[.]45[.]'" | tr -d '\r')
 nb=$(uex sh -c "ip -4 -o addr show | grep -c 'uesimtun.* 10[.]46[.]'" | tr -d '\r')
-check "10 per slice, each from its own pool (eMBB $na, URLLC $nb)" '[ "$na" -ge 10 ] && [ "$nb" -ge 10 ]'
+nc=$(uex sh -c "ip -4 -o addr show | grep -c 'uesimtun.* 10[.]47[.]'" | tr -d '\r')
+check "each slice at its size, from its own pool (eMBB $na/20, URLLC $nb/10, mMTC $nc/70)" '[ "$na" -ge 20 ] && [ "$nb" -ge 10 ] && [ "$nc" -ge 70 ]'
 
 say "6. user plane, per slice"
-for spec in "eMBB 10.45. 10.45.0.1 upf-embb ogstun dn-embb" "URLLC 10.46. 10.46.0.1 upf-urllc ogstun2 dn-urllc"; do
+for spec in "eMBB 10.45. 10.45.0.1 upf-embb ogstun dn-embb" "URLLC 10.46. 10.46.0.1 upf-urllc ogstun2 dn-urllc" \
+            "mMTC 10.47. 10.47.0.1 upf-mmtc ogstun3 dn-mmtc"; do
   # Named, not positional: check() evaluates its condition inside the function, where $1..$6
   # are check()'s own arguments (set -u aborted the first run on "$3: unbound variable").
   read -r sname pool gw upf tun dn <<<"$spec"

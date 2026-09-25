@@ -6,7 +6,7 @@
 # through the gNB as GTP-U, into the UPF and out of that slice's TUN device.
 #
 # Evidence is taken from both ends: the UE side (ping replies, iperf3 throughput) and the
-# UPF side (byte counters on ogstun / ogstun2). A reply alone could in principle come from
+# UPF side (byte counters on ogstun / ogstun2 / ogstun3). A reply alone could in principle come from
 # somewhere else; counters moving on the slice's own UPF device cannot.
 #
 # Usage: scripts/open5gs/verify_user_plane.sh
@@ -31,19 +31,24 @@ echo "==================================================================="
 echo "Open5GS user-plane verification — $(date -u +%Y-%m-%dT%H:%M:%SZ)"
 echo "==================================================================="
 
-for c in "$UE" o5gs-upf-embb o5gs-upf-urllc o5gs-dn-embb o5gs-dn-urllc; do
+for c in "$UE" o5gs-upf-embb o5gs-upf-urllc o5gs-upf-mmtc o5gs-dn-embb o5gs-dn-urllc o5gs-dn-mmtc; do
   [ "$(docker inspect -f '{{.State.Running}}' "$c" 2>/dev/null)" = "true" ] \
     || { echo "error: $c is not running (make o5gs-up)"; exit 2; }
 done
 
+# How many UEs the UE container runs: the sum of its UE_PLAN counts (<config>:<UEs>:<gw>:<name>).
+want=$(docker inspect -f '{{range .Config.Env}}{{println .}}{{end}}' "$UE" | sed -n 's/^UE_PLAN=//p' \
+       | tr ' ' '\n' | awk -F: 'NF >= 2 {n += $2} END {print n + 0}')
 sessions=$(ue "ip -4 -o addr show | grep -c uesimtun" | tr -d '\r')
 echo
 echo "-- PDU sessions --"
-if [ "${sessions:-0}" -ge 20 ]; then ok "$sessions UEs hold a PDU session address"
-elif [ "${sessions:-0}" -gt 0 ]; then no "only $sessions of 20 UEs hold a PDU session address"
+if [ "${sessions:-0}" -ge "$want" ]; then ok "$sessions of $want UEs hold a PDU session address"
+elif [ "${sessions:-0}" -gt 0 ]; then no "only $sessions of $want UEs hold a PDU session address"
 else no "no UE has a PDU session address — nothing to test"; exit 1; fi
 
-for slice in "A eMBB 10.45. 10.45.0.1 ogstun o5gs-upf-embb o5gs-dn-embb 10.53.0.51" "B URLLC 10.46. 10.46.0.1 ogstun2 o5gs-upf-urllc o5gs-dn-urllc 10.53.0.52"; do
+for slice in "A eMBB 10.45. 10.45.0.1 ogstun o5gs-upf-embb o5gs-dn-embb 10.53.0.51" \
+             "B URLLC 10.46. 10.46.0.1 ogstun2 o5gs-upf-urllc o5gs-dn-urllc 10.53.0.52" \
+             "C mMTC 10.47. 10.47.0.1 ogstun3 o5gs-upf-mmtc o5gs-dn-mmtc 10.53.0.53"; do
   set -- $slice
   key=$1; name=$2; pool=$3; gw=$4; dev=$5; UPF=$6; DN=$7; dnip=$8
 

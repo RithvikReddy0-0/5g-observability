@@ -46,6 +46,8 @@ amf:
           sd: "010203"
         - sst: 2
           sd: "112233"
+        - sst: 3
+          sd: "334455"
   security:
     integrity_order: [ NIA2, NIA1, NIA0 ]
     ciphering_order: [ NEA0, NEA1, NEA2 ]

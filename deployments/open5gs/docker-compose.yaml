@@ -5,15 +5,17 @@
 # untouched. See docs/adr/ADR-010-open5gs-core.md.
 #
 #   make o5gs-build     build the images from the SHAs in manifest.lock
-#   make o5gs-up        start the core, provision subscribers, attach 20 UEs
+#   make o5gs-up        start the core, provision subscribers, attach 100 UEs
 #
 # Address plan (Open5GS configs take IPs, and N2/N3 must be stable for UERANSIM):
-#   .2 mongodb   .4 smf   .5 amf   .7 upf-embb   .8 upf-urllc   .10 nrf   .11 ausf   .12 udm
-#   .13 pcf   .14 nssf   .15 bsf   .20 udr   .200 scp   .30 gnb-embb   .32 gnb-urllc   .31 ue
-#   .41 prometheus   .42 grafana   .51 dn-embb   .52 dn-urllc
+#   .2 mongodb   .4 smf   .5 amf   .7 upf-embb   .8 upf-urllc   .9 upf-mmtc   .10 nrf   .11 ausf
+#   .12 udm   .13 pcf   .14 nssf   .15 bsf   .20 udr   .200 scp
+#   .30 gnb-embb   .32 gnb-urllc   .34 gnb-mmtc   .31 ue
+#   .41 prometheus   .42 grafana   .51 dn-embb   .52 dn-urllc   .53 dn-mmtc
 #
-# Slices are dedicated end to end in the user plane (ADR-011): own gNB, own UPF, own DNN and
-# address pool. They share the control plane (AMF, SMF, NRF, …), as slices normally do.
+# Three slices (Phase 2b, ADR-014): eMBB 20 UEs, URLLC 10, mMTC 70. Each is dedicated end to end
+# in the user plane (ADR-011): own gNB, own UPF, own DNN and address pool, own data network.
+# They share the control plane (AMF, SMF, NRF, …), as slices normally do.
 #
 # Two exporters run INSIDE the containers whose network they measure — the UPF (:9120,
 # per-slice traffic) and the UE container (:9121, per-slice reachability and latency).
@@ -109,12 +111,12 @@ services:
     <<: *nf
     container_name: o5gs-smf
     command: ["open5gs-smfd", "-c", "/etc/open5gs/smf.yaml"]
-    depends_on: [nrf, upf-embb, upf-urllc]
+    depends_on: [nrf, upf-embb, upf-urllc, upf-mmtc]
     networks:
       o5gs: { ipv4_address: 10.53.0.4 }
 
-  # One UPF per slice (ADR-011). The SMF steers each DNN to its own UPF, so eMBB and URLLC
-  # user traffic never share a forwarding process.
+  # One UPF per slice (ADR-011). The SMF steers each DNN to its own UPF, so no two slices'
+  # user traffic share a forwarding process.
   upf-embb:
     <<: *nf
     container_name: o5gs-upf-embb
@@ -165,6 +167,31 @@ services:
     networks:
       o5gs: { ipv4_address: 10.53.0.8 }
 
+  upf-mmtc:
+    <<: *nf
+    container_name: o5gs-upf-mmtc
+    init: true
+    entrypoint: ["/bin/sh", "/upf-entrypoint.sh"]
+    command: []
+    depends_on: []
+    environment:
+      UPF_CONFIG: /etc/open5gs/upf-mmtc.yaml
+      TUN_DEV: ogstun3
+      TUN_GATEWAY: 10.47.0.1/16
+      TUN_POOL: 10.47.0.0/16
+      SLICE_DEVICES: "ogstun3:3:334455:mMTC"
+      DN_SUBNET: 10.53.0.48/28
+    volumes:
+      - ./config:/etc/open5gs:ro
+      - ./upf-entrypoint.sh:/upf-entrypoint.sh:ro
+      - ./observability:/opt/o5gs-obs:ro
+    cap_add: [NET_ADMIN]
+    devices: ["/dev/net/tun:/dev/net/tun"]
+    sysctls:
+      net.ipv4.ip_forward: "1"
+    networks:
+      o5gs: { ipv4_address: 10.53.0.9 }
+
   # One gNB per slice (ADR-011). With one shared gNB, an eMBB flood overflowed its UDP receive
   # buffer and URLLC packets were dropped with it.
   # One data network per slice (ADR-012): where user traffic goes to and comes from. Test
@@ -193,9 +220,21 @@ services:
     networks:
       o5gs: { ipv4_address: 10.53.0.52 }
 
+  # Where the IoT devices' reports arrive (Track 2's collector runs here).
+  dn-mmtc:
+    container_name: o5gs-dn-mmtc
+    image: o5gs/open5gs:v2.8.0
+    restart: unless-stopped
+    init: true
+    cap_add: [NET_ADMIN]
+    entrypoint: ["/bin/sh", "-c", "ip route replace 10.47.0.0/16 via 10.53.0.9 && exec sleep infinity"]
+    depends_on: [upf-mmtc]
+    networks:
+      o5gs: { ipv4_address: 10.53.0.53 }
+
   gnb-embb:
     container_name: o5gs-gnb-embb
-    image: o5gs/ueransim:v3.3.0-udpbuf
+    image: o5gs/ueransim:v3.3.0-udpbuf-mono
     restart: unless-stopped
     command: ["nr-gnb", "-c", "/etc/ueransim/gnb-embb.yaml"]
     # 8 MiB UDP buffers (ADR-012). NET_ADMIN lets SO_RCVBUFFORCE exceed the kernel's rmem_max.
@@ -210,7 +249,7 @@ services:
 
   gnb-urllc:
     container_name: o5gs-gnb-urllc
-    image: o5gs/ueransim:v3.3.0-udpbuf
+    image: o5gs/ueransim:v3.3.0-udpbuf-mono
     restart: unless-stopped
     command: ["nr-gnb", "-c", "/etc/ueransim/gnb-urllc.yaml"]
     environment:
@@ -222,25 +261,43 @@ services:
     networks:
       o5gs: { ipv4_address: 10.53.0.32 }
 
-  # 20 UEs (10 per slice), one supervised process each, run as this container's own workload:
-  # they survive an engine restart, and a UE whose user plane dies is restarted on its own.
-  # See ran/ue-entrypoint.sh. Set UES_PER_SLICE=0 to start the container idle.
+  # The 70 IoT devices attach here: their signalling load never reaches the other slices' gNBs.
+  gnb-mmtc:
+    container_name: o5gs-gnb-mmtc
+    image: o5gs/ueransim:v3.3.0-udpbuf-mono
+    restart: unless-stopped
+    command: ["nr-gnb", "-c", "/etc/ueransim/gnb-mmtc.yaml"]
+    environment:
+      UERANSIM_UDP_BUFFER_BYTES: "8388608"
+    cap_add: [NET_ADMIN]
+    volumes:
+      - ./ran:/etc/ueransim:ro
+    depends_on: [amf]
+    networks:
+      o5gs: { ipv4_address: 10.53.0.34 }
+
+  # 100 UEs (eMBB 20, URLLC 10, mMTC 70), one supervised process each, run as this container's
+  # own workload: they survive an engine restart, and a UE whose user plane dies is restarted on
+  # its own. See ran/ue-entrypoint.sh. UE_PLAN must match O5GS_UES in deployments/slices.env
+  # (checked by tools/check_open5gs_slices.py); set UE_PLAN="" to start the container idle.
   ue:
     container_name: o5gs-ue
-    image: o5gs/ueransim:v3.3.0-udpbuf
+    image: o5gs/ueransim:v3.3.0-udpbuf-mono
     restart: unless-stopped
     init: true      # reaps UE processes the supervisor restarts
     entrypoint: ["/bin/sh", "/etc/ueransim/ue-entrypoint.sh"]
     environment:
-      UES_PER_SLICE: "10"
+      # <template>:<UEs>:<gateway>:<slice>, in IMSI order from 208930000000001
+      UE_PLAN: "ue-slice-a.yaml:20:10.45.0.1:eMBB ue-slice-b.yaml:10:10.46.0.1:URLLC ue-slice-c.yaml:70:10.47.0.1:mMTC"
+      START_BATCH: "10"                        # UEs attaching at once (ADR-014)
       UERANSIM_UDP_BUFFER_BYTES: "8388608"     # ADR-012
-      SLICE_POOLS: "10.45.:10.45.0.1:eMBB 10.46.:10.46.0.1:URLLC"
+      SLICE_POOLS: "10.45.:10.45.0.1:eMBB 10.46.:10.46.0.1:URLLC 10.47.:10.47.0.1:mMTC"
     volumes:
       - ./ran:/etc/ueransim:ro
       - ./observability:/opt/o5gs-obs:ro     # ue_probe_exporter.py, served on :9121
     cap_add: [NET_ADMIN]
     devices: ["/dev/net/tun:/dev/net/tun"]
-    depends_on: [gnb-embb, gnb-urllc]
+    depends_on: [gnb-embb, gnb-urllc, gnb-mmtc]
     networks:
       o5gs: { ipv4_address: 10.53.0.31 }
 

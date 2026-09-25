@@ -10,7 +10,7 @@ global:
   max:
     ue: 1024
 
-# One NSI per slice. Both point at the single NRF: slice isolation here is at the QoS and
+# One NSI per slice. All point at the single NRF: slice isolation here is at the QoS and
 # user-plane pool level, not separate NF instances.
 nssf:
   sbi:
@@ -29,3 +29,7 @@ nssf:
           s_nssai:
             sst: 2
             sd: "112233"
+        - uri: http://10.53.0.10:7777
+          s_nssai:
+            sst: 3
+            sd: "334455"

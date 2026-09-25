@@ -153,6 +153,14 @@ Measured ([`docs/evidence/open5gs-orchestrator/`](../../docs/evidence/open5gs-or
 below policy; `scripts/open5gs/calibrate_capacity.sh` measures it. This laptop delivers the full
 policy capacity, so it is not set.
 
+**Phase 2b — three slices** ([ADR-014](../../docs/adr/ADR-014-mmtc-slice-and-100-ues.md)). The mMTC
+slice (SST 3) is defined in `slices.env`, so the orchestrator loads it, and `SLICE_PATHS` knows its
+pool and data network. Its 70 IoT subscribers are permitted on mMTC only. The traffic generator's
+mix (video, files, browsing, control) is phone-like traffic, so `traffic_gen.py` drives only
+subscribers permitted on SST 1 or 2 (`SUBSCRIBER_SSTS`). IoT devices get their own traffic profile
+(Track 2). Which traffic classes map to mMTC, and priority within URLLC, are the shared
+orchestrator work of Phase 2b and are not decided here.
+
 ## Honest limitations
 
 - **free5GC mode: capacity is modelled, not measured.** Without a UPF nothing enforces AMBR; these are

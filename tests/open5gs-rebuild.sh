@@ -8,7 +8,7 @@
 #   1. docker compose down -v      containers, network AND volumes (subscribers, metrics, Grafana)
 #   2. confirm nothing is left
 #   3. docker compose up -d        from the committed configuration and the pinned images
-#   4. provision into the empty database, attach 20 UEs
+#   4. provision into the empty database, attach 100 UEs
 #   5. verify the user plane, then the KPI gate
 #
 # DESTRUCTIVE: deletes the Open5GS subscriber database and Prometheus/Grafana history. The
@@ -34,7 +34,7 @@ check() { if eval "$2"; then echo "  [ PASS ] $1"; else echo "  [ FAIL ] $1"; fa
 {
 echo "Open5GS teardown/rebuild — $TS"
 echo "commit: $(git rev-parse HEAD) $(git diff --quiet && echo clean || echo '(uncommitted changes present)')"
-for i in o5gs/open5gs:v2.8.0 o5gs/ueransim:v3.3.0-udpbuf; do echo "image $i $(docker image inspect "$i" --format '{{.Id}}')"; done
+for i in o5gs/open5gs:v2.8.0 o5gs/ueransim:v3.3.0-udpbuf-mono; do echo "image $i $(docker image inspect "$i" --format '{{.Id}}')"; done
 
 step "1. teardown (down -v)"
 bash scripts/open5gs/start_orchestrator.sh --stop
@@ -54,9 +54,9 @@ done
 check "subscriber database starts EMPTY" '[ "$(docker exec o5gs-mongodb mongo open5gs --quiet --eval "db.subscribers.count()")" = "0" ]'
 
 step "4. provision + attach"
-bash scripts/open5gs/start_ues.sh 2>&1 | tail -6
-check "20 subscribers provisioned" '[ "$(docker exec o5gs-mongodb mongo open5gs --quiet --eval "db.subscribers.count()")" = "20" ]'
-check "20 UE session addresses live" '[ "$(docker exec o5gs-ue ip -4 -o addr show | grep -c uesimtun)" -ge 20 ]'
+bash scripts/open5gs/start_ues.sh 2>&1 | tail -9
+check "100 subscribers provisioned" '[ "$(docker exec o5gs-mongodb mongo open5gs --quiet --eval "db.subscribers.count()")" = "100" ]'
+check "100 UE session addresses live" '[ "$(docker exec o5gs-ue ip -4 -o addr show | grep -c uesimtun)" -ge 100 ]'
 
 step "5. user plane"
 bash scripts/open5gs/verify_user_plane.sh 2>&1 | grep -E "PASS|FAIL|WARN"
