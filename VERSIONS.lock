@@ -6,7 +6,7 @@
   "environment": {
     "ubuntu_release": "24.04",
     "ubuntu_point_release": "TO_BE_FILLED_ON_LAB_ODE",
-    "kernel_release": "6.8.0-136-generic",
+    "kernel_release": "6.8.0-142-generic",
     "arch": "x86_64",
     "docker_engine": "TO_BE_FILLED_ON_LAB_ODE",
     "docker_compose": "TO_BE_FILLED_ON_LAB_ODE"
@@ -37,8 +37,8 @@
   "gtp5g_validation": {
     "built": true,
     "loaded": true,
-    "kernel": "6.8.0-136-generic",
+    "kernel": "6.8.0-142-generic",
     "module_version": "0.10.2",
-    "timestamp": "2026-09-16T04:30:15Z"
+    "timestamp": "2026-09-29T04:33:26Z"
   }
 }

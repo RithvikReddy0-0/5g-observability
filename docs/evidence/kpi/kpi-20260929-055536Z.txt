@@ -1,0 +1,50 @@
+==============================================================================
+KPI gate — 2026-09-29T05:55:37Z
+Prometheus: http://localhost:9090   definitions: deployments/kpi-gates.json
+==============================================================================
+
+  [  PASS  ] All 8 control-plane NFs are scrapeable
+             8 >= 8 NFs
+
+  [  PASS  ] No configured target is down
+             0 == 0 targets
+
+  [  FAIL  ] Expected UE population is registered
+             0 UEs — required >= 20
+             why this matters: The deployment is only accepted if devices actually attached. Sourced from the slice exporter (AMF logs), not the AMF gauges, which are known to be wrong.
+
+  [  FAIL  ] Both slices have registered UEs
+             no data — the metric is not being reported
+             why this matters: 20 UEs all on one slice would pass a naive count while slicing is entirely broken. This is the check that would have caught the 'AMF can not select an target AMF by NRF' failure.
+
+  [  PASS  ] Subscriber records exist for both slices
+             20 >= 20 subscribers
+
+  [  PASS  ] SBI server-error rate is below threshold
+             0 <= 0.2 req/s
+
+  [  FAIL  ] SBI p95 latency within budget
+             expression evaluated to NaN
+             why this matters: Inter-NF latency is the earliest signal that the host is too loaded to serve the core honestly. Mirrors the SbiLatencyHigh alert so the gate and the alerting agree.
+
+  [  PASS  ] Both slices publish capacity
+             2 >= 2 slices
+
+  [  PASS  ] No slice is saturated
+             0 <= 0.95 ratio
+
+  [  PASS  ] No demand refused for want of a low-latency slice
+             0 == 0 demands
+
+  [SKIP-ODE] PDU session establishment succeeds
+             requires the user plane (gtp5g); not runnable on this host
+
+  [SKIP-ODE] Per-slice throughput matches the provisioned AMBR
+             requires the user plane (gtp5g); not runnable on this host
+
+==============================================================================
+  7 passed   3 failed   0 advisory   2 skipped (ODE)
+==============================================================================
+
+GATE FAILED — this deployment must not be promoted.
+  verdict written to docs/evidence/kpi/kpi-20260929-055536Z.json

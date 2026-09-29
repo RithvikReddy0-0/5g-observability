@@ -19,6 +19,16 @@ sudo apt update
 sudo apt install -y git python3 curl build-essential make gcc
 ```
 
+On the supported ODE, the kernel must be the Ubuntu 24.04 GA family (`6.8.x`), not the newer
+`7.0.x` kernel that breaks the pinned `gtp5g` version. Confirm with:
+
+```bash
+uname -r
+```
+
+Expect a `6.8.0-*` kernel. If you are on `7.0.0-*`, stop here — that is the known
+`gtp5g`/kernel API mismatch behind the build failure.
+
 `jq` is **optional** — `bootstrap.sh` falls back to `python3`, which Ubuntu ships by default.
 
 Docker Engine + Compose v2 plugin must be installed and the daemon running.

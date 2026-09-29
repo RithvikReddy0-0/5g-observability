@@ -31,7 +31,7 @@ N_A     := 10
 N_B     := 10
 
 .PHONY: help up create down restart stop-ues ues status test evidence screenshots report \
-        bootstrap verify clean logs urls nuke gate gate-test \
+        bootstrap verify clean logs urls nuke gate gate-test jenkins-up jenkins-status jenkins-down \
         o5gs-build o5gs-up o5gs-ues o5gs-status o5gs-ping o5gs-traffic o5gs-gate o5gs-evidence o5gs-urls o5gs-orchestrate o5gs-slices \
         o5gs-test o5gs-deploy o5gs-deploy-init o5gs-rebuild o5gs-calibrate o5gs-isolation o5gs-capture \
         o5gs-k8s-up o5gs-k8s-verify o5gs-k8s-down \
@@ -97,6 +97,15 @@ down: ## Stop everything (keeps all data)
 	@echo "✓ stopped — data preserved, 'make up' brings it straight back"
 
 restart: down up ## Stop then start everything
+
+jenkins-up: ## Start Jenkins CI container on port 8080
+	@bash scripts/start_jenkins.sh
+
+jenkins-status: ## Check Jenkins CI container status
+	@bash scripts/start_jenkins.sh --status
+
+jenkins-down: ## Stop Jenkins CI container
+	@bash scripts/start_jenkins.sh --stop
 
 ## ─────────────────────────── devices (UEs) ───────────────────────────────
 

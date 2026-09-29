@@ -1,0 +1,47 @@
+==============================================================================
+KPI gate — 2026-09-29T06:19:50Z
+Prometheus: http://prometheus:9090   definitions: deployments/kpi-gates.json
+==============================================================================
+
+  [  PASS  ] All 8 control-plane NFs are scrapeable
+             8 >= 8 NFs
+
+  [  PASS  ] No configured target is down
+             0 == 0 targets
+
+  [  PASS  ] Expected UE population is registered
+             20 >= 20 UEs
+
+  [  PASS  ] Both slices have registered UEs
+             2 >= 2 slices
+
+  [  PASS  ] Subscriber records exist for both slices
+             20 >= 20 subscribers
+
+  [  PASS  ] SBI server-error rate is below threshold
+             0 <= 0.2 req/s
+
+  [  PASS  ] SBI p95 latency within budget
+             0.03971 <= 1 seconds
+
+  [  PASS  ] Both slices publish capacity
+             2 >= 2 slices
+
+  [  PASS  ] No slice is saturated
+             0 <= 0.95 ratio
+
+  [  PASS  ] No demand refused for want of a low-latency slice
+             0 == 0 demands
+
+  [SKIP-ODE] PDU session establishment succeeds
+             requires the user plane (gtp5g); not runnable on this host
+
+  [SKIP-ODE] Per-slice throughput matches the provisioned AMBR
+             requires the user plane (gtp5g); not runnable on this host
+
+==============================================================================
+  10 passed   0 failed   0 advisory   2 skipped (ODE)
+==============================================================================
+
+GATE PASSED (2 KPIs still require the ODE — Phase 1 is not frozen)
+  verdict written to docs/evidence/kpi/kpi-20260929-061950Z.json

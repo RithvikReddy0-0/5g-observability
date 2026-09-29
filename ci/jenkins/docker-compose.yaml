@@ -1,0 +1,32 @@
+services:
+  jenkins:
+    container_name: jenkins
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: 5g-jenkins:latest
+    user: root
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    environment:
+      - JENKINS_OPTS=--httpPort=8080
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - PROMETHEUS_URL=http://prometheus:9090
+      - GRAFANA_URL=http://grafana:3000
+    volumes:
+      - jenkins_data:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /home/anvita/Desktop/5gnetworks/5g-observability:/home/anvita/Desktop/5gnetworks/5g-observability
+    networks:
+      - privnet
+
+volumes:
+  jenkins_data:
+    name: jenkins_home_data
+
+networks:
+  privnet:
+    name: compose_privnet
+    external: true

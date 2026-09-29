@@ -1,0 +1,85 @@
+// pipeline.groovy — scripted/shared pipeline definition for 5G DevOps Framework.
+// Sourced by Jenkins multibranch or standalone pipeline jobs.
+
+pipeline {
+    agent any
+
+    options {
+        timeout(time: 15, unit: 'MINUTES')
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        ansiColor('xterm')
+    }
+
+    environment {
+        PROMETHEUS_URL = 'http://localhost:9090'
+        GRAFANA_URL    = 'http://localhost:3000'
+        EXPECT_MIN_UES = '10'
+    }
+
+    stages {
+        stage('Static Analysis & Lint') {
+            steps {
+                echo '=== Stage 1: Static Analysis, Slice Consistency & Tool Linting ==='
+                sh '''
+                    python3 -m py_compile \
+                        tools/kpi-gate/*.py \
+                        tools/slice-orchestrator/*.py \
+                        observability/slice-exporter/*.py
+
+                    for s in scripts/*.sh ci/scripts/*.sh; do
+                        [ -f "$s" ] && bash -n "$s"
+                    done
+
+                    python3 tools/kpi-gate/kpi_gate.py --self-test
+                    python3 tools/kpi-gate/check_metric_names.py
+                '''
+            }
+        }
+
+        stage('Pre-flight & Images') {
+            steps {
+                echo '=== Stage 2: Container Images & Daemon Pre-flight ==='
+                sh 'bash ci/scripts/build-images.sh'
+            }
+        }
+
+        stage('Deploy 5G Stack & Observability') {
+            steps {
+                echo '=== Stage 3: Automated Stack Deployment ==='
+                sh 'bash ci/scripts/deploy.sh'
+            }
+        }
+
+        stage('Synthetic RAN & Slice Attach') {
+            steps {
+                echo '=== Stage 4: Multi-Slice Subscriber Provisioning & UE Attach ==='
+                sh 'bash ci/scripts/test-attach.sh'
+            }
+        }
+
+        stage('Continuous Verification (KPI Gate)') {
+            steps {
+                echo '=== Stage 5: Evaluating Telemetry against KPI Thresholds ==='
+                sh '''
+                    sleep 10
+                    bash ci/scripts/collect-kpis.sh docs/evidence/kpi
+                '''
+            }
+        }
+    }
+
+    post {
+        always {
+            archiveArtifacts artifacts: 'docs/evidence/kpi/*', allowEmptyArchive: true
+        }
+        failure {
+            sh '''
+                mkdir -p logs/pipeline-failure
+                docker logs --tail 100 amf > logs/pipeline-failure/amf.log 2>&1 || true
+                docker logs --tail 100 smf > logs/pipeline-failure/smf.log 2>&1 || true
+                docker logs --tail 100 ueransim > logs/pipeline-failure/ueransim.log 2>&1 || true
+            '''
+            archiveArtifacts artifacts: 'logs/pipeline-failure/*', allowEmptyArchive: true
+        }
+    }
+}

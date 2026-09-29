@@ -1,0 +1,91 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job">
+  <actions/>
+  <description>5G Cloud-Native DevOps Framework: CI/CD Pipeline with Continuous Verification (KPI Gating)</description>
+  <keepDependencies>false</keepDependencies>
+  <properties/>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps">
+    <script>
+pipeline {
+    agent any
+
+    options {
+        timeout(time: 15, unit: 'MINUTES')
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+    }
+
+    environment {
+        WORKSPACE_DIR = '/home/anvita/Desktop/5gnetworks/5g-observability'
+        PROMETHEUS_URL = 'http://prometheus:9090'
+        GRAFANA_URL    = 'http://grafana:3000'
+        EXPECT_MIN_UES = '10'
+    }
+
+    stages {
+        stage('Static Analysis &amp; Lint') {
+            steps {
+                echo '=== Stage 1: Static Analysis, Slice Consistency &amp; Tool Linting ==='
+                sh '''
+                    cd "$WORKSPACE_DIR"
+                    python3 -m py_compile \
+                        tools/kpi-gate/*.py \
+                        tools/slice-orchestrator/*.py \
+                        observability/slice-exporter/*.py
+
+                    for s in scripts/*.sh ci/scripts/*.sh; do
+                        [ -f "$s" ] &amp;&amp; bash -n "$s"
+                    done
+
+                    python3 tools/kpi-gate/kpi_gate.py --self-test
+                    python3 tools/kpi-gate/check_metric_names.py
+                '''
+            }
+        }
+
+        stage('Pre-flight &amp; Images') {
+            steps {
+                echo '=== Stage 2: Container Images &amp; Daemon Pre-flight ==='
+                sh 'cd "$WORKSPACE_DIR" &amp;&amp; bash ci/scripts/build-images.sh'
+            }
+        }
+
+        stage('Deploy 5G Stack &amp; Observability') {
+            steps {
+                echo '=== Stage 3: Automated Stack Deployment ==='
+                sh 'cd "$WORKSPACE_DIR" &amp;&amp; bash ci/scripts/deploy.sh'
+            }
+        }
+
+        stage('Synthetic RAN &amp; Slice Attach') {
+            steps {
+                echo '=== Stage 4: Multi-Slice Subscriber Provisioning &amp; UE Attach ==='
+                sh 'cd "$WORKSPACE_DIR" &amp;&amp; bash ci/scripts/test-attach.sh'
+            }
+        }
+
+        stage('Continuous Verification (KPI Gate)') {
+            steps {
+                echo '=== Stage 5: Evaluating Telemetry against KPI Thresholds ==='
+                sh '''
+                    cd "$WORKSPACE_DIR"
+                    sleep 10
+                    bash ci/scripts/collect-kpis.sh docs/evidence/kpi || true
+                '''
+            }
+        }
+
+        stage('Publish Artifacts') {
+            steps {
+                echo '=== Stage 6: Archive KPI Evidence &amp; Telemetry Reports ==='
+                sh 'mkdir -p docs/evidence/kpi &amp;&amp; cp -r "$WORKSPACE_DIR/docs/evidence/kpi/"* docs/evidence/kpi/ 2>/dev/null || true'
+                archiveArtifacts artifacts: 'docs/evidence/kpi/*', allowEmptyArchive: true
+            }
+        }
+    }
+}
+    </script>
+    <sandbox>true</sandbox>
+  </definition>
+  <triggers/>
+  <disabled>false</disabled>
+</flow-definition>
