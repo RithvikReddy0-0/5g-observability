@@ -13,7 +13,7 @@ gtp5g) are pinned by SHA in [`manifest.lock`](manifest.lock) and fetched into a 
 - **KPI gate:** [`docs/kpi-gate.md`](docs/kpi-gate.md) — the pass/fail contract a deployment must meet.
 - **Review deck:** [`docs/presentation/`](docs/presentation/) — Phase 2 Review 1 slides (LaTeX Beamer).
 - **Open5GS stack:** [`docs/open5gs.md`](docs/open5gs.md) — a second core ([ADR-010](docs/adr/ADR-010-open5gs-core.md)) with a **working user plane on this laptop**. `make o5gs-build && make o5gs-up`.
-- **Phase 2b (100 UEs, three slices):** [work division](docs/briefs/phase2b-work-division.md) · [Track 1 handover](docs/briefs/phase2b-track1-handover.md) · [ADR-014](docs/adr/ADR-014-mmtc-slice-and-100-ues.md).
+- **Phase 2b (100 UEs, three slices):** [work division](docs/briefs/phase2b-work-division.md) · [Track 1 handover](docs/briefs/phase2b-track1-handover.md) · [KPI targets review](docs/briefs/phase2b-kpi-targets-review.md) · [ADR-014](docs/adr/ADR-014-mmtc-slice-and-100-ues.md).
 - **Open5GS completion report:** [`docs/reports/2026-09-14-open5gs-completion-report.md`](docs/reports/2026-09-14-open5gs-completion-report.md) — what was built, every problem found and how it was fixed, final measured state, what is not done.
 
 > **Baseline environment (ODE):** bare-metal **Ubuntu 24.04 LTS, x86_64, ≥16 GB RAM** (ADR-003).
