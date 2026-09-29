@@ -35,14 +35,13 @@ addrs() {   # <pool-regex> -> "iface ip" lines
 
 mapfile -t A < <(addrs '10.45.')
 mapfile -t B < <(addrs '10.46.')
-[ "${#A[@]}" -ge "$N" ] && [ "${#B[@]}" -ge "$N" ] \
-  || { echo "error: need $N UEs with sessions on each slice (have ${#A[@]} eMBB, ${#B[@]} URLLC)"; exit 1; }
+# Only the slices being loaded need N UEs: eMBB has 20 and URLLC 10 (Phase 2b).
 case "$ONLY" in
-  both)  ;;
-  embb)  B=() ;;
-  urllc) A=() ;;
+  both)  { [ "${#A[@]}" -ge "$N" ] && [ "${#B[@]}" -ge "$N" ]; } ;;
+  embb)  B=(); [ "${#A[@]}" -ge "$N" ] ;;
+  urllc) A=(); [ "${#B[@]}" -ge "$N" ] ;;
   *) echo "error: slice selector must be both, embb or urllc"; exit 1 ;;
-esac
+esac || { echo "error: need $N UEs with sessions on each loaded slice (have ${#A[@]} eMBB, ${#B[@]} URLLC)"; exit 1; }
 
 for u in o5gs-dn-embb o5gs-dn-urllc; do docker exec "$u" sh -c 'pkill -x iperf3 2>/dev/null; true'; done
 port=5300

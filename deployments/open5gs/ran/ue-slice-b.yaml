@@ -1,7 +1,7 @@
 # UERANSIM UE template — slice B, URLLC (SST 2).
-# Launched with `nr-ue -n 10`, which increments the SUPI for each instance, so this one file
-# brings up imsi-208930000000011 and the nine that follow it.
-supi: "imsi-208930000000011"
+# ran/ue-entrypoint.sh starts one `nr-ue -i <imsi>` per device from a copy of this file, so the
+# SUPI below is only a default; the IMSIs are 208930000000021-030 (deployments/slices.env).
+supi: "imsi-208930000000021"
 mcc: "208"
 mnc: "93"
 key: "8baf473f2f8fd09487cccbd7097c6862"

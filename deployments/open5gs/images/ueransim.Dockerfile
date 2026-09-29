@@ -4,10 +4,14 @@
 # whose source commit is not recorded (an M0 open item). This builds the exact pinned SHA
 # instead, so the RAN simulator is as reproducible as the core it is tested against.
 #
-# One local patch is applied on top of the pinned source, and the build fails if it no longer
-# applies: patches/ueransim-udp-socket-buffers.patch sizes UDP socket buffers when
-# UERANSIM_UDP_BUFFER_BYTES is set (docs/adr/ADR-012-ueransim-udp-buffers.md). The image is
-# tagged v3.3.0-udpbuf so it is never mistaken for upstream.
+# Two local patches are applied on top of the pinned source, and the build fails if either no
+# longer applies:
+#   patches/ueransim-udp-socket-buffers.patch  sizes UDP socket buffers when
+#       UERANSIM_UDP_BUFFER_BYTES is set (docs/adr/ADR-012-ueransim-udp-buffers.md)
+#   patches/ueransim-monotonic-clock.patch     times heartbeats and timers with a monotonic
+#       clock, so a wall-clock step no longer fakes a radio link failure
+#       (docs/adr/ADR-014-mmtc-slice-and-100-ues.md)
+# The image is tagged v3.3.0-udpbuf-mono so it is never mistaken for upstream.
 
 ARG UBUNTU=ubuntu@sha256:224a1869083a311ef3f13648a154ba79832fbef6364d31493642ca03082da254
 
@@ -26,8 +30,9 @@ RUN git init -q ueransim && cd ueransim \
     && git -c advice.detachedHead=false checkout -q FETCH_HEAD \
     && test "$(git rev-parse HEAD)" = "${UERANSIM_COMMIT}"
 
-COPY patches/ueransim-udp-socket-buffers.patch /patches/
-RUN cd /src/ueransim && git apply --verbose /patches/ueransim-udp-socket-buffers.patch
+COPY patches/ueransim-udp-socket-buffers.patch patches/ueransim-monotonic-clock.patch /patches/
+RUN cd /src/ueransim && git apply --verbose /patches/ueransim-udp-socket-buffers.patch \
+    && git apply --verbose /patches/ueransim-monotonic-clock.patch
 
 WORKDIR /src/ueransim
 RUN make -j"$(nproc)" && ls -la build/
@@ -42,5 +47,5 @@ COPY --from=build /src/ueransim/build/nr-gnb /src/ueransim/build/nr-ue \
                   /src/ueransim/build/libdevbnd.so /opt/ueransim/
 ENV PATH=/opt/ueransim:$PATH
 LABEL org.opencontainers.image.version="v3.3.0" \
-      io.5g-observability.patches="ueransim-udp-socket-buffers"
+      io.5g-observability.patches="ueransim-udp-socket-buffers ueransim-monotonic-clock"
 WORKDIR /opt/ueransim

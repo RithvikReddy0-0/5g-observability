@@ -8,9 +8,10 @@
 #                 A candidate that fails here is rejected WITHOUT touching the running stack.
 #   2. snapshot   the running configuration is the last known-good, if it currently passes the
 #                 gate (the first run establishes it).
-#   3. apply      restart the stack in dependency order. The SMF is always followed by its UPFs:
-#                 restarting only the SMF left a UPF with stale PFCP state that rejected every
-#                 session (ADR-011).
+#   3. apply      restart the stack in dependency order. The UPFs are stopped while the SMF
+#                 restarts and started after it: restarting only the SMF left a UPF with stale
+#                 PFCP state that rejected every session (ADR-011), and restarting the UPFs one
+#                 by one after the SMF let it associate with an outgoing UPF process (ADR-014).
 #   4. verify     wait for UEs, let the gate's 1-minute windows fill with post-deploy data only,
 #                 run the KPI gate.
 #   5. decide     PASS: the candidate becomes the new known-good.
@@ -37,7 +38,9 @@ mkdir -p "$STATE" "$LOG_DIR"
 LOG="$LOG_DIR/deploy-$TS.txt"
 TRACKED="deployments/open5gs deployments/slices.env"
 DEFS=deployments/open5gs/kpi-gates.json
-ORDER="o5gs-mongodb o5gs-nrf o5gs-scp o5gs-ausf o5gs-udm o5gs-udr o5gs-pcf o5gs-bsf o5gs-nssf o5gs-amf o5gs-smf o5gs-upf-embb o5gs-upf-urllc o5gs-dn-embb o5gs-dn-urllc o5gs-gnb-embb o5gs-gnb-urllc o5gs-ue"
+CORE="o5gs-mongodb o5gs-nrf o5gs-scp o5gs-ausf o5gs-udm o5gs-udr o5gs-pcf o5gs-bsf o5gs-nssf o5gs-amf o5gs-smf"
+UPFS="o5gs-upf-embb o5gs-upf-urllc o5gs-upf-mmtc"
+RAN="o5gs-dn-embb o5gs-dn-urllc o5gs-dn-mmtc o5gs-gnb-embb o5gs-gnb-urllc o5gs-gnb-mmtc o5gs-ue"
 
 say() { echo "== $(date -u +%T) $*"; }
 gate() { python3 tools/kpi-gate/kpi_gate.py --defs "$DEFS" --wait 20; }
@@ -62,8 +65,16 @@ PY
 
 apply() {   # restart everything in dependency order so no NF keeps state from the old config
   (cd deployments/open5gs && docker compose up -d --remove-orphans 2>&1 | grep -E "Error" )
-  for c in $ORDER; do docker restart "$c" >/dev/null 2>&1; done
-  bash scripts/open5gs/start_ues.sh 2>&1 | tail -5 | sed 's/^/  /'
+  # The UPFs are STOPPED while the SMF restarts, not merely restarted after it. A restarted SMF
+  # associates over PFCP within a second; restarting the UPFs one by one afterwards left it
+  # associated with an outgoing URLLC UPF process for ~20 s, and every URLLC session created in
+  # that window never reached the new UPF ("Cannot find PFCP-Node", ADR-014). With the UPFs
+  # down, the SMF can only ever associate with the processes that will carry traffic.
+  docker stop $UPFS >/dev/null 2>&1
+  for c in $CORE; do docker restart "$c" >/dev/null 2>&1; done
+  docker start $UPFS >/dev/null 2>&1
+  for c in $RAN; do docker restart "$c" >/dev/null 2>&1; done
+  bash scripts/open5gs/start_ues.sh 2>&1 | tail -8 | sed 's/^/  /'
   echo "  waiting 75 s so every gate window holds only post-deploy samples"
   sleep 75
 }
@@ -72,7 +83,7 @@ snapshot() {   # <dir>
   rm -rf "$1"; mkdir -p "$1"
   tar -cf "$1/files.tar" $TRACKED
   (cd "$1" && tar -tf files.tar | grep -v '/$' | sort > manifest.txt)
-  for i in o5gs/open5gs:v2.8.0 o5gs/ueransim:v3.3.0-udpbuf; do
+  for i in o5gs/open5gs:v2.8.0 o5gs/ueransim:v3.3.0-udpbuf-mono; do
     echo "$i $(docker image inspect "$i" --format '{{.Id}}')" >> "$1/images.txt"
   done
   git rev-parse HEAD > "$1/commit.txt"

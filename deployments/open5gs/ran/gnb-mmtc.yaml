@@ -1,0 +1,22 @@
+# UERANSIM gNB dedicated to the mMTC slice (ADR-011, ADR-014): 70 IoT devices attach here.
+# One gNB per slice: with a single shared gNB, an eMBB flood overflowed its UDP
+# receive buffer (12 817 drops in 60 s) and dropped URLLC packets along with it.
+mcc: "208"
+mnc: "93"
+nci: "0x000000030"
+idLength: 32
+tac: 1
+
+linkIp: 10.53.0.34     # radio link simulation (UEs find the cell here)
+ngapIp: 10.53.0.34     # N2 towards the AMF
+gtpIp: 10.53.0.34      # N3 towards the UPF — real GTP-U on this stack
+
+amfConfigs:
+  - address: 10.53.0.5
+    port: 38412
+
+slices:
+  - sst: 0x3
+    sd: 0x334455
+
+ignoreStreamIds: true

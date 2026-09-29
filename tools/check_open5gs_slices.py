@@ -8,12 +8,18 @@ pool for, or routes to a UPF without that pool, fails at session establishment. 
 fails far from the file that is wrong. This checks them all from the committed configuration,
 with no stack running.
 
+It also checks the UE plan (Phase 2b, ADR-014): the UE container's UE_PLAN must start the
+same slices, in the same order and with the same counts, as O5GS_UES in deployments/slices.env
+— IMSIs are assigned contiguously by that order on both sides, so a mismatch would silently
+start UEs under subscribers provisioned for a different slice.
+
 Used by CI (.github/workflows/integrity.yml) and by tests/acceptance-open5gs.sh.
 Usage: tools/check_open5gs_slices.py [deployments/open5gs]
 """
 
 import glob
 import os
+import re
 import sys
 
 import yaml
@@ -70,7 +76,47 @@ def main(base):
         print("::error::no UE session definitions found under %s/ran" % base)
         return 1
     print("%d UE session definition(s) checked, %d inconsistency(ies)" % (checked, bad))
-    return 1 if bad else 0
+    plan_bad = check_plan(base, load, smf)
+    return 1 if bad or plan_bad else 0
+
+
+def check_plan(base, load, smf):
+    """UE_PLAN (compose) against O5GS_UES and the slice definitions (slices.env)."""
+    env = {}
+    for line in open(os.path.join(REPO, "deployments", "slices.env"), encoding="utf-8"):
+        m = re.match(r'\s*([A-Z0-9_]+)=("?)(.*?)\2\s*(#.*)?$', line)
+        if m:
+            env[m.group(1)] = m.group(3)
+    compose = load(f"{base}/docker-compose.yaml")
+    ue_env = compose["services"]["ue"].get("environment", {})
+    plan = [x.split(":") for x in str(ue_env.get("UE_PLAN", "")).split()]
+    want = [x.split("=") for x in env.get("O5GS_UES", "").split()]
+    gateways = {x.get("dnn"): x.get("gateway") for x in smf["smf"]["session"]}
+    pools = str(ue_env.get("SLICE_POOLS", "")).split()
+    errors = []
+    if len(plan) != len(want):
+        errors.append("UE_PLAN has %d slices, O5GS_UES has %d" % (len(plan), len(want)))
+    for (cfg, n, gw, name), (letter, count) in zip(plan, want):
+        ue = load(f"{base}/ran/{cfg}")
+        sess = ue["sessions"][0]
+        got = norm(sess["slice"]["sst"], sess["slice"]["sd"])
+        exp = norm(env["SLICE_%s_SST" % letter], env["SLICE_%s_SD" % letter])
+        if got != exp:
+            errors.append("UE_PLAN %s (%s) opens slice %s, but O5GS_UES position %s is slice %s"
+                          % (cfg, name, got, letter, exp))
+        if int(n) != int(count):
+            errors.append("UE_PLAN starts %s %s UEs, O5GS_UES provisions %s" % (n, name, count))
+        if gateways.get(sess["apn"]) != gw:
+            errors.append("UE_PLAN gateway %s for %s, SMF gateway for DNN %r is %s"
+                          % (gw, name, sess["apn"], gateways.get(sess["apn"])))
+        if not any(p.split(":")[1:2] == [gw] for p in pools):
+            errors.append("SLICE_POOLS has no probe entry for gateway %s (%s)" % (gw, name))
+    for e in errors:
+        print("::error file=%s/docker-compose.yaml::%s" % (base, e))
+    if not errors:
+        print("UE plan matches O5GS_UES: %s (%d UEs)"
+              % (", ".join("%s %s" % (x[3], x[1]) for x in plan), sum(int(x[1]) for x in plan)))
+    return len(errors)
 
 
 if __name__ == "__main__":

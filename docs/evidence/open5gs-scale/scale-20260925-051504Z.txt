@@ -1,0 +1,26 @@
+Open5GS scale test — 20260925-051504Z
+commit: 80ca3fc3f41c941c21685adc81f90a69f345660a + uncommitted changes
+host: 12 CPUs, 7783 MiB, 4291 MiB available at start
+UERANSIM: ueransim-udp-socket-buffers ueransim-monotonic-clock
+
+== 05:15:07 part 1 — attach burst: 100 UEs, START_BATCH = 1 10 25 100
+  batch   1: 100/100 attached in 111s · registration p50 39 ms p95 75 ms max 79 ms · PDU p50 223 ms p95 231 ms · reg failures 0 · AMF peak 2.8% · SMF peak 1.4% · AUSF 0.6% · UDM 2.8%
+  batch  10: 100/100 attached in 35s · registration p50 141 ms p95 194 ms max 221 ms · PDU p50 48 ms p95 75 ms · reg failures 0 · AMF peak 8.3% · SMF peak 6.5% · AUSF 2.6% · UDM 8.3%
+  batch  25: 100/100 attached in 16s · registration p50 300 ms p95 404 ms max 415 ms · PDU p50 95 ms p95 146 ms · reg failures 0 · AMF peak 17.9% · SMF peak 11.6% · AUSF 5.4% · UDM 16.4%
+  batch 100: 100/100 attached in 7s · registration p50 2409 ms p95 2526 ms max 2550 ms · PDU p50 221 ms p95 524 ms · reg failures 0 · AMF peak 52.1% · SMF peak 22.2% · AUSF 17.7% · UDM 40.4%
+
+== 05:18:39 part 2 — scale steps: total UEs = 100 150 200 300 (eMBB 20 + URLLC 10 + the rest mMTC)
+    home slice sst 3/334455  dnn=iot  5qi=9  -> 70 subscribers
+  100 UEs: 100/100 attached in 15s; settling 60s
+  100 UEs at rest: UE container CPU avg 56.0% mem 193.4 MiB · AMF 0.0% · SMF 0.1% · mMTC UPF 0.4% · Prometheus 1.0% · host available 4243 MiB · probe round 0.14s · reachable 100
+    home slice sst 3/334455  dnn=iot  5qi=9  -> 120 subscribers
+  150 UEs: 150/150 attached in 25s; settling 60s
+  150 UEs at rest: UE container CPU avg 89.4% mem 291.4 MiB · AMF 0.0% · SMF 0.0% · mMTC UPF 0.5% · Prometheus 0.8% · host available 4135 MiB · probe round 0.244s · reachable 150
+    home slice sst 3/334455  dnn=iot  5qi=9  -> 170 subscribers
+  200 UEs: 200/200 attached in 34s; settling 60s
+  200 UEs at rest: UE container CPU avg 141.2% mem 414.8 MiB · AMF 0.0% · SMF 0.0% · mMTC UPF 0.8% · Prometheus 0.8% · host available 3998 MiB · probe round 0.343s · reachable 200
+    home slice sst 3/334455  dnn=iot  5qi=9  -> 270 subscribers
+  300 UEs: 300/300 attached in 56s; settling 60s
+  300 UEs at rest: UE container CPU avg 188.2% mem 785.3 MiB · AMF 0.0% · SMF 0.0% · mMTC UPF 0.2% · Prometheus 1.0% · host available 3771 MiB · probe round 1.658s · reachable 55
+
+CSV: docs/evidence/open5gs-scale/scale-20260925-051504Z.csv

@@ -1,0 +1,31 @@
+--- a/src/utils/common.cpp
++++ b/src/utils/common.cpp
+@@ -147,9 +147,15 @@
+     return res;
+ }
+ 
++// 5g-observability patch (docs/adr/ADR-014-mmtc-slice-and-100-ues.md):
++// Every caller of CurrentTimeMillis measures an INTERVAL — RLS heartbeats, NAS timers, the NTS
++// timer queue, the gNB's AMBR token bucket. On the wall clock, any clock step (NTP, VM time
++// sync, resume from sleep) is taken as elapsed time: a +1.1 s step every 32 s made UEs declare
++// radio link failure (2 s heartbeat threshold) and lose their user plane. A monotonic clock
++// cannot step. The one caller that needs real wall time, CurrentTimeStamp, reads it itself.
+ int64_t utils::CurrentTimeMillis()
+ {
+-    auto time = std::chrono::system_clock::now();
++    auto time = std::chrono::steady_clock::now();
+     auto sinceEpoch = time.time_since_epoch();
+     auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(sinceEpoch);
+     int64_t now = millis.count();
+@@ -158,7 +164,10 @@
+ 
+ TimeStamp utils::CurrentTimeStamp()
+ {
+-    int64_t tms = CurrentTimeMillis();
++    // Wall time on purpose: this is an NTP-format timestamp sent in NGAP messages.
++    int64_t tms = std::chrono::duration_cast<std::chrono::milliseconds>(
++                      std::chrono::system_clock::now().time_since_epoch())
++                      .count();
+ 
+     int64_t baseTime;
+     if (tms < 2085978496000LL)

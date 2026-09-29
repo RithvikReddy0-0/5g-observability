@@ -1,0 +1,11 @@
+Open5GS deployment — 20260925-054450Z
+commit: 80ca3fc3f41c941c21685adc81f90a69f345660a + uncommitted changes in the candidate
+== 05:44:51 1. validate the candidate (static, the running stack is not touched)
+  YAML: ok
+  deployments/open5gs/ran/ue-slice-c.yaml: slice (3, 3359829), DNN 'iot' -> gNB ['10.53.0.34'] -> UPF 10.53.0.9: consistent
+  3 UE session definition(s) checked, 0 inconsistency(ies)
+  UE plan matches O5GS_UES: eMBB 20, URLLC 10, mMTC 70 (100 UEs)
+  KPI definitions: ok
+== 05:44:51 2. last known-good
+  known-good established from the running stack (37 files, gate passed)
+DECISION: INITIALISED — change files, then run scripts/open5gs/deploy.sh

@@ -134,7 +134,8 @@ for p in sorted(glob.glob(os.path.join(BASE, "ran", "gnb-*.yaml"))):
     ran[os.path.basename(p)] = dump(to_k8s_gnb(load(p)))
 for p in sorted(glob.glob(os.path.join(BASE, "ran", "ue-slice-*.yaml"))):
     ran[os.path.basename(p)] = dump(to_k8s_ue(load(p)))
-ran["ue-entrypoint.sh"] = open(os.path.join(BASE, "ran", "ue-entrypoint.sh"), encoding="utf-8").read()
+for script in ("ue-entrypoint.sh", "gnb-entrypoint.sh"):
+    ran[script] = open(os.path.join(BASE, "ran", script), encoding="utf-8").read()
 configmap("o5gs-ran", ran)
 
 obs = {os.path.basename(p): open(p, encoding="utf-8").read()
@@ -185,6 +186,11 @@ PROM = SERVICES["prometheus"]["image"]
 CONFIG_MOUNT = {"name": "config", "mountPath": "/etc/open5gs"}
 SBI = [("TCP", 7777)]
 METRICS = [("TCP", 9090)]
+# The per-slice user plane, discovered from compose rather than listed here, so adding a slice
+# to compose (Phase 2b added mMTC) adds it to Kubernetes on the next render.
+UPFS = sorted(n for n in SERVICES if n.startswith("upf-"))
+DNS = sorted(n for n in SERVICES if n.startswith("dn-"))
+GNBS = sorted(n for n in SERVICES if n.startswith("gnb-"))
 
 # ---- database
 add({"apiVersion": "v1", "kind": "PersistentVolumeClaim",
@@ -205,7 +211,7 @@ NFS = {"nrf": SBI, "scp": SBI, "ausf": SBI, "udm": SBI, "udr": SBI, "pcf": SBI +
        "smf": SBI + METRICS + [("UDP", 8805), ("UDP", 2152)]}
 WAIT = {"nrf": ["mongodb"], "scp": ["nrf"], "ausf": ["scp"], "udm": ["scp"], "udr": ["scp", "mongodb"],
         "pcf": ["scp", "mongodb"], "bsf": ["scp"], "nssf": ["scp"], "amf": ["scp"],
-        "smf": ["scp", "upf-embb", "upf-urllc"]}
+        "smf": ["scp"] + UPFS}
 for nf, ports in NFS.items():
     headless(nf, ports)
     deployment(nf, {
@@ -215,8 +221,8 @@ for nf, ports in NFS.items():
         volumes=[cm_volume("config", "o5gs-config")], wait_for=WAIT[nf])
 
 # ---- one UPF per slice (ADR-011), userspace over TUN
-for upf, svc in (("upf-embb", SERVICES["upf-embb"]), ("upf-urllc", SERVICES["upf-urllc"])):
-    env = {k: str(v) for k, v in svc["environment"].items() if k != "DN_SUBNET"}
+for upf in UPFS:
+    env = {k: str(v) for k, v in SERVICES[upf]["environment"].items() if k != "DN_SUBNET"}
     headless(upf, METRICS + [("UDP", 8805), ("UDP", 2152), ("TCP", 9120)])
     deployment(upf, {
         "name": upf, "image": OPEN5GS, "imagePullPolicy": "Never",
@@ -230,25 +236,26 @@ for upf, svc in (("upf-embb", SERVICES["upf-embb"]), ("upf-urllc", SERVICES["upf
                  cm_volume("entry", "o5gs-obs", items=["upf-entrypoint.sh"])])
 
 # ---- per-slice data networks (ADR-012); on Kubernetes UE traffic reaches them through NAT
-for dn in ("dn-embb", "dn-urllc"):
+for dn in DNS:
     headless(dn, [("TCP", 5201)])
     deployment(dn, {"name": dn, "image": OPEN5GS, "imagePullPolicy": "Never",
                     "command": ["sleep", "infinity"]})
 
 # ---- one gNB per slice (ADR-011)
-for gnb in ("gnb-embb", "gnb-urllc"):
+for gnb in GNBS:
     headless(gnb, [("UDP", 4997), ("UDP", 2152)])
     deployment(gnb, {
         "name": gnb, "image": UERANSIM, "imagePullPolicy": "Never",
         "command": ["/bin/sh", "-c",
-                    "sed \"s/POD_IP/$POD_IP/g\" /etc/ueransim/%s.yaml > /tmp/gnb.yaml && exec nr-gnb -c /tmp/gnb.yaml" % gnb],
+                    "sed \"s/POD_IP/$POD_IP/g\" /etc/ueransim/%s.yaml > /tmp/gnb.yaml"
+                    " && exec sh /etc/ueransim/gnb-entrypoint.sh /tmp/gnb.yaml" % gnb],
         "env": [{"name": "UERANSIM_UDP_BUFFER_BYTES", "value": "8388608"},
                 {"name": "POD_IP", "valueFrom": {"fieldRef": {"fieldPath": "status.podIP"}}}],
         "securityContext": {"capabilities": {"add": ["NET_ADMIN"]}},
         "volumeMounts": [{"name": "ran", "mountPath": "/etc/ueransim"}]},
         volumes=[cm_volume("ran", "o5gs-ran")], wait_for=["amf"])
 
-# ---- the 20 supervised UEs
+# ---- the supervised UEs (Phase 2b: 100, per the UE container's UE_PLAN)
 ue_env = {k: str(v) for k, v in SERVICES["ue"]["environment"].items()}
 headless("ue", [("TCP", 9121)])
 deployment("ue", {
@@ -258,7 +265,7 @@ deployment("ue", {
     "securityContext": {"privileged": True},
     "volumeMounts": [{"name": "ran", "mountPath": "/etc/ueransim"},
                      {"name": "obs", "mountPath": "/opt/o5gs-obs"}]},
-    volumes=[cm_volume("ran", "o5gs-ran"), cm_volume("obs", "o5gs-obs")], wait_for=["gnb-embb", "gnb-urllc"])
+    volumes=[cm_volume("ran", "o5gs-ran"), cm_volume("obs", "o5gs-obs")], wait_for=GNBS)
 
 # ---- Prometheus (same scrape jobs and labels as compose, so the same KPI gate applies)
 add({"apiVersion": "v1", "kind": "Service", "metadata": {"name": "prometheus", "namespace": NS},

@@ -1,0 +1,34 @@
+# Open5GS v2.8.0 — UPF for ONE slice
+# Generated from deployments/slices.env by the Open5GS migration; edit slices.env for slice
+# changes. Addresses follow the static plan in deployments/open5gs/docker-compose.yaml.
+# No logger.file: NFs log to stdout so `docker logs` is the single log source.
+
+logger:
+  level: info
+
+global:
+  max:
+    ue: 1024
+
+# User plane in USERSPACE over TUN devices — no gtp5g kernel module. This is the property
+# that lets the data path run on a WSL2 kernel, where free5GC's UPF could not.
+# Dedicated user plane for the mMTC slice (ADR-011, ADR-014). The SMF sends only DNN "iot" here
+# (smf.yaml pfcp.client.upf), so 70 IoT devices' sessions never share a process with eMBB or
+# URLLC traffic.
+# Userspace forwarding over TUN — no gtp5g kernel module (ADR-010).
+upf:
+  pfcp:
+    server:
+      - address: 10.53.0.9
+  gtpu:
+    server:
+      - address: 10.53.0.9
+  session:
+    - subnet: 10.47.0.0/16
+      gateway: 10.47.0.1
+      dnn: iot
+      dev: ogstun3
+  metrics:
+    server:
+      - address: 10.53.0.9
+        port: 9090

@@ -1,0 +1,277 @@
+{
+  "timestamp": "2026-09-25T05:42:04Z",
+  "prometheus": "http://localhost:19091",
+  "verdict": "PASSED",
+  "summary": {
+    "passed": 22,
+    "failed": 0,
+    "advisory": 2,
+    "skipped_ode": 0
+  },
+  "results": [
+    {
+      "id": "exporters-up",
+      "title": "All 6 Open5GS metric exporters are scrapeable",
+      "status": "PASS",
+      "value": 6.0,
+      "threshold": 6,
+      "op": "gte",
+      "unit": "NFs",
+      "severity": "gate",
+      "detail": "6 >= 6 NFs"
+    },
+    {
+      "id": "no-scrape-failures",
+      "title": "No network or exporter target is down",
+      "status": "PASS",
+      "value": 0.0,
+      "threshold": 0,
+      "op": "eq",
+      "unit": "targets",
+      "severity": "gate",
+      "detail": "0 == 0 targets"
+    },
+    {
+      "id": "pfcp-associated",
+      "title": "The SMF is associated over N4 with all three slice UPFs",
+      "status": "PASS",
+      "value": 3.0,
+      "threshold": 3,
+      "op": "gte",
+      "unit": "peers",
+      "severity": "gate",
+      "detail": "3 >= 3 peers"
+    },
+    {
+      "id": "gnb-connected",
+      "title": "All three slice gNBs are connected over N2",
+      "status": "PASS",
+      "value": 3.0,
+      "threshold": 3,
+      "op": "gte",
+      "unit": "gNBs",
+      "severity": "gate",
+      "detail": "3 >= 3 gNBs"
+    },
+    {
+      "id": "ues-on-ran",
+      "title": "All 100 UEs are attached",
+      "status": "PASS",
+      "value": 100.0,
+      "threshold": 100,
+      "op": "gte",
+      "unit": "UEs",
+      "severity": "gate",
+      "detail": "100 >= 100 UEs"
+    },
+    {
+      "id": "pdu-sessions-at-upf",
+      "title": "Every UE has a user-plane session at the UPF",
+      "status": "PASS",
+      "value": 100.0,
+      "threshold": 100,
+      "op": "gte",
+      "unit": "sessions",
+      "severity": "gate",
+      "detail": "100 >= 100 sessions"
+    },
+    {
+      "id": "upf-sessions-per-slice",
+      "title": "Each slice's own UPF holds sessions",
+      "status": "PASS",
+      "value": 3.0,
+      "threshold": 3,
+      "op": "gte",
+      "unit": "UPFs",
+      "severity": "gate",
+      "detail": "3 >= 3 UPFs"
+    },
+    {
+      "id": "sessions-embb",
+      "title": "eMBB holds its 20 PDU sessions",
+      "status": "PASS",
+      "value": 20.0,
+      "threshold": 20,
+      "op": "gte",
+      "unit": "sessions",
+      "severity": "gate",
+      "detail": "20 >= 20 sessions"
+    },
+    {
+      "id": "sessions-urllc",
+      "title": "URLLC holds its 10 PDU sessions",
+      "status": "PASS",
+      "value": 10.0,
+      "threshold": 10,
+      "op": "gte",
+      "unit": "sessions",
+      "severity": "gate",
+      "detail": "10 >= 10 sessions"
+    },
+    {
+      "id": "sessions-mmtc",
+      "title": "mMTC holds its 70 PDU sessions",
+      "status": "PASS",
+      "value": 70.0,
+      "threshold": 70,
+      "op": "gte",
+      "unit": "sessions",
+      "severity": "gate",
+      "detail": "70 >= 70 sessions"
+    },
+    {
+      "id": "every-slice-has-sessions",
+      "title": "All three slices appear in the SMF's slice-labelled metrics",
+      "status": "PASS",
+      "value": 3.0,
+      "threshold": 3,
+      "op": "gte",
+      "unit": "slices",
+      "severity": "gate",
+      "detail": "3 >= 3 slices"
+    },
+    {
+      "id": "user-plane-flows-per-slice",
+      "title": "The UPFs hold QoS flows for all three slices' DNNs",
+      "status": "PASS",
+      "value": 3.0,
+      "threshold": 3,
+      "op": "gte",
+      "unit": "DNNs",
+      "severity": "gate",
+      "detail": "3 >= 3 DNNs"
+    },
+    {
+      "id": "slice-traffic-exporter",
+      "title": "All three slices' UPF devices are measurable",
+      "status": "PASS",
+      "value": 3.0,
+      "threshold": 3,
+      "op": "gte",
+      "unit": "slices",
+      "severity": "gate",
+      "detail": "3 >= 3 slices"
+    },
+    {
+      "id": "ues-reachable-embb",
+      "title": "Every eMBB UE (20) answered through its UPF within 30 s",
+      "status": "PASS",
+      "value": 20.0,
+      "threshold": 20,
+      "op": "gte",
+      "unit": "UEs",
+      "severity": "gate",
+      "detail": "20 >= 20 UEs"
+    },
+    {
+      "id": "ues-reachable-urllc",
+      "title": "Every URLLC UE (10) answered through its UPF within 30 s",
+      "status": "PASS",
+      "value": 10.0,
+      "threshold": 10,
+      "op": "gte",
+      "unit": "UEs",
+      "severity": "gate",
+      "detail": "10 >= 10 UEs"
+    },
+    {
+      "id": "ues-reachable-mmtc",
+      "title": "Every mMTC UE (70) answered through its UPF within 30 s",
+      "status": "PASS",
+      "value": 70.0,
+      "threshold": 70,
+      "op": "gte",
+      "unit": "UEs",
+      "severity": "gate",
+      "detail": "70 >= 70 UEs"
+    },
+    {
+      "id": "urllc-latency-budget",
+      "title": "URLLC average round-trip time within its 10 ms budget (1 min)",
+      "status": "PASS",
+      "value": 3.9707500000000002,
+      "threshold": 10,
+      "op": "lte",
+      "unit": "ms",
+      "severity": "gate",
+      "detail": "3.971 <= 10 ms"
+    },
+    {
+      "id": "embb-latency-budget",
+      "title": "eMBB worst round-trip time within its 300 ms budget (1 min)",
+      "status": "PASS",
+      "value": 24.761,
+      "threshold": 300,
+      "op": "lte",
+      "unit": "ms",
+      "severity": "gate",
+      "detail": "24.76 <= 300 ms"
+    },
+    {
+      "id": "mmtc-latency-budget",
+      "title": "mMTC worst round-trip time within its 1000 ms budget (1 min)",
+      "status": "PASS",
+      "value": 11.538,
+      "threshold": 1000,
+      "op": "lte",
+      "unit": "ms",
+      "severity": "gate",
+      "detail": "11.54 <= 1000 ms"
+    },
+    {
+      "id": "urllc-tail-latency",
+      "title": "URLLC worst-case round-trip time within 10 ms (1 min)",
+      "status": "WARN",
+      "value": 15.153,
+      "threshold": 10,
+      "op": "lte",
+      "unit": "ms",
+      "severity": "advisory",
+      "detail": "15.15 ms \u2014 required <= 10"
+    },
+    {
+      "id": "urllc-no-probe-loss",
+      "title": "No URLLC probe lost in the last minute",
+      "status": "PASS",
+      "value": 10.0,
+      "threshold": 10,
+      "op": "gte",
+      "unit": "UEs",
+      "severity": "advisory",
+      "detail": "10 >= 10 UEs"
+    },
+    {
+      "id": "no-registration-failures",
+      "title": "No UE registration failures in the last 5 minutes",
+      "status": "PASS",
+      "value": 0.0,
+      "threshold": 0,
+      "op": "eq",
+      "unit": "failures",
+      "severity": "advisory",
+      "detail": "0 == 0 failures"
+    },
+    {
+      "id": "slices-carrying-traffic",
+      "title": "All three slices carried user traffic in the last 5 minutes",
+      "status": "PASS",
+      "value": 3.0,
+      "threshold": 3,
+      "op": "gte",
+      "unit": "slices",
+      "severity": "advisory",
+      "detail": "3 >= 3 slices"
+    },
+    {
+      "id": "orchestrator-reachable",
+      "title": "The slice orchestrator is being scraped",
+      "status": "WARN",
+      "value": null,
+      "threshold": 1,
+      "op": "gte",
+      "unit": "up",
+      "severity": "advisory",
+      "detail": "no data \u2014 the metric is not being reported"
+    }
+  ]
+}

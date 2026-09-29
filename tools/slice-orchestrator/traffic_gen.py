@@ -39,6 +39,10 @@ MIX = os.environ.get("MIX", "video:4 file:3 blog:2 control:1")
 
 
 CORE = os.environ.get("CORE", "free5gc")
+# Which subscribers issue these demands, by the SSTs they are permitted on. The mix above is
+# phone-like traffic (video, files, browsing, control); the 70 IoT devices on the mMTC slice
+# (SST 3, Phase 2b) are driven by their own traffic profile instead, not by this generator.
+SUBSCRIBER_SSTS = set(int(x) for x in os.environ.get("SUBSCRIBER_SSTS", "1 2").split())
 
 
 def real_supis():
@@ -49,8 +53,10 @@ def real_supis():
     db = "free5gc"
     if CORE == "open5gs":
         db = "open5gs"
-        js = ('var a=[];db.subscribers.find({},{_id:0,imsi:1})'
-              '.forEach(function(d){a.push("imsi-"+d.imsi);});print(JSON.stringify(a));')
+        js = ('var a=[];db.subscribers.find({},{_id:0,imsi:1,slice:1}).forEach(function(d){'
+              'var ok=(d.slice||[]).some(function(s){return [%s].indexOf(s.sst)>=0;});'
+              'if(ok){a.push("imsi-"+d.imsi);}});print(JSON.stringify(a));'
+              % ",".join(str(x) for x in sorted(SUBSCRIBER_SSTS)))
     try:
         out = subprocess.run(
             ["docker", "exec", "-i", DB_CONTAINER, "mongo", db, "--quiet", "--eval", js],

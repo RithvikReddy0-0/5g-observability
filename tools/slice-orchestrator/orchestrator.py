@@ -85,7 +85,8 @@ UE_CONTAINER = os.environ.get("UE_CONTAINER", "o5gs-ue")
 SLICE_PATHS = dict(
     item.split("=", 1) for item in os.environ.get(
         "SLICE_PATHS",
-        "1/010203=10.45.:10.53.0.51:o5gs-dn-embb 2/112233=10.46.:10.53.0.52:o5gs-dn-urllc").split())
+        "1/010203=10.45.:10.53.0.51:o5gs-dn-embb 2/112233=10.46.:10.53.0.52:o5gs-dn-urllc "
+        "3/334455=10.47.:10.53.0.53:o5gs-dn-mmtc").split())
 
 _lock = threading.Lock()
 

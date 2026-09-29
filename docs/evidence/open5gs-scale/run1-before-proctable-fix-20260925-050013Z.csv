@@ -1,0 +1,5 @@
+part,batch,ues,attached,attach_s,reg_p50_ms,reg_p95_ms,reg_max_ms,pdu_p50_ms,pdu_p95_ms,pdu_max_ms,reg_fail,ue_rejects,amf_cpu_peak,smf_cpu_peak,ausf_cpu_peak,udm_cpu_peak,udr_cpu_peak,nrf_cpu_peak,scp_cpu_peak,pcf_cpu_peak,mongodb_cpu_peak,gnb_mmtc_cpu_peak,ue_cpu_peak,ue_cpu_avg,amf_cpu_avg,smf_cpu_avg,upf_mmtc_cpu_avg,prometheus_cpu_avg,ue_mem_mib,amf_mem_mib,smf_mem_mib,host_avail_mib,probe_round_s,reachable
+burst,1,100,100,134,54,96,131,228,246,1373,0,0,2.7,2.5,1.8,2.3,1.9,0.4,7.6,2.1,3.8,8.3,,,,,,,,,,,,
+burst,10,100,98,35,160,277,317,52,228,285,0,0,13.2,9.5,3.9,11.9,8.6,0.4,31.8,5.6,15.1,16.1,,,,,,,,,,,,
+burst,25,100,100,15,290,376,392,83,139,244,0,0,17.6,12.9,5.8,14.8,12.8,0.3,36.3,8.5,18.7,24.4,,,,,,,,,,,,
+burst,100,100,96,5,1173,1356,1401,224,382,388,0,0,40.0,25.6,22.2,36.4,28.8,0.1,69.1,18.7,49.6,31.7,,,,,,,,,,,,

@@ -1,0 +1,56 @@
+Open5GS teardown/rebuild — 20260925-053313Z
+commit: 80ca3fc3f41c941c21685adc81f90a69f345660a (uncommitted changes present)
+image o5gs/open5gs:v2.8.0 sha256:d3eb63d8ff14ad5000d109b5f0737ab93b4926dc8b9d90ad25a644d1f6419add
+image o5gs/ueransim:v3.3.0-udpbuf-mono sha256:a4b58650c740f84fe75ea5b816b78e5f5e4b3ad0ef6e6b47b2ecb14529499cac
+
+== 05:33:15 1. teardown (down -v)
+not running
+  removed objects: 27
+
+== 05:33:20 2. nothing left
+  [ PASS ] no o5gs-* containers
+  [ PASS ] no open5gs_* volumes
+  [ PASS ] network o5gs_net gone
+
+== 05:33:21 3. rebuild (up -d)
+  started/created: 50
+  [ PASS ] subscriber database starts EMPTY
+
+== 05:33:23 4. provision + attach
+   waiting for 70 mMTC interfaces on 10.47.0.0/16 ................... ok
+
+  UEs registered        : 100 / 100
+  UEs with PDU session  : 100 / 100
+  eMBB   interfaces     : 20 / 20   (10.45.0.0/16)
+  URLLC  interfaces     : 10 / 10   (10.46.0.0/16)
+  mMTC   interfaces     : 70 / 70   (10.47.0.0/16)
+  TUN allocation errors : 0
+  all attached in       : 31s
+  [ PASS ] 100 subscribers provisioned
+  [ PASS ] 100 UE session addresses live
+
+== 05:33:57 5. user plane
+  [ PASS ] 100 of 100 UEs hold a PDU session address
+  [ PASS ] UE interface uesimtun00060 has 10.45.0.2 (address came from the slice's own pool)
+  [ PASS ] ping 10.45.0.1 via uesimtun00060: 5/5 replies, avg rtt 2.757 ms
+  [ PASS ] UPF ogstun received 420 bytes during the ping — traffic went through the UPF
+  [ PASS ] iperf3 UE -> o5gs-upf-embb -> o5gs-dn-embb: 253.0 Mbps
+  [ PASS ] UE interface uesimtun00230 has 10.46.0.2 (address came from the slice's own pool)
+  [ PASS ] ping 10.46.0.1 via uesimtun00230: 5/5 replies, avg rtt 2.022 ms
+  [ PASS ] UPF ogstun2 received 420 bytes during the ping — traffic went through the UPF
+  [ PASS ] iperf3 UE -> o5gs-upf-urllc -> o5gs-dn-urllc: 25.1 Mbps
+  [ PASS ] UE interface uesimtun00380 has 10.47.0.2 (address came from the slice's own pool)
+  [ PASS ] ping 10.47.0.1 via uesimtun00380: 5/5 replies, avg rtt 2.150 ms
+  [ PASS ] UPF ogstun3 received 5460 bytes during the ping — traffic went through the UPF
+  [ PASS ] iperf3 UE -> o5gs-upf-mmtc -> o5gs-dn-mmtc: 1.0 Mbps
+  [ PASS ] UE on slice A reached 8.8.8.8 through the UPF's NAT (real internet egress)
+  PASS=14  FAIL=0  WARN=0
+  [ PASS ] user-plane verification passes
+
+== 05:34:33 6. KPI gate (after 75 s, so the 1-minute windows hold only the rebuilt stack)
+  [  WARN  ] URLLC worst-case round-trip time within 10 ms (1 min)
+  23 passed   0 failed   1 advisory   0 skipped (ODE)
+GATE PASSED
+  [ PASS ] KPI gate passes
+
+RESULT: PASS — teardown with volumes and rebuild returned to a working stack

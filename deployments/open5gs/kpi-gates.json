@@ -20,20 +20,25 @@
     "kernel module (ADR-010).",
     "",
     "Core-side metrics cannot see UEs that disappear: with all 20 UEs stopped, every gate above",
-    "`ues-reachable-per-slice` still passed. Liveness and latency come from ue_probe_exporter."
+    "the UE-reachability ones still passed. Liveness and latency come from ue_probe_exporter.",
+    "",
+    "Phase 2b (ADR-014): three slices and 100 UEs — eMBB 20, URLLC 10, mMTC 70. Counts are per",
+    "slice at each slice's own size (O5GS_UES in deployments/slices.env). These are DEPLOYMENT",
+    "gates — is every slice up and serving its UEs. The per-slice service KPIs compared against",
+    "industry targets belong to the Phase 2b KPI scorecard, which Track 3 owns."
   ],
   "prometheus": "http://localhost:9091",
   "gates": [
     {
       "id": "exporters-up",
-      "title": "All 5 Open5GS metric exporters are scrapeable",
+      "title": "All 6 Open5GS metric exporters are scrapeable",
       "expr": "count(up{job=\"open5gs\"} == 1)",
       "op": "gte",
-      "threshold": 5,
+      "threshold": 6,
       "unit": "NFs",
       "severity": "gate",
       "requires": "core",
-      "why": "AMF, SMF, PCF and the two per-slice UPFs are the NFs that export metrics; losing one blinds the gate to that part of the network."
+      "why": "AMF, SMF, PCF and the three per-slice UPFs are the NFs that export metrics; losing one blinds the gate to that part of the network."
     },
     {
       "id": "no-scrape-failures",
@@ -48,10 +53,10 @@
     },
     {
       "id": "pfcp-associated",
-      "title": "The SMF is associated over N4 with both slice UPFs",
+      "title": "The SMF is associated over N4 with all three slice UPFs",
       "expr": "sum(pfcp_peers_active{nf=\"smf\"})",
       "op": "gte",
-      "threshold": 2,
+      "threshold": 3,
       "unit": "peers",
       "severity": "gate",
       "requires": "core",
@@ -59,32 +64,32 @@
     },
     {
       "id": "gnb-connected",
-      "title": "Both slice gNBs are connected over N2",
+      "title": "All three slice gNBs are connected over N2",
       "expr": "sum(gnb)",
       "op": "gte",
-      "threshold": 2,
+      "threshold": 3,
       "unit": "gNBs",
       "severity": "gate",
       "requires": "core",
-      "why": "One gNB per slice (ADR-011). A missing gNB means an entire slice has no radio access, while the other slice keeps every KPI green."
+      "why": "One gNB per slice (ADR-011). A missing gNB means an entire slice has no radio access, while the other slices keep every KPI green."
     },
     {
       "id": "ues-on-ran",
-      "title": "All 20 UEs are attached",
+      "title": "All 100 UEs are attached",
       "expr": "sum(ran_ue)",
       "op": "gte",
-      "threshold": 20,
+      "threshold": 100,
       "unit": "UEs",
       "severity": "gate",
       "requires": "core",
-      "why": "Matched the 20 UE interfaces exactly in the ground-truth audit, unlike free5GC's AMF gauges."
+      "why": "Matched the UE interfaces exactly in the ground-truth audit (20 UEs, then 100), unlike free5GC's AMF gauges."
     },
     {
       "id": "pdu-sessions-at-upf",
       "title": "Every UE has a user-plane session at the UPF",
       "expr": "sum(fivegs_upffunction_upf_sessionnbr)",
       "op": "gte",
-      "threshold": 20,
+      "threshold": 100,
       "unit": "sessions",
       "severity": "gate",
       "requires": "core",
@@ -95,66 +100,110 @@
       "title": "Each slice's own UPF holds sessions",
       "expr": "count(fivegs_upffunction_upf_sessionnbr > 0)",
       "op": "gte",
-      "threshold": 2,
+      "threshold": 3,
       "unit": "UPFs",
       "severity": "gate",
       "requires": "core",
       "why": "With a UPF per slice, the UPF's native session gauge becomes per-slice. Presence only: the gauge over-counts after UE restarts, so it is never used as an exact count."
     },
     {
-      "id": "sessions-per-slice",
-      "title": "Each slice holds its 10 PDU sessions",
-      "expr": "min(fivegs_smffunction_sm_sessionnbr)",
+      "id": "sessions-embb",
+      "title": "eMBB holds its 20 PDU sessions",
+      "expr": "sum(fivegs_smffunction_sm_sessionnbr{snssai=\"1-010203\"}) or vector(0)",
+      "op": "gte",
+      "threshold": 20,
+      "unit": "sessions",
+      "severity": "gate",
+      "requires": "core",
+      "why": "The SMF's session gauge is labelled by S-NSSAI and was exact in every audit. One gate per slice at that slice's own size (O5GS_UES in slices.env): with slices of 20, 10 and 70, a min() across them could only ever check the smallest. `or vector(0)`: a slice with no series at all must fail, not vanish."
+    },
+    {
+      "id": "sessions-urllc",
+      "title": "URLLC holds its 10 PDU sessions",
+      "expr": "sum(fivegs_smffunction_sm_sessionnbr{snssai=\"2-112233\"}) or vector(0)",
       "op": "gte",
       "threshold": 10,
       "unit": "sessions",
       "severity": "gate",
       "requires": "core",
-      "why": "min() over the per-S-NSSAI series: a total of 20 would still pass if one slice had all of them and the other none."
+      "why": "The SMF's session gauge is labelled by S-NSSAI and was exact in every audit. One gate per slice at that slice's own size (O5GS_UES in slices.env): with slices of 20, 10 and 70, a min() across them could only ever check the smallest. `or vector(0)`: a slice with no series at all must fail, not vanish."
     },
     {
-      "id": "both-slices-have-sessions",
-      "title": "Both slices appear in the SMF's slice-labelled metrics",
+      "id": "sessions-mmtc",
+      "title": "mMTC holds its 70 PDU sessions",
+      "expr": "sum(fivegs_smffunction_sm_sessionnbr{snssai=\"3-334455\"}) or vector(0)",
+      "op": "gte",
+      "threshold": 70,
+      "unit": "sessions",
+      "severity": "gate",
+      "requires": "core",
+      "why": "The SMF's session gauge is labelled by S-NSSAI and was exact in every audit. One gate per slice at that slice's own size (O5GS_UES in slices.env): with slices of 20, 10 and 70, a min() across them could only ever check the smallest. `or vector(0)`: a slice with no series at all must fail, not vanish."
+    },
+    {
+      "id": "every-slice-has-sessions",
+      "title": "All three slices appear in the SMF's slice-labelled metrics",
       "expr": "count(fivegs_smffunction_sm_sessionnbr > 0)",
       "op": "gte",
-      "threshold": 2,
+      "threshold": 3,
       "unit": "slices",
       "severity": "gate",
       "requires": "core",
-      "why": "Guards sessions-per-slice against a slice vanishing from the metrics entirely, where min() over one remaining series would still look healthy."
+      "why": "Guards the per-slice session gates against a slice vanishing from the metrics entirely."
     },
     {
       "id": "user-plane-flows-per-slice",
-      "title": "The UPF holds QoS flows for both slices' DNNs",
+      "title": "The UPFs hold QoS flows for all three slices' DNNs",
       "expr": "count(fivegs_upffunction_upf_qosflows > 0)",
       "op": "gte",
-      "threshold": 2,
+      "threshold": 3,
       "unit": "DNNs",
       "severity": "gate",
       "requires": "core",
-      "why": "Each slice has its own DNN (internet = eMBB, urllc = URLLC), so this confirms slice separation inside the user plane. Counts presence per DNN only: after a UE restart the UPF reported 11 flows on 'internet' for 10 real sessions."
+      "why": "Each slice has its own DNN (internet = eMBB, urllc = URLLC, iot = mMTC), so this confirms slice separation inside the user plane. Counts presence per DNN only: after a UE restart the UPF reported 11 flows on 'internet' for 10 real sessions."
     },
     {
       "id": "slice-traffic-exporter",
-      "title": "Both slices' UPF devices are measurable",
+      "title": "All three slices' UPF devices are measurable",
       "expr": "count(upf_slice_up == 1)",
       "op": "gte",
-      "threshold": 2,
+      "threshold": 3,
       "unit": "slices",
       "severity": "gate",
       "requires": "core",
       "why": "Native UPF volume counters are labelled only by QFI and cannot separate slices; per-slice throughput depends entirely on this exporter."
     },
     {
-      "id": "ues-reachable-per-slice",
-      "title": "Every UE on each slice answered through the UPF within 30 s",
-      "expr": "min(max_over_time(ue_probe_reachable[30s]))",
+      "id": "ues-reachable-embb",
+      "title": "Every eMBB UE (20) answered through its UPF within 30 s",
+      "expr": "max(max_over_time(ue_probe_reachable{slice=\"eMBB\"}[30s])) or vector(0)",
+      "op": "gte",
+      "threshold": 20,
+      "unit": "UEs",
+      "severity": "gate",
+      "requires": "core",
+      "why": "The only liveness signal measured from the UE side: with every UE stopped, the AMF still reported every UE and the UPF every session. Windowed over 30 s because one probe lost in a single 5 s round is not a dead UE; a UE that is really gone never answers, and the UE supervisor restarts it within ~30 s. One gate per slice at its own size."
+    },
+    {
+      "id": "ues-reachable-urllc",
+      "title": "Every URLLC UE (10) answered through its UPF within 30 s",
+      "expr": "max(max_over_time(ue_probe_reachable{slice=\"URLLC\"}[30s])) or vector(0)",
       "op": "gte",
       "threshold": 10,
       "unit": "UEs",
       "severity": "gate",
       "requires": "core",
-      "why": "The only liveness signal measured from the UE side: with every UE stopped, the AMF still reported 20 UEs and the UPF 20 sessions. Windowed over 30 s because one probe lost in a single 5 s round is not a dead UE (URLLC lost up to 4 of 10 probes per round under eMBB load with no UE actually down); a UE that is really gone never reaches 10, and the UE supervisor restarts such a UE within ~30 s."
+      "why": "The only liveness signal measured from the UE side: with every UE stopped, the AMF still reported every UE and the UPF every session. Windowed over 30 s because one probe lost in a single 5 s round is not a dead UE; a UE that is really gone never answers, and the UE supervisor restarts it within ~30 s. One gate per slice at its own size."
+    },
+    {
+      "id": "ues-reachable-mmtc",
+      "title": "Every mMTC UE (70) answered through its UPF within 30 s",
+      "expr": "max(max_over_time(ue_probe_reachable{slice=\"mMTC\"}[30s])) or vector(0)",
+      "op": "gte",
+      "threshold": 70,
+      "unit": "UEs",
+      "severity": "gate",
+      "requires": "core",
+      "why": "The only liveness signal measured from the UE side: with every UE stopped, the AMF still reported every UE and the UPF every session. Windowed over 30 s because one probe lost in a single 5 s round is not a dead UE; a UE that is really gone never answers, and the UE supervisor restarts it within ~30 s. One gate per slice at its own size."
     },
     {
       "id": "urllc-latency-budget",
@@ -177,6 +226,17 @@
       "severity": "gate",
       "requires": "core",
       "why": "SLICE_A_MAX_LATENCY_MS in slices.env, measured the same way as URLLC."
+    },
+    {
+      "id": "mmtc-latency-budget",
+      "title": "mMTC worst round-trip time within its 1000 ms budget (1 min)",
+      "expr": "max(max_over_time(ue_probe_rtt_ms{slice=\"mMTC\",stat=\"max\"}[1m]))",
+      "op": "lte",
+      "threshold": 1000,
+      "unit": "ms",
+      "severity": "gate",
+      "requires": "core",
+      "why": "SLICE_C_MAX_LATENCY_MS in slices.env: an IoT report may take up to a second. Measured the same way as the other slices. The slice's own KPIs (device density, delivery of small reports) belong to the Phase 2b KPI scorecard, not to this deployment gate."
     },
     {
       "id": "urllc-tail-latency",
@@ -213,14 +273,14 @@
     },
     {
       "id": "slices-carrying-traffic",
-      "title": "Both slices carried user traffic in the last 5 minutes",
+      "title": "All three slices carried user traffic in the last 5 minutes",
       "expr": "count(increase(upf_slice_uplink_packets_total[5m]) > 0)",
       "op": "gte",
-      "threshold": 2,
+      "threshold": 3,
       "unit": "slices",
       "severity": "advisory",
       "requires": "core",
-      "why": "Advisory: an idle network is not a broken one. Reported so that a demo or test run shows traffic genuinely reached both slices."
+      "why": "Advisory: an idle network is not a broken one. Reported so that a demo or test run shows traffic genuinely reached every slice. The UE probes alone keep this true while the UEs are up."
     },
     {
       "id": "orchestrator-reachable",

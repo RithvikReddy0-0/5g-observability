@@ -1,0 +1,88 @@
+Open5GS on Kubernetes — 20260925-053701Z
+commit: 80ca3fc3f41c941c21685adc81f90a69f345660a
+
+== 05:37:01 1. cluster
+* Enabled addons: default-storageclass, storage-provisioner
+* Done! kubectl is now configured to use "o5gs" cluster and "default" namespace by default
+  Server Version: v1.35.1
+  pausing the compose Open5GS stack (both cores at once would distort every measurement)
+
+== 05:37:45 2. images built from the pinned commits, loaded into the cluster
+  loaded o5gs/open5gs:v2.8.0
+  loaded o5gs/ueransim:v3.3.0-udpbuf-mono
+
+== 05:38:19 3. apply the manifests generated from the compose deployment
+  rendered open5gs/k8s/generated/o5gs.yaml: {"Namespace": 1, "ConfigMap": 4, "PersistentVolumeClaim": 1, "Service": 22, "Deployment": 22}
+  service/gnb-mmtc created
+  deployment.apps/gnb-mmtc created
+  service/gnb-urllc created
+  deployment.apps/gnb-urllc created
+  service/ue created
+  deployment.apps/ue created
+  service/prometheus created
+  deployment.apps/prometheus created
+mongodb nrf scp ausf udm udr pcf bsf nssf amf upf-embb upf-urllc upf-mmtc smf dn-embb dn-urllc dn-mmtc gnb-embb gnb-urllc gnb-mmtc ue prometheus 
+
+== 05:38:59 4. core bring-up
+  [ PASS ] all three gNBs completed NG Setup
+  [ PASS ] SMF associated with all three UPFs over PFCP
+
+== 05:39:02 5. subscribers and UEs
+  provisioning 100 subscribers into deploy/mongodb in namespace o5gs (database open5gs)
+  upserted 100 subscribers
+  total in db: 100
+    home slice sst 1/010203  dnn=internet  5qi=9  -> 20 subscribers
+    home slice sst 2/112233  dnn=urllc  5qi=82  -> 10 subscribers
+    home slice sst 3/334455  dnn=iot  5qi=9  -> 70 subscribers
+  UE session addresses: 100
+  [ PASS ] 100 UEs with a PDU session
+  [ PASS ] each slice at its size, from its own pool (eMBB 20/20, URLLC 10/10, mMTC 70/70)
+
+== 05:40:10 6. user plane, per slice
+  [ PASS ] eMBB: ping 10.45.0.1 through its UPF from uesimtun00050 (10.45.0.2)
+  [ PASS ] eMBB: bytes arrived on upf-embb's ogstun (10080 -> 12012)
+  [ PASS ] eMBB: iperf3 UE -> upf-embb -> dn-embb (252.9 Mbps)
+  [ PASS ] URLLC: ping 10.46.0.1 through its UPF from uesimtun00220 (10.46.0.2)
+  [ PASS ] URLLC: bytes arrived on upf-urllc's ogstun2 (7392 -> 7644)
+  [ PASS ] URLLC: iperf3 UE -> upf-urllc -> dn-urllc (25.1 Mbps)
+  [ PASS ] mMTC: ping 10.47.0.1 through its UPF from uesimtun00350 (10.47.0.2)
+  [ PASS ] mMTC: bytes arrived on upf-mmtc's ogstun3 (47544 -> 53676)
+  [ PASS ] mMTC: iperf3 UE -> upf-mmtc -> dn-mmtc (1.0 Mbps)
+
+== 05:40:40 7. the same KPI gate as compose, against the in-cluster Prometheus
+    [  WARN  ] URLLC worst-case round-trip time within 10 ms (1 min)
+               15.15 ms — required <= 10
+    [  WARN  ] The slice orchestrator is being scraped
+               no data — the metric is not being reported
+    22 passed   0 failed   2 advisory   0 skipped (ODE)
+  ==============================================================================
+  GATE PASSED
+    verdict written to docs/evidence/open5gs-k8s/k8s-20260925-053701Z-gate.json
+  [ PASS ] KPI gate passes on Kubernetes
+
+== 05:42:04 resources
+NAME                         READY  STATUS   RESTARTS
+amf-67c859bb8d-drrz9         1/1    Running  0
+ausf-677d9c5986-dwlsr        1/1    Running  0
+bsf-5679776d96-hvphk         1/1    Running  0
+dn-embb-6fb7f85dcb-hb82c     1/1    Running  0
+dn-mmtc-6447dd5584-vhjhs     1/1    Running  0
+dn-urllc-58db97844d-2qn58    1/1    Running  0
+gnb-embb-85f9f76bd9-25r8x    1/1    Running  0
+gnb-mmtc-69889775f6-rmx92    1/1    Running  0
+gnb-urllc-5988679d65-z87cg   1/1    Running  0
+mongodb-795bdd6f8b-pdbwn     1/1    Running  0
+nrf-89ff849bd-wljn8          1/1    Running  0
+nssf-754b4c5566-z8vwq        1/1    Running  0
+pcf-67d955cc6f-wh79c         1/1    Running  0
+prometheus-76d97f7788-hh9nx  1/1    Running  0
+scp-6cdb9758c6-ggtlx         1/1    Running  0
+smf-7b4987f57b-l9vq9         1/1    Running  0
+udm-78fb7b5696-r54tw         1/1    Running  0
+udr-684546777-x6gpn          1/1    Running  0
+ue-54b798c6d6-8t7bg          1/1    Running  0
+upf-embb-6569475759-sg8v2    1/1    Running  0
+upf-mmtc-65bbcb5c99-6hxj6    1/1    Running  0
+upf-urllc-66c7fd884d-6vtwp   1/1    Running  0
+
+RESULT: PASS — the Open5GS stack runs on Kubernetes and passes the same checks as compose
