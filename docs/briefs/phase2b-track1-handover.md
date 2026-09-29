@@ -13,7 +13,8 @@ make o5gs-ping      # user plane through each slice's own UPF
 ```
 
 Keep a WSL terminal open while it runs: WSL stops the Docker engine when the Ubuntu distro goes
-idle.
+idle. When it comes back, every container restarts and the 100 UEs reattach on their own within
+about a minute. Give it that minute before measuring.
 
 ## What is where
 

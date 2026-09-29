@@ -134,7 +134,8 @@ for p in sorted(glob.glob(os.path.join(BASE, "ran", "gnb-*.yaml"))):
     ran[os.path.basename(p)] = dump(to_k8s_gnb(load(p)))
 for p in sorted(glob.glob(os.path.join(BASE, "ran", "ue-slice-*.yaml"))):
     ran[os.path.basename(p)] = dump(to_k8s_ue(load(p)))
-ran["ue-entrypoint.sh"] = open(os.path.join(BASE, "ran", "ue-entrypoint.sh"), encoding="utf-8").read()
+for script in ("ue-entrypoint.sh", "gnb-entrypoint.sh"):
+    ran[script] = open(os.path.join(BASE, "ran", script), encoding="utf-8").read()
 configmap("o5gs-ran", ran)
 
 obs = {os.path.basename(p): open(p, encoding="utf-8").read()
@@ -246,7 +247,8 @@ for gnb in GNBS:
     deployment(gnb, {
         "name": gnb, "image": UERANSIM, "imagePullPolicy": "Never",
         "command": ["/bin/sh", "-c",
-                    "sed \"s/POD_IP/$POD_IP/g\" /etc/ueransim/%s.yaml > /tmp/gnb.yaml && exec nr-gnb -c /tmp/gnb.yaml" % gnb],
+                    "sed \"s/POD_IP/$POD_IP/g\" /etc/ueransim/%s.yaml > /tmp/gnb.yaml"
+                    " && exec sh /etc/ueransim/gnb-entrypoint.sh /tmp/gnb.yaml" % gnb],
         "env": [{"name": "UERANSIM_UDP_BUFFER_BYTES", "value": "8388608"},
                 {"name": "POD_IP", "valueFrom": {"fieldRef": {"fieldPath": "status.podIP"}}}],
         "securityContext": {"capabilities": {"add": ["NET_ADMIN"]}},

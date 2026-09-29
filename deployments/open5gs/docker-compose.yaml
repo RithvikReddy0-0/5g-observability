@@ -236,7 +236,8 @@ services:
     container_name: o5gs-gnb-embb
     image: o5gs/ueransim:v3.3.0-udpbuf-mono
     restart: unless-stopped
-    command: ["nr-gnb", "-c", "/etc/ueransim/gnb-embb.yaml"]
+    # Supervised: exits when N2 to the AMF is down, so restart: unless-stopped retries it (ADR-014).
+    entrypoint: ["/bin/sh", "/etc/ueransim/gnb-entrypoint.sh", "/etc/ueransim/gnb-embb.yaml"]
     # 8 MiB UDP buffers (ADR-012). NET_ADMIN lets SO_RCVBUFFORCE exceed the kernel's rmem_max.
     environment:
       UERANSIM_UDP_BUFFER_BYTES: "8388608"
@@ -251,7 +252,8 @@ services:
     container_name: o5gs-gnb-urllc
     image: o5gs/ueransim:v3.3.0-udpbuf-mono
     restart: unless-stopped
-    command: ["nr-gnb", "-c", "/etc/ueransim/gnb-urllc.yaml"]
+    # Supervised: exits when N2 to the AMF is down, so restart: unless-stopped retries it (ADR-014).
+    entrypoint: ["/bin/sh", "/etc/ueransim/gnb-entrypoint.sh", "/etc/ueransim/gnb-urllc.yaml"]
     environment:
       UERANSIM_UDP_BUFFER_BYTES: "8388608"
     cap_add: [NET_ADMIN]
@@ -266,7 +268,8 @@ services:
     container_name: o5gs-gnb-mmtc
     image: o5gs/ueransim:v3.3.0-udpbuf-mono
     restart: unless-stopped
-    command: ["nr-gnb", "-c", "/etc/ueransim/gnb-mmtc.yaml"]
+    # Supervised: exits when N2 to the AMF is down, so restart: unless-stopped retries it (ADR-014).
+    entrypoint: ["/bin/sh", "/etc/ueransim/gnb-entrypoint.sh", "/etc/ueransim/gnb-mmtc.yaml"]
     environment:
       UERANSIM_UDP_BUFFER_BYTES: "8388608"
     cap_add: [NET_ADMIN]

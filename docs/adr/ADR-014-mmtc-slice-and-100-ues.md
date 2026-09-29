@@ -115,7 +115,26 @@ The supervisor restored all 10 within 2 minutes, but a deploy should not depend 
 Deploying this ADR's own topology through `deploy.sh` then gave 0 supervisor restarts, sessions
 of exactly 20 / 10 / 70 at the three UPFs, and no PFCP or TEID errors.
 
-### 6. The deployment gate counts each slice at its own size
+### 6. A gNB that loses the AMF exits, so it is restarted
+
+After a real Docker engine restart, only the 20 eMBB UEs came back. All containers had started at
+once. The URLLC and mMTC gNBs reached the AMF before it listened and logged "Connection refused".
+They stayed up with their cells barred, and nothing restarted them. Two gNBs made the race
+unlikely; three made it routine.
+
+UERANSIM's gNB connects once. It never retries a refused connection and never reconnects a lost
+association (`src/gnb/sctp/task.cpp`, `handleAssociationShutdown`). So
+[`ran/gnb-entrypoint.sh`](../../deployments/open5gs/ran/gnb-entrypoint.sh) now supervises it:
+- no NG Setup within 30 s → the gNB exits;
+- `Association terminated` later → the gNB exits.
+
+`restart: unless-stopped` (on Kubernetes, `restartPolicy: Always`) then starts a fresh gNB.
+
+**Reproduced twice by starting every container at once:** two gNBs lost the race each time and were
+restarted once, and all 100 UEs had sessions after 61 s and 55 s. A third, genuine engine restart
+(WSL idling the distro) recovered on its own in 36 s.
+
+### 7. The deployment gate counts each slice at its own size
 
 `min()` across slices of 20, 10 and 70 can only ever check the smallest. So sessions and UE
 reachability are now one gate per slice, at that slice's size. `or vector(0)` makes a slice

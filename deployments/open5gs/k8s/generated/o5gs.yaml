@@ -167,6 +167,24 @@ data:
     $STATE/restarts.log\"\n      stop_ue \"$imsi\"\n      launch_ue \"$imsi\"\n      wait_up \"$imsi\"\n      if [ -n \"$(tun_of\
     \ \"$imsi\")\" ]; then log \"$name imsi-$imsi back on $(tun_of \"$imsi\")\"\n      else log \"$name imsi-$imsi restart\
     \ did not complete; will retry\"; fi\n    fi\n  done < \"$STATE/plan\"\ndone\n"
+  gnb-entrypoint.sh: "#!/bin/sh\n# gnb-entrypoint.sh <config> \u2014 run one UERANSIM gNB, and exit when its N2 link to the\
+    \ AMF is down,\n# so that Docker (restart: unless-stopped) or Kubernetes (restartPolicy: Always) starts a fresh one.\n\
+    #\n# WHY: UERANSIM v3.3.0's gNB connects to the AMF once. A refused connection is logged\n# (\"Connecting to ... failed\"\
+    , src/gnb/sctp/task.cpp) and never retried; an association that\n# ends later is dropped without reconnecting (handleAssociationShutdown,\
+    \ src/gnb/ngap/\n# interface.cpp). The process stays up either way, with its cell barred.\n# After a Docker engine restart\
+    \ every container starts at once: two of the three gNBs reached the\n# AMF before it listened, logged \"Connection refused\"\
+    \ and stayed like that \u2014 80 of 100 UEs could\n# not attach, and nothing restarted them (ADR-014).\n#\n# So: no NG\
+    \ Setup within NG_SETUP_WAIT seconds, or \"Association terminated\" later -> exit 1.\nset -u\n\nCFG=\"$1\"\nWAIT=\"${NG_SETUP_WAIT:-30}\"\
+    \nLOG=/tmp/gnb.log\n: > \"$LOG\"\n\nnr-gnb -c \"$CFG\" < /dev/null > \"$LOG\" 2>&1 &\nPID=$!\ntail -n +1 -F \"$LOG\" 2>/dev/null\
+    \ &     # keep the gNB's own output in `docker logs`\nTAIL=$!\n\nsay()  { echo \"gnb-entrypoint: $*\"; }\nstop() { kill\
+    \ \"$PID\" 2>/dev/null; wait \"$PID\" 2>/dev/null; kill \"$TAIL\" 2>/dev/null; }\ntrap 'stop; exit 143' TERM INT\n\nw=0\n\
+    until grep -q \"NG Setup procedure is successful\" \"$LOG\"; do\n  if ! kill -0 \"$PID\" 2>/dev/null; then say \"nr-gnb\
+    \ exited before NG Setup\"; stop; exit 1; fi\n  if [ \"$w\" -ge \"$WAIT\" ]; then\n    say \"no NG Setup with the AMF\
+    \ within ${WAIT}s \u2014 exiting so this gNB is restarted\"; stop; exit 1\n  fi\n  w=$((w + 1)); sleep 1\ndone\nsay \"\
+    NG Setup done; watching the N2 association\"\n\n# Only the recent end of the log is searched: it grows with every UE event.\n\
+    while kill -0 \"$PID\" 2>/dev/null; do\n  if tail -c 65536 \"$LOG\" | grep -q \"Association terminated\"; then\n    say\
+    \ \"N2 association to the AMF lost \u2014 exiting so this gNB is restarted\"; stop; exit 1\n  fi\n  sleep 2\ndone\nsay\
+    \ \"nr-gnb exited\"; stop; exit 1\n"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -1389,7 +1407,8 @@ spec:
         command:
         - /bin/sh
         - -c
-        - sed "s/POD_IP/$POD_IP/g" /etc/ueransim/gnb-embb.yaml > /tmp/gnb.yaml && exec nr-gnb -c /tmp/gnb.yaml
+        - sed "s/POD_IP/$POD_IP/g" /etc/ueransim/gnb-embb.yaml > /tmp/gnb.yaml && exec sh /etc/ueransim/gnb-entrypoint.sh
+          /tmp/gnb.yaml
         env:
         - name: UERANSIM_UDP_BUFFER_BYTES
           value: '8388608'
@@ -1461,7 +1480,8 @@ spec:
         command:
         - /bin/sh
         - -c
-        - sed "s/POD_IP/$POD_IP/g" /etc/ueransim/gnb-mmtc.yaml > /tmp/gnb.yaml && exec nr-gnb -c /tmp/gnb.yaml
+        - sed "s/POD_IP/$POD_IP/g" /etc/ueransim/gnb-mmtc.yaml > /tmp/gnb.yaml && exec sh /etc/ueransim/gnb-entrypoint.sh
+          /tmp/gnb.yaml
         env:
         - name: UERANSIM_UDP_BUFFER_BYTES
           value: '8388608'
@@ -1533,7 +1553,8 @@ spec:
         command:
         - /bin/sh
         - -c
-        - sed "s/POD_IP/$POD_IP/g" /etc/ueransim/gnb-urllc.yaml > /tmp/gnb.yaml && exec nr-gnb -c /tmp/gnb.yaml
+        - sed "s/POD_IP/$POD_IP/g" /etc/ueransim/gnb-urllc.yaml > /tmp/gnb.yaml && exec sh /etc/ueransim/gnb-entrypoint.sh
+          /tmp/gnb.yaml
         env:
         - name: UERANSIM_UDP_BUFFER_BYTES
           value: '8388608'

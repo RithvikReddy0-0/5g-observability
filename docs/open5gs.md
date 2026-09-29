@@ -321,6 +321,9 @@ Every container restarts by policy and the UEs re-attach on their own. **Keep a 
     an outgoing UPF process within 0.7 s.
   - `deploy.sh` stops the UPFs, restarts the core, then starts the UPFs. `start_ues.sh` waits for
     an association newer than each UPF's start.
+- **The gNBs are supervised** (`ran/gnb-entrypoint.sh`). UERANSIM's gNB never retries a refused or
+  lost AMF connection. After an engine restart it would stay up with its cell barred, so it now
+  exits and is restarted.
 - **Start UEs in parallel only through `ue-entrypoint.sh`.** It removes three races inside
   `nr-ue`: the interface name, the routing-table id and the proc-table directory. Plain
   concurrent `nr-ue` launches still hit them.
