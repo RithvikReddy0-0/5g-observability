@@ -15,6 +15,8 @@ make o5gs-up           # start everything; 100 UEs attach with PDU sessions (eMB
 make o5gs-test         # SPEC acceptance criteria: PASS 22, FAIL 0
 make o5gs-ping         # user plane per slice
 make o5gs-scale        # what attaching and holding many UEs costs, and where this laptop stops
+make o5gs-kpi          # per-slice KPIs at nominal load, scored against the team's targets
+make o5gs-kpi-all      # + three one-parameter sweeps and the Excel report (~25 min)
 make o5gs-orchestrate  # demands admitted by measured capacity, run as real flows
 make o5gs-deploy       # deploy a config change behind the KPI gate, roll back if it fails
 make o5gs-k8s-up       # the same stack on Kubernetes, judged by the same gate
@@ -78,6 +80,7 @@ recorded; the three-slice, 100-UE rows are from Phase 2b ([ADR-014](adr/ADR-014-
 | Radio links survive wall-clock steps | 6 steps of ≤ +1.1 s in 130 s: **0** radio link failures (before the patch: 6 of 20 UEs reachable) | [`open5gs-clock`](evidence/open5gs-clock/README.md) |
 | Three-slice topology deployed through the gate | **DEPLOYED**, 22 passed / 0 failed; UPF sessions exactly 20 / 10 / 70 | [`open5gs-deploy`](evidence/open5gs-deploy/README.md) |
 | mMTC session AMBR | iperf3 through the mMTC UPF: **1.0 Mbps** against 1 Mbps | `make o5gs-ping` |
+| Per-slice KPIs, all slices served at once | URLLC one-way latency mean **3.9 ms**, p99 22 ms, 0 loss · eMBB p5 **10.8 Mbps**, aggregate 299 Mbps · mMTC registration **100 %**, report loss **0** · scores 0.90 / 0.37 / 1.00 | [`open5gs-kpi`](evidence/open5gs-kpi/README.md), [scorecard](kpi-scorecard.md) |
 | Traffic through each slice's own UPF | ping ~2 ms; UPF device counters move; internet egress | `make o5gs-ping` |
 | Single flow UE → UPF → DN | eMBB ~256 Mbps · URLLC ~25 Mbps · mMTC 1.0 Mbps (its AMBR) | same |
 | Session AMBR enforced | URLLC **20.08 Mbps** over 20 s against 20 Mbps | [token bucket](#where-ambr-is-enforced) |
@@ -339,8 +342,6 @@ Every container restarts by policy and the UEs re-attach on their own. **Keep a 
 
 - **Beyond ~200 UEs on this laptop.** At 300 every UE attaches and stays up, but the host saturates
   and the per-UE liveness probe stops being trustworthy ([scale](evidence/open5gs-scale/README.md)).
-- **The mMTC slice's own traffic and KPIs** (ten-byte reports, device density, delivery) — Phase 2b
-  Tracks 2 and 3. Today the mMTC devices carry only the liveness probes.
 - **Grafana and the orchestrator on Kubernetes**, and anything beyond single-node minikube.
 - **CPU isolation between slices** — URLLC's tail budget is not met on this laptop.
 - **A slice-aggregate rate limit in the network** — only admission enforces it.

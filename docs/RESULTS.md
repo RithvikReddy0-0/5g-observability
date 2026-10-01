@@ -24,6 +24,7 @@ the ratified ODE. That distinction determines what could and could not be proven
 | Phase-1 acceptance (runnable subset) | **PASS=12, FAIL=0** | `tests/acceptance.sh` |
 | KPI gate enforces thresholds in CI | **10 enforced, 2 ODE-only** | `make gate`: 10/10 PASS on a live deployment, exit 1 with an NF stopped |
 | **Open5GS: UEs with a working PDU session** | **100 / 100** in three slices (eMBB 20, URLLC 10, mMTC 70) | interface per UE + ping/iperf3 through each slice's UPF |
+| **Open5GS: per-slice KPIs (Phase 2b)** | **URLLC 0.90 · eMBB 0.37 · mMTC 1.00** | scored against the team's targets; Excel report |
 | **Open5GS: where this laptop stops** | **~300 UEs** (clean up to 200) | `scale_test.sh`: attach bursts and steps, cgroup CPU |
 | **Open5GS: KPI gate incl. user plane** | **PASS, 0 failed** (22 passed, 2 advisory, 24 KPIs) | live stack, each slice at its own size |
 | **Open5GS: URLLC isolated from a saturated eMBB** | **10 / 10** reachable, 3 of 3 runs | `isolation_test.sh`, a gNB + UPF per slice |
@@ -340,6 +341,40 @@ Findings:
    (AMF and SMF at ~0 % for 100–300 UEs). Simulating and pinging them costs the UE container about
    0.6 % of a core per UE. At 300 the per-UE liveness probe started timing out while every UE was
    still alive.
+
+### 6.2 Phase 2b — per-slice KPIs against the team's targets (ADR-015)
+
+Each slice carries its own service:
+- **URLLC:** 64-byte packets every 20 ms from each device;
+- **mMTC:** a 10-byte report every 10 s from each device;
+- **eMBB:** TCP bulk downloads during a measurement.
+
+Each is measured where it arrives: one-way, on one shared clock. The KPIs and targets come from
+the team's notes ([scorecard](kpi-scorecard.md)). Run
+[`20261001-124845Z`](evidence/open5gs-kpi/README.md), with an Excel report and a
+[results deck](presentation/phase2b-kpi-results.pdf):
+
+| Slice | Standard instance (all slices at once, 150 s) | Score |
+|---|---|---|
+| URLLC | latency mean 3.9 ms ✅ · p95 11.4 ms ❌ · p99 22.0 ms ❌ (target 10 ms) · 0 loss ✅ | 0.90 |
+| eMBB | 5th percentile 10.8 Mbps ❌ (target 50) · aggregate 299 Mbps ❌ (target 500) | 0.37 |
+| mMTC | registration 100 % ✅ · report loss 0 in 1 089 ✅ · latency p99 18 ms ✅ | 1.00 |
+
+Sweeps varied one parameter each: eMBB devices downloading (0–20), IoT reporting interval
+(1–30 s) and IoT devices (70–210, i.e. 100–240 UEs).
+
+Findings:
+
+1. **URLLC's mean is well inside 10 ms; its tail is not, whenever eMBB is busy.** p99 was 8.6 ms
+   with no eMBB load and 10.4–22 ms with it, with zero URLLC loss throughout. The user planes are
+   separate, but the CPU is shared.
+2. **eMBB is limited by the laptop, not the slicing.** The 5th percentile was 46 Mbps with 5
+   devices and at most 14 Mbps with 20. The laptop delivered 255–455 Mbps in total, varying that
+   much between runs with identical settings. The notes' two eMBB targets need 1 Gbps and 500 Mbps.
+3. **mMTC held at every scale tried:** 100 % registration and zero loss with 70, 140 and 210
+   devices, and at reporting intervals of 1–30 s.
+4. **Checking the run's own numbers caught a measurement bug.** The first device sweep counted
+   registration for only 70 devices; it was fixed and re-run.
 
 ---
 

@@ -1,3 +1,10 @@
+# Presentations
+
+- `phase2-review1.tex` / `.pdf` — the Phase 2 Review 1 deck (19 slides), described below.
+- `phase2b-kpi-results.tex` / `.pdf` — Phase 2b per-slice KPI results (9 slides). **Generated** by
+  `tools/kpi/slides.py <run dir>` from a KPI run's measurements. Regenerate it from the next run
+  rather than editing it.
+
 # Phase 2 Review 1 presentation
 
 `phase2-review1.tex` — the review deck, in LaTeX Beamer. `phase2-review1.pdf` is the

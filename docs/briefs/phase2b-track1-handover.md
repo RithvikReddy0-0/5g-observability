@@ -1,6 +1,14 @@
 # Phase 2b — Track 1 handover: the 100-UE, three-slice stack
 
-For Tracks 2, 3 and 4 ([work division](phase2b-work-division.md)). Track 1 is done. This is the
+For Tracks 2, 3 and 4 ([work division](phase2b-work-division.md)). Track 1 is done.
+
+> **Update 2026-10-01:** Tracks 2, 3 and 4 are now implemented as well ([ADR-015](../adr/ADR-015-traffic-profiles-and-kpi-scorecard.md)):
+> - traffic profiles and collectors;
+> - the KPI scorecard ([`docs/kpi-scorecard.md`](../kpi-scorecard.md));
+> - sweeps and the Excel report (`make o5gs-kpi-all`, [results](../evidence/open5gs-kpi/README.md));
+> - a results deck ([`docs/presentation/phase2b-kpi-results.pdf`](../presentation/phase2b-kpi-results.pdf)).
+>
+> The "For each track" notes below describe the starting point each track built from. This is the
 stack every other track measures against, and what you need to use it.
 
 ## Bring it up

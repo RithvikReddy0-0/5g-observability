@@ -87,6 +87,14 @@ Source material:
 7. **Name the papers** behind the research-based targets (~2 ms, 550–900 Mbps, 0.1 %). Reviewers
    will ask.
 
+## Implemented
+
+These targets are now the scorecard, [`deployments/open5gs/kpi-scorecard.json`](../../deployments/open5gs/kpi-scorecard.json),
+explained in [`docs/kpi-scorecard.md`](../kpi-scorecard.md). They are used as written, with the
+added KPIs marked. Every KPI is measured on the running stack and scored, through three one-parameter
+sweeps, into an Excel report ([`evidence/open5gs-kpi`](../evidence/open5gs-kpi/README.md),
+[ADR-015](../adr/ADR-015-traffic-profiles-and-kpi-scorecard.md)).
+
 ## Still to decide
 
 - The IoT reporting interval (how often each device sends its 10 bytes).
