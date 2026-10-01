@@ -1,0 +1,10 @@
+Open5GS deployment — 20261001-124758Z
+commit: 7487512504381e23be087ae5b774e3c39de1f9be + uncommitted changes in the candidate
+== 12:48:05 1. validate the candidate (static, the running stack is not touched)
+  YAML: ok
+  deployments/open5gs/ran/ue-slice-c.yaml: slice (3, 3359829), DNN 'iot' -> gNB ['10.53.0.34'] -> UPF 10.53.0.9: consistent
+  3 UE session definition(s) checked, 0 inconsistency(ies)
+  UE plan matches O5GS_UES: eMBB 20, URLLC 10, mMTC 70 (100 UEs)
+  KPI definitions: ok
+  the docker compose plugin is unavailable here (Docker Desktop's WSL integration provides it)
+DECISION: ABORTED — this host cannot apply a candidate right now; the running stack is unchanged

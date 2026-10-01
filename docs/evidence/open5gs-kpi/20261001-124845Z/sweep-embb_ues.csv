@@ -1,0 +1,5 @@
+embb_ues,instance,URLLC latency mean (ms),URLLC p95 (ms),URLLC p99 (ms),URLLC max (ms),URLLC loss,URLLC jitter (ms),URLLC packets,eMBB devices loaded,eMBB p5 DL (Mbps),eMBB mean DL (Mbps),eMBB aggregate DL (Mbps),mMTC registration success,mMTC registered,mMTC provisioned,mMTC report loss,mMTC loss resolution,mMTC reports,mMTC latency p99 (ms),mMTC devices reporting,UE container CPU (% core),eMBB UPF CPU (% core),host load start,host load end,URLLC score,eMBB score,mMTC score,overall
+0,embb_ues=0,2.475,3.748,8.59,74.104,0.0,0.916,30006,0,,,,1.0,70,70,0.0,0.002381,420,5.0,70,132.0,0.3,8.75,4.38,1.0,,1.0,
+5,embb_ues=5,2.867,7.455,14.606,44.966,0.0,1.945,30850,5,46.38,71.53,357.7,1.0,70,70,0.0,0.002304,434,11.0,70,393.8,96.7,4.38,8.07,0.9527,0.8427,1.0,0.9318
+10,embb_ues=10,2.683,6.492,16.421,56.977,0.0,1.779,31810,10,12.64,30.26,302.6,1.0,70,70,0.0,0.002242,446,12.0,70,407.0,93.1,8.38,9.86,0.9413,0.3938,1.0,0.7784
+20,embb_ues=20,2.942,7.714,15.167,61.049,0.0,2.004,33117,20,7.03,13.75,275.1,1.0,70,70,0.0,0.002146,466,15.0,70,399.4,90.0,9.86,10.68,0.9489,0.3044,1.0,0.7511

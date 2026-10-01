@@ -1,0 +1,34 @@
+Open5GS deployment — 20261001-123845Z
+commit: 7487512504381e23be087ae5b774e3c39de1f9be + uncommitted changes in the candidate
+== 12:38:52 1. validate the candidate (static, the running stack is not touched)
+  YAML: ok
+  deployments/open5gs/ran/ue-slice-c.yaml: slice (3, 3359829), DNN 'iot' -> gNB ['10.53.0.34'] -> UPF 10.53.0.9: consistent
+  3 UE session definition(s) checked, 0 inconsistency(ies)
+  UE plan matches O5GS_UES: eMBB 20, URLLC 10, mMTC 70 (100 UEs)
+  KPI definitions: ok
+== 12:38:55 2. last known-good
+  known-good snapshot from 2026-09-25 05:44:51, commit 80ca3fc3f41c941c21685adc81f90a69f345660a
+  candidate differs from known-good:
+    Files .deploy/cmp/deployments/open5gs/docker-compose.yaml and deployments/open5gs/docker-compose.yaml differ
+    Files .deploy/cmp/deployments/open5gs/k8s/generated/o5gs.yaml and deployments/open5gs/k8s/generated/o5gs.yaml differ
+    Files .deploy/cmp/deployments/open5gs/k8s/render.py and deployments/open5gs/k8s/render.py differ
+    Only in deployments/open5gs: kpi-scorecard.json
+    Only in deployments/open5gs/observability: kpi_collector.py
+    Files .deploy/cmp/deployments/open5gs/observability/prometheus.yml and deployments/open5gs/observability/prometheus.yml differ
+    Only in deployments/open5gs/observability: traffic_agent.py
+    Only in deployments/open5gs/ran: gnb-entrypoint.sh
+    Files .deploy/cmp/deployments/open5gs/ran/ue-entrypoint.sh and deployments/open5gs/ran/ue-entrypoint.sh differ
+== 12:39:00 3. apply the candidate
+  
+    UEs registered        : 100 / 100
+    UEs with PDU session  : 100 / 100
+    eMBB   interfaces     : 20 / 20   (10.45.0.0/16)
+    URLLC  interfaces     : 10 / 10   (10.46.0.0/16)
+    mMTC   interfaces     : 70 / 70   (10.47.0.0/16)
+    TUN allocation errors : 0
+    all attached in       : 41s
+  waiting 75 s so every gate window holds only post-deploy samples
+== 12:41:28 4. KPI gate on the candidate
+    22 passed   0 failed   2 advisory   0 skipped (ODE)
+  GATE PASSED
+DECISION: DEPLOYED — the candidate passed the gate and is the new known-good
