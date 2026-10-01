@@ -109,6 +109,32 @@ ts("Dropped packets per slice", [
    12, y, h=10, unit="pps", desc="Drops on the slice's UPF device. AMBR policing happens in the gNB, so it does not show here.")
 y += 10
 
+row("Phase 2b KPIs — each slice's own service, measured device to data network (ADR-015)", y); y += 1
+stat("URLLC latency p99 (target 10 ms)", 'max(kpi_owd_ms{slice="URLLC",stat="p99"})', 0, y, w=4,
+     desc="One-way, device -> URLLC data network, last 60 s. 64-byte packets every 20 ms from all 10 devices. Target: 5QI 82 packet delay budget.")
+stat("URLLC latency mean (target 10 ms)", 'max(kpi_owd_ms{slice="URLLC",stat="mean"})', 4, y, w=4)
+stat("URLLC loss, 5 min (target 0.01 %)", '1 - sum(increase(kpi_packets_received_total{slice="URLLC"}[5m])) / sum(increase(kpi_packets_expected_total{slice="URLLC"}[5m]))', 8, y, w=4)
+stat("mMTC devices reporting (of 70)", 'max(kpi_devices_active{slice="mMTC"})', 12, y, w=4,
+     desc="Devices heard from in the last 90 s. Each sends a 10-byte report every 10 s.")
+stat("mMTC report loss, 5 min (target 0.1 %)", '1 - sum(increase(kpi_packets_received_total{slice="mMTC"}[5m])) / sum(increase(kpi_packets_expected_total{slice="mMTC"}[5m]))', 16, y, w=4)
+stat("mMTC report latency p99", 'max(kpi_owd_ms{slice="mMTC",stat="p99"})', 20, y, w=4,
+     desc="TR 38.913 small-packet latency target: 10 s.")
+for _p in (panels[-6], panels[-5], panels[-1]):
+    _p["fieldConfig"]["defaults"].update({"unit": "ms", "decimals": 2})
+for _p in (panels[-4], panels[-2]):
+    _p["fieldConfig"]["defaults"].update({"unit": "percentunit", "decimals": 3})
+y += 4
+ts("URLLC one-way latency (device -> data network)", [
+    {"expr": 'max(kpi_owd_ms{slice="URLLC",stat="mean"})', "legendFormat": "URLLC mean"},
+    {"expr": 'max(kpi_owd_ms{slice="URLLC",stat="p95"})', "legendFormat": "URLLC p95"},
+    {"expr": 'max(kpi_owd_ms{slice="URLLC",stat="p99"})', "legendFormat": "URLLC p99"}],
+   0, y, unit="ms", desc="Rolling 60 s window from kpi_collector.py. Sender and receiver share one monotonic clock, so this is exact one-way delay.")
+ts("Measurement packets per second, by slice", [
+    {"expr": "sum by (slice) (rate(kpi_packets_received_total[1m]))", "legendFormat": "{{slice}} received"},
+    {"expr": "sum by (slice) (rate(kpi_agent_sent_total[1m]))", "legendFormat": "{{slice}} sent"}],
+   12, y, unit="pps", desc="Sent by traffic_agent.py in the UE container, received in each slice's data network.")
+y += 8
+
 row("Slice orchestrator — demands admitted by measured capacity, run as real flows", y); y += 1
 ts("eMBB: capacity, admitted, measured", [
     {"expr": 'max(slice_capacity_mbps{slice="eMBB"})', "legendFormat": "capacity"},

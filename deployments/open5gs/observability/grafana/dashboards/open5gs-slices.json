@@ -1240,7 +1240,7 @@
     },
     {
       "type": "row",
-      "title": "Slice orchestrator \u2014 demands admitted by measured capacity, run as real flows",
+      "title": "Phase 2b KPIs \u2014 each slice's own service, measured device to data network (ADR-015)",
       "id": 21,
       "collapsed": false,
       "gridPos": {
@@ -1251,9 +1251,530 @@
       }
     },
     {
+      "type": "stat",
+      "title": "URLLC latency p99 (target 10 ms)",
+      "id": 22,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prom-o5gs"
+      },
+      "description": "One-way, device -> URLLC data network, last 60 s. 64-byte packets every 20 ms from all 10 devices. Target: 5QI 82 packet delay budget.",
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 0,
+        "y": 48
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "decimals": 2,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#2E6E8E"
+          }
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "max(kpi_owd_ms{slice=\"URLLC\",stat=\"p99\"})",
+          "instant": true
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "URLLC latency mean (target 10 ms)",
+      "id": 23,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prom-o5gs"
+      },
+      "description": "",
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 4,
+        "y": 48
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "decimals": 2,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#2E6E8E"
+          }
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "max(kpi_owd_ms{slice=\"URLLC\",stat=\"mean\"})",
+          "instant": true
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "URLLC loss, 5 min (target 0.01 %)",
+      "id": 24,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prom-o5gs"
+      },
+      "description": "",
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 8,
+        "y": 48
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "decimals": 3,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#2E6E8E"
+          }
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "1 - sum(increase(kpi_packets_received_total{slice=\"URLLC\"}[5m])) / sum(increase(kpi_packets_expected_total{slice=\"URLLC\"}[5m]))",
+          "instant": true
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "mMTC devices reporting (of 70)",
+      "id": 25,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prom-o5gs"
+      },
+      "description": "Devices heard from in the last 90 s. Each sends a 10-byte report every 10 s.",
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 12,
+        "y": 48
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#2E6E8E"
+          }
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "max(kpi_devices_active{slice=\"mMTC\"})",
+          "instant": true
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "mMTC report loss, 5 min (target 0.1 %)",
+      "id": 26,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prom-o5gs"
+      },
+      "description": "",
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 16,
+        "y": 48
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "decimals": 3,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#2E6E8E"
+          }
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "1 - sum(increase(kpi_packets_received_total{slice=\"mMTC\"}[5m])) / sum(increase(kpi_packets_expected_total{slice=\"mMTC\"}[5m]))",
+          "instant": true
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "mMTC report latency p99",
+      "id": 27,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prom-o5gs"
+      },
+      "description": "TR 38.913 small-packet latency target: 10 s.",
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 20,
+        "y": 48
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "decimals": 2,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#2E6E8E"
+          }
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "max(kpi_owd_ms{slice=\"mMTC\",stat=\"p99\"})",
+          "instant": true
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "URLLC one-way latency (device -> data network)",
+      "id": 28,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prom-o5gs"
+      },
+      "description": "Rolling 60 s window from kpi_collector.py. Sender and receiver share one monotonic clock, so this is exact one-way delay.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 52
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "min": 0,
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "stacking": {
+              "mode": "none"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(eMBB|1-010203|internet).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#2E6E8E"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(URLLC|2-112233|urllc).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#C7601F"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(mMTC|3-334455|iot).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#5A8F3C"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "max(kpi_owd_ms{slice=\"URLLC\",stat=\"mean\"})",
+          "legendFormat": "URLLC mean"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "max(kpi_owd_ms{slice=\"URLLC\",stat=\"p95\"})",
+          "legendFormat": "URLLC p95"
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "max(kpi_owd_ms{slice=\"URLLC\",stat=\"p99\"})",
+          "legendFormat": "URLLC p99"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Measurement packets per second, by slice",
+      "id": 29,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prom-o5gs"
+      },
+      "description": "Sent by traffic_agent.py in the UE container, received in each slice's data network.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 52
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "pps",
+          "min": 0,
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "stacking": {
+              "mode": "none"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(eMBB|1-010203|internet).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#2E6E8E"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(URLLC|2-112233|urllc).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#C7601F"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(mMTC|3-334455|iot).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#5A8F3C"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "sum by (slice) (rate(kpi_packets_received_total[1m]))",
+          "legendFormat": "{{slice}} received"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "sum by (slice) (rate(kpi_agent_sent_total[1m]))",
+          "legendFormat": "{{slice}} sent"
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "Slice orchestrator \u2014 demands admitted by measured capacity, run as real flows",
+      "id": 30,
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 60
+      }
+    },
+    {
       "type": "timeseries",
       "title": "eMBB: capacity, admitted, measured",
-      "id": 22,
+      "id": 31,
       "datasource": {
         "type": "prometheus",
         "uid": "prom-o5gs"
@@ -1263,7 +1784,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 48
+        "y": 61
       },
       "fieldConfig": {
         "defaults": {
@@ -1371,7 +1892,7 @@
     {
       "type": "timeseries",
       "title": "URLLC: capacity, admitted, measured",
-      "id": 23,
+      "id": 32,
       "datasource": {
         "type": "prometheus",
         "uid": "prom-o5gs"
@@ -1381,7 +1902,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 48
+        "y": 61
       },
       "fieldConfig": {
         "defaults": {
@@ -1489,7 +2010,7 @@
     {
       "type": "stat",
       "title": "Executed flows that got their rate",
-      "id": 24,
+      "id": 33,
       "datasource": {
         "type": "prometheus",
         "uid": "prom-o5gs"
@@ -1499,7 +2020,7 @@
         "h": 4,
         "w": 8,
         "x": 0,
-        "y": 56
+        "y": 69
       },
       "options": {
         "reduceOptions": {
@@ -1536,7 +2057,7 @@
     {
       "type": "stat",
       "title": "Demands refused (capacity), last 15 min",
-      "id": 25,
+      "id": 34,
       "datasource": {
         "type": "prometheus",
         "uid": "prom-o5gs"
@@ -1546,7 +2067,7 @@
         "h": 4,
         "w": 8,
         "x": 8,
-        "y": 56
+        "y": 69
       },
       "options": {
         "reduceOptions": {
@@ -1583,7 +2104,7 @@
     {
       "type": "stat",
       "title": "Demands admitted, last 15 min",
-      "id": 26,
+      "id": 35,
       "datasource": {
         "type": "prometheus",
         "uid": "prom-o5gs"
@@ -1593,7 +2114,7 @@
         "h": 4,
         "w": 8,
         "x": 16,
-        "y": 56
+        "y": 69
       },
       "options": {
         "reduceOptions": {
@@ -1630,7 +2151,7 @@
     {
       "type": "timeseries",
       "title": "Delivered / admitted rate per slice (last 200 flows)",
-      "id": 27,
+      "id": 36,
       "datasource": {
         "type": "prometheus",
         "uid": "prom-o5gs"
@@ -1640,7 +2161,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 60
+        "y": 73
       },
       "fieldConfig": {
         "defaults": {

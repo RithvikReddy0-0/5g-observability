@@ -1,0 +1,191 @@
+{
+  "schema_version": "1",
+  "_comment": [
+    "Phase 2b per-slice KPI scorecard (Track 3). The ONE place a service KPI, its target and its",
+    "weight are defined: tools/kpi/run_kpis.py measures what `measure` names, tools/kpi/scorecard.py",
+    "scores it, and the Excel report is written from both. Change a target or weight here only.",
+    "",
+    "Targets come from the team's KPI notes (docs/briefs/phase2b-assets/01-*, 02-*), transcribed in",
+    "docs/briefs/phase2b-kpi-targets-review.md. KPIs the notes do not list are marked",
+    "origin = 'added' with their source. Weights are PROVISIONAL: the notes do not set them.",
+    "",
+    "This is NOT the deployment gate (kpi-gates.json). The gate asks: is every slice up and serving",
+    "its UEs? This asks: how well does each slice serve its service class, against its targets?",
+    "",
+    "Scoring, per KPI: the target is project_target if set, else research_target.",
+    "  lower is better : score = 1 if measured <= target, else target / measured",
+    "  higher is better: score = min(1, measured / target)",
+    "Slice score = sum(weight x score) over its KPIs (weights sum to 1). Overall = mean of slices.",
+    "A KPI with weight 0 is reported, never scored."
+  ],
+  "assumptions": [
+    "Industry-standard values are used only as benchmarks.",
+    "We use Open5GS and UERANSIM, not an industry-grade 5G deployment.",
+    "If the actual 5G architecture in the 5G research lab becomes available, industry-standard values can be used."
+  ],
+  "sources": {
+    "ITU-R M.2410": "Minimum requirements related to technical performance for IMT-2020 radio interface(s) — industry benchmarks.",
+    "3GPP TS 23.501 Table 5.7.4-1": "Standardized 5QI to QoS characteristics mapping — 5QI QoS values (URLLC runs on 5QI 82: 10 ms packet delay budget, 10^-4 packet error rate).",
+    "3GPP TR 38.913": "Scenarios and requirements for next generation access technologies — mMTC requirements.",
+    "Research papers": "Papers using the same Open5GS + UERANSIM stack — research-based project targets (the notes do not yet name them)."
+  },
+  "slices": [
+    {
+      "name": "URLLC",
+      "ues": 10,
+      "kpis": [
+        {
+          "id": "urllc-latency-mean",
+          "name": "End-to-end user-plane latency, mean (one-way, UE to destination)",
+          "measure": "urllc.owd_mean_ms",
+          "unit": "ms",
+          "better": "lower",
+          "project_target": 10,
+          "research_target": 2,
+          "benchmark": { "value": 1, "source": "ITU-R M.2410", "note": "The 1 ms is one-way user-plane latency across the radio network only, not end to end." },
+          "weight": 0.5,
+          "origin": "notes",
+          "why": "Time-sensitive traffic is judged by delay. 10 ms is the project target in the notes, and also 5QI 82's packet delay budget (TS 23.501)."
+        },
+        {
+          "id": "urllc-latency-p95",
+          "name": "Latency, 95th percentile",
+          "measure": "urllc.owd_p95_ms",
+          "unit": "ms",
+          "better": "lower",
+          "project_target": 10,
+          "benchmark": { "value": 10, "source": "3GPP TS 23.501 Table 5.7.4-1", "note": "5QI 82 packet delay budget." },
+          "weight": 0.15,
+          "origin": "notes",
+          "why": "The notes ask for p95/p99 to identify occasional high-delay packets. Held to the same 10 ms budget."
+        },
+        {
+          "id": "urllc-latency-p99",
+          "name": "Latency, 99th percentile",
+          "measure": "urllc.owd_p99_ms",
+          "unit": "ms",
+          "better": "lower",
+          "project_target": 10,
+          "benchmark": { "value": 10, "source": "3GPP TS 23.501 Table 5.7.4-1", "note": "5QI 82 packet delay budget." },
+          "weight": 0.15,
+          "origin": "notes",
+          "why": "As p95: the tail is what a time-sensitive application notices."
+        },
+        {
+          "id": "urllc-packet-loss",
+          "name": "Packet loss",
+          "measure": "urllc.loss_ratio",
+          "unit": "ratio",
+          "better": "lower",
+          "project_target": 0.0001,
+          "benchmark": { "value": 0.0001, "source": "3GPP TS 23.501 Table 5.7.4-1", "note": "5QI 82 packet error rate 10^-4." },
+          "weight": 0.2,
+          "origin": "added",
+          "why": "Added: URLLC is ultra-reliable as well as low-latency. Not in the notes; from the same TS 23.501 table they cite."
+        },
+        {
+          "id": "urllc-jitter",
+          "name": "Jitter (mean change in latency between consecutive packets of a device)",
+          "measure": "urllc.jitter_ms",
+          "unit": "ms",
+          "better": "lower",
+          "weight": 0,
+          "origin": "added",
+          "why": "Reported, not scored: no target exists in the notes or the cited sources."
+        }
+      ]
+    },
+    {
+      "name": "eMBB",
+      "ues": 20,
+      "kpis": [
+        {
+          "id": "embb-throughput-p5",
+          "name": "5th-percentile user throughput, downlink",
+          "measure": "embb.dl_p5_mbps",
+          "unit": "Mbps",
+          "better": "higher",
+          "project_target": 50,
+          "benchmark": { "value": 100, "source": "ITU-R M.2410", "note": "User-experienced data rate: 100 Mbps DL / 50 Mbps UL, defined as the 5th percentile." },
+          "weight": 0.6,
+          "origin": "notes",
+          "why": "Exposes the lower end of user performance. Project target in the notes: >= 50 Mbps DL per UE for 20 simultaneous UEs on a software laptop testbed."
+        },
+        {
+          "id": "embb-throughput-aggregate",
+          "name": "Aggregate downlink throughput of the slice",
+          "measure": "embb.dl_aggregate_mbps",
+          "unit": "Mbps",
+          "better": "higher",
+          "research_target": 500,
+          "benchmark": { "value": 550, "source": "Research papers", "note": "Papers on Open5GS + UERANSIM report 550-900 Mbps." },
+          "weight": 0.4,
+          "origin": "notes",
+          "why": "Research-based target from the notes. Note: 50 Mbps x 20 UEs would need 1000 Mbps, so the two eMBB targets cannot both be met as written."
+        },
+        {
+          "id": "embb-throughput-mean",
+          "name": "Mean user throughput, downlink",
+          "measure": "embb.dl_mean_mbps",
+          "unit": "Mbps",
+          "better": "higher",
+          "weight": 0,
+          "origin": "added",
+          "why": "Reported, not scored: shows how unevenly the slice is shared next to the 5th percentile."
+        }
+      ]
+    },
+    {
+      "name": "mMTC",
+      "ues": 70,
+      "kpis": [
+        {
+          "id": "mmtc-registration-success",
+          "name": "UE registration success rate",
+          "measure": "mmtc.registration_success",
+          "unit": "ratio",
+          "better": "higher",
+          "project_target": 0.99,
+          "benchmark": { "value": null, "source": "3GPP TR 38.913", "note": "No universal fixed numerical target (notes)." },
+          "weight": 0.4,
+          "origin": "notes",
+          "why": "mMTC is about supporting a very large number of devices. Counted from the IoT UEs' own logs at their latest attach: successful initial registrations / (successful + failed)."
+        },
+        {
+          "id": "mmtc-packet-loss",
+          "name": "Report loss (10-byte periodic reports)",
+          "measure": "mmtc.loss_ratio",
+          "unit": "ratio",
+          "better": "lower",
+          "research_target": 0.001,
+          "benchmark": { "value": 0.001, "source": "Research papers", "note": "Papers report 0.1 %." },
+          "weight": 0.4,
+          "origin": "notes",
+          "why": "Research-based target from the notes. Resolvable only with >= 1000 reports per measurement; the report states the resolution."
+        },
+        {
+          "id": "mmtc-report-latency",
+          "name": "Report latency, 99th percentile (one-way, device to data network)",
+          "measure": "mmtc.owd_p99_ms",
+          "unit": "ms",
+          "better": "lower",
+          "project_target": 10000,
+          "benchmark": { "value": 10000, "source": "3GPP TR 38.913", "note": "Latency for infrequent small packets: no worse than 10 s (20-byte uplink packet at 164 dB MCL). Verify the clause before citing." },
+          "weight": 0.2,
+          "origin": "added",
+          "why": "Added: the TR 38.913 KPI that matches ten-byte reports. Trivially met on a lab path; it matters once the network is loaded or scaled."
+        },
+        {
+          "id": "mmtc-devices-reporting",
+          "name": "Devices reporting during the measurement",
+          "measure": "mmtc.devices_reporting",
+          "unit": "devices",
+          "better": "higher",
+          "weight": 0,
+          "origin": "added",
+          "why": "Reported, not scored: how many of the slice's devices were heard from."
+        }
+      ]
+    }
+  ]
+}

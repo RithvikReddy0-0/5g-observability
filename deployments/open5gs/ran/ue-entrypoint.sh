@@ -44,6 +44,7 @@ START_BATCH="${START_BATCH:-10}"
 FIRST_IMSI="${FIRST_IMSI:-208930000000001}"
 STATE=/tmp/ues
 mkdir -p "$STATE" "$RUN"
+rm -f "$STATE/startup"     # /tmp survives a container restart; a stale record would look like this start
 mkdir -p /tmp/UERANSIM.proc-table && chmod 777 /tmp/UERANSIM.proc-table   # see "a third shared thing"
 
 # Slice plan, in IMSI order: <config>:<UEs>:<gateway>:<name>. IMSIs are assigned contiguously
@@ -51,12 +52,27 @@ mkdir -p /tmp/UERANSIM.proc-table && chmod 777 /tmp/UERANSIM.proc-table   # see 
 # the counts must equal O5GS_UES in deployments/slices.env (tools/check_open5gs_slices.py).
 UE_PLAN="${UE_PLAN:-ue-slice-a.yaml:20:10.45.0.1:eMBB ue-slice-b.yaml:10:10.46.0.1:URLLC ue-slice-c.yaml:70:10.47.0.1:mMTC}"
 
+# A measurement run may change the plan without recreating this container — which needs `docker
+# compose`, not always available on this host. scripts/open5gs/scale_test.sh and
+# tools/kpi/run_kpis.py write UE_PLAN= / START_BATCH= lines here, restart the container, and
+# delete the file (and restart again) to restore the plan above.
+if [ -f /tmp/ue-plan.override ]; then
+  # shellcheck disable=SC1091
+  . /tmp/ue-plan.override
+  echo "ue-entrypoint: plan overridden for this run by /tmp/ue-plan.override"
+fi
+
 log() { echo "ue-entrypoint: $(date -u +%H:%M:%S) $*"; }
 
 # Per-slice reachability/latency exporter on :9121, measured from these UEs' own interfaces.
 # Runs here rather than as a sidecar: a sidecar sharing this network namespace is stranded
 # in a dead one when this container restarts. Respawned if it ever exits.
 ( while true; do python3 -u /opt/o5gs-obs/ue_probe_exporter.py; sleep 2; done ) &
+
+# The URLLC and mMTC devices' own traffic (ADR-015): small periodic packets from each UE's own
+# address to its slice's data network, where kpi_collector.py measures latency and loss. It finds
+# the UEs itself and follows them across restarts. Metrics on :9122.
+( while true; do python3 -u /opt/o5gs-obs/traffic_agent.py; sleep 2; done ) &
 
 plan() {   # every UE, one per line: <imsi> <config> <gateway> <slice>
   imsi=$FIRST_IMSI

@@ -37,7 +37,6 @@ ATTACH_TIMEOUT="${ATTACH_TIMEOUT:-600}"
 TS=$(date -u +%Y%m%d-%H%M%SZ)
 OUT=docs/evidence/open5gs-scale; mkdir -p "$OUT"
 LOG="$OUT/scale-$TS.txt"; CSV="$OUT/scale-$TS.csv"
-OVR=/tmp/o5gs-scale-override.yaml
 CP="o5gs-amf o5gs-smf o5gs-ausf o5gs-udm o5gs-udr o5gs-nrf o5gs-scp o5gs-pcf o5gs-mongodb"
 RAN="o5gs-gnb-embb o5gs-gnb-urllc o5gs-gnb-mmtc o5gs-ue o5gs-upf-mmtc o5gs-prometheus"
 EMBB=20; URLLC=10
@@ -47,17 +46,13 @@ prom() { curl -s --get --data-urlencode "query=$1" http://localhost:9091/api/v1/
            | python3 -c "import json,sys; r=json.load(sys.stdin)['data']['result']; print(r[0]['value'][1] if r else '')"; }
 avail_mb() { awk '/MemAvailable/ {print int($2/1024)}' /proc/meminfo; }
 
-# Recreate the UE container with a given plan and batch size, through a compose override so the
-# committed compose file is never edited. <mmtc count> <batch>
+# Restart the UE container with a given plan and batch size. The plan goes into an override file
+# the UE entrypoint reads at start, so this needs neither `docker compose` (not always available on
+# this host) nor any edit to the committed compose file. <mmtc count> <batch>
 ue_with() {
-  cat > "$OVR" <<EOF
-services:
-  ue:
-    environment:
-      UE_PLAN: "ue-slice-a.yaml:$EMBB:10.45.0.1:eMBB ue-slice-b.yaml:$URLLC:10.46.0.1:URLLC ue-slice-c.yaml:$1:10.47.0.1:mMTC"
-      START_BATCH: "$2"
-EOF
-  (cd deployments/open5gs && docker compose -f docker-compose.yaml -f "$OVR" up -d --no-deps --force-recreate ue >/dev/null 2>&1)
+  printf 'UE_PLAN="ue-slice-a.yaml:%s:10.45.0.1:eMBB ue-slice-b.yaml:%s:10.46.0.1:URLLC ue-slice-c.yaml:%s:10.47.0.1:mMTC"\nSTART_BATCH=%s\n' \
+    "$EMBB" "$URLLC" "$1" "$2" | docker exec -i o5gs-ue sh -c 'cat > /tmp/ue-plan.override'
+  docker restart o5gs-ue >/dev/null
 }
 
 # Wait for the UE supervisor's startup record: "<up> <total> <seconds> <batch>".
@@ -97,8 +92,7 @@ restore() {
   say "restore: the standard 100 UEs"
   docker exec o5gs-mongodb mongo open5gs --quiet --eval \
     'print("removed extra subscribers: " + db.subscribers.deleteMany({imsi: {$gt: "208930000000100"}}).deletedCount)'
-  rm -f "$OVR"
-  (cd deployments/open5gs && docker compose up -d --no-deps --force-recreate ue >/dev/null 2>&1)
+  docker exec o5gs-ue rm -f /tmp/ue-plan.override
   bash scripts/open5gs/start_ues.sh 2>&1 | tail -9 | sed 's/^/  /'
 }
 trap restore EXIT

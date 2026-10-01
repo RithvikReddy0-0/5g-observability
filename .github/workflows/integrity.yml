@@ -131,7 +131,7 @@ jobs:
 
       - name: Python tools and exporters compile
         run: |
-          python3 -m py_compile tools/kpi-gate/*.py tools/check_open5gs_slices.py tools/slice-orchestrator/*.py deployments/open5gs/k8s/render.py scripts/open5gs/*.py             deployments/open5gs/observability/*.py             && echo "all Python compiles"
+          python3 -m py_compile tools/kpi-gate/*.py tools/kpi/*.py tools/check_open5gs_slices.py tools/slice-orchestrator/*.py deployments/open5gs/k8s/render.py scripts/open5gs/*.py             deployments/open5gs/observability/*.py             && echo "all Python compiles"
 
   kpi-gate:
     name: KPI gate is defined and effective
@@ -152,6 +152,14 @@ jobs:
           # querying a metric name nobody emits. Three free5GC gates did exactly that until a
           # live run exposed it. This checks the names against the exporters' source.
           python3 tools/kpi-gate/check_metric_names.py
+
+      - name: Phase 2b KPI scorecard definitions and scoring rules
+        run: |
+          # deployments/open5gs/kpi-scorecard.json is the one place a service KPI, its target and
+          # its weight live. Rejects a missing field, a duplicate id, a scored KPI with no target
+          # and per-slice weights that do not sum to 1; then proves the scoring rules on known values.
+          python3 tools/kpi/scorecard.py --check
+          python3 tools/kpi/scorecard.py --self-test
 
       - name: slice orchestrator placement rules
         run: |

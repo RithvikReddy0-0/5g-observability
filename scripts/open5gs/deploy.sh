@@ -41,6 +41,10 @@ DEFS=deployments/open5gs/kpi-gates.json
 CORE="o5gs-mongodb o5gs-nrf o5gs-scp o5gs-ausf o5gs-udm o5gs-udr o5gs-pcf o5gs-bsf o5gs-nssf o5gs-amf o5gs-smf"
 UPFS="o5gs-upf-embb o5gs-upf-urllc o5gs-upf-mmtc"
 RAN="o5gs-dn-embb o5gs-dn-urllc o5gs-dn-mmtc o5gs-gnb-embb o5gs-gnb-urllc o5gs-gnb-mmtc o5gs-ue"
+# Prometheus reads prometheus.yml from a mounted file: a changed scrape config takes effect only on
+# restart, and until ADR-015 added a scrape job nothing here restarted it — the change deployed,
+# passed the gate on the OLD config, and was never scraped.
+OBS="o5gs-prometheus"
 
 say() { echo "== $(date -u +%T) $*"; }
 gate() { python3 tools/kpi-gate/kpi_gate.py --defs "$DEFS" --wait 20; }
@@ -64,7 +68,14 @@ PY
 }
 
 apply() {   # restart everything in dependency order so no NF keeps state from the old config
-  (cd deployments/open5gs && docker compose up -d --remove-orphans 2>&1 | grep -E "Error" )
+  # A candidate that changes a service definition is applied by `docker compose up`. If that
+  # fails, the stack is still the OLD one — gating it would approve a change never deployed.
+  # (It happened: with the compose plugin gone, `compose up` failed unseen, the gate passed on the
+  # old containers, and this script reported DEPLOYED.)
+  if ! (cd deployments/open5gs && docker compose up -d --remove-orphans > /tmp/deploy-compose.txt 2>&1); then
+    sed 's/^/    /' /tmp/deploy-compose.txt | tail -5
+    return 1
+  fi
   # The UPFs are STOPPED while the SMF restarts, not merely restarted after it. A restarted SMF
   # associates over PFCP within a second; restarting the UPFs one by one afterwards left it
   # associated with an outgoing URLLC UPF process for ~20 s, and every URLLC session created in
@@ -73,7 +84,7 @@ apply() {   # restart everything in dependency order so no NF keeps state from t
   docker stop $UPFS >/dev/null 2>&1
   for c in $CORE; do docker restart "$c" >/dev/null 2>&1; done
   docker start $UPFS >/dev/null 2>&1
-  for c in $RAN; do docker restart "$c" >/dev/null 2>&1; done
+  for c in $RAN $OBS; do docker restart "$c" >/dev/null 2>&1; done
   bash scripts/open5gs/start_ues.sh 2>&1 | tail -8 | sed 's/^/  /'
   echo "  waiting 75 s so every gate window holds only post-deploy samples"
   sleep 75
@@ -97,6 +108,11 @@ say "1. validate the candidate (static, the running stack is not touched)"
 if ! validate; then
   echo "DECISION: REJECTED before deployment — static validation failed; the running stack is unchanged"
   exit 1
+fi
+if ! docker compose version >/dev/null 2>&1; then
+  echo "  the docker compose plugin is unavailable here (Docker Desktop's WSL integration provides it)"
+  echo "DECISION: ABORTED — this host cannot apply a candidate right now; the running stack is unchanged"
+  exit 2
 fi
 
 say "2. last known-good"
@@ -122,7 +138,10 @@ changed=$(mkdir -p "$STATE/cmp" && rm -rf "$STATE/cmp"/* && tar -xf "$KG/files.t
 if [ -z "$changed" ]; then echo "  candidate is identical to known-good"; else echo "  candidate differs from known-good:"; echo "$changed"; fi
 
 say "3. apply the candidate"
-apply
+if ! apply; then
+  echo "DECISION: ABORTED — the candidate could not be applied; the gate was not run on a stack that does not have it"
+  exit 2
+fi
 
 say "4. KPI gate on the candidate"
 if gate > /tmp/deploy-gate.txt 2>&1; then

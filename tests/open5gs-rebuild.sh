@@ -21,6 +21,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." >/dev/null 2>&1 && pwd)"
 cd "$REPO_ROOT" || exit 2
 [ "${1:-}" = "--yes" ] || { echo "destructive: re-run with --yes to delete and rebuild the Open5GS stack"; exit 2; }
+# Tearing down without being able to build again would leave no stack at all.
+docker compose version >/dev/null 2>&1 || { echo "the docker compose plugin is unavailable (Docker Desktop's WSL integration provides it); nothing was touched"; exit 2; }
 
 TS=$(date -u +%Y%m%d-%H%M%SZ)
 OUT=docs/evidence/open5gs-rebuild

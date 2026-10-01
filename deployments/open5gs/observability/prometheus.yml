@@ -39,6 +39,17 @@ scrape_configs:
       - targets: ["10.53.0.31:9121"]   # sidecar shares the UE container's network namespace
         labels: { component: ue-probe-exporter }
 
+  # Phase 2b KPIs (ADR-015): the URLLC and mMTC devices' measurement traffic, received in each
+  # slice's data network (one-way latency, loss, active devices), and the agent that sends it.
+  - job_name: kpi-traffic
+    static_configs:
+      - targets: ["10.53.0.52:9130"]
+        labels: { component: kpi-collector }   # the collector labels its own series by slice
+      - targets: ["10.53.0.53:9130"]
+        labels: { component: kpi-collector }
+      - targets: ["10.53.0.31:9122"]
+        labels: { component: traffic-agent }
+
   # Slice orchestrator (measured + executed), a host process reached via the o5gs_net gateway.
   - job_name: slice-orchestrator
     static_configs:

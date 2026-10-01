@@ -235,11 +235,23 @@ for upf in UPFS:
         volumes=[cm_volume("config", "o5gs-config"), cm_volume("obs", "o5gs-obs"),
                  cm_volume("entry", "o5gs-obs", items=["upf-entrypoint.sh"])])
 
-# ---- per-slice data networks (ADR-012); on Kubernetes UE traffic reaches them through NAT
+# ---- per-slice data networks (ADR-012); on Kubernetes UE traffic reaches them through NAT.
+# A data network that runs a KPI collector in compose (ADR-015) runs it here too. The collector
+# identifies devices from the packet, not the source address, so the UPF's NAT does not matter.
 for dn in DNS:
-    headless(dn, [("TCP", 5201)])
-    deployment(dn, {"name": dn, "image": OPEN5GS, "imagePullPolicy": "Never",
-                    "command": ["sleep", "infinity"]})
+    svc = SERVICES[dn]
+    collects = any("observability" in str(v) for v in svc.get("volumes", []))
+    headless(dn, [("TCP", 5201)] + ([("TCP", 9130)] if collects else []))
+    if collects:
+        deployment(dn, {"name": dn, "image": OPEN5GS, "imagePullPolicy": "Never",
+                        "command": ["/bin/sh", "-c",
+                                    "while true; do python3 -u /opt/o5gs-obs/kpi_collector.py; sleep 2; done"],
+                        "env": [{"name": k, "value": str(v)} for k, v in svc.get("environment", {}).items()],
+                        "volumeMounts": [{"name": "obs", "mountPath": "/opt/o5gs-obs"}]},
+                   volumes=[cm_volume("obs", "o5gs-obs")])
+    else:
+        deployment(dn, {"name": dn, "image": OPEN5GS, "imagePullPolicy": "Never",
+                        "command": ["sleep", "infinity"]})
 
 # ---- one gNB per slice (ADR-011)
 for gnb in GNBS:
@@ -257,7 +269,11 @@ for gnb in GNBS:
 
 # ---- the supervised UEs (Phase 2b: 100, per the UE container's UE_PLAN)
 ue_env = {k: str(v) for k, v in SERVICES["ue"]["environment"].items()}
-headless("ue", [("TCP", 9121)])
+# Measurement traffic goes to each slice's data network by Service name, not by compose IP.
+ue_env["TRAFFIC_PROFILES"] = re.sub(r"\b10\.53\.0\.(\d+)\b",
+                                    lambda m: fqdn(IP_TO_NAME["10.53.0.%s" % m.group(1)]),
+                                    ue_env.get("TRAFFIC_PROFILES", ""))
+headless("ue", [("TCP", 9121), ("TCP", 9122)])
 deployment("ue", {
     "name": "ue", "image": UERANSIM, "imagePullPolicy": "Never",
     "command": ["/bin/sh", "/etc/ueransim/ue-entrypoint.sh"],

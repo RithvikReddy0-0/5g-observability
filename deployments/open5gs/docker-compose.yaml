@@ -209,25 +209,33 @@ services:
     networks:
       o5gs: { ipv4_address: 10.53.0.51 }
 
+  # The URLLC and mMTC data networks also run kpi_collector.py (ADR-015): it receives the slice's
+  # measurement traffic from traffic_agent.py in the UE container and serves its KPIs on :9130.
   dn-urllc:
     container_name: o5gs-dn-urllc
     image: o5gs/open5gs:v2.8.0
     restart: unless-stopped
     init: true
     cap_add: [NET_ADMIN]
-    entrypoint: ["/bin/sh", "-c", "ip route replace 10.46.0.0/16 via 10.53.0.8 && exec sleep infinity"]
+    environment: { SLICE: URLLC, MODE: urllc, UDP_PORT: "5400" }
+    volumes:
+      - ./observability:/opt/o5gs-obs:ro
+    entrypoint: ["/bin/sh", "-c", "ip route replace 10.46.0.0/16 via 10.53.0.8 && while true; do python3 -u /opt/o5gs-obs/kpi_collector.py; sleep 2; done"]
     depends_on: [upf-urllc]
     networks:
       o5gs: { ipv4_address: 10.53.0.52 }
 
-  # Where the IoT devices' reports arrive (Track 2's collector runs here).
+  # Where the IoT devices' ten-byte reports arrive.
   dn-mmtc:
     container_name: o5gs-dn-mmtc
     image: o5gs/open5gs:v2.8.0
     restart: unless-stopped
     init: true
     cap_add: [NET_ADMIN]
-    entrypoint: ["/bin/sh", "-c", "ip route replace 10.47.0.0/16 via 10.53.0.9 && exec sleep infinity"]
+    environment: { SLICE: mMTC, MODE: mmtc, UDP_PORT: "5401" }
+    volumes:
+      - ./observability:/opt/o5gs-obs:ro
+    entrypoint: ["/bin/sh", "-c", "ip route replace 10.47.0.0/16 via 10.53.0.9 && while true; do python3 -u /opt/o5gs-obs/kpi_collector.py; sleep 2; done"]
     depends_on: [upf-mmtc]
     networks:
       o5gs: { ipv4_address: 10.53.0.53 }
@@ -295,6 +303,9 @@ services:
       START_BATCH: "10"                        # UEs attaching at once (ADR-014)
       UERANSIM_UDP_BUFFER_BYTES: "8388608"     # ADR-012
       SLICE_POOLS: "10.45.:10.45.0.1:eMBB 10.46.:10.46.0.1:URLLC 10.47.:10.47.0.1:mMTC"
+      # Measurement traffic, <slice>:<pool>:<destination>:<port>:<bytes>:<interval s> (ADR-015).
+      # URLLC 64 B every 20 ms per device; mMTC 10 B every 10 s per device (provisional values).
+      TRAFFIC_PROFILES: "URLLC:10.46.:10.53.0.52:5400:64:0.02 mMTC:10.47.:10.53.0.53:5401:10:10"
     volumes:
       - ./ran:/etc/ueransim:ro
       - ./observability:/opt/o5gs-obs:ro     # ue_probe_exporter.py, served on :9121
