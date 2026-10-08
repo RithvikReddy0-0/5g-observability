@@ -1,0 +1,17 @@
+Feedback controller: the same demand with CONTROL=0 and CONTROL=1
+
+  run                                  static     controlled
+  eMBB admitted                           154             51
+  eMBB refused                              2            243
+  eMBB flows                              154             51
+  eMBB flows met %                      66.23         100.00
+  eMBB delivered (avg Mbps)            176.50          58.52
+  eMBB measured peak                   287.87         215.67
+  eMBB limit range                    500-500         50-500
+  cuts                                      0             12
+  raises                                    0              0
+  URLLC flows met %                    100.00         100.00
+  URLLC probe mean ms                    8.79           5.62
+  p95 ms                                31.34          18.48
+  p99 ms                                77.65          54.95
+  probe loss                             0.00           0.00

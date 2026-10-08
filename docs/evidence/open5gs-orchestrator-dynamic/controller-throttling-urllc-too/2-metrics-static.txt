@@ -1,0 +1,65 @@
+# HELP slice_capacity_mbps Capacity of each slice, from the AMBR provisioned into its subscribers.
+# TYPE slice_capacity_mbps gauge
+slice_capacity_mbps{sst="1",sd="010203",slice="eMBB"} 500
+slice_capacity_mbps{sst="2",sd="112233",slice="URLLC"} 20
+slice_capacity_mbps{sst="3",sd="334455",slice="mMTC"} 10
+# HELP slice_allocated_mbps Bandwidth currently admitted onto each slice by the orchestrator.
+# TYPE slice_allocated_mbps gauge
+slice_allocated_mbps{sst="1",sd="010203",slice="eMBB"} 0.000
+slice_allocated_mbps{sst="2",sd="112233",slice="URLLC"} 0.000
+slice_allocated_mbps{sst="3",sd="334455",slice="mMTC"} 0.000
+# HELP slice_utilization_ratio Allocated divided by capacity, per slice (1.0 = full).
+# TYPE slice_utilization_ratio gauge
+slice_utilization_ratio{sst="1",sd="010203",slice="eMBB"} 0.0000
+slice_utilization_ratio{sst="2",sd="112233",slice="URLLC"} 0.0000
+slice_utilization_ratio{sst="3",sd="334455",slice="mMTC"} 0.0000
+# HELP slice_active_flows Number of admitted demands currently holding capacity on each slice.
+# TYPE slice_active_flows gauge
+slice_active_flows{sst="1",sd="010203",slice="eMBB"} 0
+slice_active_flows{sst="2",sd="112233",slice="URLLC"} 0
+slice_active_flows{sst="3",sd="334455",slice="mMTC"} 0
+# HELP slice_admission_limit_mbps What each slice admits up to now: the feedback controller's limit, at most the capacity.
+# TYPE slice_admission_limit_mbps gauge
+slice_admission_limit_mbps{sst="1",sd="010203",slice="eMBB"} 500.00
+slice_admission_limit_mbps{sst="2",sd="112233",slice="URLLC"} 20.00
+slice_admission_limit_mbps{sst="3",sd="334455",slice="mMTC"} 10.00
+# HELP slice_decisions_by_priority_total Demands by slice, the requester's ARP priority level and decision (admitted, refused, preempted).
+# TYPE slice_decisions_by_priority_total counter
+slice_decisions_by_priority_total{slice="URLLC",arp="1",decision="admitted"} 9
+slice_decisions_by_priority_total{slice="URLLC",arp="2",decision="admitted"} 61
+slice_decisions_by_priority_total{slice="eMBB",arp="8",decision="admitted"} 208
+# HELP slice_measured_mbps Traffic each slice's UPF actually carried over the last 15 s, both directions.
+# TYPE slice_measured_mbps gauge
+slice_measured_mbps{sst="1",sd="010203",slice="eMBB"} 11.261
+slice_measured_mbps{sst="2",sd="112233",slice="URLLC"} 0.853
+slice_measured_mbps{sst="3",sd="334455",slice="mMTC"} 0.030
+# HELP slice_measurement_ok 1 when the last measured-load query to Prometheus succeeded.
+# TYPE slice_measurement_ok gauge
+slice_measurement_ok 1
+# HELP slice_admitted_total Traffic demands admitted, by slice and traffic class.
+# TYPE slice_admitted_total counter
+slice_admitted_total{sst_sd="1/010203",traffic_class="file"} 96
+slice_admitted_total{sst_sd="1/010203",traffic_class="video"} 112
+slice_admitted_total{sst_sd="2/112233",traffic_class="blog"} 31
+slice_admitted_total{sst_sd="2/112233",traffic_class="control"} 39
+# HELP slice_rejected_total Traffic demands refused, by reason (capacity, latency, unknown_class, ...).
+# TYPE slice_rejected_total counter
+# HELP slice_preempted_total Admitted demands stopped to make room for a higher-priority one (ARP pre-emption).
+# TYPE slice_preempted_total counter
+# HELP slice_flows_completed_total Executed flows by outcome: met = >=95% of the admitted rate delivered with <=2% loss.
+# TYPE slice_flows_completed_total counter
+slice_flows_completed_total{sst_sd="1/010203",traffic_class="file",outcome="met"} 9
+slice_flows_completed_total{sst_sd="1/010203",traffic_class="file",outcome="short"} 87
+slice_flows_completed_total{sst_sd="1/010203",traffic_class="video",outcome="met"} 22
+slice_flows_completed_total{sst_sd="1/010203",traffic_class="video",outcome="short"} 90
+slice_flows_completed_total{sst_sd="2/112233",traffic_class="blog",outcome="met"} 31
+slice_flows_completed_total{sst_sd="2/112233",traffic_class="control",outcome="met"} 39
+# HELP slice_flow_start_failed_total Admitted demands that could not be started (no device session on the slice).
+# TYPE slice_flow_start_failed_total counter
+# HELP slice_flow_delivery_ratio Mean delivered/admitted rate over the last 200 executed flows, per slice.
+# TYPE slice_flow_delivery_ratio gauge
+slice_flow_delivery_ratio{slice="eMBB"} 0.9488
+slice_flow_delivery_ratio{slice="URLLC"} 0.9999
+# HELP slice_orchestrator_up 1 when the orchestrator served a scrape.
+# TYPE slice_orchestrator_up gauge
+slice_orchestrator_up 1

@@ -1,0 +1,168 @@
+== experiment 3: how many slices, and how much capacity
+
+-- demand observed by the orchestrator over the last 180s (GET /plan)
+{
+  "window_s": 180.0,
+  "observed_demand": [
+    {
+      "class": "blog",
+      "mbps": 4.778
+    },
+    {
+      "class": "control",
+      "mbps": 6.0
+    },
+    {
+      "class": "file",
+      "mbps": 191.667
+    },
+    {
+      "class": "video",
+      "mbps": 98.667
+    }
+  ],
+  "slices_needed": 2,
+  "headroom": 1.25,
+  "slices": [
+    {
+      "slice": "eMBB",
+      "snssai": "1/010203",
+      "needed": true,
+      "demand_mbps": 290.33,
+      "required_mbps": 362.92,
+      "classes": {
+        "file": 191.667,
+        "video": 98.667
+      },
+      "policy_capacity_mbps": 500.0,
+      "current_limit_mbps": 50.0,
+      "fits_policy": true,
+      "fits_now": false
+    },
+    {
+      "slice": "URLLC",
+      "snssai": "2/112233",
+      "needed": true,
+      "demand_mbps": 10.78,
+      "required_mbps": 13.47,
+      "classes": {
+        "blog": 4.778,
+        "control": 6.0
+      },
+      "policy_capacity_mbps": 20.0,
+      "current_limit_mbps": 20.0,
+      "fits_policy": true,
+      "fits_now": true
+    },
+    {
+      "slice": "mMTC",
+      "snssai": "3/334455",
+      "needed": false,
+      "demand_mbps": 0.0,
+      "required_mbps": 0.0,
+      "classes": {},
+      "policy_capacity_mbps": 10.0,
+      "current_limit_mbps": 10.0,
+      "fits_policy": true,
+      "fits_now": true
+    }
+  ],
+  "unservable": []
+}
+-- the Phase 2b device mix: 10 control, 20 video, 70 sensor (POST /plan)
+{
+  "slices_needed": 3,
+  "headroom": 1.25,
+  "slices": [
+    {
+      "slice": "eMBB",
+      "snssai": "1/010203",
+      "needed": true,
+      "demand_mbps": 160.0,
+      "required_mbps": 200.0,
+      "classes": {
+        "video": 160.0
+      },
+      "policy_capacity_mbps": 500.0,
+      "current_limit_mbps": 50.0,
+      "fits_policy": true,
+      "fits_now": false
+    },
+    {
+      "slice": "URLLC",
+      "snssai": "2/112233",
+      "needed": true,
+      "demand_mbps": 10.0,
+      "required_mbps": 12.5,
+      "classes": {
+        "control": 10.0
+      },
+      "policy_capacity_mbps": 20.0,
+      "current_limit_mbps": 20.0,
+      "fits_policy": true,
+      "fits_now": true
+    },
+    {
+      "slice": "mMTC",
+      "snssai": "3/334455",
+      "needed": true,
+      "demand_mbps": 0.7,
+      "required_mbps": 0.88,
+      "classes": {
+        "sensor": 0.7
+      },
+      "policy_capacity_mbps": 10.0,
+      "current_limit_mbps": 10.0,
+      "fits_policy": true,
+      "fits_now": true
+    }
+  ],
+  "unservable": []
+}
+-- delay-tolerant demand only: 30 video, 10 file
+{
+  "slices_needed": 1,
+  "headroom": 1.25,
+  "slices": [
+    {
+      "slice": "eMBB",
+      "snssai": "1/010203",
+      "needed": true,
+      "demand_mbps": 390.0,
+      "required_mbps": 487.5,
+      "classes": {
+        "video": 240.0,
+        "file": 150.0
+      },
+      "policy_capacity_mbps": 500.0,
+      "current_limit_mbps": 50.0,
+      "fits_policy": true,
+      "fits_now": false
+    },
+    {
+      "slice": "URLLC",
+      "snssai": "2/112233",
+      "needed": false,
+      "demand_mbps": 0.0,
+      "required_mbps": 0.0,
+      "classes": {},
+      "policy_capacity_mbps": 20.0,
+      "current_limit_mbps": 20.0,
+      "fits_policy": true,
+      "fits_now": true
+    },
+    {
+      "slice": "mMTC",
+      "snssai": "3/334455",
+      "needed": false,
+      "demand_mbps": 0.0,
+      "required_mbps": 0.0,
+      "classes": {},
+      "policy_capacity_mbps": 10.0,
+      "current_limit_mbps": 10.0,
+      "fits_policy": true,
+      "fits_now": true
+    }
+  ],
+  "unservable": []
+}

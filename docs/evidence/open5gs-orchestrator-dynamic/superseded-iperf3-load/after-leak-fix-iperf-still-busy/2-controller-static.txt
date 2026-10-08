@@ -1,0 +1,1 @@
+== controller run 'static' (CONTROL=0): 180s at 3 demands/s, mix video:3 file:3 blog:1 control:1

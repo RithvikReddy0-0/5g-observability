@@ -1,0 +1,3 @@
+idle         mix=idle                     URLLC probe mean  1.70  p95   2.87  p99   5.39 ms  loss 0.0000  load 3.62
+urllc-only   mix=control:1 blog:1         URLLC probe mean  4.93  p95  16.18  p99  44.12 ms  loss 0.0000  load 23.54
+embb-only    mix=video:1 file:1           URLLC probe mean  2.99  p95  10.61  p99  25.37 ms  loss 0.0000  load 53.77

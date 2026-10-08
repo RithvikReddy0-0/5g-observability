@@ -1,0 +1,58 @@
+== experiment 1: priority inside the URLLC slice (ARP tiers)
+   critical devices ...021-023: ARP 1, may pre-empt, not pre-emptable
+   standard devices ...024-030: ARP 2, may not pre-empt, pre-emptable
+   each control demand is 1 Mbps for 40 s; URLLC admits 20 Mbps
+
+-- the standard devices fill the slice
+ADMIT  024 ARP 2 control -> URLLC  1.0/20 Mbps
+ADMIT  025 ARP 2 control -> URLLC  2.0/20 Mbps
+ADMIT  026 ARP 2 control -> URLLC  3.0/20 Mbps
+ADMIT  027 ARP 2 control -> URLLC  4.0/20 Mbps
+ADMIT  028 ARP 2 control -> URLLC  5.0/20 Mbps
+ADMIT  029 ARP 2 control -> URLLC  6.0/20 Mbps
+ADMIT  030 ARP 2 control -> URLLC  7.0/20 Mbps
+ADMIT  024 ARP 2 control -> URLLC  8.0/20 Mbps
+ADMIT  025 ARP 2 control -> URLLC  9.0/20 Mbps
+ADMIT  026 ARP 2 control -> URLLC  10.0/20 Mbps
+ADMIT  027 ARP 2 control -> URLLC  11.0/20 Mbps
+ADMIT  028 ARP 2 control -> URLLC  12.0/20 Mbps
+ADMIT  029 ARP 2 control -> URLLC  13.0/20 Mbps
+ADMIT  030 ARP 2 control -> URLLC  14.0/20 Mbps
+ADMIT  024 ARP 2 control -> URLLC  15.0/20 Mbps
+ADMIT  025 ARP 2 control -> URLLC  16.0/20 Mbps
+ADMIT  026 ARP 2 control -> URLLC  17.0/20 Mbps
+ADMIT  027 ARP 2 control -> URLLC  18.0/20 Mbps
+ADMIT  028 ARP 2 control -> URLLC  19.0/20 Mbps
+ADMIT  029 ARP 2 control -> URLLC  20.0/20 Mbps
+
+-- one more standard demand (an equal priority cannot pre-empt)
+REFUSE 027 control  slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 0.4, policy 20), control needs 1.0
+
+-- critical demands
+ADMIT  021 ARP 1 control -> URLLC  20.0/20 Mbps  pre-empted: control ARP 2
+ADMIT  022 ARP 1 control -> URLLC  20.0/20 Mbps  pre-empted: control ARP 2
+ADMIT  023 ARP 1 control -> URLLC  20.0/20 Mbps  pre-empted: control ARP 2
+ADMIT  021 ARP 1 control -> URLLC  20.0/20 Mbps  pre-empted: control ARP 2
+ADMIT  022 ARP 1 control -> URLLC  20.0/20 Mbps  pre-empted: control ARP 2
+
+-- a standard demand again
+REFUSE 025 control  slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 0.4, policy 20), control needs 1.0
+
+-- IoT devices: sensor reports go to mMTC
+ADMIT  031 ARP 12 sensor  -> mMTC  0.0/10 Mbps
+ADMIT  055 ARP 12 sensor  -> mMTC  0.0/10 Mbps
+ADMIT  100 ARP 12 sensor  -> mMTC  0.0/10 Mbps
+
+--- every executed flow, by requester ARP ---
+  URLLC  ARP 1   met 5
+  URLLC  ARP 2   met 15  preempted 5
+  mMTC   ARP 12  met 3
+  pre-empted flows delivered before being stopped: 0.00, 0.01, 0.01, 0.02, 0.01
+
+--- decisions by priority (orchestrator metrics) ---
+  slice_decisions_by_priority_total{slice="URLLC",arp="1",decision="admitted"} 5
+  slice_decisions_by_priority_total{slice="URLLC",arp="2",decision="admitted"} 20
+  slice_decisions_by_priority_total{slice="URLLC",arp="2",decision="preempted"} 5
+  slice_decisions_by_priority_total{slice="URLLC",arp="2",decision="refused"} 2
+  slice_decisions_by_priority_total{slice="mMTC",arp="12",decision="admitted"} 3
+  slice_preempted_total{sst_sd="2/112233",traffic_class="control"} 5

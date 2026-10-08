@@ -1,0 +1,8 @@
+date_utc: 2026-10-08T14:31:05Z
+git: b81d0e6 (working tree modified)
+controller_run_seconds: 180
+demands_per_second: 3
+mix: video:3 file:3 blog:1 control:1
+ue_sessions: 100
+host_load: 6.47 17.25 18.82
+free5gc_running: 13 containers (left up, as in the KPI baseline)

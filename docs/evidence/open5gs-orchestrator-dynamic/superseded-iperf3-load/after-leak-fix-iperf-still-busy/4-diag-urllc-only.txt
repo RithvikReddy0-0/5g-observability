@@ -1,0 +1,249 @@
+driving 30 real subscribers at ~3 demands/s against http://localhost:9111
+traffic mix: control:1 blog:1
+
+  ADMIT  control  0012 -> URLLC  (sst 2/112233)  1.0/20 Mbps  measured 0.4  flow on 10.46.0.5
+  ADMIT  blog     0012 -> URLLC  (sst 2/112233)  2.0/20 Mbps  measured 0.4  flow on 10.46.0.8
+  ADMIT  control  0002 -> URLLC  (sst 2/112233)  3.0/20 Mbps  measured 0.4  flow on 10.46.0.3
+  ADMIT  blog     0003 -> URLLC  (sst 2/112233)  4.0/20 Mbps  measured 0.4  flow on 10.46.0.6
+  ADMIT  control  0002 -> URLLC  (sst 2/112233)  5.0/20 Mbps  measured 0.4  flow on 10.46.0.9
+  ADMIT  control  0018 -> URLLC  (sst 2/112233)  6.0/20 Mbps  measured 0.4  flow on 10.46.0.7
+  ADMIT  blog     0013 -> URLLC  (sst 2/112233)  7.0/20 Mbps  measured 0.4  flow on 10.46.0.2
+  ADMIT  blog     0025 -> URLLC  (sst 2/112233)  8.0/20 Mbps  measured 0.4  flow on 10.46.0.4
+  ADMIT  control  0020 -> URLLC  (sst 2/112233)  9.0/20 Mbps  measured 0.4  flow on 10.46.0.11
+  ADMIT  blog     0014 -> URLLC  (sst 2/112233)  10.0/20 Mbps  measured 0.4  flow on 10.46.0.10
+  ADMIT  blog     0021 -> URLLC  (sst 2/112233)  11.0/20 Mbps  measured 0.4  flow on 10.46.0.3
+  ADMIT  blog     0007 -> URLLC  (sst 2/112233)  12.0/20 Mbps  measured 0.4  flow on 10.46.0.7
+  ADMIT  blog     0017 -> URLLC  (sst 2/112233)  13.0/20 Mbps  measured 2.1  flow on 10.46.0.4
+  ADMIT  control  0025 -> URLLC  (sst 2/112233)  14.0/20 Mbps  measured 2.1  flow on 10.46.0.10
+  ADMIT  blog     0012 -> URLLC  (sst 2/112233)  15.0/20 Mbps  measured 2.1  flow on 10.46.0.2
+  ADMIT  control  0008 -> URLLC  (sst 2/112233)  16.0/20 Mbps  measured 2.1  flow on 10.46.0.9
+  ADMIT  control  0016 -> URLLC  (sst 2/112233)  17.0/20 Mbps  measured 7.8  flow on 10.46.0.11
+  ADMIT  blog     0005 -> URLLC  (sst 2/112233)  18.0/20 Mbps  measured 7.8  flow on 10.46.0.6
+  ADMIT  control  0025 -> URLLC  (sst 2/112233)  19.0/20 Mbps  measured 7.8  flow on 10.46.0.8
+  ADMIT  blog     0025 -> URLLC  (sst 2/112233)  20.0/20 Mbps  measured 7.8  flow on 10.46.0.5
+  REFUSE control  0030 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 7.8, policy 20), control needs 1.0
+  REFUSE control  0005 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 7.8, policy 20), control needs 1.0
+  REFUSE control  0001 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 7.8, policy 20), control needs 1.0
+  REFUSE blog     0030 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 7.8, policy 20), blog needs 1.0
+  REFUSE control  0001 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 7.8, policy 20), control needs 1.0
+  REFUSE control  0025 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 7.8, policy 20), control needs 1.0
+  REFUSE control  0013 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 7.8, policy 20), control needs 1.0
+  REFUSE control  0020 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 7.8, policy 20), control needs 1.0
+  REFUSE control  0002 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 13.1, policy 20), control needs 1.0
+  REFUSE blog     0020 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 13.1, policy 20), blog needs 1.0
+  REFUSE control  0016 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 13.1, policy 20), control needs 1.0
+  ADMIT  blog     0021 -> URLLC  (sst 2/112233)  20.0/20 Mbps  measured 13.1  flow on 10.46.0.3  PRE-EMPTED blog (ARP 2)
+  REFUSE control  0009 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 13.1, policy 20), control needs 1.0
+  REFUSE control  0024 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 13.1, policy 20), control needs 1.0
+  REFUSE blog     0015 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 13.1, policy 20), blog needs 1.0
+  REFUSE control  0024 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 13.1, policy 20), control needs 1.0
+  REFUSE control  0026 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 13.1, policy 20), control needs 1.0
+  REFUSE blog     0005 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 13.1, policy 20), blog needs 1.0
+  REFUSE control  0003 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 13.1, policy 20), control needs 1.0
+  ADMIT  control  0022 -> URLLC  (sst 2/112233)  20.0/20 Mbps  measured 13.1  flow on 10.46.0.5  PRE-EMPTED control (ARP 2)
+  REFUSE blog     0030 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 13.1, policy 20), blog needs 1.0
+  REFUSE blog     0015 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 13.1, policy 20), blog needs 1.0
+  REFUSE blog     0008 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 13.1, policy 20), blog needs 1.0
+  REFUSE blog     0029 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 13.1, policy 20), blog needs 1.0
+  ADMIT  control  0023 -> URLLC  (sst 2/112233)  20.0/20 Mbps  measured 16.8  flow on 10.46.0.8  PRE-EMPTED blog (ARP 2)
+  ADMIT  control  0010 -> URLLC  (sst 2/112233)  19.0/20 Mbps  measured 16.8  flow on 10.46.0.5
+  ADMIT  control  0010 -> URLLC  (sst 2/112233)  18.0/20 Mbps  measured 16.8  flow on 10.46.0.6
+  ADMIT  control  0013 -> URLLC  (sst 2/112233)  18.0/20 Mbps  measured 16.8  flow on 10.46.0.6
+  ADMIT  blog     0005 -> URLLC  (sst 2/112233)  18.0/20 Mbps  measured 16.8  flow on 10.46.0.7
+  ADMIT  control  0013 -> URLLC  (sst 2/112233)  18.0/20 Mbps  measured 16.4  flow on 10.46.0.8
+  ADMIT  blog     0010 -> URLLC  (sst 2/112233)  18.0/20 Mbps  measured 16.4  flow on 10.46.0.9
+  ADMIT  blog     0017 -> URLLC  (sst 2/112233)  18.0/20 Mbps  measured 16.4  flow on 10.46.0.11
+  ADMIT  control  0016 -> URLLC  (sst 2/112233)  18.0/20 Mbps  measured 16.4  flow on 10.46.0.2
+  ADMIT  control  0019 -> URLLC  (sst 2/112233)  19.0/20 Mbps  measured 16.4  flow on 10.46.0.10
+  REFUSE control  0013 -> slice 2/112233 (URLLC) full: 19.3/20.0 Mbps in use (admitted 18.0, measured 19.3, policy 20), control needs 1.0
+  REFUSE blog     0018 -> slice 2/112233 (URLLC) full: 19.3/20.0 Mbps in use (admitted 17.0, measured 19.3, policy 20), blog needs 1.0
+  REFUSE control  0027 -> slice 2/112233 (URLLC) full: 19.3/20.0 Mbps in use (admitted 17.0, measured 19.3, policy 20), control needs 1.0
+  REFUSE blog     0002 -> slice 2/112233 (URLLC) full: 19.3/20.0 Mbps in use (admitted 17.0, measured 19.3, policy 20), blog needs 1.0
+  REFUSE control  0012 -> slice 2/112233 (URLLC) full: 19.3/20.0 Mbps in use (admitted 16.0, measured 19.3, policy 20), control needs 1.0
+  ADMIT  blog     0023 -> URLLC  (sst 2/112233)  16.0/20 Mbps  measured 19.2  flow on 10.46.0.4  PRE-EMPTED control (ARP 2)
+  REFUSE blog     0025 -> slice 2/112233 (URLLC) full: 19.3/20.0 Mbps in use (admitted 15.0, measured 19.3, policy 20), blog needs 1.0
+  REFUSE blog     0020 -> slice 2/112233 (URLLC) full: 19.3/20.0 Mbps in use (admitted 14.0, measured 19.3, policy 20), blog needs 1.0
+  ADMIT  blog     0007 -> URLLC  (sst 2/112233)  14.0/20 Mbps  measured 17.3  flow on 10.46.0.10
+  ADMIT  blog     0003 -> URLLC  (sst 2/112233)  14.0/20 Mbps  measured 17.3  flow on 10.46.0.4
+  ADMIT  blog     0007 -> URLLC  (sst 2/112233)  15.0/20 Mbps  measured 17.3  flow on 10.46.0.9
+  ADMIT  control  0029 -> URLLC  (sst 2/112233)  16.0/20 Mbps  measured 17.3  flow on 10.46.0.7
+  ADMIT  control  0030 -> URLLC  (sst 2/112233)  17.0/20 Mbps  measured 17.3  flow on 10.46.0.10
+  ADMIT  control  0015 -> URLLC  (sst 2/112233)  18.0/20 Mbps  measured 17.3  flow on 10.46.0.3
+  ADMIT  blog     0013 -> URLLC  (sst 2/112233)  19.0/20 Mbps  measured 17.3  flow on 10.46.0.2
+  ADMIT  control  0017 -> URLLC  (sst 2/112233)  20.0/20 Mbps  measured 17.3  flow on 10.46.0.11
+  ADMIT  blog     0022 -> URLLC  (sst 2/112233)  20.0/20 Mbps  measured 17.3  flow on 10.46.0.10  PRE-EMPTED control (ARP 2)
+  REFUSE control  0026 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 17.3, policy 20), control needs 1.0
+  REFUSE blog     0029 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 17.3, policy 20), blog needs 1.0
+  ADMIT  control  0008 -> URLLC  (sst 2/112233)  20.0/20 Mbps  measured 15.8  flow on 10.46.0.3
+  REFUSE control  0012 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 15.8, policy 20), control needs 1.0
+  REFUSE control  0013 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 15.8, policy 20), control needs 1.0
+  REFUSE control  0016 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 15.8, policy 20), control needs 1.0
+  REFUSE control  0014 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 15.8, policy 20), control needs 1.0
+  REFUSE blog     0024 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 15.8, policy 20), blog needs 1.0
+  REFUSE blog     0002 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 15.8, policy 20), blog needs 1.0
+  REFUSE blog     0003 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 15.8, policy 20), blog needs 1.0
+  REFUSE control  0005 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 15.8, policy 20), control needs 1.0
+  ADMIT  blog     0012 -> URLLC  (sst 2/112233)  20.0/20 Mbps  measured 17.5  flow on 10.46.0.5
+  ADMIT  control  0023 -> URLLC  (sst 2/112233)  20.0/20 Mbps  measured 17.5  flow on 10.46.0.11  PRE-EMPTED blog (ARP 2)
+  REFUSE blog     0004 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 17.5, policy 20), blog needs 1.0
+  REFUSE blog     0020 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 17.5, policy 20), blog needs 1.0
+  ADMIT  blog     0007 -> URLLC  (sst 2/112233)  20.0/20 Mbps  measured 17.5  flow on 10.46.0.5
+  ADMIT  control  0023 -> URLLC  (sst 2/112233)  20.0/20 Mbps  measured 17.5  flow on 10.46.0.8
+  ADMIT  blog     0028 -> URLLC  (sst 2/112233)  20.0/20 Mbps  measured 17.5  flow on 10.46.0.5
+  ADMIT  blog     0015 -> URLLC  (sst 2/112233)  20.0/20 Mbps  measured 17.5  flow on 10.46.0.6
+  ADMIT  control  0018 -> URLLC  (sst 2/112233)  20.0/20 Mbps  measured 17.5  flow on 10.46.0.6
+  ADMIT  control  0015 -> URLLC  (sst 2/112233)  20.0/20 Mbps  measured 17.5  flow on 10.46.0.8
+  ADMIT  control  0015 -> URLLC  (sst 2/112233)  20.0/20 Mbps  measured 17.5  flow on 10.46.0.7
+  REFUSE blog     0010 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 19.7, policy 20), blog needs 1.0
+  REFUSE blog     0008 -> slice 2/112233 (URLLC) full: 19.7/20.0 Mbps in use (admitted 19.0, measured 19.7, policy 20), blog needs 1.0
+  REFUSE control  0007 -> slice 2/112233 (URLLC) full: 19.7/20.0 Mbps in use (admitted 19.0, measured 19.7, policy 20), control needs 1.0
+  REFUSE blog     0029 -> slice 2/112233 (URLLC) full: 19.7/20.0 Mbps in use (admitted 19.0, measured 19.7, policy 20), blog needs 1.0
+  REFUSE control  0027 -> slice 2/112233 (URLLC) full: 19.5/20.0 Mbps in use (admitted 18.0, measured 19.5, policy 20), control needs 1.0
+  REFUSE control  0028 -> slice 2/112233 (URLLC) full: 19.5/20.0 Mbps in use (admitted 18.0, measured 19.5, policy 20), control needs 1.0
+  REFUSE blog     0014 -> slice 2/112233 (URLLC) full: 19.5/20.0 Mbps in use (admitted 18.0, measured 19.5, policy 20), blog needs 1.0
+  REFUSE blog     0025 -> slice 2/112233 (URLLC) full: 19.5/20.0 Mbps in use (admitted 18.0, measured 19.5, policy 20), blog needs 1.0
+  REFUSE blog     0027 -> slice 2/112233 (URLLC) full: 19.5/20.0 Mbps in use (admitted 18.0, measured 19.5, policy 20), blog needs 1.0
+  REFUSE blog     0020 -> slice 2/112233 (URLLC) full: 19.5/20.0 Mbps in use (admitted 18.0, measured 19.5, policy 20), blog needs 1.0
+  REFUSE control  0026 -> slice 2/112233 (URLLC) full: 19.5/20.0 Mbps in use (admitted 18.0, measured 19.5, policy 20), control needs 1.0
+  REFUSE blog     0008 -> slice 2/112233 (URLLC) full: 19.5/20.0 Mbps in use (admitted 17.0, measured 19.5, policy 20), blog needs 1.0
+  REFUSE control  0007 -> slice 2/112233 (URLLC) full: 19.5/20.0 Mbps in use (admitted 17.0, measured 19.5, policy 20), control needs 1.0
+  ADMIT  control  0005 -> URLLC  (sst 2/112233)  18.0/20 Mbps  measured 15.9  flow on 10.46.0.2
+  ADMIT  blog     0013 -> URLLC  (sst 2/112233)  18.0/20 Mbps  measured 15.9  flow on 10.46.0.4
+  ADMIT  blog     0027 -> URLLC  (sst 2/112233)  18.0/20 Mbps  measured 15.9  flow on 10.46.0.11
+  ADMIT  blog     0014 -> URLLC  (sst 2/112233)  18.0/20 Mbps  measured 15.9  flow on 10.46.0.9
+  ADMIT  blog     0023 -> URLLC  (sst 2/112233)  19.0/20 Mbps  measured 15.9  flow on 10.46.0.4
+  ADMIT  blog     0003 -> URLLC  (sst 2/112233)  19.0/20 Mbps  measured 13.4  flow on 10.46.0.9
+  ADMIT  control  0006 -> URLLC  (sst 2/112233)  18.0/20 Mbps  measured 13.4  flow on 10.46.0.3
+  ADMIT  blog     0011 -> URLLC  (sst 2/112233)  19.0/20 Mbps  measured 13.4  flow on 10.46.0.10
+  ADMIT  blog     0019 -> URLLC  (sst 2/112233)  19.0/20 Mbps  measured 13.4  flow on 10.46.0.2
+  ADMIT  blog     0021 -> URLLC  (sst 2/112233)  20.0/20 Mbps  measured 14.9  flow on 10.46.0.7
+  ADMIT  control  0001 -> URLLC  (sst 2/112233)  20.0/20 Mbps  measured 14.9  flow on 10.46.0.10
+  ADMIT  control  0025 -> URLLC  (sst 2/112233)  20.0/20 Mbps  measured 14.9  flow on 10.46.0.3
+  REFUSE control  0011 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 14.9, policy 20), control needs 1.0
+  REFUSE blog     0027 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 14.9, policy 20), blog needs 1.0
+  REFUSE blog     0024 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 14.9, policy 20), blog needs 1.0
+  REFUSE blog     0003 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 14.9, policy 20), blog needs 1.0
+  REFUSE blog     0005 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 17.6, policy 20), blog needs 1.0
+  REFUSE blog     0012 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 17.6, policy 20), blog needs 1.0
+  REFUSE control  0002 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 17.6, policy 20), control needs 1.0
+  REFUSE control  0013 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 17.6, policy 20), control needs 1.0
+  REFUSE blog     0010 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 17.6, policy 20), blog needs 1.0
+  REFUSE control  0011 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 17.6, policy 20), control needs 1.0
+  REFUSE control  0008 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 17.6, policy 20), control needs 1.0
+  REFUSE blog     0016 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 17.6, policy 20), blog needs 1.0
+  REFUSE blog     0009 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 17.6, policy 20), blog needs 1.0
+  ADMIT  control  0030 -> URLLC  (sst 2/112233)  20.0/20 Mbps  measured 17.6  flow on 10.46.0.11
+  ADMIT  control  0015 -> URLLC  (sst 2/112233)  20.0/20 Mbps  measured 17.6  flow on 10.46.0.5
+  ADMIT  control  0011 -> URLLC  (sst 2/112233)  20.0/20 Mbps  measured 17.6  flow on 10.46.0.8
+  ADMIT  blog     0001 -> URLLC  (sst 2/112233)  20.0/20 Mbps  measured 17.6  flow on 10.46.0.5
+  ADMIT  blog     0009 -> URLLC  (sst 2/112233)  20.0/20 Mbps  measured 17.6  flow on 10.46.0.6
+  REFUSE control  0014 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 17.6, policy 20), control needs 1.0
+  ADMIT  control  0012 -> URLLC  (sst 2/112233)  20.0/20 Mbps  measured 19.3  flow on 10.46.0.6
+  REFUSE blog     0001 -> slice 2/112233 (URLLC) full: 19.3/20.0 Mbps in use (admitted 19.0, measured 19.3, policy 20), blog needs 1.0
+  REFUSE blog     0011 -> slice 2/112233 (URLLC) full: 19.3/20.0 Mbps in use (admitted 19.0, measured 19.3, policy 20), blog needs 1.0
+  REFUSE control  0016 -> slice 2/112233 (URLLC) full: 19.3/20.0 Mbps in use (admitted 19.0, measured 19.3, policy 20), control needs 1.0
+  REFUSE blog     0001 -> slice 2/112233 (URLLC) full: 19.3/20.0 Mbps in use (admitted 18.0, measured 19.3, policy 20), blog needs 1.0
+  REFUSE control  0016 -> slice 2/112233 (URLLC) full: 19.3/20.0 Mbps in use (admitted 18.0, measured 19.3, policy 20), control needs 1.0
+  REFUSE control  0010 -> slice 2/112233 (URLLC) full: 19.3/20.0 Mbps in use (admitted 18.0, measured 19.3, policy 20), control needs 1.0
+  REFUSE blog     0011 -> slice 2/112233 (URLLC) full: 19.3/20.0 Mbps in use (admitted 18.0, measured 19.3, policy 20), blog needs 1.0
+  REFUSE control  0030 -> slice 2/112233 (URLLC) full: 19.3/20.0 Mbps in use (admitted 18.0, measured 19.3, policy 20), control needs 1.0
+  REFUSE blog     0005 -> slice 2/112233 (URLLC) full: 19.3/20.0 Mbps in use (admitted 18.0, measured 19.3, policy 20), blog needs 1.0
+  REFUSE control  0027 -> slice 2/112233 (URLLC) full: 19.3/20.0 Mbps in use (admitted 18.0, measured 19.3, policy 20), control needs 1.0
+  REFUSE control  0006 -> slice 2/112233 (URLLC) full: 19.3/20.0 Mbps in use (admitted 18.0, measured 19.3, policy 20), control needs 1.0
+  ADMIT  blog     0021 -> URLLC  (sst 2/112233)  18.0/20 Mbps  measured 19.3  flow on 10.46.0.8  PRE-EMPTED control (ARP 2)
+  REFUSE blog     0025 -> slice 2/112233 (URLLC) full: 19.3/20.0 Mbps in use (admitted 18.0, measured 19.3, policy 20), blog needs 1.0
+  REFUSE blog     0029 -> slice 2/112233 (URLLC) full: 19.3/20.0 Mbps in use (admitted 18.0, measured 19.3, policy 20), blog needs 1.0
+  REFUSE control  0020 -> slice 2/112233 (URLLC) full: 19.3/20.0 Mbps in use (admitted 18.0, measured 19.3, policy 20), control needs 1.0
+  REFUSE blog     0014 -> slice 2/112233 (URLLC) full: 19.3/20.0 Mbps in use (admitted 17.0, measured 19.3, policy 20), blog needs 1.0
+  REFUSE control  0025 -> slice 2/112233 (URLLC) full: 19.3/20.0 Mbps in use (admitted 16.0, measured 19.3, policy 20), control needs 1.0
+  REFUSE blog     0007 -> slice 2/112233 (URLLC) full: 19.5/20.0 Mbps in use (admitted 16.0, measured 19.5, policy 20), blog needs 1.0
+  REFUSE blog     0027 -> slice 2/112233 (URLLC) full: 19.5/20.0 Mbps in use (admitted 16.0, measured 19.5, policy 20), blog needs 1.0
+  REFUSE blog     0006 -> slice 2/112233 (URLLC) full: 19.5/20.0 Mbps in use (admitted 16.0, measured 19.5, policy 20), blog needs 1.0
+  REFUSE control  0006 -> slice 2/112233 (URLLC) full: 19.5/20.0 Mbps in use (admitted 15.0, measured 19.5, policy 20), control needs 1.0
+  REFUSE blog     0013 -> slice 2/112233 (URLLC) full: 19.5/20.0 Mbps in use (admitted 15.0, measured 19.5, policy 20), blog needs 1.0
+  REFUSE control  0030 -> slice 2/112233 (URLLC) full: 19.5/20.0 Mbps in use (admitted 14.0, measured 19.5, policy 20), control needs 1.0
+  REFUSE blog     0020 -> slice 2/112233 (URLLC) full: 19.5/20.0 Mbps in use (admitted 14.0, measured 19.5, policy 20), blog needs 1.0
+  REFUSE control  0016 -> slice 2/112233 (URLLC) full: 19.5/20.0 Mbps in use (admitted 13.0, measured 19.5, policy 20), control needs 1.0
+  REFUSE blog     0012 -> slice 2/112233 (URLLC) full: 19.5/20.0 Mbps in use (admitted 13.0, measured 19.5, policy 20), blog needs 1.0
+  ADMIT  blog     0013 -> URLLC  (sst 2/112233)  13.0/20 Mbps  measured 18.1  flow on 10.46.0.9
+  ADMIT  control  0019 -> URLLC  (sst 2/112233)  12.0/20 Mbps  measured 18.1  flow on 10.46.0.4
+  ADMIT  blog     0022 -> URLLC  (sst 2/112233)  12.0/20 Mbps  measured 18.1  flow on 10.46.0.2
+  ADMIT  control  0002 -> URLLC  (sst 2/112233)  13.0/20 Mbps  measured 18.1  flow on 10.46.0.11
+  ADMIT  control  0026 -> URLLC  (sst 2/112233)  13.0/20 Mbps  measured 18.1  flow on 10.46.0.7
+  ADMIT  control  0010 -> URLLC  (sst 2/112233)  13.0/20 Mbps  measured 18.1  flow on 10.46.0.10
+  ADMIT  control  0009 -> URLLC  (sst 2/112233)  13.0/20 Mbps  measured 18.1  flow on 10.46.0.3
+  ADMIT  control  0013 -> URLLC  (sst 2/112233)  14.0/20 Mbps  measured 12.2  flow on 10.46.0.7
+  ADMIT  control  0017 -> URLLC  (sst 2/112233)  15.0/20 Mbps  measured 12.2  flow on 10.46.0.6
+  ADMIT  blog     0015 -> URLLC  (sst 2/112233)  16.0/20 Mbps  measured 12.2  flow on 10.46.0.2
+  ADMIT  control  0022 -> URLLC  (sst 2/112233)  17.0/20 Mbps  measured 12.2  flow on 10.46.0.10
+  ADMIT  blog     0011 -> URLLC  (sst 2/112233)  18.0/20 Mbps  measured 8.5  flow on 10.46.0.4
+  ADMIT  blog     0017 -> URLLC  (sst 2/112233)  19.0/20 Mbps  measured 8.5  flow on 10.46.0.9
+  ADMIT  control  0026 -> URLLC  (sst 2/112233)  18.0/20 Mbps  measured 8.5  flow on 10.46.0.5
+  ADMIT  control  0022 -> URLLC  (sst 2/112233)  18.0/20 Mbps  measured 8.5  flow on 10.46.0.11
+  ADMIT  blog     0018 -> URLLC  (sst 2/112233)  19.0/20 Mbps  measured 8.5  flow on 10.46.0.3
+  ADMIT  blog     0011 -> URLLC  (sst 2/112233)  19.0/20 Mbps  measured 8.5  flow on 10.46.0.5
+  ADMIT  control  0014 -> URLLC  (sst 2/112233)  19.0/20 Mbps  measured 11.0  flow on 10.46.0.6
+  ADMIT  control  0015 -> URLLC  (sst 2/112233)  20.0/20 Mbps  measured 11.0  flow on 10.46.0.8
+  REFUSE control  0002 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 11.0, policy 20), control needs 1.0
+  REFUSE control  0027 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 11.0, policy 20), control needs 1.0
+  REFUSE control  0018 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 11.0, policy 20), control needs 1.0
+  REFUSE blog     0008 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 11.0, policy 20), blog needs 1.0
+  ADMIT  control  0021 -> URLLC  (sst 2/112233)  20.0/20 Mbps  measured 16.2  flow on 10.46.0.9  PRE-EMPTED control (ARP 2)
+  REFUSE control  0008 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 16.2, policy 20), control needs 1.0
+  REFUSE control  0020 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 16.2, policy 20), control needs 1.0
+  ADMIT  blog     0021 -> URLLC  (sst 2/112233)  20.0/20 Mbps  measured 16.2  flow on 10.46.0.8  PRE-EMPTED control (ARP 2)
+  ADMIT  control  0017 -> URLLC  (sst 2/112233)  20.0/20 Mbps  measured 16.2  flow on 10.46.0.8
+  REFUSE control  0030 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 16.2, policy 20), control needs 1.0
+  ADMIT  control  0022 -> URLLC  (sst 2/112233)  20.0/20 Mbps  measured 16.2  flow on 10.46.0.6  PRE-EMPTED control (ARP 2)
+  ADMIT  blog     0022 -> URLLC  (sst 2/112233)  20.0/20 Mbps  measured 16.2  flow on 10.46.0.8  PRE-EMPTED blog (ARP 2)
+  REFUSE blog     0019 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 16.2, policy 20), blog needs 1.0
+  REFUSE control  0024 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 16.2, policy 20), control needs 1.0
+  REFUSE control  0019 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 16.2, policy 20), control needs 1.0
+  REFUSE control  0015 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 16.2, policy 20), control needs 1.0
+  REFUSE blog     0007 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 16.2, policy 20), blog needs 1.0
+  REFUSE blog     0019 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 16.2, policy 20), blog needs 1.0
+  REFUSE control  0009 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 16.2, policy 20), control needs 1.0
+  REFUSE control  0016 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 18.9, policy 20), control needs 1.0
+  REFUSE blog     0008 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 18.9, policy 20), blog needs 1.0
+  REFUSE control  0003 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 18.9, policy 20), control needs 1.0
+  ADMIT  control  0030 -> URLLC  (sst 2/112233)  20.0/20 Mbps  measured 18.9  flow on 10.46.0.5
+  ADMIT  blog     0027 -> URLLC  (sst 2/112233)  20.0/20 Mbps  measured 18.9  flow on 10.46.0.4
+  ADMIT  blog     0021 -> URLLC  (sst 2/112233)  20.0/20 Mbps  measured 18.9  flow on 10.46.0.2
+  ADMIT  control  0024 -> URLLC  (sst 2/112233)  20.0/20 Mbps  measured 18.9  flow on 10.46.0.11
+  ADMIT  control  0016 -> URLLC  (sst 2/112233)  20.0/20 Mbps  measured 18.9  flow on 10.46.0.7
+  ADMIT  control  0003 -> URLLC  (sst 2/112233)  20.0/20 Mbps  measured 18.9  flow on 10.46.0.10
+  REFUSE control  0030 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 18.9, policy 20), control needs 1.0
+  REFUSE blog     0006 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 18.9, policy 20), blog needs 1.0
+  ADMIT  blog     0019 -> URLLC  (sst 2/112233)  20.0/20 Mbps  measured 18.9  flow on 10.46.0.3
+  ADMIT  blog     0030 -> URLLC  (sst 2/112233)  20.0/20 Mbps  measured 19.9  flow on 10.46.0.7
+  REFUSE blog     0030 -> slice 2/112233 (URLLC) full: 20.0/20.0 Mbps in use (admitted 20.0, measured 19.9, policy 20), blog needs 1.0
+  REFUSE control  0029 -> slice 2/112233 (URLLC) full: 19.9/20.0 Mbps in use (admitted 19.0, measured 19.9, policy 20), control needs 1.0
+  ADMIT  control  0022 -> URLLC  (sst 2/112233)  19.0/20 Mbps  measured 19.9  flow on 10.46.0.6  PRE-EMPTED blog (ARP 2)
+  REFUSE control  0014 -> slice 2/112233 (URLLC) full: 19.9/20.0 Mbps in use (admitted 18.0, measured 19.9, policy 20), control needs 1.0
+  REFUSE blog     0007 -> slice 2/112233 (URLLC) full: 19.9/20.0 Mbps in use (admitted 17.0, measured 19.9, policy 20), blog needs 1.0
+  REFUSE control  0030 -> slice 2/112233 (URLLC) full: 19.9/20.0 Mbps in use (admitted 16.0, measured 19.9, policy 20), control needs 1.0
+  REFUSE control  0007 -> slice 2/112233 (URLLC) full: 19.9/20.0 Mbps in use (admitted 16.0, measured 19.9, policy 20), control needs 1.0
+  ADMIT  blog     0023 -> URLLC  (sst 2/112233)  15.0/20 Mbps  measured 19.4  flow on 10.46.0.9  PRE-EMPTED blog (ARP 2)
+  REFUSE blog     0020 -> slice 2/112233 (URLLC) full: 19.4/20.0 Mbps in use (admitted 14.0, measured 19.4, policy 20), blog needs 1.0
+  ADMIT  blog     0022 -> URLLC  (sst 2/112233)  13.0/20 Mbps  measured 19.4  flow on 10.46.0.2  PRE-EMPTED control (ARP 2)
+  REFUSE control  0003 -> slice 2/112233 (URLLC) full: 19.4/20.0 Mbps in use (admitted 12.0, measured 19.4, policy 20), control needs 1.0
+  REFUSE blog     0017 -> slice 2/112233 (URLLC) full: 19.4/20.0 Mbps in use (admitted 12.0, measured 19.4, policy 20), blog needs 1.0
+  REFUSE blog     0007 -> slice 2/112233 (URLLC) full: 19.4/20.0 Mbps in use (admitted 12.0, measured 19.4, policy 20), blog needs 1.0
+  REFUSE blog     0011 -> slice 2/112233 (URLLC) full: 19.4/20.0 Mbps in use (admitted 12.0, measured 19.4, policy 20), blog needs 1.0
+  REFUSE control  0019 -> slice 2/112233 (URLLC) full: 19.4/20.0 Mbps in use (admitted 12.0, measured 19.4, policy 20), control needs 1.0
+  REFUSE control  0008 -> slice 2/112233 (URLLC) full: 19.4/20.0 Mbps in use (admitted 12.0, measured 19.4, policy 20), control needs 1.0
+  REFUSE control  0009 -> slice 2/112233 (URLLC) full: 19.4/20.0 Mbps in use (admitted 12.0, measured 19.4, policy 20), control needs 1.0
+  REFUSE control  0006 -> slice 2/112233 (URLLC) full: 19.4/20.0 Mbps in use (admitted 12.0, measured 19.4, policy 20), control needs 1.0
+  REFUSE blog     0008 -> slice 2/112233 (URLLC) full: 19.4/20.0 Mbps in use (admitted 12.0, measured 19.4, policy 20), blog needs 1.0
+  REFUSE control  0004 -> slice 2/112233 (URLLC) full: 19.4/20.0 Mbps in use (admitted 12.0, measured 19.4, policy 20), control needs 1.0
+  REFUSE blog     0026 -> slice 2/112233 (URLLC) full: 19.4/20.0 Mbps in use (admitted 12.0, measured 19.4, policy 20), blog needs 1.0
+  REFUSE blog     0008 -> slice 2/112233 (URLLC) full: 19.4/20.0 Mbps in use (admitted 12.0, measured 19.4, policy 20), blog needs 1.0
+  REFUSE blog     0018 -> slice 2/112233 (URLLC) full: 19.4/20.0 Mbps in use (admitted 11.0, measured 19.4, policy 20), blog needs 1.0
+  ADMIT  blog     0024 -> URLLC  (sst 2/112233)  12.0/20 Mbps  measured 16.1  flow on 10.46.0.3
+  ADMIT  blog     0026 -> URLLC  (sst 2/112233)  12.0/20 Mbps  measured 16.1  flow on 10.46.0.10
+
+--- summary ---
+  demands : 240
+  admitted: 108 (45%)
+  refused : 132 (55%)
+      slice 2/112233 (URLLC) full              132

@@ -1,0 +1,178 @@
+[
+  {
+    "t": "14:11:07",
+    "slice": "eMBB",
+    "action": "cut",
+    "from": 500.0,
+    "to": 232.4,
+    "why": "URLLC p95 11.7 ms > 8.0 ms"
+  },
+  {
+    "t": "14:11:07",
+    "slice": "URLLC",
+    "action": "cut",
+    "from": 20.0,
+    "to": 4.2,
+    "why": "URLLC p95 11.7 ms > 8.0 ms"
+  },
+  {
+    "t": "14:11:27",
+    "slice": "eMBB",
+    "action": "cut",
+    "from": 232.4,
+    "to": 96.6,
+    "why": "URLLC p95 16.3 ms > 8.0 ms"
+  },
+  {
+    "t": "14:11:27",
+    "slice": "URLLC",
+    "action": "cut",
+    "from": 4.2,
+    "to": 2.9,
+    "why": "URLLC p95 16.3 ms > 8.0 ms"
+  },
+  {
+    "t": "14:11:34",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 96.6,
+    "to": 121.6,
+    "why": "URLLC p95 2.8 ms, eMBB at 91/97 Mbps"
+  },
+  {
+    "t": "14:11:39",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 121.6,
+    "to": 146.6,
+    "why": "URLLC p95 2.0 ms, eMBB at 115/122 Mbps"
+  },
+  {
+    "t": "14:11:54",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 146.6,
+    "to": 171.6,
+    "why": "URLLC p95 4.6 ms, eMBB at 133/147 Mbps"
+  },
+  {
+    "t": "14:11:59",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 171.6,
+    "to": 196.6,
+    "why": "URLLC p95 2.0 ms, eMBB at 164/172 Mbps"
+  },
+  {
+    "t": "14:12:05",
+    "slice": "eMBB",
+    "action": "cut",
+    "from": 196.6,
+    "to": 130.9,
+    "why": "URLLC p95 8.1 ms > 8.0 ms"
+  },
+  {
+    "t": "14:12:05",
+    "slice": "URLLC",
+    "action": "cut",
+    "from": 2.9,
+    "to": 2.0,
+    "why": "URLLC p95 8.1 ms > 8.0 ms"
+  },
+  {
+    "t": "14:12:27",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 130.9,
+    "to": 155.9,
+    "why": "URLLC p95 4.9 ms, eMBB at 161/131 Mbps"
+  },
+  {
+    "t": "14:12:44",
+    "slice": "eMBB",
+    "action": "cut",
+    "from": 155.9,
+    "to": 107.1,
+    "why": "URLLC p95 16.7 ms > 8.0 ms"
+  },
+  {
+    "t": "14:12:44",
+    "slice": "URLLC",
+    "action": "cut",
+    "from": 2.0,
+    "to": 2.0,
+    "why": "URLLC p95 16.7 ms > 8.0 ms"
+  },
+  {
+    "t": "14:12:59",
+    "slice": "URLLC",
+    "action": "raise",
+    "from": 2.0,
+    "to": 3.0,
+    "why": "URLLC p95 2.9 ms, URLLC at 2/2 Mbps"
+  },
+  {
+    "t": "14:13:04",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 107.1,
+    "to": 132.1,
+    "why": "URLLC p95 2.6 ms, eMBB at 106/107 Mbps"
+  },
+  {
+    "t": "14:13:04",
+    "slice": "URLLC",
+    "action": "raise",
+    "from": 3.0,
+    "to": 4.0,
+    "why": "URLLC p95 2.6 ms, URLLC at 3/3 Mbps"
+  },
+  {
+    "t": "14:13:09",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 132.1,
+    "to": 157.1,
+    "why": "URLLC p95 2.2 ms, eMBB at 129/132 Mbps"
+  },
+  {
+    "t": "14:13:09",
+    "slice": "URLLC",
+    "action": "raise",
+    "from": 4.0,
+    "to": 5.0,
+    "why": "URLLC p95 2.2 ms, URLLC at 4/4 Mbps"
+  },
+  {
+    "t": "14:13:22",
+    "slice": "eMBB",
+    "action": "cut",
+    "from": 157.1,
+    "to": 106.4,
+    "why": "URLLC p95 19.8 ms > 8.0 ms"
+  },
+  {
+    "t": "14:13:22",
+    "slice": "URLLC",
+    "action": "cut",
+    "from": 5.0,
+    "to": 2.1,
+    "why": "URLLC p95 19.8 ms > 8.0 ms"
+  },
+  {
+    "t": "14:13:37",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 106.4,
+    "to": 131.4,
+    "why": "URLLC p95 2.6 ms, eMBB at 100/106 Mbps"
+  },
+  {
+    "t": "14:13:42",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 131.4,
+    "to": 156.4,
+    "why": "URLLC p95 2.2 ms, eMBB at 130/131 Mbps"
+  }
+]

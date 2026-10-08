@@ -1,0 +1,162 @@
+[
+  {
+    "t": "13:46:40",
+    "slice": "eMBB",
+    "action": "cut",
+    "from": 500.0,
+    "to": 86.1,
+    "why": "URLLC p95 9.8 ms > 8.0 ms"
+  },
+  {
+    "t": "13:46:40",
+    "slice": "URLLC",
+    "action": "cut",
+    "from": 20.0,
+    "to": 3.5,
+    "why": "URLLC p95 9.8 ms > 8.0 ms"
+  },
+  {
+    "t": "13:47:02",
+    "slice": "eMBB",
+    "action": "cut",
+    "from": 86.1,
+    "to": 54.6,
+    "why": "URLLC p95 9.9 ms > 8.0 ms"
+  },
+  {
+    "t": "13:47:02",
+    "slice": "URLLC",
+    "action": "cut",
+    "from": 3.5,
+    "to": 2.2,
+    "why": "URLLC p95 9.9 ms > 8.0 ms"
+  },
+  {
+    "t": "13:47:24",
+    "slice": "eMBB",
+    "action": "cut",
+    "from": 54.6,
+    "to": 50.0,
+    "why": "URLLC p95 21.7 ms > 8.0 ms"
+  },
+  {
+    "t": "13:47:24",
+    "slice": "URLLC",
+    "action": "cut",
+    "from": 2.2,
+    "to": 2.0,
+    "why": "URLLC p95 21.7 ms > 8.0 ms"
+  },
+  {
+    "t": "13:47:45",
+    "slice": "eMBB",
+    "action": "cut",
+    "from": 50.0,
+    "to": 50.0,
+    "why": "URLLC p95 26.9 ms > 8.0 ms"
+  },
+  {
+    "t": "13:47:45",
+    "slice": "URLLC",
+    "action": "cut",
+    "from": 2.0,
+    "to": 2.0,
+    "why": "URLLC p95 26.9 ms > 8.0 ms"
+  },
+  {
+    "t": "13:48:08",
+    "slice": "eMBB",
+    "action": "cut",
+    "from": 50.0,
+    "to": 50.0,
+    "why": "URLLC p95 13.1 ms > 8.0 ms"
+  },
+  {
+    "t": "13:48:08",
+    "slice": "URLLC",
+    "action": "cut",
+    "from": 2.0,
+    "to": 2.0,
+    "why": "URLLC p95 13.1 ms > 8.0 ms"
+  },
+  {
+    "t": "13:48:28",
+    "slice": "eMBB",
+    "action": "cut",
+    "from": 50.0,
+    "to": 50.0,
+    "why": "URLLC p95 11.1 ms > 8.0 ms"
+  },
+  {
+    "t": "13:48:28",
+    "slice": "URLLC",
+    "action": "cut",
+    "from": 2.0,
+    "to": 2.0,
+    "why": "URLLC p95 11.1 ms > 8.0 ms"
+  },
+  {
+    "t": "13:48:50",
+    "slice": "eMBB",
+    "action": "cut",
+    "from": 50.0,
+    "to": 50.0,
+    "why": "URLLC p95 13.8 ms > 8.0 ms"
+  },
+  {
+    "t": "13:48:50",
+    "slice": "URLLC",
+    "action": "cut",
+    "from": 2.0,
+    "to": 2.0,
+    "why": "URLLC p95 13.8 ms > 8.0 ms"
+  },
+  {
+    "t": "13:49:12",
+    "slice": "eMBB",
+    "action": "cut",
+    "from": 50.0,
+    "to": 50.0,
+    "why": "URLLC p95 38.7 ms > 8.0 ms"
+  },
+  {
+    "t": "13:49:12",
+    "slice": "URLLC",
+    "action": "cut",
+    "from": 2.0,
+    "to": 2.0,
+    "why": "URLLC p95 38.7 ms > 8.0 ms"
+  },
+  {
+    "t": "13:49:33",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 50.0,
+    "to": 75.0,
+    "why": "URLLC p95 3.5 ms, eMBB at 40/50 Mbps"
+  },
+  {
+    "t": "13:49:33",
+    "slice": "URLLC",
+    "action": "raise",
+    "from": 2.0,
+    "to": 3.0,
+    "why": "URLLC p95 3.5 ms, URLLC at 2/2 Mbps"
+  },
+  {
+    "t": "13:49:45",
+    "slice": "eMBB",
+    "action": "cut",
+    "from": 75.0,
+    "to": 50.0,
+    "why": "URLLC p95 8.4 ms > 8.0 ms"
+  },
+  {
+    "t": "13:49:45",
+    "slice": "URLLC",
+    "action": "cut",
+    "from": 3.0,
+    "to": 2.0,
+    "why": "URLLC p95 8.4 ms > 8.0 ms"
+  }
+]

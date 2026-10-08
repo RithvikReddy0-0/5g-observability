@@ -1,0 +1,10 @@
+== experiment 4: what inflates URLLC's tail? 120s each, 3 demands/s, controller off
+  idle        idle                 URLLC probe mean  1.58  p95   2.51  p99   5.37 ms  loss 0.0000   host load 6.54 -> 2.27
+your 131072x1 screen size is bogus. expect trouble
+              leaked flow processes after: 0
+  urllc-only  control:1 blog:1     URLLC probe mean  1.59  p95   2.79  p99   5.27 ms  loss 0.0000   host load 1.71 -> 4.97
+your 131072x1 screen size is bogus. expect trouble
+              leaked flow processes after: 0
+  embb-only   video:1 file:1       URLLC probe mean  2.67  p95   8.89  p99  17.50 ms  loss 0.0000   host load 3.44 -> 36.86
+your 131072x1 screen size is bogus. expect trouble
+              leaked flow processes after: 0
