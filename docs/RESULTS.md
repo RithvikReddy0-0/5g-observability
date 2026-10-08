@@ -31,6 +31,8 @@ the ratified ODE. That distinction determines what could and could not be proven
 | **Open5GS: orchestrator flows delivered** | **164 / 165** | real UDP flows, both slices saturated |
 | **Open5GS: priority inside URLLC (ARP)** | **5 / 5** critical demands admitted by pre-emption | standard demands refused while the slice is full |
 | **Open5GS: feedback controller** | eMBB flows met **68 % → 100 %**; URLLC p95 **20.5 → 12.5 ms** | same demand, controller off vs on; costs eMBB volume (266 → 109 Mbps) |
+| **Open5GS: slice lifecycle (network orchestrator)** | mMTC off in **14.5 s**, on in **12.2 s**; core sessions 70 → 0 → 70 | each step verified; URLLC 0 packets lost meanwhile; a missed deadline rolled back |
+| **Open5GS: closed loop on demand** | mMTC activated when IoT demand appeared, deactivated after 67 s idle | 21 IoT demands refused while it came up, then 81 admitted |
 | **Open5GS: acceptance** | **PASS=22, FAIL=0** | `tests/acceptance-open5gs.sh` |
 | **Open5GS: broken deploy rolled back** | **automatic** | `deploy.sh`, gate failed 8 KPIs |
 | **Open5GS on Kubernetes** | **same gate PASS** | minikube, 22 pods, 100 UEs in three slices |

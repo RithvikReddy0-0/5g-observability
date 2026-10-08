@@ -178,6 +178,25 @@ permitted on it.
 
 Evidence: [`open5gs-orchestrator-dynamic`](evidence/open5gs-orchestrator-dynamic/README.md).
 
+## Network orchestrator — slice lifecycle ([ADR-017](adr/ADR-017-network-orchestrator.md))
+
+The slice orchestrator manages traffic on the slices; the network orchestrator manages the slices
+themselves. `make o5gs-network` shows them; `tools/network-orchestrator/netorch.py
+activate|deactivate|scale|auto` acts on them ([README](../tools/network-orchestrator/README.md)).
+
+| Experiment | Result |
+|---|---|
+| Deactivate mMTC | 14.5 s: admissions stopped, flows drained, 70 UEs deregistered (core sessions 70 → 0), gNB/UPF/DN stopped; UE container CPU 211 % → 40 % |
+| Activate mMTC | 12.2 s: UPF + PFCP association, gNB + NG Setup, 70/70 UEs, data path checked, admissions resumed |
+| During the cycle | URLLC probes 0 lost of 63 891 |
+| Activation past its deadline | rolled back automatically; slice left dormant and clean |
+| Closed loop | mMTC switched on when IoT demand appeared, off after 67 s without it |
+| eMBB CPU quota unlimited / 1 / 0.5 | eMBB 366 / 121 / 50 Mbps; URLLC p99 11.0 / 10.4 / 8.1 ms |
+
+A dormant slice's UEs are **parked** (`ran/ue-slice.sh`): the UE supervisor leaves them alone, and a
+restart of the UE container keeps them down. `deploy.sh` refuses to run while a slice is dormant.
+Evidence: [`open5gs-network-orchestrator`](evidence/open5gs-network-orchestrator/README.md).
+
 ---
 
 ## Which metrics can be trusted
