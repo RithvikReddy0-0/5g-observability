@@ -130,6 +130,24 @@ class Placement(unittest.TestCase):
         self.assertTrue(r["admitted"])
         self.assertEqual(r["slice"]["name"], "mMTC")
 
+    def test_inactive_slice_admits_nothing_but_demand_is_logged(self):
+        mmtc = next(s for s in self.o.SLICES if s["name"] == "mMTC")
+        mmtc["active"] = False
+        r = self.o.decide(IOT, "sensor")
+        self.assertFalse(r["admitted"])
+        self.assertIn("not active", r["reason"])
+        self.assertEqual(self.o.demand_log[-1][1], "sensor", "planning must still see refused demand")
+        plan = self.o.plan(self.o.observed_demands(window=60))
+        self.assertIn("mMTC", {s["slice"] for s in plan["slices"] if s["needed"]})
+
+    def test_inactive_slice_is_skipped_when_another_permitted_one_fits(self):
+        urllc = next(s for s in self.o.SLICES if s["name"] == "URLLC")
+        urllc["active"] = False
+        r = self.o.decide("imsi-208930000000001", "control")      # needs 10 ms: only URLLC fits
+        self.assertFalse(r["admitted"])
+        r = self.o.decide("imsi-208930000000001", "video")        # eMBB still active
+        self.assertTrue(r["admitted"])
+
     def test_admission_limit_below_capacity_is_enforced(self):
         self.o.limits["eMBB"] = 100.0
         fill(self.o, "eMBB", 95.0)

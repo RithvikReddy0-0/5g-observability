@@ -35,17 +35,17 @@
 # START_BATCH UEs are started at once; START_BATCH=1 restores one at a time.
 set -u
 
-CFG=/etc/ueransim
-RUN=/tmp/ue-cfg
+# CFG, RUN, STATE, START_WAIT and the UE helpers (plan, launch_ue, wait_up, stop_ue, tun_of, parked)
+# live in ue-lib.sh, shared with ue-slice.sh — the network orchestrator's park/unpark (ADR-017).
+. /etc/ueransim/ue-lib.sh
 CHECK_EVERY="${CHECK_EVERY:-10}"
 CHECK_STRIKES="${CHECK_STRIKES:-3}"
-START_WAIT="${UE_START_WAIT:-60}"
 START_BATCH="${START_BATCH:-10}"
 FIRST_IMSI="${FIRST_IMSI:-208930000000001}"
-STATE=/tmp/ues
 mkdir -p "$STATE" "$RUN"
 rm -f "$STATE/startup"     # /tmp survives a container restart; a stale record would look like this start
 mkdir -p /tmp/UERANSIM.proc-table && chmod 777 /tmp/UERANSIM.proc-table   # see "a third shared thing"
+rm -f /tmp/UERANSIM.proc-table/*   # no nr-ue runs yet, so every entry is stale (prune_proc_table)
 
 # Slice plan, in IMSI order: <config>:<UEs>:<gateway>:<name>. IMSIs are assigned contiguously
 # from FIRST_IMSI in this order — the same rule as scripts/open5gs/provision_subscribers.py, and
@@ -62,8 +62,6 @@ if [ -f /tmp/ue-plan.override ]; then
   echo "ue-entrypoint: plan overridden for this run by /tmp/ue-plan.override"
 fi
 
-log() { echo "ue-entrypoint: $(date -u +%H:%M:%S) $*"; }
-
 # Per-slice reachability/latency exporter on :9121, measured from these UEs' own interfaces.
 # Runs here rather than as a sidecar: a sidecar sharing this network namespace is stranded
 # in a dead one when this container restarts. Respawned if it ever exits.
@@ -74,24 +72,10 @@ log() { echo "ue-entrypoint: $(date -u +%H:%M:%S) $*"; }
 # the UEs itself and follows them across restarts. Metrics on :9122.
 ( while true; do python3 -u /opt/o5gs-obs/traffic_agent.py; sleep 2; done ) &
 
-plan() {   # every UE, one per line: <imsi> <config> <gateway> <slice>
-  imsi=$FIRST_IMSI
-  for s in $UE_PLAN; do
-    cfg=${s%%:*}; rest=${s#*:}; n=${rest%%:*}; rest=${rest#*:}; gw=${rest%%:*}; name=${rest#*:}
-    k=0
-    while [ "$k" -lt "$n" ]; do
-      echo "$imsi $cfg $gw $name"
-      imsi=$((imsi + 1)); k=$((k + 1))
-    done
-  done
-}
-
 total=$(plan | wc -l)
 if [ "$total" -le 0 ]; then
   log "UE_PLAN is empty, idling"; exec sleep infinity
 fi
-
-tag_of() { printf '%04d' $(( $1 % 10000 )); }   # <imsi> -> its last four digits
 
 # Each UE's own interface prefix, "uesimtun" + the last four digits of its IMSI (UERANSIM allows
 # 12 characters). Its one session is then uesimtun<NNNN>0 — still matched by every tool that
@@ -105,54 +89,13 @@ plan | while read -r imsi cfg gw name; do
     || printf '%d\trt_uesimtun%s0\n' $(( 2000 + imsi % 10000 )) "$t" >> /etc/iproute2/rt_tables
 done
 
-# A UE is identified by its PDU-session ADDRESS, never by its interface NAME. With the old shared
-# prefix, names were reused after a session dropped, and checking by name once marked two dead
-# UEs healthy. Addresses are allocated uniquely by the SMF, so an address can only ever mean one
-# live session; with per-UE prefixes this is now doubly safe.
-ip_of() {    # <imsi> -> the UE's latest session address from its own log, or empty
-  sed -n 's/.*TUN interface\[uesimtun[0-9]*, \([0-9.]*\)\].*/\1/p' "/tmp/ue-$1.log" 2>/dev/null | tail -1
-}
-
-tun_of() {   # <imsi> -> the interface CURRENTLY holding that UE's address, or empty
-  a=$(ip_of "$1")
-  [ -n "$a" ] || return 0
-  ip -4 -o addr show 2>/dev/null | awk -v a="$a" '/uesimtun/ { split($4, p, "/"); if (p[1] == a) { print $2; exit } }'
-}
-
-launch_ue() {   # <imsi>: start it, do not wait
-  : > "/tmp/ue-$1.log"
-  nr-ue -c "$RUN/$1.yaml" -i "imsi-$1" < /dev/null >> "/tmp/ue-$1.log" 2>&1 &
-  echo $! > "$STATE/$1.pid"
-  echo 0 > "$STATE/$1.strikes"
-}
-
-wait_up() {     # <imsi>...: wait until each has its interface, has died, or START_WAIT passes
-  w=0
-  while [ "$w" -lt "$START_WAIT" ]; do
-    pending=0
-    for i in "$@"; do
-      [ -n "$(tun_of "$i")" ] && continue
-      kill -0 "$(cat "$STATE/$i.pid")" 2>/dev/null && pending=$((pending + 1))
-    done
-    [ "$pending" -eq 0 ] && return 0
-    w=$((w + 1)); sleep 1
-  done
-}
-
-stop_ue() {   # <imsi>
-  pid=$(cat "$STATE/$1.pid" 2>/dev/null)
-  [ -n "$pid" ] || return 0
-  kill "$pid" 2>/dev/null
-  for _ in 1 2 3 4 5; do kill -0 "$pid" 2>/dev/null || return 0; sleep 1; done
-  kill -9 "$pid" 2>/dev/null
-}
-
 log "starting $total UEs ($UE_PLAN), $START_BATCH at a time"
 started=$(date +%s)
 plan > "$STATE/plan"
 batch=""
 n=0
 while read -r imsi cfg gw name; do
+  parked "$name" && continue          # deactivated by the network orchestrator: stays down
   launch_ue "$imsi"
   batch="$batch $imsi"; n=$((n + 1))
   if [ "$n" -ge "$START_BATCH" ]; then
@@ -165,6 +108,7 @@ done < "$STATE/plan"
 
 up=0
 while read -r imsi cfg gw name; do
+  parked "$name" && continue
   if [ -n "$(tun_of "$imsi")" ]; then up=$((up + 1))
   else log "$name imsi-$imsi did not come up within ${START_WAIT}s; the supervisor will retry"; fi
 done < "$STATE/plan"
@@ -175,6 +119,7 @@ log "supervising: ping each UE's gateway every ${CHECK_EVERY}s, restart after ${
 while true; do
   sleep "$CHECK_EVERY"
   while read -r imsi cfg gw name; do
+    parked "$name" && continue        # deliberately down (ADR-017): not a failure
     pid=$(cat "$STATE/$imsi.pid" 2>/dev/null)
     t=$(tun_of "$imsi")
     if ! kill -0 "$pid" 2>/dev/null; then

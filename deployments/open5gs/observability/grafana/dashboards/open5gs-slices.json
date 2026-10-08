@@ -2636,6 +2636,415 @@
           "instant": true
         }
       ]
+    },
+    {
+      "type": "row",
+      "title": "Network orchestrator \u2014 slice lifecycle and compute (ADR-017)",
+      "id": 43,
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 94
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Slice deployed and serving (1) or dormant (0)",
+      "id": 44,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prom-o5gs"
+      },
+      "description": "Discovered from the infrastructure every 15 s, never remembered: containers running, UEs parked or up. Requires scripts/open5gs/start_netorch.sh.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 95
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "min": 0,
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "stacking": {
+              "mode": "none"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(eMBB|1-010203|internet).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#2E6E8E"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(URLLC|2-112233|urllc).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#C7601F"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(mMTC|3-334455|iot).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#5A8F3C"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "max by (slice) (netorch_slice_active)",
+          "legendFormat": "{{slice}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "UEs holding a PDU session, per slice",
+      "id": 45,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prom-o5gs"
+      },
+      "description": "From the UEs themselves, and the SMF's own count: deactivation must bring both to 0.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 95
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "min": 0,
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "stacking": {
+              "mode": "none"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(eMBB|1-010203|internet).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#2E6E8E"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(URLLC|2-112233|urllc).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#C7601F"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(mMTC|3-334455|iot).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#5A8F3C"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "max by (slice) (netorch_slice_ues_up)",
+          "legendFormat": "{{slice}}"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "sum by (snssai) (fivegs_smffunction_sm_sessionnbr)",
+          "legendFormat": "core sessions {{snssai}}"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Lifecycle operations, last hour",
+      "id": 46,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prom-o5gs"
+      },
+      "description": "",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 103
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#2E6E8E"
+          }
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "sum(increase(netorch_operations_total[1h])) or vector(0)",
+          "instant": true
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Rolled back, last hour",
+      "id": 47,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prom-o5gs"
+      },
+      "description": "",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 103
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#2E6E8E"
+          }
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "sum(increase(netorch_operations_total{result=\"rolled_back\"}[1h])) or vector(0)",
+          "instant": true
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Last activation (s)",
+      "id": 48,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prom-o5gs"
+      },
+      "description": "",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 103
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#2E6E8E"
+          }
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "max(netorch_operation_seconds{op=\"activate\",result=\"done\"})",
+          "instant": true
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "eMBB CPU quota (0 = unlimited)",
+      "id": 49,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prom-o5gs"
+      },
+      "description": "",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 103
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#2E6E8E"
+          }
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "max(netorch_slice_cpus{slice=\"eMBB\"})",
+          "instant": true
+        }
+      ]
     }
   ]
 }

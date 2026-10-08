@@ -183,6 +183,22 @@ stat("Controller cuts, last 15 min", 'sum(increase(slice_control_actions_total{a
 stat("Controller raises, last 15 min", 'sum(increase(slice_control_actions_total{action="raise"}[15m])) or vector(0)', 16, y, w=8)
 y += 4
 
+row("Network orchestrator — slice lifecycle and compute (ADR-017)", y); y += 1
+ts("Slice deployed and serving (1) or dormant (0)", [
+    {"expr": "max by (slice) (netorch_slice_active)", "legendFormat": "{{slice}}"}],
+   0, y, desc=("Discovered from the infrastructure every 15 s, never remembered: containers running, UEs "
+               "parked or up. Requires scripts/open5gs/start_netorch.sh."))
+ts("UEs holding a PDU session, per slice", [
+    {"expr": "max by (slice) (netorch_slice_ues_up)", "legendFormat": "{{slice}}"},
+    {"expr": "sum by (snssai) (fivegs_smffunction_sm_sessionnbr)", "legendFormat": "core sessions {{snssai}}"}],
+   12, y, desc="From the UEs themselves, and the SMF's own count: deactivation must bring both to 0.")
+y += 8
+stat("Lifecycle operations, last hour", 'sum(increase(netorch_operations_total[1h])) or vector(0)', 0, y, w=6)
+stat("Rolled back, last hour", 'sum(increase(netorch_operations_total{result="rolled_back"}[1h])) or vector(0)', 6, y, w=6)
+stat("Last activation (s)", 'max(netorch_operation_seconds{op="activate",result="done"})', 12, y, w=6)
+stat("eMBB CPU quota (0 = unlimited)", 'max(netorch_slice_cpus{slice="eMBB"})', 18, y, w=6)
+y += 4
+
 dash = {
     "uid": "open5gs-slices", "title": "Open5GS — slices, sessions and traffic", "editable": True,
     "schemaVersion": 39, "version": 1, "refresh": "5s",

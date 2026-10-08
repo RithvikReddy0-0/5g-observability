@@ -56,6 +56,14 @@ scrape_configs:
       - targets: ["10.53.0.1:9111"]
         labels: { component: slice-orchestrator }
 
+  # Network orchestrator (slice lifecycle, ADR-017), also a host process. Its metrics are
+  # discovered state, observed at most every 15 s, so a slower scrape loses nothing.
+  - job_name: network-orchestrator
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["10.53.0.1:9113"]
+        labels: { component: network-orchestrator }
+
   - job_name: prometheus
     static_configs:
       - targets: ["localhost:9090"]

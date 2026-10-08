@@ -32,7 +32,7 @@ N_B     := 10
 
 .PHONY: help up create down restart stop-ues ues status test evidence screenshots report \
         bootstrap verify clean logs urls nuke gate gate-test \
-        o5gs-build o5gs-up o5gs-ues o5gs-status o5gs-ping o5gs-traffic o5gs-gate o5gs-evidence o5gs-urls o5gs-orchestrate o5gs-slices o5gs-plan o5gs-dynamic \
+        o5gs-build o5gs-up o5gs-ues o5gs-status o5gs-ping o5gs-traffic o5gs-gate o5gs-evidence o5gs-urls o5gs-orchestrate o5gs-slices o5gs-plan o5gs-dynamic o5gs-network o5gs-network-demo \
         o5gs-test o5gs-deploy o5gs-deploy-init o5gs-rebuild o5gs-calibrate o5gs-isolation o5gs-capture o5gs-scale o5gs-kpi o5gs-kpi-all \
         o5gs-k8s-up o5gs-k8s-verify o5gs-k8s-down \
         o5gs-down o5gs-logs o5gs-clean
@@ -258,6 +258,13 @@ o5gs-plan: ## Open5GS: which slices the recently observed demand needs, and how 
 
 o5gs-dynamic: ## Open5GS: priority, feedback controller and planning experiments on real traffic. Use: D=180 RATE=3
 	@bash scripts/open5gs/orchestrator_dynamic.sh $(or $(D),180) $(or $(RATE),3)
+
+o5gs-network: ## Open5GS: network orchestrator — slice lifecycle state (starts it if needed). Then: netorch.py activate|deactivate|scale (ADR-017)
+	@bash scripts/open5gs/start_netorch.sh >/dev/null
+	@python3 tools/network-orchestrator/netorch.py status
+
+o5gs-network-demo: ## Open5GS: lifecycle, rollback, closed loop and compute experiments, saved as evidence (~16 min)
+	@bash scripts/open5gs/netorch_demo.sh
 
 o5gs-test: ## Open5GS: SPEC acceptance criteria on the running stack (user plane included)
 	@bash tests/acceptance-open5gs.sh

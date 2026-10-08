@@ -49,6 +49,15 @@ OBS="o5gs-prometheus"
 say() { echo "== $(date -u +%T) $*"; }
 gate() { python3 tools/kpi-gate/kpi_gate.py --defs "$DEFS" --wait 20; }
 
+# A slice the network orchestrator has made dormant (ADR-017) would half-restart here — its UPF is
+# in $UPFS — and fail the gate, which checks every slice. Refuse, and say how to proceed.
+dormant=$(docker exec o5gs-ue sh /etc/ueransim/ue-slice.sh status 2>/dev/null | awk '$2 == "parked" { print $1 }' | tr '\n' ' ')
+if [ -n "$dormant" ]; then
+  echo "ABORTED: slice(s) ${dormant}are dormant (network orchestrator, ADR-017). Activate them first:"
+  for s in $dormant; do echo "  python3 tools/network-orchestrator/netorch.py activate $s"; done
+  exit 2
+fi
+
 validate() {
   python3 - <<'PY' || return 1
 import glob, sys, yaml

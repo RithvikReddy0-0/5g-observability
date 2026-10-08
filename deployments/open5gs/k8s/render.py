@@ -99,16 +99,18 @@ def to_k8s_ue(doc):
     return d
 
 
+HOST_JOBS = ("slice-orchestrator", "network-orchestrator")
+
+
 def to_k8s_prometheus(doc):
     d = copy.deepcopy(doc)
+    # The slice and network orchestrators are host processes in the compose deployment (they
+    # drive Docker); they are not part of this one.
+    d["scrape_configs"] = [j for j in d["scrape_configs"] if j["job_name"] not in HOST_JOBS]
     for job in d["scrape_configs"]:
-        if job["job_name"] == "slice-orchestrator":
-            continue
         for sc in job.get("static_configs", []):
             sc["targets"] = [re.sub(r"^10\.53\.0\.(\d+)", lambda m: fqdn(IP_TO_NAME["10.53.0.%s" % m.group(1)]), t)
                              for t in sc["targets"]]
-    # The orchestrator is a host process in the compose deployment; it is not part of this one.
-    d["scrape_configs"] = [j for j in d["scrape_configs"] if j["job_name"] != "slice-orchestrator"]
     return d
 
 
@@ -134,7 +136,8 @@ for p in sorted(glob.glob(os.path.join(BASE, "ran", "gnb-*.yaml"))):
     ran[os.path.basename(p)] = dump(to_k8s_gnb(load(p)))
 for p in sorted(glob.glob(os.path.join(BASE, "ran", "ue-slice-*.yaml"))):
     ran[os.path.basename(p)] = dump(to_k8s_ue(load(p)))
-for script in ("ue-entrypoint.sh", "gnb-entrypoint.sh"):
+# ue-entrypoint.sh sources ue-lib.sh (ADR-017): without it the UE pod would not start.
+for script in ("ue-entrypoint.sh", "ue-lib.sh", "ue-slice.sh", "gnb-entrypoint.sh"):
     ran[script] = open(os.path.join(BASE, "ran", script), encoding="utf-8").read()
 configmap("o5gs-ran", ran)
 

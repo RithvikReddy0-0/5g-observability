@@ -131,7 +131,7 @@ jobs:
 
       - name: Python tools and exporters compile
         run: |
-          python3 -m py_compile tools/kpi-gate/*.py tools/kpi/*.py tools/check_open5gs_slices.py tools/slice-orchestrator/*.py deployments/open5gs/k8s/render.py scripts/open5gs/*.py             deployments/open5gs/observability/*.py             && echo "all Python compiles"
+          python3 -m py_compile tools/kpi-gate/*.py tools/kpi/*.py tools/check_open5gs_slices.py tools/slice-orchestrator/*.py tools/network-orchestrator/*.py deployments/open5gs/k8s/render.py scripts/open5gs/*.py             deployments/open5gs/observability/*.py             && echo "all Python compiles"
 
   kpi-gate:
     name: KPI gate is defined and effective
@@ -165,7 +165,14 @@ jobs:
         run: |
           # Each rule came from a real failure: cheapest adequate slice, no spill-over of
           # best-effort demand into URLLC, measured load counts, permission is enforced.
+          # Phase 2b (ADR-016): ARP pre-emption, the feedback controller, planning.
           python3 tools/slice-orchestrator/test_decide.py
+
+      - name: network orchestrator lifecycle decisions and rollback
+        run: |
+          # ADR-017: the closed loop on /plan (with its hysteresis), inventory, rollback of a
+          # failed activation, and a CPU quota that must read back as requested.
+          python3 tools/network-orchestrator/test_netorch.py
 
       - name: gate PASSES a conforming deployment
         run: |

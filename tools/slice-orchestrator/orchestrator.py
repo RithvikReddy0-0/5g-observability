@@ -175,6 +175,9 @@ def load_slices():
             "arp": int(env.get(p + "ARP_PRIORITY", 8)),
             "capacity_mbps": float(env.get(p + "CAPACITY_MBPS", 100)),
             "max_latency_ms": float(env.get(p + "MAX_LATENCY_MS", 300)),
+            # Set by the network orchestrator (ADR-017): an inactive slice is deployed but parked
+            # or being drained, and admits nothing. Planning still considers it.
+            "active": True,
             # The slice's default ARP, for subscribers whose own record does not say otherwise.
             "arp_default": {"priority": int(env.get(p + "ARP_PRIORITY", 8)),
                             "may_preempt": env.get(p + "ARP_PREEMPT_CAP") == "MAY_PREEMPT",
@@ -428,6 +431,14 @@ def decide(supi, cls, mbps=None):
         return {"admitted": False,
                 "reason": "subscriber is permitted on %s, none of which is a defined slice"
                           % ",".join(allowed)}
+    # Slices the network orchestrator has deactivated admit nothing (ADR-017). The demand is still
+    # in demand_log, so /plan sees it — that is how a dormant slice gets activated again.
+    if not any(s["active"] for s in candidates):
+        s = candidates[0]
+        bump("rejected", snssai(s), cls, "inactive")
+        return {"admitted": False,
+                "reason": "slice %s (%s) is not active" % (snssai(s), ",".join(c["name"] for c in candidates))}
+    candidates = [s for s in candidates if s["active"]]
 
     fits_latency = [s for s in candidates if s["max_latency_ms"] <= need_latency]
     if not fits_latency:
@@ -791,6 +802,10 @@ def metrics():
         "Allocated divided by capacity, per slice (1.0 = full).", util)
     add("slice_active_flows", "gauge",
         "Number of admitted demands currently holding capacity on each slice.", nflows)
+    add("slice_active", "gauge",
+        "1 when the slice admits demands; 0 when the network orchestrator has deactivated it (ADR-017).",
+        ['slice_active{sst="%d",sd="%s",slice="%s"} %d' % (s["sst"], s["sd"], s["name"], 1 if s["active"] else 0)
+         for s in SLICES])
     add("slice_admission_limit_mbps", "gauge",
         "What each slice admits up to now: the feedback controller's limit, at most the capacity.",
         ['slice_admission_limit_mbps{sst="%d",sd="%s",slice="%s"} %.2f'
@@ -924,7 +939,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         path = self.path.split("?")[0].rstrip("/")
-        if path not in ("/request", "/plan"):
+        if path not in ("/request", "/plan", "/slices"):
             self._send(404, '{"error":"not found"}')
             return
         n = int(self.headers.get("Content-Length") or 0)
@@ -937,6 +952,19 @@ class Handler(BaseHTTPRequestHandler):
             with _lock:
                 result = plan(req.get("demands", []), float(req.get("headroom", PLAN_HEADROOM)))
             self._send(200, json.dumps(result, indent=2))
+            return
+        if path == "/slices":
+            # The network orchestrator's switch (ADR-017): {"name": "mMTC", "active": false}.
+            with _lock:
+                s = next((x for x in SLICES if x["name"] == req.get("name")), None)
+                if s is None or not isinstance(req.get("active"), bool):
+                    self._send(400, '{"error":"need {\\"name\\": <slice>, \\"active\\": true|false}"}')
+                    return
+                s["active"] = req["active"]
+                body = {"name": s["name"], "active": s["active"],
+                        "active_flows": len([f for f in flows if f["snssai"] == snssai(s)]),
+                        "allocated_mbps": round(allocated(snssai(s)), 2)}
+            self._send(200, json.dumps(body))
             return
         supi = req.get("supi", "")
         cls = req.get("traffic_class", req.get("type", ""))
