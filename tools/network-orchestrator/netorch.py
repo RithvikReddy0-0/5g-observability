@@ -252,7 +252,7 @@ class Op:
     def __init__(self, kind, name, reason, **args):
         self.id = "%s-%s-%x" % (kind, name, random.getrandbits(20))
         self.kind, self.name, self.reason, self.args = kind, name, reason, args
-        self.steps, self.result, self.error = [], "running", None
+        self.steps, self.result, self.error, self.warnings = [], "running", None, []
         self.t0 = time.time()
         self.t_end = None
 
@@ -267,7 +267,7 @@ class Op:
 
     def as_dict(self):
         return {"id": self.id, "op": self.kind, "slice": self.name, "reason": self.reason, "args": self.args,
-                "result": self.result, "error": self.error, "seconds": round((self.t_end or time.time()) - self.t0, 2),
+                "result": self.result, "error": self.error, "warnings": self.warnings, "seconds": round((self.t_end or time.time()) - self.t0, 2),
                 "started": time.strftime("%H:%M:%S", time.localtime(self.t0)), "steps": self.steps}
 
 
@@ -425,6 +425,14 @@ def deactivate(op):
                     break
                 time.sleep(1)
             detail = "other slices kept every UE" if not lost else "other slices lost UEs: %s" % lost
+            if lost:
+                op.warnings.append("other slices lost UEs: %s" % lost)
+            # Under heavy load some deregistrations do not reach the core before the UEs stop
+            # (11 of 70 in one run): those sessions stay counted until the UEs re-attach. Not a
+            # failure — the slice IS down — but it must be visible, not buried in a detail line.
+            if core is not None and core > max(1, s["ues"] // 50):
+                op.warnings.append("core still holds %d stale session(s) on %s until its UEs re-attach"
+                                   % (core, s["name"]))
             return "%s; core still holds %s session(s) on %s" % (detail, core, s["name"])
         op.step("verify", verify)
         _finish(op, "done")
@@ -681,6 +689,8 @@ def cli(argv):
             r = call("GET", "/ops/" + r["id"])[1]
         for st in r["steps"]:
             print("  %-18s %6.1fs  %s" % (st["step"], st["seconds"], st["detail"]))
+        for w in r.get("warnings", []):
+            print("  WARNING: %s" % w)
         print("%s %s: %s in %.1fs%s" % (r["op"], r["slice"], r["result"], r["seconds"],
                                        " — " + r["error"] if r["error"] else ""))
         return 0 if r["result"] == "done" else 1
