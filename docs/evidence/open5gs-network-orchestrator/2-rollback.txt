@@ -1,0 +1,24 @@
+== experiment 2: an activation that misses its deadline is rolled back
+deactivate mMTC: done in 14.7s
+
+-- activate with ACTIVATE_DEADLINE=10 s
+  rollback              0.0s  stopped o5gs-upf-mmtc
+activate mMTC: rolled_back in 11.2s — PFCP association of o5gs-upf-mmtc with the SMF not reached within 10s
+
+eMBB   ACTIVE       UEs  20/20   core sessions 20    NFs upf dn gnb  cpus 0.0
+URLLC  ACTIVE       UEs  10/10   core sessions 10    NFs upf dn gnb  cpus 0.0
+mMTC   DORMANT      UEs   0/70   core sessions 0     NFs -  cpus None
+  mMTC containers running: 0
+
+-- activate again with the normal deadline (150 s)
+  upf                   2.8s  associated with the SMF (10.53.0.9)
+  data network          0.4s  running
+  gnb                   1.4s  NG Setup done
+  ues                   4.0s  70/70 UEs with a PDU session
+  data path             3.4s  3/3 sampled UEs reach 10.47.0.1 through the UPF
+  admit                 0.0s  slice orchestrator admits
+activate mMTC: done in 12.1s
+
+eMBB   ACTIVE       UEs  20/20   core sessions 20    NFs upf dn gnb  cpus 0.0
+URLLC  ACTIVE       UEs  10/10   core sessions 10    NFs upf dn gnb  cpus 0.0
+mMTC   ACTIVE       UEs  70/70   core sessions 70    NFs upf dn gnb  cpus 0.0

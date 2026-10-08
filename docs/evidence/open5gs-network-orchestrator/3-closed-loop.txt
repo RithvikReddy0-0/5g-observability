@@ -1,0 +1,22 @@
+== experiment 3: closed loop on /plan (on-demand: mMTC, idle 60 s, plan window 30 s)
+-- A: phones only for 120 s (no IoT demand)
+mMTC   DORMANT      UEs   0/70   core sessions 0     NFs -  cpus None
+-- B: IoT devices ask for service for 120 s
+mMTC   ACTIVE       UEs  70/70   core sessions 70    NFs upf dn gnb  cpus 0.0
+-- C: phones only again for 150 s
+mMTC   DORMANT      UEs   0/70   core sessions 0     NFs -  cpus None
+
+--- closed-loop decisions ---
+  15:21:36 deactivate mMTC  idle: no demand for 67s
+  15:22:30 activate   mMTC  demand: 0.01 Mbps needs mMTC
+  15:26:06 deactivate mMTC  idle: no demand for 68s
+
+--- operations ---
+  15:21:39 deactivate mMTC  done         17.3s  auto idle: no demand for 67s
+  15:22:32 activate   mMTC  done         17.2s  auto demand: 0.01 Mbps needs mMTC
+  15:26:08 deactivate mMTC  done         14.3s  auto idle: no demand for 68s
+
+--- IoT demands in phase B, in order (A = admitted, r = refused) ---
+rrrrrrrrrrrrrrrrrrrrrAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+  admitted: 81
+  refused:  21

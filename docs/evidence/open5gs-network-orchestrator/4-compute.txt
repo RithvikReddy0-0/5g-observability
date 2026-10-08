@@ -1,0 +1,12 @@
+== experiment 4: eMBB's compute, set by the network orchestrator
+   the same load each time: TCP downlink, 60 s, 5 eMBB UEs (scripts/open5gs/traffic.sh)
+scale eMBB: done in 0.2s
+  cpus=0  eMBB:    total   366.2 Mbps   mean per session   73.2 Mbps   (37% of AMBR over 60s)
+           URLLC probes: 31892 received, loss 0.0, one-way mean 2.058 / p95 5.691 / p99 11.022 ms
+scale eMBB: done in 0.2s
+  cpus=1  eMBB:    total   121.4 Mbps   mean per session   24.3 Mbps   (12% of AMBR over 60s)
+           URLLC probes: 31820 received, loss 0.0, one-way mean 2.041 / p95 5.028 / p99 10.435 ms
+scale eMBB: done in 0.1s
+  cpus=0.5  eMBB:    total    50.4 Mbps   mean per session   10.1 Mbps   (5% of AMBR over 60s)
+           URLLC probes: 32120 received, loss 0.0, one-way mean 1.915 / p95 4.531 / p99 8.068 ms
+scale eMBB: done in 0.3s

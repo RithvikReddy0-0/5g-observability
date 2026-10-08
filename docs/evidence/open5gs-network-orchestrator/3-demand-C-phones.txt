@@ -1,0 +1,135 @@
+driving 30 real subscribers at ~1 demands/s against http://localhost:9111
+traffic mix: video:1 control:1
+
+  ADMIT  control  0001 -> URLLC  (sst 2/112233)  1.0/20 Mbps  measured 0.4  flow on 10.46.0.13
+  ADMIT  video    0004 -> eMBB   (sst 1/010203)  8.0/93 Mbps  measured 0.0  flow on 10.45.0.38
+  ADMIT  control  0012 -> URLLC  (sst 2/112233)  2.0/20 Mbps  measured 0.4  flow on 10.46.0.21
+  ADMIT  control  0015 -> URLLC  (sst 2/112233)  3.0/20 Mbps  measured 0.4  flow on 10.46.0.19
+  ADMIT  control  0025 -> URLLC  (sst 2/112233)  4.0/20 Mbps  measured 0.4  flow on 10.46.0.16
+  ADMIT  video    0003 -> eMBB   (sst 1/010203)  16.0/93 Mbps  measured 0.0  flow on 10.45.0.40
+  ADMIT  control  0014 -> URLLC  (sst 2/112233)  5.0/20 Mbps  measured 1.3  flow on 10.46.0.20
+  ADMIT  control  0011 -> URLLC  (sst 2/112233)  6.0/20 Mbps  measured 1.3  flow on 10.46.0.12
+  ADMIT  control  0030 -> URLLC  (sst 2/112233)  7.0/20 Mbps  measured 1.3  flow on 10.46.0.15
+  ADMIT  video    0022 -> eMBB   (sst 1/010203)  24.0/93 Mbps  measured 8.4  flow on 10.45.0.25
+  ADMIT  video    0019 -> eMBB   (sst 1/010203)  32.0/93 Mbps  measured 8.4  flow on 10.45.0.27
+  ADMIT  video    0022 -> eMBB   (sst 1/010203)  40.0/93 Mbps  measured 8.4  flow on 10.45.0.31
+  ADMIT  video    0028 -> eMBB   (sst 1/010203)  48.0/93 Mbps  measured 9.0  flow on 10.45.0.29
+  ADMIT  control  0002 -> URLLC  (sst 2/112233)  8.0/20 Mbps  measured 4.5  flow on 10.46.0.17
+  ADMIT  video    0002 -> eMBB   (sst 1/010203)  56.0/93 Mbps  measured 9.0  flow on 10.45.0.43
+  ADMIT  video    0027 -> eMBB   (sst 1/010203)  64.0/93 Mbps  measured 18.5  flow on 10.45.0.36
+  ADMIT  control  0013 -> URLLC  (sst 2/112233)  9.0/20 Mbps  measured 5.3  flow on 10.46.0.14
+  ADMIT  video    0004 -> eMBB   (sst 1/010203)  72.0/93 Mbps  measured 18.5  flow on 10.45.0.26
+  ADMIT  control  0006 -> URLLC  (sst 2/112233)  10.0/20 Mbps  measured 6.6  flow on 10.46.0.18
+  ADMIT  control  0029 -> URLLC  (sst 2/112233)  11.0/20 Mbps  measured 6.6  flow on 10.46.0.15
+  ADMIT  control  0016 -> URLLC  (sst 2/112233)  12.0/20 Mbps  measured 6.6  flow on 10.46.0.20
+  ADMIT  control  0028 -> URLLC  (sst 2/112233)  12.0/20 Mbps  measured 6.5  flow on 10.46.0.13
+  ADMIT  control  0005 -> URLLC  (sst 2/112233)  13.0/20 Mbps  measured 6.5  flow on 10.46.0.21
+  ADMIT  video    0008 -> eMBB   (sst 1/010203)  72.0/93 Mbps  measured 55.4  flow on 10.45.0.41
+  ADMIT  control  0025 -> URLLC  (sst 2/112233)  12.0/20 Mbps  measured 9.4  flow on 10.46.0.19
+  REFUSE video    0015 -> slice 1/010203 (eMBB) full: 72.0/50.4 Mbps in use (admitted 72.0, measured 62.1, policy 500), video needs 8.0
+  REFUSE video    0011 -> slice 1/010203 (eMBB) full: 64.0/50.4 Mbps in use (admitted 64.0, measured 62.1, policy 500), video needs 8.0
+  REFUSE video    0028 -> slice 1/010203 (eMBB) full: 66.7/50.4 Mbps in use (admitted 64.0, measured 66.7, policy 500), video needs 8.0
+  ADMIT  control  0028 -> URLLC  (sst 2/112233)  10.0/20 Mbps  measured 9.9  flow on 10.46.0.16
+  ADMIT  control  0022 -> URLLC  (sst 2/112233)  10.0/20 Mbps  measured 9.9  flow on 10.46.0.12
+  REFUSE video    0018 -> slice 1/010203 (eMBB) full: 66.7/50.4 Mbps in use (admitted 56.0, measured 66.7, policy 500), video needs 8.0
+  ADMIT  control  0015 -> URLLC  (sst 2/112233)  11.0/20 Mbps  measured 9.9  flow on 10.46.0.20
+  ADMIT  control  0023 -> URLLC  (sst 2/112233)  12.0/20 Mbps  measured 9.9  flow on 10.46.0.14
+  REFUSE video    0027 -> slice 1/010203 (eMBB) full: 59.3/50.4 Mbps in use (admitted 40.0, measured 59.3, policy 500), video needs 8.0
+  REFUSE video    0012 -> slice 1/010203 (eMBB) full: 59.3/50.4 Mbps in use (admitted 32.0, measured 59.3, policy 500), video needs 8.0
+  REFUSE video    0027 -> slice 1/010203 (eMBB) full: 59.3/50.4 Mbps in use (admitted 32.0, measured 59.3, policy 500), video needs 8.0
+  ADMIT  control  0004 -> URLLC  (sst 2/112233)  12.0/20 Mbps  measured 9.8  flow on 10.46.0.17
+  ADMIT  control  0020 -> URLLC  (sst 2/112233)  13.0/20 Mbps  measured 9.8  flow on 10.46.0.15
+  ADMIT  video    0003 -> eMBB   (sst 1/010203)  24.0/50 Mbps  measured 40.3  flow on 10.45.0.32
+  ADMIT  control  0007 -> URLLC  (sst 2/112233)  13.0/20 Mbps  measured 10.4  flow on 10.46.0.13
+  ADMIT  control  0028 -> URLLC  (sst 2/112233)  13.0/20 Mbps  measured 10.4  flow on 10.46.0.18
+  ADMIT  control  0024 -> URLLC  (sst 2/112233)  13.0/20 Mbps  measured 10.8  flow on 10.46.0.15
+  ADMIT  control  0003 -> URLLC  (sst 2/112233)  13.0/20 Mbps  measured 10.8  flow on 10.46.0.12
+  ADMIT  video    0016 -> eMBB   (sst 1/010203)  24.0/50 Mbps  measured 19.0  flow on 10.45.0.39
+  ADMIT  video    0011 -> eMBB   (sst 1/010203)  32.0/50 Mbps  measured 7.6  flow on 10.45.0.29
+  ADMIT  video    0018 -> eMBB   (sst 1/010203)  32.0/50 Mbps  measured 7.6  flow on 10.45.0.43
+  ADMIT  video    0012 -> eMBB   (sst 1/010203)  40.0/50 Mbps  measured 7.6  flow on 10.45.0.25
+  ADMIT  control  0030 -> URLLC  (sst 2/112233)  11.0/20 Mbps  measured 8.5  flow on 10.46.0.19
+  ADMIT  control  0012 -> URLLC  (sst 2/112233)  12.0/20 Mbps  measured 8.5  flow on 10.46.0.21
+  ADMIT  control  0005 -> URLLC  (sst 2/112233)  13.0/20 Mbps  measured 8.5  flow on 10.46.0.14
+  ADMIT  video    0002 -> eMBB   (sst 1/010203)  48.0/50 Mbps  measured 19.2  flow on 10.45.0.37
+  ADMIT  control  0004 -> URLLC  (sst 2/112233)  12.0/20 Mbps  measured 8.4  flow on 10.46.0.16
+  ADMIT  video    0015 -> eMBB   (sst 1/010203)  56.0/75 Mbps  measured 19.2  flow on 10.45.0.44
+  ADMIT  control  0020 -> URLLC  (sst 2/112233)  12.0/20 Mbps  measured 7.8  flow on 10.46.0.20
+  ADMIT  video    0027 -> eMBB   (sst 1/010203)  64.0/75 Mbps  measured 40.2  flow on 10.45.0.38
+  ADMIT  video    0016 -> eMBB   (sst 1/010203)  72.0/75 Mbps  measured 40.2  flow on 10.45.0.30
+  ADMIT  video    0013 -> eMBB   (sst 1/010203)  80.0/100 Mbps  measured 40.2  flow on 10.45.0.27
+  ADMIT  control  0003 -> URLLC  (sst 2/112233)  11.0/20 Mbps  measured 10.5  flow on 10.46.0.17
+  ADMIT  video    0018 -> eMBB   (sst 1/010203)  88.0/100 Mbps  measured 40.2  flow on 10.45.0.28
+  ADMIT  video    0005 -> eMBB   (sst 1/010203)  88.0/100 Mbps  measured 56.2  flow on 10.45.0.41
+  ADMIT  video    0017 -> eMBB   (sst 1/010203)  96.0/125 Mbps  measured 56.2  flow on 10.45.0.35
+  ADMIT  control  0029 -> URLLC  (sst 2/112233)  9.0/20 Mbps  measured 10.1  flow on 10.46.0.13
+  ADMIT  control  0019 -> URLLC  (sst 2/112233)  9.0/20 Mbps  measured 10.1  flow on 10.46.0.18
+  ADMIT  video    0022 -> eMBB   (sst 1/010203)  104.0/125 Mbps  measured 75.4  flow on 10.45.0.26
+  ADMIT  video    0002 -> eMBB   (sst 1/010203)  104.0/125 Mbps  measured 75.4  flow on 10.45.0.39
+  ADMIT  video    0024 -> eMBB   (sst 1/010203)  104.0/125 Mbps  measured 75.4  flow on 10.45.0.36
+  ADMIT  video    0005 -> eMBB   (sst 1/010203)  104.0/125 Mbps  measured 75.4  flow on 10.45.0.32
+  ADMIT  video    0011 -> eMBB   (sst 1/010203)  104.0/125 Mbps  measured 75.4  flow on 10.45.0.25
+  ADMIT  video    0017 -> eMBB   (sst 1/010203)  112.0/125 Mbps  measured 83.1  flow on 10.45.0.31
+  ADMIT  control  0017 -> URLLC  (sst 2/112233)  7.0/20 Mbps  measured 7.5  flow on 10.46.0.21
+  REFUSE video    0014 -> slice 1/010203 (eMBB) full: 112.0/78.4 Mbps in use (admitted 112.0, measured 57.7, policy 500), video needs 8.0
+  ADMIT  control  0011 -> URLLC  (sst 2/112233)  7.0/20 Mbps  measured 7.6  flow on 10.46.0.19
+  ADMIT  control  0007 -> URLLC  (sst 2/112233)  7.0/20 Mbps  measured 7.6  flow on 10.46.0.16
+  REFUSE video    0022 -> slice 1/010203 (eMBB) full: 96.0/78.4 Mbps in use (admitted 96.0, measured 69.7, policy 500), video needs 8.0
+  ADMIT  control  0005 -> URLLC  (sst 2/112233)  7.0/20 Mbps  measured 5.2  flow on 10.46.0.14
+  REFUSE video    0018 -> slice 1/010203 (eMBB) full: 88.0/78.4 Mbps in use (admitted 88.0, measured 69.7, policy 500), video needs 8.0
+  ADMIT  control  0009 -> URLLC  (sst 2/112233)  8.0/20 Mbps  measured 3.5  flow on 10.46.0.12
+  REFUSE video    0027 -> slice 1/010203 (eMBB) full: 76.9/78.4 Mbps in use (admitted 72.0, measured 76.9, policy 500), video needs 8.0
+  ADMIT  control  0019 -> URLLC  (sst 2/112233)  8.0/20 Mbps  measured 3.5  flow on 10.46.0.17
+  ADMIT  control  0016 -> URLLC  (sst 2/112233)  9.0/20 Mbps  measured 4.4  flow on 10.46.0.20
+  REFUSE video    0024 -> slice 1/010203 (eMBB) full: 87.2/78.4 Mbps in use (admitted 56.0, measured 87.2, policy 500), video needs 8.0
+  REFUSE video    0016 -> slice 1/010203 (eMBB) full: 87.2/78.4 Mbps in use (admitted 48.0, measured 87.2, policy 500), video needs 8.0
+  REFUSE video    0003 -> slice 1/010203 (eMBB) full: 74.2/78.4 Mbps in use (admitted 48.0, measured 74.2, policy 500), video needs 8.0
+  REFUSE video    0010 -> slice 1/010203 (eMBB) full: 74.2/78.4 Mbps in use (admitted 48.0, measured 74.2, policy 500), video needs 8.0
+  ADMIT  control  0025 -> URLLC  (sst 2/112233)  8.0/20 Mbps  measured 7.0  flow on 10.46.0.15
+  ADMIT  video    0011 -> eMBB   (sst 1/010203)  48.0/78 Mbps  measured 50.7  flow on 10.45.0.29
+  ADMIT  control  0026 -> URLLC  (sst 2/112233)  9.0/20 Mbps  measured 7.0  flow on 10.46.0.18
+  ADMIT  control  0013 -> URLLC  (sst 2/112233)  10.0/20 Mbps  measured 7.0  flow on 10.46.0.13
+  ADMIT  video    0016 -> eMBB   (sst 1/010203)  32.0/78 Mbps  measured 50.7  flow on 10.45.0.40
+  ADMIT  control  0011 -> URLLC  (sst 2/112233)  11.0/20 Mbps  measured 7.8  flow on 10.46.0.12
+  ADMIT  video    0023 -> eMBB   (sst 1/010203)  24.0/78 Mbps  measured 50.7  flow on 10.45.0.30
+  ADMIT  control  0026 -> URLLC  (sst 2/112233)  11.0/20 Mbps  measured 8.7  flow on 10.46.0.21
+  ADMIT  video    0023 -> eMBB   (sst 1/010203)  32.0/78 Mbps  measured 27.6  flow on 10.45.0.34
+  ADMIT  control  0004 -> URLLC  (sst 2/112233)  11.0/20 Mbps  measured 8.7  flow on 10.46.0.19
+  ADMIT  control  0015 -> URLLC  (sst 2/112233)  11.0/20 Mbps  measured 8.7  flow on 10.46.0.16
+  ADMIT  control  0002 -> URLLC  (sst 2/112233)  12.0/20 Mbps  measured 8.7  flow on 10.46.0.15
+  ADMIT  control  0006 -> URLLC  (sst 2/112233)  12.0/20 Mbps  measured 8.7  flow on 10.46.0.14
+  ADMIT  control  0028 -> URLLC  (sst 2/112233)  13.0/20 Mbps  measured 9.6  flow on 10.46.0.20
+  ADMIT  control  0024 -> URLLC  (sst 2/112233)  13.0/20 Mbps  measured 9.6  flow on 10.46.0.18
+  ADMIT  control  0004 -> URLLC  (sst 2/112233)  14.0/20 Mbps  measured 10.0  flow on 10.46.0.19
+  ADMIT  video    0008 -> eMBB   (sst 1/010203)  40.0/78 Mbps  measured 27.5  flow on 10.45.0.28
+  ADMIT  video    0006 -> eMBB   (sst 1/010203)  48.0/78 Mbps  measured 27.5  flow on 10.45.0.41
+  ADMIT  control  0005 -> URLLC  (sst 2/112233)  13.0/20 Mbps  measured 8.2  flow on 10.46.0.17
+  ADMIT  video    0003 -> eMBB   (sst 1/010203)  56.0/78 Mbps  measured 28.7  flow on 10.45.0.44
+  ADMIT  control  0015 -> URLLC  (sst 2/112233)  14.0/20 Mbps  measured 8.2  flow on 10.46.0.14
+  ADMIT  control  0021 -> URLLC  (sst 2/112233)  14.0/20 Mbps  measured 9.6  flow on 10.46.0.13
+  ADMIT  video    0015 -> eMBB   (sst 1/010203)  56.0/78 Mbps  measured 25.9  flow on 10.45.0.39
+  ADMIT  control  0011 -> URLLC  (sst 2/112233)  14.0/20 Mbps  measured 9.6  flow on 10.46.0.12
+  ADMIT  video    0008 -> eMBB   (sst 1/010203)  64.0/78 Mbps  measured 35.1  flow on 10.45.0.38
+  ADMIT  video    0006 -> eMBB   (sst 1/010203)  64.0/78 Mbps  measured 35.1  flow on 10.45.0.33
+  ADMIT  control  0016 -> URLLC  (sst 2/112233)  13.0/20 Mbps  measured 10.2  flow on 10.46.0.20
+  ADMIT  control  0016 -> URLLC  (sst 2/112233)  14.0/20 Mbps  measured 12.2  flow on 10.46.0.21
+  ADMIT  video    0013 -> eMBB   (sst 1/010203)  64.0/78 Mbps  measured 47.5  flow on 10.45.0.26
+  ADMIT  control  0009 -> URLLC  (sst 2/112233)  14.0/20 Mbps  measured 12.2  flow on 10.46.0.12
+  ADMIT  video    0019 -> eMBB   (sst 1/010203)  64.0/78 Mbps  measured 47.5  flow on 10.45.0.35
+  ADMIT  video    0030 -> eMBB   (sst 1/010203)  72.0/78 Mbps  measured 47.5  flow on 10.45.0.29
+  REFUSE video    0022 -> slice 1/010203 (eMBB) full: 72.0/78.4 Mbps in use (admitted 72.0, measured 47.4, policy 500), video needs 8.0
+  REFUSE video    0020 -> slice 1/010203 (eMBB) full: 72.0/78.4 Mbps in use (admitted 72.0, measured 50.4, policy 500), video needs 8.0
+  ADMIT  video    0018 -> eMBB   (sst 1/010203)  80.0/103 Mbps  measured 50.4  flow on 10.45.0.43
+  ADMIT  control  0020 -> URLLC  (sst 2/112233)  9.0/20 Mbps  measured 11.2  flow on 10.46.0.18
+  ADMIT  control  0009 -> URLLC  (sst 2/112233)  9.0/20 Mbps  measured 11.2  flow on 10.46.0.15
+  ADMIT  video    0010 -> eMBB   (sst 1/010203)  80.0/103 Mbps  measured 62.4  flow on 10.45.0.31
+  ADMIT  control  0005 -> URLLC  (sst 2/112233)  10.0/20 Mbps  measured 11.2  flow on 10.46.0.16
+  ADMIT  control  0014 -> URLLC  (sst 2/112233)  10.0/20 Mbps  measured 9.2  flow on 10.46.0.19
+  ADMIT  video    0008 -> eMBB   (sst 1/010203)  72.0/103 Mbps  measured 62.4  flow on 10.45.0.25
+  ADMIT  control  0003 -> URLLC  (sst 2/112233)  10.0/20 Mbps  measured 9.2  flow on 10.46.0.17
+
+--- summary ---
+  demands : 126
+  admitted: 109 (87%)
+  refused : 17 (13%)
+      slice 1/010203 (eMBB) full               17

@@ -1,0 +1,82 @@
+[
+  {
+    "id": "scale-eMBB-3b92e",
+    "op": "scale",
+    "slice": "eMBB",
+    "reason": "manual",
+    "args": {
+      "cpus": 0.0
+    },
+    "result": "done",
+    "error": null,
+    "seconds": 0.2,
+    "started": "15:27:24",
+    "steps": [
+      {
+        "step": "cpu quota",
+        "seconds": 0.2,
+        "detail": "CPU quota {'gnb': 12.0, 'upf': 12.0} -> {'gnb': 12.0, 'upf': 12.0}: unlimited (all 12 cores)"
+      }
+    ]
+  },
+  {
+    "id": "scale-eMBB-600af",
+    "op": "scale",
+    "slice": "eMBB",
+    "reason": "manual",
+    "args": {
+      "cpus": 1.0
+    },
+    "result": "done",
+    "error": null,
+    "seconds": 0.22,
+    "started": "15:28:52",
+    "steps": [
+      {
+        "step": "cpu quota",
+        "seconds": 0.22,
+        "detail": "CPU quota {'gnb': 12.0, 'upf': 12.0} -> {'gnb': 1.0, 'upf': 1.0}: 1 CPUs"
+      }
+    ]
+  },
+  {
+    "id": "scale-eMBB-346ca",
+    "op": "scale",
+    "slice": "eMBB",
+    "reason": "manual",
+    "args": {
+      "cpus": 0.5
+    },
+    "result": "done",
+    "error": null,
+    "seconds": 0.13,
+    "started": "15:30:17",
+    "steps": [
+      {
+        "step": "cpu quota",
+        "seconds": 0.13,
+        "detail": "CPU quota {'gnb': 1.0, 'upf': 1.0} -> {'gnb': 0.5, 'upf': 0.5}: 0.5 CPUs"
+      }
+    ]
+  },
+  {
+    "id": "scale-eMBB-7dcae",
+    "op": "scale",
+    "slice": "eMBB",
+    "reason": "manual",
+    "args": {
+      "cpus": 0.0
+    },
+    "result": "done",
+    "error": null,
+    "seconds": 0.29,
+    "started": "15:31:43",
+    "steps": [
+      {
+        "step": "cpu quota",
+        "seconds": 0.29,
+        "detail": "CPU quota {'gnb': 0.5, 'upf': 0.5} -> {'gnb': 12.0, 'upf': 12.0}: unlimited (all 12 cores)"
+      }
+    ]
+  }
+]

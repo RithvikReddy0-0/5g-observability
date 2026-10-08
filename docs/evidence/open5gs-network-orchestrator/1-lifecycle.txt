@@ -1,0 +1,54 @@
+== experiment 1: lifecycle of the mMTC slice
+eMBB   ACTIVE       UEs  20/20   core sessions 20    NFs upf dn gnb  cpus 0.0
+URLLC  ACTIVE       UEs  10/10   core sessions 10    NFs upf dn gnb  cpus 0.0
+mMTC   ACTIVE       UEs  70/70   core sessions 70    NFs upf dn gnb  cpus 0.0
+
+-- resources with mMTC active
+  host load (1 min): 1.76
+  nr-ue processes: 100
+o5gs-ue cpu 210.93% mem 199.7MiB / 7.601GiB
+o5gs-gnb-mmtc cpu 6.50% mem 4.562MiB / 7.601GiB
+o5gs-upf-mmtc cpu 0.18% mem 35.72MiB / 7.601GiB
+o5gs-dn-mmtc cpu 0.19% mem 10.61MiB / 7.601GiB
+
+-- deactivate
+  stop admitting        0.0s  slice orchestrator admits nothing more; 0 flows active
+  drain                 0.2s  no admitted flows left
+  ues                  10.2s  70 UEs deregistered and stopped, 0 still up
+  network functions     2.5s  gNB, data network and UPF stopped
+  verify                0.6s  other slices kept every UE; core still holds 0 session(s) on mMTC
+deactivate mMTC: done in 14.5s
+
+eMBB   ACTIVE       UEs  20/20   core sessions 20    NFs upf dn gnb  cpus 0.0
+URLLC  ACTIVE       UEs  10/10   core sessions 10    NFs upf dn gnb  cpus 0.0
+mMTC   DORMANT      UEs   0/70   core sessions 0     NFs -  cpus None
+
+-- resources with mMTC dormant
+  host load (1 min): 1.73
+  nr-ue processes: 30
+o5gs-ue cpu 40.43% mem 75.23MiB / 7.601GiB
+o5gs-gnb-mmtc cpu 0.00% mem 0B / 0B
+o5gs-upf-mmtc cpu 0.00% mem 0B / 0B
+o5gs-dn-mmtc cpu 0.00% mem 0B / 0B
+
+-- an IoT demand while dormant:
+{"admitted": false, "reason": "slice 3/334455 (mMTC) is not active"}
+
+-- activate
+  upf                   2.7s  associated with the SMF (10.53.0.9)
+  data network          0.4s  running
+  gnb                   1.5s  NG Setup done
+  ues                   4.1s  70/70 UEs with a PDU session
+  data path             3.5s  3/3 sampled UEs reach 10.47.0.1 through the UPF
+  admit                 0.0s  slice orchestrator admits
+activate mMTC: done in 12.2s
+
+eMBB   ACTIVE       UEs  20/20   core sessions 20    NFs upf dn gnb  cpus 0.0
+URLLC  ACTIVE       UEs  10/10   core sessions 10    NFs upf dn gnb  cpus 0.0
+mMTC   ACTIVE       UEs  70/70   core sessions 70    NFs upf dn gnb  cpus 0.0
+
+-- the IoT devices' own reports reach the data network again:
+kpi_devices_active{slice="mMTC"} 70
+
+-- the other slices throughout (URLLC collector run covering the whole experiment):
+URLLC probes: 63891 received, loss 0.0, one-way mean 1.746 / p95 2.76 / p99 6.881 ms

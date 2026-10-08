@@ -1,0 +1,111 @@
+driving 70 real subscribers at ~1 demands/s against http://localhost:9111
+traffic mix: video:1 control:1
+
+  REFUSE sensor   0090 -> slice 3/334455 (mMTC) is not active
+  REFUSE sensor   0044 -> slice 3/334455 (mMTC) is not active
+  REFUSE sensor   0084 -> slice 3/334455 (mMTC) is not active
+  REFUSE sensor   0081 -> slice 3/334455 (mMTC) is not active
+  REFUSE sensor   0097 -> slice 3/334455 (mMTC) is not active
+  REFUSE sensor   0065 -> slice 3/334455 (mMTC) is not active
+  REFUSE sensor   0074 -> slice 3/334455 (mMTC) is not active
+  REFUSE sensor   0036 -> slice 3/334455 (mMTC) is not active
+  REFUSE sensor   0096 -> slice 3/334455 (mMTC) is not active
+  REFUSE sensor   0095 -> slice 3/334455 (mMTC) is not active
+  REFUSE sensor   0079 -> slice 3/334455 (mMTC) is not active
+  REFUSE sensor   0062 -> slice 3/334455 (mMTC) is not active
+  REFUSE sensor   0098 -> slice 3/334455 (mMTC) is not active
+  REFUSE sensor   0034 -> slice 3/334455 (mMTC) is not active
+  REFUSE sensor   0036 -> slice 3/334455 (mMTC) is not active
+  REFUSE sensor   0037 -> slice 3/334455 (mMTC) is not active
+  REFUSE sensor   0084 -> slice 3/334455 (mMTC) is not active
+  REFUSE sensor   0091 -> slice 3/334455 (mMTC) is not active
+  REFUSE sensor   0056 -> slice 3/334455 (mMTC) is not active
+  REFUSE sensor   0038 -> slice 3/334455 (mMTC) is not active
+  REFUSE sensor   0091 -> slice 3/334455 (mMTC) is not active
+  ADMIT  sensor   0071 -> mMTC   (sst 3/334455)  0.0/10 Mbps  measured 0.0  flow on 10.47.3.3
+  ADMIT  sensor   0064 -> mMTC   (sst 3/334455)  0.0/10 Mbps  measured 0.0  flow on 10.47.2.200
+  ADMIT  sensor   0039 -> mMTC   (sst 3/334455)  0.0/10 Mbps  measured 0.0  flow on 10.47.2.194
+  ADMIT  sensor   0040 -> mMTC   (sst 3/334455)  0.0/10 Mbps  measured 0.0  flow on 10.47.3.2
+  ADMIT  sensor   0089 -> mMTC   (sst 3/334455)  0.1/10 Mbps  measured 0.0  flow on 10.47.2.218
+  ADMIT  sensor   0048 -> mMTC   (sst 3/334455)  0.1/10 Mbps  measured 0.0  flow on 10.47.2.237
+  ADMIT  sensor   0076 -> mMTC   (sst 3/334455)  0.1/10 Mbps  measured 0.0  flow on 10.47.2.232
+  ADMIT  sensor   0092 -> mMTC   (sst 3/334455)  0.1/10 Mbps  measured 0.0  flow on 10.47.2.239
+  ADMIT  sensor   0100 -> mMTC   (sst 3/334455)  0.1/10 Mbps  measured 0.1  flow on 10.47.2.199
+  ADMIT  sensor   0091 -> mMTC   (sst 3/334455)  0.1/10 Mbps  measured 0.1  flow on 10.47.2.243
+  ADMIT  sensor   0054 -> mMTC   (sst 3/334455)  0.1/10 Mbps  measured 0.1  flow on 10.47.2.253
+  ADMIT  sensor   0038 -> mMTC   (sst 3/334455)  0.1/10 Mbps  measured 0.1  flow on 10.47.2.204
+  ADMIT  sensor   0100 -> mMTC   (sst 3/334455)  0.1/10 Mbps  measured 0.1  flow on 10.47.2.225
+  ADMIT  sensor   0089 -> mMTC   (sst 3/334455)  0.1/10 Mbps  measured 0.1  flow on 10.47.2.196
+  ADMIT  sensor   0038 -> mMTC   (sst 3/334455)  0.1/10 Mbps  measured 0.1  flow on 10.47.2.223
+  ADMIT  sensor   0097 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.1  flow on 10.47.3.4
+  ADMIT  sensor   0087 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.1  flow on 10.47.3.1
+  ADMIT  sensor   0050 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.1  flow on 10.47.2.220
+  ADMIT  sensor   0095 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.1  flow on 10.47.2.193
+  ADMIT  sensor   0064 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.1  flow on 10.47.2.222
+  ADMIT  sensor   0066 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.211
+  ADMIT  sensor   0099 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.198
+  ADMIT  sensor   0033 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.215
+  ADMIT  sensor   0044 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.247
+  ADMIT  sensor   0064 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.248
+  ADMIT  sensor   0056 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.206
+  ADMIT  sensor   0077 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.228
+  ADMIT  sensor   0042 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.236
+  ADMIT  sensor   0077 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.192
+  ADMIT  sensor   0067 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.251
+  ADMIT  sensor   0064 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.199
+  ADMIT  sensor   0099 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.229
+  ADMIT  sensor   0084 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.3.0
+  ADMIT  sensor   0062 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.224
+  ADMIT  sensor   0046 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.250
+  ADMIT  sensor   0080 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.244
+  ADMIT  sensor   0081 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.207
+  ADMIT  sensor   0074 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.220
+  ADMIT  sensor   0092 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.210
+  ADMIT  sensor   0054 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.201
+  ADMIT  sensor   0045 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.1  flow on 10.47.2.255
+  ADMIT  sensor   0055 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.1  flow on 10.47.2.225
+  ADMIT  sensor   0075 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.1  flow on 10.47.2.242
+  ADMIT  sensor   0044 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.1  flow on 10.47.2.240
+  ADMIT  sensor   0056 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.1  flow on 10.47.2.217
+  ADMIT  sensor   0040 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.1  flow on 10.47.2.203
+  ADMIT  sensor   0050 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.214
+  ADMIT  sensor   0043 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.3.2
+  ADMIT  sensor   0036 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.196
+  ADMIT  sensor   0039 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.3.4
+  ADMIT  sensor   0099 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.251
+  ADMIT  sensor   0033 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.202
+  ADMIT  sensor   0097 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.213
+  ADMIT  sensor   0076 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.229
+  ADMIT  sensor   0081 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.193
+  ADMIT  sensor   0067 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.192
+  ADMIT  sensor   0066 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.215
+  ADMIT  sensor   0094 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.236
+  ADMIT  sensor   0031 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.208
+  ADMIT  sensor   0065 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.244
+  ADMIT  sensor   0035 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.210
+  ADMIT  sensor   0057 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.241
+  ADMIT  sensor   0034 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.199
+  ADMIT  sensor   0054 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.201
+  ADMIT  sensor   0045 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.240
+  ADMIT  sensor   0068 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.243
+  ADMIT  sensor   0097 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.211
+  ADMIT  sensor   0084 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.200
+  ADMIT  sensor   0074 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.255
+  ADMIT  sensor   0083 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.230
+  ADMIT  sensor   0093 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.233
+  ADMIT  sensor   0070 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.224
+  ADMIT  sensor   0040 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.207
+  ADMIT  sensor   0049 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.216
+  ADMIT  sensor   0064 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.226
+  ADMIT  sensor   0072 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.3.3
+  ADMIT  sensor   0082 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.225
+  ADMIT  sensor   0078 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.215
+  ADMIT  sensor   0083 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.228
+  ADMIT  sensor   0043 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.236
+  ADMIT  sensor   0040 -> mMTC   (sst 3/334455)  0.2/10 Mbps  measured 0.2  flow on 10.47.2.248
+
+--- summary ---
+  demands : 102
+  admitted: 81 (79%)
+  refused : 21 (21%)
+      slice 3/334455 (mMTC) is not active      21

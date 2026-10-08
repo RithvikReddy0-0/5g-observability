@@ -1,0 +1,121 @@
+[
+  {
+    "id": "deactivate-mMTC-4db65",
+    "op": "deactivate",
+    "slice": "mMTC",
+    "reason": "auto idle: no demand for 67s",
+    "args": {},
+    "result": "done",
+    "error": null,
+    "seconds": 17.34,
+    "started": "15:21:39",
+    "steps": [
+      {
+        "step": "stop admitting",
+        "seconds": 0.0,
+        "detail": "slice orchestrator admits nothing more; 0 flows active"
+      },
+      {
+        "step": "drain",
+        "seconds": 0.0,
+        "detail": "no admitted flows left"
+      },
+      {
+        "step": "ues",
+        "seconds": 13.19,
+        "detail": "70 UEs deregistered and stopped, 0 still up"
+      },
+      {
+        "step": "network functions",
+        "seconds": 1.76,
+        "detail": "gNB, data network and UPF stopped"
+      },
+      {
+        "step": "verify",
+        "seconds": 0.94,
+        "detail": "other slices kept every UE; core still holds 0 session(s) on mMTC"
+      }
+    ]
+  },
+  {
+    "id": "activate-mMTC-78f42",
+    "op": "activate",
+    "slice": "mMTC",
+    "reason": "auto demand: 0.01 Mbps needs mMTC",
+    "args": {},
+    "result": "done",
+    "error": null,
+    "seconds": 17.18,
+    "started": "15:22:32",
+    "steps": [
+      {
+        "step": "upf",
+        "seconds": 7.53,
+        "detail": "associated with the SMF (10.53.0.9)"
+      },
+      {
+        "step": "data network",
+        "seconds": 0.31,
+        "detail": "running"
+      },
+      {
+        "step": "gnb",
+        "seconds": 1.42,
+        "detail": "NG Setup done"
+      },
+      {
+        "step": "ues",
+        "seconds": 4.31,
+        "detail": "70/70 UEs with a PDU session"
+      },
+      {
+        "step": "data path",
+        "seconds": 3.53,
+        "detail": "3/3 sampled UEs reach 10.47.0.1 through the UPF"
+      },
+      {
+        "step": "admit",
+        "seconds": 0.0,
+        "detail": "slice orchestrator admits"
+      }
+    ]
+  },
+  {
+    "id": "deactivate-mMTC-753c4",
+    "op": "deactivate",
+    "slice": "mMTC",
+    "reason": "auto idle: no demand for 68s",
+    "args": {},
+    "result": "done",
+    "error": null,
+    "seconds": 14.35,
+    "started": "15:26:08",
+    "steps": [
+      {
+        "step": "stop admitting",
+        "seconds": 0.0,
+        "detail": "slice orchestrator admits nothing more; 0 flows active"
+      },
+      {
+        "step": "drain",
+        "seconds": 0.0,
+        "detail": "no admitted flows left"
+      },
+      {
+        "step": "ues",
+        "seconds": 10.63,
+        "detail": "70 UEs deregistered and stopped, 0 still up"
+      },
+      {
+        "step": "network functions",
+        "seconds": 1.29,
+        "detail": "gNB, data network and UPF stopped"
+      },
+      {
+        "step": "verify",
+        "seconds": 1.06,
+        "detail": "other slices kept every UE; core still holds 0 session(s) on mMTC"
+      }
+    ]
+  }
+]
