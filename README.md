@@ -37,6 +37,7 @@ gtp5g) are pinned by SHA in [`manifest.lock`](manifest.lock) and fetched into a 
 | Slice isolation — Open5GS | ✅ URLLC 10/10 reachable with eMBB saturated, 3 of 3 runs ([ADR-011](docs/adr/ADR-011-dedicated-user-plane-per-slice.md)); CPU not isolated |
 | Deliverable capacity — Open5GS | ✅ eMBB 200 Mbps, URLLC 20 Mbps of real UDP ([ADR-012](docs/adr/ADR-012-ueransim-udp-buffers.md)) |
 | Slice orchestrator on real traffic | ✅ 164/165 admitted flows delivered their rate; refuses on measured load, no spill-over |
+| Dynamic allocation (Phase 2b) | ✅ ARP priority inside URLLC: critical devices pre-empt standard ones, 5/5. Feedback controller moves eMBB's admission limit: eMBB flows getting their rate 68 % → 100 %, URLLC p95 20.5 → 12.5 ms. Slice planning from demand ([results](docs/evidence/open5gs-orchestrator-dynamic/README.md), [ADR-016](docs/adr/ADR-016-dynamic-slice-allocation.md)) |
 | KPI gate — Open5GS | ✅ 0 failed on the live stack (24 KPIs: 19 enforced, 5 advisory; each slice at its own size) |
 | Deploy with automatic rollback | ✅ `scripts/open5gs/deploy.sh` — static reject, gate-fail rollback, deploy all demonstrated; the three-slice topology itself was deployed through it |
 | Per-slice KPIs (Phase 2b) | ✅ measured and scored against the team's targets: URLLC 0.90 · eMBB 0.37 · mMTC 1.00; three one-parameter sweeps; Excel report ([results](docs/evidence/open5gs-kpi/README.md), [ADR-015](docs/adr/ADR-015-traffic-profiles-and-kpi-scorecard.md)) |

@@ -29,6 +29,8 @@ the ratified ODE. That distinction determines what could and could not be proven
 | **Open5GS: KPI gate incl. user plane** | **PASS, 0 failed** (22 passed, 2 advisory, 24 KPIs) | live stack, each slice at its own size |
 | **Open5GS: URLLC isolated from a saturated eMBB** | **10 / 10** reachable, 3 of 3 runs | `isolation_test.sh`, a gNB + UPF per slice |
 | **Open5GS: orchestrator flows delivered** | **164 / 165** | real UDP flows, both slices saturated |
+| **Open5GS: priority inside URLLC (ARP)** | **5 / 5** critical demands admitted by pre-emption | standard demands refused while the slice is full |
+| **Open5GS: feedback controller** | eMBB flows met **68 % → 100 %**; URLLC p95 **20.5 → 12.5 ms** | same demand, controller off vs on; costs eMBB volume (266 → 109 Mbps) |
 | **Open5GS: acceptance** | **PASS=22, FAIL=0** | `tests/acceptance-open5gs.sh` |
 | **Open5GS: broken deploy rolled back** | **automatic** | `deploy.sh`, gate failed 8 KPIs |
 | **Open5GS on Kubernetes** | **same gate PASS** | minikube, 22 pods, 100 UEs in three slices |

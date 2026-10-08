@@ -160,6 +160,24 @@ Boundary: each device holds a session on its home slice only, and a slice's gNB 
 slice, so a flow runs on the least-busy device of the chosen slice; the requester must still be
 permitted on it.
 
+### Dynamic allocation (Phase 2b, [ADR-016](adr/ADR-016-dynamic-slice-allocation.md))
+
+- **Priority inside URLLC:** ARP sub-classes of one slice. The 3 critical devices (ARP 1) may
+  pre-empt; the 7 standard devices (ARP 2) may be pre-empted. ARP is read from the core.
+- **Feedback controller:** eMBB's admission limit follows URLLC's 10 s p95 and eMBB delivery
+  (AIMD). The 500 Mbps policy capacity is the ceiling.
+- **Planning:** `make o5gs-plan` shows which slices the observed demand needs.
+- Executed flows use `flowgen.py`: iperf3 3.16's UDP sender busy-waits, and its CPU load distorted
+  URLLC latency.
+
+| Experiment | Result |
+|---|---|
+| URLLC full of standard flows, 5 critical demands | 5/5 admitted, each pre-empting one standard flow |
+| Same saturating demand, controller off vs on | eMBB flows met 68 % → 100 %; URLLC p95 20.5 → 12.5 ms, p99 55 → 34 ms |
+| What inflates URLLC's tail | eMBB demand (p95 8.9 ms); URLLC's own flows do not (2.8 ms, idle 2.5) |
+
+Evidence: [`open5gs-orchestrator-dynamic`](evidence/open5gs-orchestrator-dynamic/README.md).
+
 ---
 
 ## Which metrics can be trusted
