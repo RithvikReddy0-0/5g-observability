@@ -108,7 +108,11 @@ See [`docs/evidence/open5gs-network-orchestrator/`](../evidence/open5gs-network-
 3. **`docker update --cpus 0` is accepted and changes nothing.** "Unlimited" left a 1.5-CPU quota
    in place while the operation reported success. Unlimited is now a quota of every host core, and
    every quota is read back.
-4. **The Kubernetes manifest would have broken the UE pod.** Its ConfigMap carried only the two
+4. **Stale sessions under heavy load (not fixed, now a warning).** In a run with the host loaded,
+   11 of 70 deregistrations did not reach the core before the UEs stopped. Those sessions stay
+   counted until the UEs re-attach. The deactivation now reports this as a WARNING instead of a
+   detail line.
+5. **The Kubernetes manifest would have broken the UE pod.** Its ConfigMap carried only the two
    entrypoints, and the UE entrypoint now sources `ue-lib.sh`. `render.py` now ships `ue-lib.sh` and
    `ue-slice.sh` as well. This is rendered and checked, but not run on minikube in this phase.
 

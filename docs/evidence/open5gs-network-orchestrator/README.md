@@ -73,6 +73,22 @@ The quota controls eMBB's capacity almost in proportion. URLLC's tail improves, 
 data network, which the quota on gNB and UPF does not reach. So the lever works, and whether the
 trade is worth it is a policy decision; the default leaves eMBB unlimited.
 
+## Under heavy load: stale sessions in the core (found in the screenshot run)
+
+During `scripts/open5gs/capture_orchestrator_screens.sh`, mMTC was deactivated while 3 demands/s
+loaded the host. 11 of the 70 deregistrations did not reach the core before the UEs stopped. The
+core kept counting 11 mMTC sessions while the slice was off, until the UEs re-attached on activation
+(screenshot `docs/screenshots/open5gs/15-ues-and-core-sessions-per-slice.png`). The slice was
+genuinely down, so the operation succeeded, but this used to show only in a detail line. It is now
+reported as a **WARNING** on the operation. This is not fixed: nothing on this stack can make the
+AMF release a context for a UE that is already gone.
+
+## Screenshots
+
+`docs/screenshots/open5gs/10-*.png` to `21-*.png`: the new Grafana panels, captured over one
+scripted 5-minute scenario (controller under load, mMTC off and on, ARP pre-emption) by
+`scripts/open5gs/capture_orchestrator_screens.sh`.
+
 ## Reproduce
 
 ```bash
