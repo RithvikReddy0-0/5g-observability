@@ -32,7 +32,7 @@ N_B     := 10
 
 .PHONY: help up create down restart stop-ues ues status test evidence screenshots report \
         bootstrap verify clean logs urls nuke gate gate-test \
-        o5gs-build o5gs-up o5gs-ues o5gs-status o5gs-ping o5gs-traffic o5gs-gate o5gs-evidence o5gs-urls o5gs-orchestrate o5gs-slices \
+        o5gs-build o5gs-up o5gs-ues o5gs-status o5gs-ping o5gs-traffic o5gs-gate o5gs-evidence o5gs-urls o5gs-orchestrate o5gs-slices o5gs-plan o5gs-dynamic \
         o5gs-test o5gs-deploy o5gs-deploy-init o5gs-rebuild o5gs-calibrate o5gs-isolation o5gs-capture o5gs-scale o5gs-kpi o5gs-kpi-all \
         o5gs-k8s-up o5gs-k8s-verify o5gs-k8s-down \
         o5gs-down o5gs-logs o5gs-clean
@@ -250,7 +250,14 @@ o5gs-orchestrate: ## Open5GS: demands admitted by MEASURED capacity and run as r
 	@cd tools/slice-orchestrator && CORE=open5gs DB_CONTAINER=o5gs-mongodb ORCH_URL=http://localhost:9111 	  DURATION=$${DURATION:-120} RATE=$${RATE:-1} python3 traffic_gen.py
 
 o5gs-slices: ## Open5GS: slice capacity, admitted vs measured load, and delivered flows
-	@curl -s --max-time 20 http://localhost:9111/metrics 2>/dev/null 	  | grep -E '^slice_(capacity|allocated|measured|utilization|flows_completed|flow_delivery|rejected)' | sed 's/^/  /' 	  || echo "  (orchestrator not running: scripts/open5gs/start_orchestrator.sh)"
+	@curl -s --max-time 20 http://localhost:9111/metrics 2>/dev/null 	  | grep -E '^slice_(capacity|admission_limit|allocated|measured|utilization|flows_completed|flow_delivery|preempted|rejected)' | sed 's/^/  /' 	  || echo "  (orchestrator not running: scripts/open5gs/start_orchestrator.sh)"
+
+o5gs-plan: ## Open5GS: which slices the recently observed demand needs, and how much capacity (ADR-016)
+	@curl -s --max-time 20 "http://localhost:9111/plan?window=$${WINDOW:-300}" 2>/dev/null \
+	  || echo "  (orchestrator not running: scripts/open5gs/start_orchestrator.sh)"
+
+o5gs-dynamic: ## Open5GS: priority, feedback controller and planning experiments on real traffic. Use: D=180 RATE=3
+	@bash scripts/open5gs/orchestrator_dynamic.sh $(or $(D),180) $(or $(RATE),3)
 
 o5gs-test: ## Open5GS: SPEC acceptance criteria on the running stack (user plane included)
 	@bash tests/acceptance-open5gs.sh

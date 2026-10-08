@@ -156,10 +156,51 @@ policy capacity, so it is not set.
 **Phase 2b — three slices** ([ADR-014](../../docs/adr/ADR-014-mmtc-slice-and-100-ues.md)). The mMTC
 slice (SST 3) is defined in `slices.env`, so the orchestrator loads it, and `SLICE_PATHS` knows its
 pool and data network. Its 70 IoT subscribers are permitted on mMTC only. The traffic generator's
-mix (video, files, browsing, control) is phone-like traffic, so `traffic_gen.py` drives only
-subscribers permitted on SST 1 or 2 (`SUBSCRIBER_SSTS`). IoT devices get their own traffic profile
-(Track 2). Which traffic classes map to mMTC, and priority within URLLC, are the shared
-orchestrator work of Phase 2b and are not decided here.
+mix (video, files, browsing, control) is phone-like traffic for subscribers permitted on SST 1 or 2;
+add 3 to `SUBSCRIBER_SSTS` and the IoT devices ask for `IOT_MIX` (`sensor`) instead, which goes to
+mMTC. Their real reports flow regardless, from `traffic_agent.py` (Track 2).
+
+## Dynamic allocation (Phase 2b, ADR-016)
+
+[ADR-016](../../docs/adr/ADR-016-dynamic-slice-allocation.md) makes three static things dynamic.
+
+**Priority inside URLLC — ARP sub-classes, not more slices.** The three critical URLLC devices
+(…021–023) have ARP 1 and may pre-empt; the seven standard ones (…024–030) have ARP 2 and may be
+pre-empted (`SLICE_B_ARP_TIERS`). The orchestrator reads each subscriber's ARP from the core. When
+the slice is full, a critical demand stops just enough lower-priority flows to fit, and their real
+traffic is killed. An equal or a protected flow is never pre-empted.
+
+**A feedback controller moves eMBB's admission limit** (`CONTROL=1`, the Open5GS default). Every
+5 s it reads URLLC's one-way p95 over the last 10 s and the share of recent eMBB flows that missed
+their rate. Either one congested cuts the limit to 0.7 × the load in use; both healthy with demand
+pressing raises it by 5 % of the capacity (AIMD). The policy capacity, 500 Mbps, is the ceiling;
+the limit is what this host can serve without hurting URLLC. eMBB is throttled because, measured
+here, eMBB load is what inflates URLLC's tail (shared CPU); URLLC's own flows do not (ADR-016).
+`CONTROL_THROTTLE="eMBB URLLC"` caps URLLC too, and critical devices still pre-empt standard ones
+under a cut URLLC limit.
+
+**Executed flows use `flowgen.py`**, a paced UDP sender and receiver shipped to the containers on
+stdin. iperf3 3.16's UDP sender busy-waits (45–90 % of a core per flow at any rate), and that load
+inflated the very latency the controller steers by.
+
+**Planning.** `GET /plan` turns the demand seen over the last 300 s into the slices it needs and
+their capacity; `POST /plan` with `{"demands": [{"class": "video", "count": 20}, ...]}` does the
+same for a given set.
+
+```bash
+make o5gs-dynamic          # the three experiments below, saved as evidence
+make o5gs-plan             # plan from the observed demand
+curl -s localhost:9111/control    # the controller's recent cuts and raises
+```
+
+Results: [`docs/evidence/open5gs-orchestrator-dynamic/`](../../docs/evidence/open5gs-orchestrator-dynamic/README.md).
+
+| Endpoint / metric | Meaning |
+|---|---|
+| `slice_admission_limit_mbps{slice}` | what the slice admits up to now |
+| `slice_decisions_by_priority_total{slice,arp,decision}` | admitted / refused / preempted, by ARP level |
+| `slice_preempted_total{sst_sd,traffic_class}` | flows stopped for a higher-priority demand |
+| `slice_control_latency_ms`, `slice_control_short_ratio`, `slice_control_actions_total` | the controller's inputs and actions |
 
 ## Honest limitations
 

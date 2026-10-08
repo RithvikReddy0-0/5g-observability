@@ -1773,13 +1773,13 @@
     },
     {
       "type": "timeseries",
-      "title": "eMBB: capacity, admitted, measured",
+      "title": "eMBB: capacity, admission limit, admitted, measured",
       "id": 31,
       "datasource": {
         "type": "prometheus",
         "uid": "prom-o5gs"
       },
-      "description": "Admission uses max(admitted, measured): load the orchestrator never admitted still uses up capacity. Requires scripts/open5gs/start_orchestrator.sh.",
+      "description": "Admission uses max(admitted, measured): load the orchestrator never admitted still uses up capacity. The feedback controller (ADR-016) moves the admission limit between 10 % of the capacity and the capacity. Requires scripts/open5gs/start_orchestrator.sh.",
       "gridPos": {
         "h": 8,
         "w": 12,
@@ -1867,10 +1867,19 @@
             "uid": "prom-o5gs"
           },
           "expr": "max(slice_capacity_mbps{slice=\"eMBB\"})",
-          "legendFormat": "capacity"
+          "legendFormat": "capacity (policy)"
         },
         {
           "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "max(slice_admission_limit_mbps{slice=\"eMBB\"})",
+          "legendFormat": "admission limit (controller)"
+        },
+        {
+          "refId": "C",
           "datasource": {
             "type": "prometheus",
             "uid": "prom-o5gs"
@@ -1879,7 +1888,7 @@
           "legendFormat": "admitted"
         },
         {
-          "refId": "C",
+          "refId": "D",
           "datasource": {
             "type": "prometheus",
             "uid": "prom-o5gs"
@@ -1891,13 +1900,13 @@
     },
     {
       "type": "timeseries",
-      "title": "URLLC: capacity, admitted, measured",
+      "title": "URLLC: capacity, admission limit, admitted, measured",
       "id": 32,
       "datasource": {
         "type": "prometheus",
         "uid": "prom-o5gs"
       },
-      "description": "Best-effort demand never spills into URLLC when eMBB is full (ADR-012).",
+      "description": "Best-effort demand never spills into URLLC when eMBB is full (ADR-012). URLLC's limit moves only with CONTROL_THROTTLE=\"eMBB URLLC\": measured, URLLC's own flows do not inflate its latency, eMBB's do (ADR-016).",
       "gridPos": {
         "h": 8,
         "w": 12,
@@ -1985,10 +1994,19 @@
             "uid": "prom-o5gs"
           },
           "expr": "max(slice_capacity_mbps{slice=\"URLLC\"})",
-          "legendFormat": "capacity"
+          "legendFormat": "capacity (policy)"
         },
         {
           "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "max(slice_admission_limit_mbps{slice=\"URLLC\"})",
+          "legendFormat": "admission limit (controller)"
+        },
+        {
+          "refId": "C",
           "datasource": {
             "type": "prometheus",
             "uid": "prom-o5gs"
@@ -1997,7 +2015,7 @@
           "legendFormat": "admitted"
         },
         {
-          "refId": "C",
+          "refId": "D",
           "datasource": {
             "type": "prometheus",
             "uid": "prom-o5gs"
@@ -2015,7 +2033,7 @@
         "type": "prometheus",
         "uid": "prom-o5gs"
       },
-      "description": "met = >= 95 % of the admitted bitrate delivered with <= 2 % loss.",
+      "description": "met = >= 95 % of the admitted bitrate delivered with <= 2 % loss. Pre-empted flows are left out: they were stopped on purpose.",
       "gridPos": {
         "h": 4,
         "w": 8,
@@ -2049,7 +2067,7 @@
             "type": "prometheus",
             "uid": "prom-o5gs"
           },
-          "expr": "sum(slice_flows_completed_total{outcome=\"met\"}) / sum(slice_flows_completed_total)",
+          "expr": "sum(slice_flows_completed_total{outcome=\"met\"}) / sum(slice_flows_completed_total{outcome!=\"preempted\"})",
           "instant": true
         }
       ]
@@ -2245,6 +2263,377 @@
           },
           "expr": "max by (slice) (slice_flow_delivery_ratio)",
           "legendFormat": "{{slice}}"
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "Dynamic allocation \u2014 priority inside URLLC and the feedback controller (ADR-016)",
+      "id": 37,
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 81
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "What the controller watches: URLLC p95, last 10 s",
+      "id": 38,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prom-o5gs"
+      },
+      "description": "kpi_owd_recent_ms from the URLLC data network's collector. Above the upper line eMBB's admission limit is cut; below the lower one, with demand pressing on the limit, it is raised.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 82
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "min": 0,
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "stacking": {
+              "mode": "none"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(eMBB|1-010203|internet).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#2E6E8E"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(URLLC|2-112233|urllc).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#C7601F"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(mMTC|3-334455|iot).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#5A8F3C"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "max(kpi_owd_recent_ms{slice=\"URLLC\",stat=\"p95\"})",
+          "legendFormat": "URLLC p95"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "vector(8)",
+          "legendFormat": "cut above (80 % of the 10 ms budget)"
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "vector(5)",
+          "legendFormat": "may raise below (50 %)"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Demands by ARP priority level (per minute)",
+      "id": 39,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prom-o5gs"
+      },
+      "description": "ARP 1 = critical URLLC devices (may pre-empt), ARP 2 = standard URLLC devices (may be pre-empted), 8 = eMBB, 12 = IoT. A pre-emption shows as a lower-priority 'preempted'.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 82
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "min": 0,
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "stacking": {
+              "mode": "none"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(eMBB|1-010203|internet).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#2E6E8E"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(URLLC|2-112233|urllc).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#C7601F"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(mMTC|3-334455|iot).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#5A8F3C"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "sum by (slice, arp, decision) (increase(slice_decisions_by_priority_total[1m]))",
+          "legendFormat": "{{slice}} ARP {{arp}} {{decision}}"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Pre-emptions, last 15 min",
+      "id": 40,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prom-o5gs"
+      },
+      "description": "",
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 0,
+        "y": 90
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#2E6E8E"
+          }
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "sum(increase(slice_preempted_total[15m])) or vector(0)",
+          "instant": true
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Controller cuts, last 15 min",
+      "id": 41,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prom-o5gs"
+      },
+      "description": "",
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 8,
+        "y": 90
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#2E6E8E"
+          }
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "sum(increase(slice_control_actions_total{action=\"cut\"}[15m])) or vector(0)",
+          "instant": true
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Controller raises, last 15 min",
+      "id": 42,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prom-o5gs"
+      },
+      "description": "",
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 16,
+        "y": 90
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#2E6E8E"
+          }
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "sum(increase(slice_control_actions_total{action=\"raise\"}[15m])) or vector(0)",
+          "instant": true
         }
       ]
     }

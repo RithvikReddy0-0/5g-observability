@@ -13,6 +13,8 @@ UE container follows (deployments/open5gs/ran/ue-entrypoint.sh), checked in CI.
 A subscriber's home slice is its default S-NSSAI and decides which PDU session the UE opens.
 SLICE_<X>_ALSO_PERMITTED lists the other slices it may use: eMBB and URLLC devices may use
 each other's slice, which gives the orchestrator a real choice; IoT devices are mMTC only.
+SLICE_<X>_ARP_TIERS splits a slice's own subscribers into ARP priority tiers (ADR-016): the
+first three URLLC devices are critical (ARP 1, may pre-empt), the other seven standard.
 
     scripts/open5gs/provision_subscribers.py            # upsert all 100
     scripts/open5gs/provision_subscribers.py --dry-run  # print the mongo script instead
@@ -78,7 +80,31 @@ def slice_def(env, s):
         "ue_dl": bitrate(env[p + "UE_AMBR_DL"]),
         "ue_ul": bitrate(env[p + "UE_AMBR_UL"]),
         "also": list(env.get(p + "ALSO_PERMITTED", "")),
+        "tiers": arp_tiers(env.get(p + "ARP_TIERS", "")),
     }
+
+
+def arp_tiers(text):
+    """SLICE_<X>_ARP_TIERS -> [(count, priority, capability, vulnerability)], in IMSI order.
+
+    Priority inside a slice (ADR-016): the slice's own subscribers are split into ARP tiers, e.g.
+    3 critical URLLC devices that may pre-empt and 7 standard ones that may be pre-empted."""
+    tiers = []
+    for item in text.split():
+        count, prio, cap, vuln = item.split(":")
+        tiers.append((int(count), int(prio),
+                      PREEMPT_ENABLED if cap == "MAY_PREEMPT" else PREEMPT_DISABLED,
+                      PREEMPT_ENABLED if vuln == "PRE_EMPTABLE" else PREEMPT_DISABLED))
+    return tiers
+
+
+def with_tier(sl, index):
+    """The slice definition as it applies to its index-th home subscriber (0-based)."""
+    for count, prio, cap, vuln in sl["tiers"]:
+        if index < count:
+            return dict(sl, arp=prio, cap=cap, vuln=vuln)
+        index -= count
+    return sl
 
 
 def slice_entry(sl, default):
@@ -141,8 +167,11 @@ def build_script(env):
     for letter, count in plan(env):
         home = slices[letter]
         others = [slices[o] if o in slices else slice_def(env, o) for o in home["also"]]
-        for _ in range(count):
-            docs.append(subscriber("%s%s%010d" % (MCC, MNC, n), home, others))
+        if home["tiers"] and sum(t[0] for t in home["tiers"]) != count:
+            raise SystemExit("SLICE_%s_ARP_TIERS covers %d subscribers, O5GS_UES provisions %d"
+                             % (letter, sum(t[0] for t in home["tiers"]), count))
+        for i in range(count):
+            docs.append(subscriber("%s%s%010d" % (MCC, MNC, n), with_tier(home, i), others))
             n += 1
 
     # NumberInt/NumberLong matter: Open5GS reads these with bson_iter_int32/int64 and a
@@ -171,10 +200,11 @@ print('total in db: ' + db.subscribers.count());
 db.subscribers.aggregate([
   {$unwind: '$slice'}, {$match: {'slice.default_indicator': true}},
   {$group: {_id: {sst: '$slice.sst', sd: '$slice.sd', dnn: {$arrayElemAt: ['$slice.session.name', 0]},
-                  fiveqi: {$arrayElemAt: ['$slice.session.qos.index', 0]}}, subscribers: {$sum: 1}}},
-  {$sort: {'_id.sst': 1}}
+                  fiveqi: {$arrayElemAt: ['$slice.session.qos.index', 0]},
+                  arp: {$arrayElemAt: ['$slice.session.qos.arp.priority_level', 0]}}, subscribers: {$sum: 1}}},
+  {$sort: {'_id.sst': 1, '_id.arp': 1}}
 ]).forEach(function (r) { print('  home slice sst ' + r._id.sst + '/' + r._id.sd + '  dnn=' + r._id.dnn +
-                                '  5qi=' + r._id.fiveqi + '  -> ' + r.subscribers + ' subscribers'); });
+                                '  5qi=' + r._id.fiveqi + '  arp=' + r._id.arp + '  -> ' + r.subscribers + ' subscribers'); });
 """]
     return "\n".join(js), len(docs)
 

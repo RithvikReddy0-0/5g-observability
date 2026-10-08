@@ -40,22 +40,30 @@ MIX = os.environ.get("MIX", "video:4 file:3 blog:2 control:1")
 
 CORE = os.environ.get("CORE", "free5gc")
 # Which subscribers issue these demands, by the SSTs they are permitted on. The mix above is
-# phone-like traffic (video, files, browsing, control); the 70 IoT devices on the mMTC slice
-# (SST 3, Phase 2b) are driven by their own traffic profile instead, not by this generator.
+# phone-like traffic (video, files, browsing, control) and is what eMBB and URLLC devices ask for.
+# Add SST 3 to include the 70 IoT devices (Phase 2b): a device permitted on mMTC alone asks for
+# IOT_MIX instead — its periodic reports — so the orchestrator places demands on all three slices.
+# Their real reports flow regardless, from traffic_agent.py (ADR-015).
 SUBSCRIBER_SSTS = set(int(x) for x in os.environ.get("SUBSCRIBER_SSTS", "1 2").split())
+IOT_MIX = os.environ.get("IOT_MIX", "sensor:1")
 
 
 def real_supis():
-    """Read the provisioned subscribers from the live core (free5GC or Open5GS)."""
+    """Read the provisioned subscribers from the live core (free5GC or Open5GS).
+    -> (supis, iot_only): every subscriber permitted on SUBSCRIBER_SSTS, and those of them
+    permitted on mMTC (SST 3) and nothing else."""
     js = ('var a=[];db["subscriptionData.provisionedData.amData"]'
           '.find({},{_id:0,ueId:1}).forEach(function(d){a.push(d.ueId);});'
           'print(JSON.stringify(a));')
     db = "free5gc"
     if CORE == "open5gs":
         db = "open5gs"
-        js = ('var a=[];db.subscribers.find({},{_id:0,imsi:1,slice:1}).forEach(function(d){'
-              'var ok=(d.slice||[]).some(function(s){return [%s].indexOf(s.sst)>=0;});'
-              'if(ok){a.push("imsi-"+d.imsi);}});print(JSON.stringify(a));'
+        js = ('var a=[],b=[];db.subscribers.find({},{_id:0,imsi:1,slice:1}).forEach(function(d){'
+              'var sl=d.slice||[];'
+              'var ok=sl.some(function(s){return [%s].indexOf(s.sst)>=0;});'
+              'var iot=sl.length>0&&sl.every(function(s){return s.sst===3;});'
+              'if(ok){a.push("imsi-"+d.imsi); if(iot){b.push("imsi-"+d.imsi);}}});'
+              'print(JSON.stringify([a,b]));'
               % ",".join(str(x) for x in sorted(SUBSCRIBER_SSTS)))
     try:
         out = subprocess.run(
@@ -63,15 +71,18 @@ def real_supis():
             capture_output=True, text=True, timeout=30).stdout
         for line in out.splitlines():
             if line.strip().startswith("["):
-                return json.loads(line.strip())
+                data = json.loads(line.strip())
+                if CORE == "open5gs":
+                    return data[0], set(data[1])
+                return data, set()
     except Exception as exc:
         print("could not read subscribers: %s" % exc, file=sys.stderr)
-    return []
+    return [], set()
 
 
-def weighted_classes():
+def weighted_classes(mix=MIX):
     pool = []
-    for item in MIX.split():
+    for item in mix.split():
         name, _, w = item.partition(":")
         pool.extend([name] * int(w or 1))
     return pool
@@ -94,12 +105,13 @@ def post(supi, cls):
 
 
 def main():
-    supis = real_supis()
+    supis, iot = real_supis()
     if not supis:
         print("No provisioned subscribers found — is the core up and provisioned?",
               file=sys.stderr)
         return 1
     pool = weighted_classes()
+    iot_pool = weighted_classes(IOT_MIX)
     print("driving %d real subscribers at ~%g demands/s against %s" % (len(supis), RATE, ORCH))
     print("traffic mix: %s\n" % MIX)
 
@@ -111,17 +123,20 @@ def main():
             if DURATION and time.time() - started >= DURATION:
                 break
             supi = random.choice(supis)
-            cls = random.choice(pool)
+            cls = random.choice(iot_pool if supi in iot else pool)
             res = post(supi, cls)
             if res.get("admitted"):
                 admitted += 1
                 s = res["slice"]
                 fl = res.get("flow") or {}
-                print("  ADMIT  %-8s %s -> %-6s (sst %d/%s)  %.1f/%.0f Mbps%s"
+                # The admission limit, which the feedback controller may hold below the capacity.
+                print("  ADMIT  %-8s %s -> %-6s (sst %d/%s)  %.1f/%.0f Mbps%s%s"
                       % (cls, supi[-4:], s["name"], s["sst"], s["sd"],
-                         res["slice_used_mbps"], res["slice_capacity_mbps"],
+                         res["slice_used_mbps"], res.get("slice_limit_mbps", res["slice_capacity_mbps"]),
                          "  measured %.1f  flow on %s" % (res.get("slice_measured_mbps", 0), fl.get("device"))
-                         if fl.get("started") else ""))
+                         if fl.get("started") else "",
+                         "  PRE-EMPTED %s" % ", ".join("%s (ARP %d)" % (v["cls"], v["arp"]) for v in res["preempted"])
+                         if res.get("preempted") else ""))
             else:
                 refused += 1
                 why = res.get("reason", "?")

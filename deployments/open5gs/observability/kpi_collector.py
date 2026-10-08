@@ -27,12 +27,13 @@ run of thousands of packets that is noise, and it never inflates loss.
 
 Exposes, on METRICS_PORT:
   /metrics      Prometheus: kpi_packets_{received,expected}_total, kpi_owd_ms{stat} over the
-                last WINDOW seconds, kpi_devices_active, kpi_devices_seen
+                last WINDOW seconds, kpi_owd_recent_ms{stat} over the last RECENT_WINDOW
+                seconds, kpi_devices_active, kpi_devices_seen
   /run/start    starts a measurement run (clears the run accumulators)
   /run/stats    JSON for the run so far: counts, loss, latency percentiles, jitter, per device
 
 Environment: SLICE (URLLC|mMTC), MODE (urllc|mmtc), UDP_PORT, METRICS_PORT (9130),
-WINDOW (60 s), ACTIVE_WINDOW (seconds a device counts as active after its last packet).
+WINDOW (60 s), RECENT_WINDOW (10 s), ACTIVE_WINDOW (seconds a device counts as active after its last packet).
 """
 
 import collections
@@ -49,6 +50,9 @@ MODE = os.environ.get("MODE", "urllc")
 UDP_PORT = int(os.environ.get("UDP_PORT", "5400"))
 METRICS_PORT = int(os.environ.get("METRICS_PORT", "9130"))
 WINDOW = float(os.environ.get("WINDOW", "60"))
+# A short window for control rather than display: the slice orchestrator's feedback controller
+# (ADR-016) steers admission from it every few seconds, and a 60 s view reacts too late.
+RECENT_WINDOW = float(os.environ.get("RECENT_WINDOW", "10"))
 ACTIVE_WINDOW = float(os.environ.get("ACTIVE_WINDOW", "10" if MODE == "urllc" else "90"))
 
 URLLC = struct.Struct("!HBIQ")      # 15 bytes
@@ -182,6 +186,7 @@ def render_metrics():
         while recent and recent[0][0] < now - WINDOW:
             recent.popleft()
         window = summary([o for _, o in recent])
+        fast = summary([o for t, o in recent if t >= now - RECENT_WINDOW])
         received, expected = life.counts()
         active = sum(1 for t in last_seen.values() if t >= now - ACTIVE_WINDOW)
         seen = len(last_seen)
@@ -199,6 +204,13 @@ def render_metrics():
     for stat in ("mean", "p50", "p95", "p99", "max"):
         if stat in window and window[stat] is not None:
             out.append('kpi_owd_ms{%s,stat="%s"} %s' % (lab, stat, window[stat]))
+    out += [
+        "# HELP kpi_owd_recent_ms One-way delay UE -> data network over the last RECENT_WINDOW seconds.",
+        "# TYPE kpi_owd_recent_ms gauge",
+    ]
+    for stat in ("mean", "p95", "p99"):
+        if stat in fast and fast[stat] is not None:
+            out.append('kpi_owd_recent_ms{%s,stat="%s"} %s' % (lab, stat, fast[stat]))
     out += [
         "# HELP kpi_owd_samples One-way delay samples in the window.",
         "# TYPE kpi_owd_samples gauge",

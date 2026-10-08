@@ -136,20 +136,25 @@ ts("Measurement packets per second, by slice", [
 y += 8
 
 row("Slice orchestrator — demands admitted by measured capacity, run as real flows", y); y += 1
-ts("eMBB: capacity, admitted, measured", [
-    {"expr": 'max(slice_capacity_mbps{slice="eMBB"})', "legendFormat": "capacity"},
+ts("eMBB: capacity, admission limit, admitted, measured", [
+    {"expr": 'max(slice_capacity_mbps{slice="eMBB"})', "legendFormat": "capacity (policy)"},
+    {"expr": 'max(slice_admission_limit_mbps{slice="eMBB"})', "legendFormat": "admission limit (controller)"},
     {"expr": 'max(slice_allocated_mbps{slice="eMBB"})', "legendFormat": "admitted"},
     {"expr": 'max(slice_measured_mbps{slice="eMBB"})', "legendFormat": "measured at the UPF"}],
    0, y, unit="Mbits", desc=("Admission uses max(admitted, measured): load the orchestrator never admitted still "
-                            "uses up capacity. Requires scripts/open5gs/start_orchestrator.sh."))
-ts("URLLC: capacity, admitted, measured", [
-    {"expr": 'max(slice_capacity_mbps{slice="URLLC"})', "legendFormat": "capacity"},
+                            "uses up capacity. The feedback controller (ADR-016) moves the admission limit "
+                            "between 10 % of the capacity and the capacity. Requires scripts/open5gs/start_orchestrator.sh."))
+ts("URLLC: capacity, admission limit, admitted, measured", [
+    {"expr": 'max(slice_capacity_mbps{slice="URLLC"})', "legendFormat": "capacity (policy)"},
+    {"expr": 'max(slice_admission_limit_mbps{slice="URLLC"})', "legendFormat": "admission limit (controller)"},
     {"expr": 'max(slice_allocated_mbps{slice="URLLC"})', "legendFormat": "admitted"},
     {"expr": 'max(slice_measured_mbps{slice="URLLC"})', "legendFormat": "measured at the UPF"}],
-   12, y, unit="Mbits", desc="Best-effort demand never spills into URLLC when eMBB is full (ADR-012).")
+   12, y, unit="Mbits", desc=("Best-effort demand never spills into URLLC when eMBB is full (ADR-012). URLLC's "
+                             "limit moves only with CONTROL_THROTTLE=\"eMBB URLLC\": measured, URLLC's own flows do "
+                             "not inflate its latency, eMBB's do (ADR-016)."))
 y += 8
-stat("Executed flows that got their rate", 'sum(slice_flows_completed_total{outcome="met"}) / sum(slice_flows_completed_total)', 0, y, w=8,
-     desc="met = >= 95 % of the admitted bitrate delivered with <= 2 % loss.")
+stat("Executed flows that got their rate", 'sum(slice_flows_completed_total{outcome="met"}) / sum(slice_flows_completed_total{outcome!="preempted"})', 0, y, w=8,
+     desc="met = >= 95 % of the admitted bitrate delivered with <= 2 % loss. Pre-empted flows are left out: they were stopped on purpose.")
 panels[-1]["fieldConfig"]["defaults"].update({"unit": "percentunit", "decimals": 1})
 stat("Demands refused (capacity), last 15 min", 'sum(increase(slice_rejected_total{reason="capacity"}[15m])) or vector(0)', 8, y, w=8)
 stat("Demands admitted, last 15 min", 'sum(increase(slice_admitted_total[15m])) or vector(0)', 16, y, w=8)
@@ -158,6 +163,25 @@ ts("Delivered / admitted rate per slice (last 200 flows)", [
     {"expr": "max by (slice) (slice_flow_delivery_ratio)", "legendFormat": "{{slice}}"}],
    0, y, w=24, unit="percentunit")
 y += 8
+
+row("Dynamic allocation — priority inside URLLC and the feedback controller (ADR-016)", y); y += 1
+ts("What the controller watches: URLLC p95, last 10 s", [
+    {"expr": 'max(kpi_owd_recent_ms{slice="URLLC",stat="p95"})', "legendFormat": "URLLC p95"},
+    {"expr": "vector(8)", "legendFormat": "cut above (80 % of the 10 ms budget)"},
+    {"expr": "vector(5)", "legendFormat": "may raise below (50 %)"}],
+   0, y, unit="ms", desc=("kpi_owd_recent_ms from the URLLC data network's collector. Above the upper line "
+                         "eMBB's admission limit is cut; below the lower one, with demand pressing on "
+                         "the limit, it is raised."))
+ts("Demands by ARP priority level (per minute)", [
+    {"expr": "sum by (slice, arp, decision) (increase(slice_decisions_by_priority_total[1m]))",
+     "legendFormat": "{{slice}} ARP {{arp}} {{decision}}"}],
+   12, y, desc=("ARP 1 = critical URLLC devices (may pre-empt), ARP 2 = standard URLLC devices (may be "
+               "pre-empted), 8 = eMBB, 12 = IoT. A pre-emption shows as a lower-priority 'preempted'."))
+y += 8
+stat("Pre-emptions, last 15 min", 'sum(increase(slice_preempted_total[15m])) or vector(0)', 0, y, w=8)
+stat("Controller cuts, last 15 min", 'sum(increase(slice_control_actions_total{action="cut"}[15m])) or vector(0)', 8, y, w=8)
+stat("Controller raises, last 15 min", 'sum(increase(slice_control_actions_total{action="raise"}[15m])) or vector(0)', 16, y, w=8)
+y += 4
 
 dash = {
     "uid": "open5gs-slices", "title": "Open5GS — slices, sessions and traffic", "editable": True,

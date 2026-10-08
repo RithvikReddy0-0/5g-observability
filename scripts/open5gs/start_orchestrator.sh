@@ -6,6 +6,8 @@
 #   CORE=open5gs        subscribers and permitted slices from the Open5GS database
 #   PROMETHEUS_URL      admission counts what each slice's UPF is measured to carry
 #   EXECUTE=1           every admitted demand runs as a real UDP flow on the chosen slice
+#   CONTROL=1           the feedback controller moves eMBB's admission limit from URLLC latency
+#                       and eMBB delivery (ADR-016); CONTROL=0 admits up to the policy capacity
 #
 # Runs on the host (it drives containers with `docker exec`). Prometheus reaches it through
 # the o5gs_net gateway, 10.53.0.1:9111. It is a separate process from the free5GC instance
@@ -42,7 +44,7 @@ fi
 
 CORE=open5gs PORT="$PORT" DB_CONTAINER=o5gs-mongodb \
 PROMETHEUS_URL="${PROMETHEUS_URL:-http://localhost:9091}" EXECUTE="${EXECUTE:-1}" \
-FLOW_SECONDS="${FLOW_SECONDS:-20}" \
+FLOW_SECONDS="${FLOW_SECONDS:-20}" CONTROL="${CONTROL:-1}" \
   setsid nohup python3 "$APP" --instance open5gs > "$LOG" 2>&1 < /dev/null &
 
 for _ in $(seq 20); do

@@ -111,6 +111,13 @@ def check_plan(base, load, smf):
                           % (gw, name, sess["apn"], gateways.get(sess["apn"])))
         if not any(p.split(":")[1:2] == [gw] for p in pools):
             errors.append("SLICE_POOLS has no probe entry for gateway %s (%s)" % (gw, name))
+    # ARP tiers (ADR-016) are applied in IMSI order to a slice's home subscribers, so they must
+    # cover exactly that slice's UEs — a short list would leave some devices on the slice default.
+    for letter, count in want:
+        tiers = env.get("SLICE_%s_ARP_TIERS" % letter, "").split()
+        if tiers and sum(int(t.split(":")[0]) for t in tiers) != int(count):
+            errors.append("SLICE_%s_ARP_TIERS covers %d subscribers, O5GS_UES provisions %s"
+                          % (letter, sum(int(t.split(":")[0]) for t in tiers), count))
     for e in errors:
         print("::error file=%s/docker-compose.yaml::%s" % (base, e))
     if not errors:
