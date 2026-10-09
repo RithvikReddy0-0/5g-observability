@@ -99,7 +99,7 @@ Everything below was measured on our running 100-UE stack, and every number has 
 1~The setup \quad 2~Traffic cop: priority \quad 3~Traffic cop: the feedback controller \quad
 4~Traffic cop: planning \quad 5~Road builder: off and on \quad 6~Road builder: rollback \quad
 7~Road builder: on its own (closed loop) \quad 8~Road builder: compute \quad
-9~The photos: one live run \quad 10~Things that went wrong \quad 11~Where every proof lives
+9~Which algorithm is best? \quad 10~The photos: one live run \quad 11~Things that went wrong \quad 12~Where every proof lives \quad 13~Sources
 
 \newpage
 % ═════════════════════════ 1 setup ═════════════════════════
@@ -166,7 +166,7 @@ the flows afterwards & critical 5/5 got their full rate; the 15 standard flows l
 We ran it twice and got the same result both times.
 \proof{docs/evidence/open5gs-orchestrator-dynamic/1-priority.txt}
 
-\shot{0.82}{13-demands-by-arp-priority.png}{Grafana, from the live run in section 9: demands per minute by ARP level. ``URLLC ARP 1 admitted'' is the critical devices; ``URLLC ARP 2 preempted'' is the standard flows they pushed out.}
+\shot{0.82}{13-demands-by-arp-priority.png}{Grafana, from the live run in section 10: demands per minute by ARP level. ``URLLC ARP 1 admitted'' is the critical devices; ``URLLC ARP 2 preempted'' is the standard flows they pushed out.}
 
 % ═════════════════════════ 3 controller ═════════════════════════
 \newpage
@@ -226,7 +226,11 @@ by about 40\,\%, but it does \emph{not} keep URLLC under the 10 ms target the wh
 laptop, and it costs eMBB volume. Much of that ``266 Mbps'' was broken flows, though.
 \end{keybox}
 
-\shot{0.82}{12-controller-watches-urllc-p95.png}{What the controller watches (live run, section 9): URLLC p95 over the last 10 s. Each time it climbs over the yellow 8 ms line, the controller cuts eMBB, and it comes back down.}
+\textbf{Update:} this section describes the first controller (AIMD). We later raced it against
+other methods, and a PI controller did better on every measure: 0~\% of the time over budget,
+with as much eMBB as no control. It is the default now (section 9).
+
+\shot{0.82}{12-controller-watches-urllc-p95.png}{What the controller watches (live run, section 10): URLLC p95 over the last 10 s. Each time it climbs over the yellow 8 ms line, the controller cuts eMBB, and it comes back down.}
 \shot{0.82}{10-embb-capacity-limit-admitted-measured.png}{eMBB in the same run: the policy capacity (green, 500 Mbps) and the controller's admission limit (yellow) falling from 500 to 50–130 Mbps under load. The jump back to 500 at 16:11:20 is the orchestrator being restarted for the priority test, not the controller.}
 
 % ═════════════════════════ 4 planning ═════════════════════════
@@ -294,8 +298,8 @@ a sensor asks for service & admitted & refused: ``mMTC is not active'' \\
 While all this happened, URLLC's latency probes lost \textbf{0 of 63\,891} packets (p95 2.8 ms):
 switching one slice did not disturb the others.
 
-\shot{0.82}{14-slice-active-or-dormant.png}{Grafana, live run (section 9): each slice serving (1) or dormant (0). mMTC goes off at 16:07:56 and back on at 16:09:30; eMBB and URLLC stay at 1 (their lines overlap).}
-\shot{0.82}{15-ues-and-core-sessions-per-slice.png}{Devices online per slice and the core's own session count. mMTC's devices go 70 → 0 → 70. In this run, under heavy load, the core still counted 11 mMTC sessions while the slice was off (see section 10).}
+\shot{0.82}{14-slice-active-or-dormant.png}{Grafana, live run (section 10): each slice serving (1) or dormant (0). mMTC goes off at 16:07:56 and back on at 16:09:30; eMBB and URLLC stay at 1 (their lines overlap).}
+\shot{0.82}{15-ues-and-core-sessions-per-slice.png}{Devices online per slice and the core's own session count. mMTC's devices go 70 → 0 → 70. In this run, under heavy load, the core still counted 11 mMTC sessions while the slice was off (see section 11).}
 
 % ═════════════════════════ 6 rollback ═════════════════════════
 \medskip
@@ -383,7 +387,75 @@ unlimited & 366 Mbps & 11.0 ms \\
 The knob works: eMBB's capacity follows its CPU. URLLC improves only a little, so whether to use
 it is a policy decision. By default eMBB is unlimited.
 
-% ═════════════════════════ 9 live run ═════════════════════════
+% ═════════════════════════ 9 which is best ═════════════════════════
+\newpage
+\section{Which algorithm is best? We raced them}
+
+\begin{center}
+\begin{tikzpicture}[scale=0.8]
+  \draw[line width=1pt,grey] (-0.6,0) -- (12.6,0);
+  \foreach \x/\n/\a in {0/static/s, 2.6/AIMD/d, 5.2/PI/u, 7.8/MPC/w, 10.4/UCB/d}
+    { \person[scale=0.8]{\x,0.05}{\a} \node[font=\small\bfseries,below] at (\x,0) {\n}; }
+  \draw[ok,line width=1.4pt,fill=ok!25] (4.85,2.35) -- (5.55,2.35) -- (5.4,2.05) -- (5.0,2.05) -- cycle;
+  \draw[ok,line width=1.4pt] (5.2,2.05) -- (5.2,1.95);
+  \say{8.6,2.2}{same demand, same seed,\\2 rounds in opposite orders}
+\end{tikzpicture}
+\end{center}
+
+For every decision the orchestrators make, we looked up the main methods in the research
+literature, implemented the strongest ones, and raced them under identical conditions.
+\begin{itemize}
+  \item \textbf{Live} on our stack, where the network itself matters: the latency controller.
+  \item \textbf{In a simulator} running our real decision code, where it does not: admission,
+        sizing and switching, over tens of thousands of demands.
+\end{itemize}
+The full table, with references, is in \texttt{docs/algorithm-comparison.md}.
+
+\textbf{The latency controller: live, 300 s each, mean of 2 rounds}
+
+{\small\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}Xcccc@{}}
+\toprule
+\textbf{Control law} & \textbf{URLLC over 10 ms} & \textbf{URLLC p99} & \textbf{eMBB flows met} & \textbf{eMBB delivered} \\ \midrule
+static (no control) & 71 \% of the time & 52.7 ms & 60 \% & 260 Mbps \\
+AIMD (our old default, like TCP) & 20.5 \% & 21.0 ms & 87 \% & 170 Mbps \\
+\textbf{PI (like PIE, RFC 8033)} & \textbf{\color{ok}0.0 \%} & \textbf{\color{ok}13.0 ms} & \textbf{\color{ok}100 \%} & \textbf{\color{ok}261 Mbps} \\
+MPC (model-predictive) & 9.0 \% & 15.5 ms & 95 \% & 154 Mbps \\
+UCB bandit (online learning) & 9.0 \% & 17.2 ms & 97 \% & 163 Mbps \\
+\bottomrule
+\end{tabularx}}
+\proof{docs/evidence/open5gs-algorithm-comparison/controller/comparison.md}
+
+PI kept URLLC inside its budget the \emph{whole} time in both rounds, \emph{and} carried as much
+eMBB as no control at all. It is now the default.
+
+\textbf{Every decision: the winner}
+
+{\small\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{3.9cm}>{\raggedright\arraybackslash}p{5.2cm}X@{}}
+\toprule
+\textbf{Decision} & \textbf{Best on our stack} & \textbf{Why (measured)} \\ \midrule
+how much eMBB to admit & \textbf{PI} (was AIMD) & above \\
+who gets in when it is full & \textbf{trunk reservation} (was first-come) & critical demands blocked 21 \% $\to$ 2 \%, most value carried (simulation) \\
+how much capacity a slice needs & \textbf{Kaufman--Roberts} (was mean $\times$ 1.25) & meets a 1 \% blocking target; the old rule gave 3--6 \% (simulation) \\
+when to switch a slice on & \textbf{predictive + reactive} (was reactive) & periodic IoT demand refused 42 \% $\to$ 4--5 \% (simulation) \\
+which flow to pre-empt & unchanged (the 3GPP ARP rule) & the alternatives pick the same flows when all flows are the same size, as ours are \\
+\bottomrule
+\end{tabularx}}
+\proof{docs/evidence/open5gs-algorithm-comparison/simulation/}
+
+\begin{keybox}\small
+\textbf{What about deep reinforcement learning?} It is the most popular method in recent slicing
+papers, and they report it as best, in simulation. We did \emph{not} implement it.
+\begin{itemize}
+  \item On our testbed one decision takes 5 s of real time, so training would need many hours of
+        live load.
+  \item While learning, it would deliberately break URLLC's latency budget.
+  \item We could not explain the policy it learned.
+\end{itemize}
+The fair next step: train it offline on a model fitted to these measurements, then race it
+against PI the same way.
+\end{keybox}
+
+% ═════════════════════════ 10 live run ═════════════════════════
 \newpage
 \section{The photos: one live run, minute by minute}
 
@@ -452,7 +524,7 @@ Lost commands to devices & The UE command tool sent ``deregister'' to stale entr
 Sessions left in the core & Devices were killed before their ``I'm leaving'' message went out. Fix: let each device switch itself off first. Now the core frees 69–70 of 70. \\
 ``Unlimited CPU'' did nothing & \texttt{docker update --cpus 0} is silently ignored, but we reported success. Fix: unlimited = all 12 cores, and every change is read back. \\
 Kubernetes would have broken & The UE pod would not have found its new helper script. Fixed in the generated manifests, not yet run on minikube. \\
-Stale sessions under heavy load & In the live run (section 9), with the host busy, 11 of 70 sensors stopped before their ``leaving'' message reached the core, so the core kept counting them while mMTC was off. They clear when the sensors come back. Not fixed: switching off now reports it as a clear \textbf{WARNING} instead of a quiet detail. \\
+Stale sessions under heavy load & In the live run (section 10), with the host busy, 11 of 70 sensors stopped before their ``leaving'' message reached the core, so the core kept counting them while mMTC was off. They clear when the sensors come back. Not fixed: switching off now reports it as a clear \textbf{WARNING} instead of a quiet detail. \\
 \bottomrule
 \end{tabularx}
 
@@ -491,6 +563,44 @@ http://localhost:3001 (Grafana) & rows ``Dynamic allocation'' and ``Network orch
 \textbf{Still provisional — to confirm with our guide:} 3 critical / 7 standard URLLC devices;
 the controller's 8 ms / 5 ms lines; mMTC as the only on-demand slice; 120 s idle time; 150 s
 activation deadline.
+
+% ═════════════════════════ 13 sources ═════════════════════════
+\section{Sources}
+
+{\footnotesize
+\textbf{Standards}
+\begin{enumerate}[label={[\arabic*]},leftmargin=2.2em]
+  \item 3GPP TS 23.501, \emph{System architecture for the 5G System}, §5.7.2.2 (ARP) and Table 5.7.4-1 (5QI 82).
+  \item R. Pan, P. Natarajan, F. Baker, G. White, \emph{Proportional Integral Controller Enhanced (PIE)}, RFC 8033, 2017. \url{https://www.rfc-editor.org/rfc/rfc8033.html}
+  \item ITU-R M.2410, \emph{Minimum requirements related to technical performance for IMT-2020 radio interface(s)}, 2017.
+  \item 3GPP TR 38.913, \emph{Study on scenarios and requirements for next generation access technologies}.
+\end{enumerate}
+\textbf{Classical results we implemented}
+\begin{enumerate}[label={[\arabic*]},leftmargin=2.2em,resume]
+  \item J. S. Kaufman, ``Blocking in a shared resource environment,'' \emph{IEEE Trans. Commun.} 29(10):1474--1481, 1981.
+  \item J. W. Roberts, ``A service system with heterogeneous user requirements,'' in \emph{Performance of Data Communication Systems and their Applications}, North-Holland, 1981 (book chapter).
+  \item P. B. Key, ``Optimal control and trunk reservation in loss networks,'' \emph{Probability in the Engineering and Informational Sciences} 4, 1990. Trunk reservation is optimal on a single link: B. L. Miller (1969), S. A. Lippman (1975).
+  \item D. Chiu, R. Jain, ``Analysis of the increase and decrease algorithms for congestion avoidance in computer networks,'' \emph{Computer Networks and ISDN Systems} 17, 1989 (AIMD).
+  \item P. Auer, N. Cesa-Bianchi, P. Fischer, ``Finite-time analysis of the multiarmed bandit problem,'' \emph{Machine Learning} 47, 2002 (UCB1).
+  \item Y. Zhou, D. Chakrabarty, R. Lukose, ``Budget constrained bidding in keyword auctions and online knapsack problems,'' WWW 2008 / WINE 2008. \url{https://archives.iw3c2.org/www2008/papers/pdf/p1243-zhou.pdf}
+  \item J. C. de Oliveira, C. Scoglio, I. F. Akyildiz, G. Uhl, ``New preemption policies for DiffServ-aware traffic engineering to minimize rerouting in MPLS networks,'' \emph{IEEE/ACM ToN} 12(4):733--745, 2004. \url{https://ianakyildiz.com/bwn/papers/2004/j10.pdf}
+\end{enumerate}
+\textbf{State of the art in network slicing we compared against}
+\begin{enumerate}[label={[\arabic*]},leftmargin=2.2em,resume]
+  \item ``Deep reinforcement learning for resource management on network slicing: a survey,'' \emph{Sensors} 22(8):3031, 2022. \url{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9032530/}
+  \item Wu et al., lightweight PPO-based slice admission (NSF PAR). \url{https://par.nsf.gov/servlets/purl/10343822}
+  \item ``Machine learning for network slicing resource management: a comprehensive survey,'' 2020. \url{https://arxiv.org/pdf/2001.07974}
+  \item ``Deep reinforcement learning for 6G AI-RAN: a comprehensive survey'' (preprint). \url{https://arxiv.org/pdf/2608.14877}
+  \item A. Balasingam et al., ``Zipper'' (model-predictive control for vRAN slicing), USENIX NSDI 2024. \url{https://www.usenix.org/system/files/nsdi24-balasingam.pdf}
+  \item J. Liu, MPC-based resource allocation for uRLLC network slicing (doctoral thesis, 2024). \url{https://publica.fraunhofer.de/handle/publica/480889}
+  \item LACO: latency-driven network slicing orchestration with UCB, 2020. \url{https://arxiv.org/pdf/2009.03771}
+  \item DARIO: drift-aware policy selection for slice admission control (UCB). \url{https://boris.unibe.ch/199022}
+  \item FLAS: combined proactive and reactive autoscaling, 2025. \url{https://arxiv.org/pdf/2510.20388}
+  \item Traffic-aware threshold adjustment for NFV scaling using DRL, 2018. \url{https://arxiv.org/pdf/1811.08116}
+  \item D. Bertsimas et al., ``Bounds and policies for loss networks.'' \url{https://www.mit.edu/~dbertsim/papers/Stochastic\%20Networks/Bounds\%20and\%20policies\%20for\%20loss\%20networks.pdf}
+\end{enumerate}
+\textbf{Notes on these sources.} [10]: the competitive ratio ln(U/L)+1 used in our pricing policy should be checked against the paper before it is quoted. [6] is a book chapter, not a journal paper. [12]--[22] were found through web search on 9 October 2026; several were read only as abstracts. All our measured numbers come from our own evidence files (section 12), not from these papers.
+}
 
 \vspace{6pt}
 \begin{center}

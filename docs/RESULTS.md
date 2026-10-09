@@ -31,6 +31,8 @@ the ratified ODE. That distinction determines what could and could not be proven
 | **Open5GS: orchestrator flows delivered** | **164 / 165** | real UDP flows, both slices saturated |
 | **Open5GS: priority inside URLLC (ARP)** | **5 / 5** critical demands admitted by pre-emption | standard demands refused while the slice is full |
 | **Open5GS: feedback controller** | eMBB flows met **68 % → 100 %**; URLLC p95 **20.5 → 12.5 ms** | same demand, controller off vs on; costs eMBB volume (266 → 109 Mbps) |
+| **Open5GS: control laws compared (live, 2 rounds)** | PI: URLLC **0.0 %** of the time over budget, eMBB 261 Mbps; AIMD 20.5 %, 170 Mbps | static, AIMD, PI, MPC, UCB under the same seeded demand ([ADR-018](adr/ADR-018-algorithm-comparison.md)) |
+| **Simulated: admission, sizing, switching** | reservation: critical blocking 21 % → 2 %; Kaufman–Roberts meets 1 % blocking (mean × 1.25: 3–6 %); predictive switching: refusals 42 % → 4–5 % | real decision code, 20 000 s / 6 h |
 | **Open5GS: slice lifecycle (network orchestrator)** | mMTC off in **14.5 s**, on in **12.2 s**; core sessions 70 → 0 → 70 | each step verified; URLLC 0 packets lost meanwhile; a missed deadline rolled back |
 | **Open5GS: closed loop on demand** | mMTC activated when IoT demand appeared, deactivated after 67 s idle | 21 IoT demands refused while it came up, then 81 admitted |
 | **Open5GS: acceptance** | **PASS=22, FAIL=0** | `tests/acceptance-open5gs.sh` |
