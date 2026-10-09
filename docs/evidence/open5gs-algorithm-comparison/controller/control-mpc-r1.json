@@ -1,0 +1,461 @@
+[
+  {
+    "t": "03:56:48",
+    "slice": "eMBB",
+    "action": "cut",
+    "from": 500.0,
+    "to": 350.0,
+    "why": "MPC: p95 = -8.63 + 103.84 x load -> 73 Mbps for 6.5 ms",
+    "policy": "mpc"
+  },
+  {
+    "t": "03:56:54",
+    "slice": "eMBB",
+    "action": "cut",
+    "from": 350.0,
+    "to": 200.0,
+    "why": "MPC: p95 = -5.54 + 85.69 x load -> 70 Mbps for 6.5 ms",
+    "policy": "mpc"
+  },
+  {
+    "t": "03:56:59",
+    "slice": "eMBB",
+    "action": "cut",
+    "from": 200.0,
+    "to": 74.3,
+    "why": "MPC: p95 = -2.23 + 58.73 x load -> 74 Mbps for 6.5 ms",
+    "policy": "mpc"
+  },
+  {
+    "t": "03:57:04",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 74.3,
+    "to": 79.6,
+    "why": "MPC: p95 = -0.38 + 43.22 x load -> 80 Mbps for 6.5 ms",
+    "policy": "mpc"
+  },
+  {
+    "t": "03:57:09",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 79.6,
+    "to": 93.5,
+    "why": "MPC: p95 = -0.56 + 37.79 x load -> 93 Mbps for 6.5 ms",
+    "policy": "mpc"
+  },
+  {
+    "t": "03:57:14",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 93.5,
+    "to": 113.4,
+    "why": "MPC: p95 = -2.27 + 38.68 x load -> 113 Mbps for 6.5 ms",
+    "policy": "mpc"
+  },
+  {
+    "t": "03:57:19",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 113.4,
+    "to": 124.2,
+    "why": "MPC: p95 = -3.69 + 41.02 x load -> 124 Mbps for 6.5 ms",
+    "policy": "mpc"
+  },
+  {
+    "t": "03:57:26",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 124.2,
+    "to": 128.1,
+    "why": "MPC: p95 = -4.26 + 41.99 x load -> 128 Mbps for 6.5 ms",
+    "policy": "mpc"
+  },
+  {
+    "t": "03:57:31",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 128.1,
+    "to": 132.7,
+    "why": "MPC: p95 = -4.91 + 43.01 x load -> 133 Mbps for 6.5 ms",
+    "policy": "mpc"
+  },
+  {
+    "t": "03:57:36",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 132.7,
+    "to": 138.1,
+    "why": "MPC: p95 = -5.68 + 44.11 x load -> 138 Mbps for 6.5 ms",
+    "policy": "mpc"
+  },
+  {
+    "t": "03:57:41",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 138.1,
+    "to": 141.4,
+    "why": "MPC: p95 = -6.18 + 44.84 x load -> 141 Mbps for 6.5 ms",
+    "policy": "mpc"
+  },
+  {
+    "t": "03:57:46",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 141.4,
+    "to": 143.3,
+    "why": "MPC: p95 = -6.47 + 45.23 x load -> 143 Mbps for 6.5 ms",
+    "policy": "mpc"
+  },
+  {
+    "t": "03:57:51",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 143.3,
+    "to": 144.9,
+    "why": "MPC: p95 = -6.72 + 45.61 x load -> 145 Mbps for 6.5 ms",
+    "policy": "mpc"
+  },
+  {
+    "t": "03:57:56",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 144.9,
+    "to": 148.2,
+    "why": "MPC: p95 = -7.25 + 46.41 x load -> 148 Mbps for 6.5 ms",
+    "policy": "mpc"
+  },
+  {
+    "t": "03:58:03",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 148.2,
+    "to": 151.7,
+    "why": "MPC: p95 = -7.71 + 46.83 x load -> 152 Mbps for 6.5 ms",
+    "policy": "mpc"
+  },
+  {
+    "t": "03:58:08",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 151.7,
+    "to": 154.2,
+    "why": "MPC: p95 = -8.04 + 47.15 x load -> 154 Mbps for 6.5 ms",
+    "policy": "mpc"
+  },
+  {
+    "t": "03:58:13",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 154.2,
+    "to": 156.5,
+    "why": "MPC: p95 = -8.34 + 47.43 x load -> 156 Mbps for 6.5 ms",
+    "policy": "mpc"
+  },
+  {
+    "t": "03:58:18",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 156.4,
+    "to": 158.0,
+    "why": "MPC: p95 = -8.59 + 47.75 x load -> 158 Mbps for 6.5 ms",
+    "policy": "mpc"
+  },
+  {
+    "t": "03:58:23",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 158.0,
+    "to": 159.3,
+    "why": "MPC: p95 = -8.81 + 48.04 x load -> 159 Mbps for 6.5 ms",
+    "policy": "mpc"
+  },
+  {
+    "t": "03:58:28",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 159.3,
+    "to": 161.4,
+    "why": "MPC: p95 = -9.01 + 48.05 x load -> 161 Mbps for 6.5 ms",
+    "policy": "mpc"
+  },
+  {
+    "t": "03:58:35",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 161.4,
+    "to": 163.0,
+    "why": "MPC: p95 = -9.16 + 48.05 x load -> 163 Mbps for 6.5 ms",
+    "policy": "mpc"
+  },
+  {
+    "t": "03:58:40",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 163.0,
+    "to": 165.2,
+    "why": "MPC: p95 = -9.29 + 47.80 x load -> 165 Mbps for 6.5 ms",
+    "policy": "mpc"
+  },
+  {
+    "t": "03:58:45",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 165.2,
+    "to": 165.7,
+    "why": "MPC: p95 = -9.39 + 47.96 x load -> 166 Mbps for 6.5 ms",
+    "policy": "mpc"
+  },
+  {
+    "t": "03:58:50",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 165.7,
+    "to": 167.2,
+    "why": "MPC: p95 = -9.47 + 47.78 x load -> 167 Mbps for 6.5 ms",
+    "policy": "mpc"
+  },
+  {
+    "t": "03:58:55",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 167.2,
+    "to": 168.2,
+    "why": "MPC: p95 = -9.53 + 47.65 x load -> 168 Mbps for 6.5 ms",
+    "policy": "mpc"
+  },
+  {
+    "t": "03:59:00",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 168.2,
+    "to": 169.6,
+    "why": "MPC: p95 = -9.67 + 47.68 x load -> 170 Mbps for 6.5 ms",
+    "policy": "mpc"
+  },
+  {
+    "t": "03:59:05",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 169.6,
+    "to": 170.4,
+    "why": "MPC: p95 = -9.75 + 47.69 x load -> 170 Mbps for 6.5 ms",
+    "policy": "mpc"
+  },
+  {
+    "t": "03:59:11",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 170.3,
+    "to": 171.7,
+    "why": "MPC: p95 = -9.78 + 47.42 x load -> 172 Mbps for 6.5 ms",
+    "policy": "mpc"
+  },
+  {
+    "t": "03:59:16",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 171.7,
+    "to": 173.9,
+    "why": "MPC: p95 = -9.84 + 46.99 x load -> 174 Mbps for 6.5 ms",
+    "policy": "mpc"
+  },
+  {
+    "t": "03:59:21",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 173.9,
+    "to": 176.0,
+    "why": "MPC: p95 = -9.89 + 46.57 x load -> 176 Mbps for 6.5 ms",
+    "policy": "mpc"
+  },
+  {
+    "t": "03:59:26",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 176.0,
+    "to": 177.5,
+    "why": "MPC: p95 = -9.93 + 46.29 x load -> 177 Mbps for 6.5 ms",
+    "policy": "mpc"
+  },
+  {
+    "t": "03:59:31",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 177.5,
+    "to": 178.2,
+    "why": "MPC: p95 = -9.96 + 46.19 x load -> 178 Mbps for 6.5 ms",
+    "policy": "mpc"
+  },
+  {
+    "t": "03:59:36",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 178.2,
+    "to": 180.0,
+    "why": "MPC: p95 = -9.82 + 45.34 x load -> 180 Mbps for 6.5 ms",
+    "policy": "mpc"
+  },
+  {
+    "t": "03:59:43",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 180.0,
+    "to": 182.3,
+    "why": "MPC: p95 = -9.65 + 44.29 x load -> 182 Mbps for 6.5 ms",
+    "policy": "mpc"
+  },
+  {
+    "t": "03:59:48",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 182.3,
+    "to": 183.5,
+    "why": "MPC: p95 = -9.64 + 43.99 x load -> 183 Mbps for 6.5 ms",
+    "policy": "mpc"
+  },
+  {
+    "t": "03:59:53",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 183.5,
+    "to": 184.9,
+    "why": "MPC: p95 = -9.54 + 43.40 x load -> 185 Mbps for 6.5 ms",
+    "policy": "mpc"
+  },
+  {
+    "t": "04:00:03",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 185.3,
+    "to": 187.0,
+    "why": "MPC: p95 = -9.56 + 42.96 x load -> 187 Mbps for 6.5 ms",
+    "policy": "mpc"
+  },
+  {
+    "t": "04:00:20",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 187.4,
+    "to": 189.1,
+    "why": "MPC: p95 = -9.37 + 41.95 x load -> 189 Mbps for 6.5 ms",
+    "policy": "mpc"
+  },
+  {
+    "t": "04:00:25",
+    "slice": "eMBB",
+    "action": "cut",
+    "from": 189.1,
+    "to": 187.2,
+    "why": "MPC: p95 = -8.47 + 39.99 x load -> 187 Mbps for 6.5 ms",
+    "policy": "mpc"
+  },
+  {
+    "t": "04:00:30",
+    "slice": "eMBB",
+    "action": "cut",
+    "from": 187.2,
+    "to": 185.2,
+    "why": "MPC: p95 = -8.50 + 40.50 x load -> 185 Mbps for 6.5 ms",
+    "policy": "mpc"
+  },
+  {
+    "t": "04:00:40",
+    "slice": "eMBB",
+    "action": "cut",
+    "from": 185.5,
+    "to": 181.4,
+    "why": "MPC: p95 = -8.95 + 42.59 x load -> 181 Mbps for 6.5 ms",
+    "policy": "mpc"
+  },
+  {
+    "t": "04:00:45",
+    "slice": "eMBB",
+    "action": "cut",
+    "from": 181.3,
+    "to": 177.6,
+    "why": "MPC: p95 = -8.89 + 43.34 x load -> 178 Mbps for 6.5 ms",
+    "policy": "mpc"
+  },
+  {
+    "t": "04:00:57",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 177.7,
+    "to": 179.1,
+    "why": "MPC: p95 = -8.93 + 43.07 x load -> 179 Mbps for 6.5 ms",
+    "policy": "mpc"
+  },
+  {
+    "t": "04:01:02",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 179.1,
+    "to": 181.1,
+    "why": "MPC: p95 = -8.70 + 41.97 x load -> 181 Mbps for 6.5 ms",
+    "policy": "mpc"
+  },
+  {
+    "t": "04:01:07",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 181.1,
+    "to": 183.3,
+    "why": "MPC: p95 = -8.45 + 40.78 x load -> 183 Mbps for 6.5 ms",
+    "policy": "mpc"
+  },
+  {
+    "t": "04:01:12",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 183.3,
+    "to": 185.8,
+    "why": "MPC: p95 = -8.18 + 39.51 x load -> 186 Mbps for 6.5 ms",
+    "policy": "mpc"
+  },
+  {
+    "t": "04:01:24",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 186.1,
+    "to": 188.5,
+    "why": "MPC: p95 = -8.00 + 38.48 x load -> 188 Mbps for 6.5 ms",
+    "policy": "mpc"
+  },
+  {
+    "t": "04:01:29",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 188.5,
+    "to": 192.1,
+    "why": "MPC: p95 = -7.30 + 35.90 x load -> 192 Mbps for 6.5 ms",
+    "policy": "mpc"
+  },
+  {
+    "t": "04:01:34",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 192.2,
+    "to": 193.3,
+    "why": "MPC: p95 = -7.17 + 35.37 x load -> 193 Mbps for 6.5 ms",
+    "policy": "mpc"
+  },
+  {
+    "t": "04:01:39",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 193.3,
+    "to": 194.7,
+    "why": "MPC: p95 = -7.02 + 34.71 x load -> 195 Mbps for 6.5 ms",
+    "policy": "mpc"
+  },
+  {
+    "t": "04:01:44",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 194.7,
+    "to": 195.3,
+    "why": "MPC: p95 = -7.40 + 35.57 x load -> 195 Mbps for 6.5 ms",
+    "policy": "mpc"
+  }
+]

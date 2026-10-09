@@ -1,0 +1,46 @@
+{
+  "admission": [
+    {
+      "policy": "greedy (previous default)",
+      "control_blocking_pct": 20.92,
+      "blog_blocking_pct": 21.44,
+      "value_carried": 1963.3,
+      "demands": 22036
+    },
+    {
+      "policy": "trunk reservation, 4 Mbps",
+      "control_blocking_pct": 2.12,
+      "blog_blocking_pct": 53.56,
+      "value_carried": 2186.0,
+      "demands": 22036
+    },
+    {
+      "policy": "threshold pricing",
+      "control_blocking_pct": 0.36,
+      "blog_blocking_pct": 81.07,
+      "value_carried": 2089.3,
+      "demands": 22036
+    }
+  ],
+  "sizing": {
+    "mean_offered_mbps": 280.0,
+    "rows": [
+      {
+        "method": "mean x 1.25 (previous default)",
+        "capacity_mbps": 350.0,
+        "video_blocking_pct": 3.27,
+        "file_blocking_pct": 6.42,
+        "kr_predicted_video_pct": 2.94,
+        "kr_predicted_file_pct": 5.79
+      },
+      {
+        "method": "Kaufman-Roberts, 1 % target",
+        "capacity_mbps": 412.0,
+        "video_blocking_pct": 0.51,
+        "file_blocking_pct": 1.21,
+        "kr_predicted_video_pct": 0.46,
+        "kr_predicted_file_pct": 0.98
+      }
+    ]
+  }
+}

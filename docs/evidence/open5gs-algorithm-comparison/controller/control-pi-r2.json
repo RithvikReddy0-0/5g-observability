@@ -1,0 +1,245 @@
+[
+  {
+    "t": "04:21:24",
+    "slice": "eMBB",
+    "action": "cut",
+    "from": 500.0,
+    "to": 484.9,
+    "why": "PI: p95 5.7 ms, target 6.5, previous 4.2",
+    "policy": "pi"
+  },
+  {
+    "t": "04:21:29",
+    "slice": "eMBB",
+    "action": "cut",
+    "from": 484.9,
+    "to": 456.8,
+    "why": "PI: p95 7.2 ms, target 6.5, previous 5.7",
+    "policy": "pi"
+  },
+  {
+    "t": "04:21:34",
+    "slice": "eMBB",
+    "action": "cut",
+    "from": 456.8,
+    "to": 444.9,
+    "why": "PI: p95 7.5 ms, target 6.5, previous 7.2",
+    "policy": "pi"
+  },
+  {
+    "t": "04:21:42",
+    "slice": "eMBB",
+    "action": "cut",
+    "from": 444.9,
+    "to": 417.9,
+    "why": "PI: p95 8.4 ms, target 6.5, previous 7.5",
+    "policy": "pi"
+  },
+  {
+    "t": "04:21:47",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 417.9,
+    "to": 425.3,
+    "why": "PI: p95 7.4 ms, target 6.5, previous 8.4",
+    "policy": "pi"
+  },
+  {
+    "t": "04:21:52",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 425.3,
+    "to": 448.8,
+    "why": "PI: p95 6.1 ms, target 6.5, previous 7.4",
+    "policy": "pi"
+  },
+  {
+    "t": "04:21:57",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 448.8,
+    "to": 472.2,
+    "why": "PI: p95 5.2 ms, target 6.5, previous 6.1",
+    "policy": "pi"
+  },
+  {
+    "t": "04:22:02",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 472.2,
+    "to": 479.4,
+    "why": "PI: p95 5.3 ms, target 6.5, previous 5.2",
+    "policy": "pi"
+  },
+  {
+    "t": "04:22:07",
+    "slice": "eMBB",
+    "action": "cut",
+    "from": 479.4,
+    "to": 469.7,
+    "why": "PI: p95 6.1 ms, target 6.5, previous 5.3",
+    "policy": "pi"
+  },
+  {
+    "t": "04:22:51",
+    "slice": "eMBB",
+    "action": "cut",
+    "from": 469.9,
+    "to": 465.3,
+    "why": "PI: p95 6.1 ms, target 6.5, previous 5.5",
+    "policy": "pi"
+  },
+  {
+    "t": "04:22:56",
+    "slice": "eMBB",
+    "action": "cut",
+    "from": 465.3,
+    "to": 413.6,
+    "why": "PI: p95 8.5 ms, target 6.5, previous 6.1",
+    "policy": "pi"
+  },
+  {
+    "t": "04:23:02",
+    "slice": "eMBB",
+    "action": "cut",
+    "from": 413.6,
+    "to": 404.3,
+    "why": "PI: p95 8.2 ms, target 6.5, previous 8.5",
+    "policy": "pi"
+  },
+  {
+    "t": "04:23:07",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 404.3,
+    "to": 451.6,
+    "why": "PI: p95 5.6 ms, target 6.5, previous 8.2",
+    "policy": "pi"
+  },
+  {
+    "t": "04:23:17",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 451.6,
+    "to": 462.2,
+    "why": "PI: p95 5.3 ms, target 6.5, previous 5.4",
+    "policy": "pi"
+  },
+  {
+    "t": "04:23:23",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 462.2,
+    "to": 470.7,
+    "why": "PI: p95 5.3 ms, target 6.5, previous 5.3",
+    "policy": "pi"
+  },
+  {
+    "t": "04:23:28",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 470.7,
+    "to": 484.5,
+    "why": "PI: p95 5.1 ms, target 6.5, previous 5.3",
+    "policy": "pi"
+  },
+  {
+    "t": "04:23:33",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 484.5,
+    "to": 494.7,
+    "why": "PI: p95 5.1 ms, target 6.5, previous 5.1",
+    "policy": "pi"
+  },
+  {
+    "t": "04:23:38",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 494.7,
+    "to": 500.0,
+    "why": "PI: p95 5.2 ms, target 6.5, previous 5.1",
+    "policy": "pi"
+  },
+  {
+    "t": "04:23:54",
+    "slice": "eMBB",
+    "action": "cut",
+    "from": 500.0,
+    "to": 499.4,
+    "why": "PI: p95 6.0 ms, target 6.5, previous 5.7",
+    "policy": "pi"
+  },
+  {
+    "t": "04:24:11",
+    "slice": "eMBB",
+    "action": "cut",
+    "from": 499.4,
+    "to": 498.1,
+    "why": "PI: p95 5.9 ms, target 6.5, previous 5.5",
+    "policy": "pi"
+  },
+  {
+    "t": "04:24:58",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 498.1,
+    "to": 500.0,
+    "why": "PI: p95 5.4 ms, target 6.5, previous 5.6",
+    "policy": "pi"
+  },
+  {
+    "t": "04:25:11",
+    "slice": "eMBB",
+    "action": "cut",
+    "from": 500.0,
+    "to": 497.2,
+    "why": "PI: p95 6.0 ms, target 6.5, previous 5.6",
+    "policy": "pi"
+  },
+  {
+    "t": "04:25:16",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 497.2,
+    "to": 500.0,
+    "why": "PI: p95 5.9 ms, target 6.5, previous 6.0",
+    "policy": "pi"
+  },
+  {
+    "t": "04:25:43",
+    "slice": "eMBB",
+    "action": "cut",
+    "from": 500.0,
+    "to": 485.3,
+    "why": "PI: p95 6.7 ms, target 6.5, previous 5.8",
+    "policy": "pi"
+  },
+  {
+    "t": "04:25:58",
+    "slice": "eMBB",
+    "action": "cut",
+    "from": 485.3,
+    "to": 444.1,
+    "why": "PI: p95 7.7 ms, target 6.5, previous 5.5",
+    "policy": "pi"
+  },
+  {
+    "t": "04:26:03",
+    "slice": "eMBB",
+    "action": "cut",
+    "from": 444.1,
+    "to": 438.0,
+    "why": "PI: p95 7.5 ms, target 6.5, previous 7.7",
+    "policy": "pi"
+  },
+  {
+    "t": "04:26:15",
+    "slice": "eMBB",
+    "action": "cut",
+    "from": 438.0,
+    "to": 420.1,
+    "why": "PI: p95 6.5 ms, target 6.5, previous 5.3",
+    "policy": "pi"
+  }
+]

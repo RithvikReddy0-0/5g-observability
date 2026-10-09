@@ -1,0 +1,56 @@
+[
+  {
+    "refused": 0,
+    "offered": 4435,
+    "up_share": 1.0,
+    "switches": 0,
+    "policy": "always on",
+    "period": 300,
+    "burst": 60
+  },
+  {
+    "refused": 1866,
+    "offered": 4435,
+    "up_share": 0.5981481481481481,
+    "switches": 143,
+    "policy": "reactive",
+    "period": 300,
+    "burst": 60
+  },
+  {
+    "refused": 161,
+    "offered": 4435,
+    "up_share": 0.6930555555555555,
+    "switches": 143,
+    "policy": "predictive",
+    "period": 300,
+    "burst": 60
+  },
+  {
+    "refused": 0,
+    "offered": 2214,
+    "up_share": 1.0,
+    "switches": 0,
+    "policy": "always on",
+    "period": 600,
+    "burst": 60
+  },
+  {
+    "refused": 925,
+    "offered": 2214,
+    "up_share": 0.300462962962963,
+    "switches": 71,
+    "policy": "reactive",
+    "period": 600,
+    "burst": 60
+  },
+  {
+    "refused": 114,
+    "offered": 2214,
+    "up_share": 0.3453703703703704,
+    "switches": 71,
+    "policy": "predictive",
+    "period": 600,
+    "burst": 60
+  }
+]

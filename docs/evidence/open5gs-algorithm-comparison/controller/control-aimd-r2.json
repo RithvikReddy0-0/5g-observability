@@ -1,0 +1,202 @@
+[
+  {
+    "t": "04:27:53",
+    "slice": "eMBB",
+    "action": "cut",
+    "from": 500.0,
+    "to": 298.9,
+    "why": "URLLC p95 15.2 ms > 8.0 ms"
+  },
+  {
+    "t": "04:28:15",
+    "slice": "eMBB",
+    "action": "cut",
+    "from": 298.9,
+    "to": 168.0,
+    "why": "URLLC p95 13.7 ms > 8.0 ms"
+  },
+  {
+    "t": "04:28:37",
+    "slice": "eMBB",
+    "action": "cut",
+    "from": 168.0,
+    "to": 102.2,
+    "why": "21% of eMBB flows short"
+  },
+  {
+    "t": "04:28:42",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 102.2,
+    "to": 127.2,
+    "why": "URLLC p95 1.5 ms, eMBB at 107/102 Mbps"
+  },
+  {
+    "t": "04:28:47",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 127.2,
+    "to": 152.2,
+    "why": "URLLC p95 4.4 ms, eMBB at 122/127 Mbps"
+  },
+  {
+    "t": "04:28:52",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 152.2,
+    "to": 177.2,
+    "why": "URLLC p95 4.5 ms, eMBB at 145/152 Mbps"
+  },
+  {
+    "t": "04:28:57",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 177.2,
+    "to": 202.2,
+    "why": "URLLC p95 2.9 ms, eMBB at 167/177 Mbps"
+  },
+  {
+    "t": "04:29:02",
+    "slice": "eMBB",
+    "action": "cut",
+    "from": 202.2,
+    "to": 133.0,
+    "why": "URLLC p95 16.7 ms > 8.0 ms"
+  },
+  {
+    "t": "04:29:24",
+    "slice": "eMBB",
+    "action": "cut",
+    "from": 133.0,
+    "to": 93.1,
+    "why": "URLLC p95 13.5 ms > 8.0 ms"
+  },
+  {
+    "t": "04:29:40",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 93.1,
+    "to": 118.1,
+    "why": "URLLC p95 3.1 ms, eMBB at 93/93 Mbps"
+  },
+  {
+    "t": "04:29:45",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 118.1,
+    "to": 143.1,
+    "why": "URLLC p95 5.0 ms, eMBB at 116/118 Mbps"
+  },
+  {
+    "t": "04:29:51",
+    "slice": "eMBB",
+    "action": "cut",
+    "from": 143.1,
+    "to": 97.3,
+    "why": "URLLC p95 8.6 ms > 8.0 ms"
+  },
+  {
+    "t": "04:30:06",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 97.3,
+    "to": 122.3,
+    "why": "URLLC p95 5.0 ms, eMBB at 81/97 Mbps"
+  },
+  {
+    "t": "04:30:13",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 122.3,
+    "to": 147.3,
+    "why": "URLLC p95 2.0 ms, eMBB at 99/122 Mbps"
+  },
+  {
+    "t": "04:30:23",
+    "slice": "eMBB",
+    "action": "cut",
+    "from": 147.3,
+    "to": 100.8,
+    "why": "URLLC p95 28.2 ms > 8.0 ms"
+  },
+  {
+    "t": "04:30:38",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 100.8,
+    "to": 125.8,
+    "why": "URLLC p95 3.9 ms, eMBB at 98/101 Mbps"
+  },
+  {
+    "t": "04:30:50",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 125.8,
+    "to": 150.8,
+    "why": "URLLC p95 2.4 ms, eMBB at 123/126 Mbps"
+  },
+  {
+    "t": "04:30:55",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 150.8,
+    "to": 175.8,
+    "why": "URLLC p95 2.4 ms, eMBB at 147/151 Mbps"
+  },
+  {
+    "t": "04:31:00",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 175.8,
+    "to": 200.8,
+    "why": "URLLC p95 3.8 ms, eMBB at 170/176 Mbps"
+  },
+  {
+    "t": "04:31:05",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 200.8,
+    "to": 225.8,
+    "why": "URLLC p95 4.5 ms, eMBB at 171/201 Mbps"
+  },
+  {
+    "t": "04:31:10",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 225.8,
+    "to": 250.8,
+    "why": "URLLC p95 4.7 ms, eMBB at 185/226 Mbps"
+  },
+  {
+    "t": "04:31:15",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 250.8,
+    "to": 275.8,
+    "why": "URLLC p95 3.2 ms, eMBB at 245/251 Mbps"
+  },
+  {
+    "t": "04:31:32",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 275.8,
+    "to": 300.8,
+    "why": "URLLC p95 4.4 ms, eMBB at 266/276 Mbps"
+  },
+  {
+    "t": "04:31:37",
+    "slice": "eMBB",
+    "action": "cut",
+    "from": 300.8,
+    "to": 181.3,
+    "why": "URLLC p95 10.2 ms > 8.0 ms"
+  },
+  {
+    "t": "04:32:09",
+    "slice": "eMBB",
+    "action": "raise",
+    "from": 181.3,
+    "to": 206.3,
+    "why": "URLLC p95 4.1 ms, eMBB at 147/181 Mbps"
+  }
+]

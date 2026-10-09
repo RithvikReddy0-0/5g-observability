@@ -1,0 +1,10 @@
+static-r1 static 1791517115 1791517416 load_before=2.16 load_after=31.08 leaked=0
+aimd-r1 aimd 1791517475 1791517776 load_before=20.88 load_after=16.17 leaked=0
+pi-r1 pi 1791517833 1791518134 load_before=10.94 load_after=15.94 leaked=0
+mpc-r1 mpc 1791518193 1791518494 load_before=10.68 load_after=10.76 leaked=0
+ucb-r1 ucb 1791518554 1791518854 load_before=7.87 load_after=9.14 leaked=0
+ucb-r2 ucb 1791518945 1791519246 load_before=4.12 load_after=14.20 leaked=0
+mpc-r2 mpc 1791519304 1791519604 load_before=8.98 load_after=13.26 leaked=0
+pi-r2 pi 1791519664 1791519965 load_before=9.03 load_after=25.00 leaked=0
+aimd-r2 aimd 1791520025 1791520326 load_before=16.26 load_after=12.87 leaked=0
+static-r2 static 1791520386 1791520686 load_before=8.60 load_after=24.18 leaked=0

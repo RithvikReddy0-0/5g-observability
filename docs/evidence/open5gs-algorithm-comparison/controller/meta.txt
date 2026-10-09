@@ -1,0 +1,12 @@
+date_utc: 2026-10-09T03:38:23Z
+git: 7698a33 (working tree modified)
+seconds_per_run: 300  demands_per_second: 3  seed: 42  rounds: 1
+mix: video:3 file:3 blog:1 control:1
+policies: static aimd pi mpc ucb
+ue_sessions: 20
+date_utc: 2026-10-09T04:08:59Z
+git: 7698a33 (working tree modified)
+seconds_per_run: 300  demands_per_second: 3  seed: 42  rounds: 1
+mix: video:3 file:3 blog:1 control:1
+policies: ucb mpc pi aimd static
+ue_sessions: 100
