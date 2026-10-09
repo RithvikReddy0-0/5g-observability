@@ -68,6 +68,13 @@ AUTO_INTERVAL = float(os.environ.get("AUTO_INTERVAL", "10"))
 PLAN_WINDOW = float(os.environ.get("PLAN_WINDOW", "60"))     # demand window asked of /plan
 IDLE_SECONDS = float(os.environ.get("IDLE_SECONDS", "120"))  # no demand this long -> deactivate
 MIN_UP = float(os.environ.get("MIN_UP", "60"))               # never deactivate sooner after a change
+# reactive: switch on when demand appears (the original). predictive: also learn the period between
+# demand onsets — IoT devices report periodically — and switch on ACTIVATE_LEAD seconds before the
+# next one is due, and do not switch off when the next one is closer than that (ADR-018). Predictive
+# is the default: in simulation it refused 3.6 % of periodic IoT demand against reactive's 42 %, for
+# about 9 points more time switched on; until it has seen three onsets it behaves reactively.
+AUTO_POLICY = os.environ.get("AUTO_POLICY", "predictive")
+ACTIVATE_LEAD = float(os.environ.get("ACTIVATE_LEAD", "30"))  # > activation time (12-25 s measured) + a tick
 
 
 class Failure(Exception):
@@ -505,6 +512,18 @@ def submit(kind, name, reason="manual", wait=False, **args):
 loop = {"enabled": AUTO, "last_plan": None, "last_need": {}, "ticks": 0, "decisions": []}
 
 
+def next_onset(name):
+    """When the next demand onset is due: the last onset plus the median gap between recent onsets.
+    None until three onsets (two gaps) have been seen."""
+    on = loop.get("onsets", {}).get(name, [])
+    if len(on) < 3:
+        return None
+    gaps = sorted(b - a for a, b in zip(on, on[1:]))
+    period = gaps[len(gaps) // 2]
+    loop.setdefault("period", {})[name] = period
+    return on[-1] + period
+
+
 def auto_tick(now=None, plan=None, states=None):
     """One closed-loop step. Pure apart from submit(), so tests can drive it.
     -> list of (op, slice, reason) it decided."""
@@ -518,14 +537,24 @@ def auto_tick(now=None, plan=None, states=None):
     decided = []
     for name in ON_DEMAND:
         st = states.get(name, {}).get("state")
+        prev = loop.setdefault("prev_need", {}).get(name, False)
+        if needed.get(name) and not prev:
+            loop.setdefault("onsets", {}).setdefault(name, []).append(now)   # demand just began
+            del loop["onsets"][name][:-8]
+        loop["prev_need"][name] = bool(needed.get(name))
         if needed.get(name):
             loop["last_need"][name] = now
         idle_for = now - loop["last_need"].setdefault(name, now)
         settled_for = now - last_change.get(name, 0)
+        nxt = next_onset(name) if AUTO_POLICY == "predictive" else None
+        due_soon = nxt is not None and now >= nxt - ACTIVATE_LEAD and now < nxt + IDLE_SECONDS
         if st == "DORMANT" and needed.get(name):
             decided.append(("activate", name, "demand: %.2f Mbps needs %s" % (loop["last_plan"][name], name)))
+        elif st == "DORMANT" and due_soon:
+            decided.append(("activate", name, "predicted demand in %.0fs (period %.0fs)"
+                            % (nxt - now, loop["period"][name])))
         elif (st == "ACTIVE" and not needed.get(name) and idle_for >= IDLE_SECONDS
-              and settled_for >= MIN_UP):
+              and settled_for >= MIN_UP and not due_soon):
             decided.append(("deactivate", name, "idle: no demand for %.0fs" % idle_for))
     # Keep the slice orchestrator's switches in line with what is really deployed (it may have
     # restarted and forgotten them).

@@ -201,6 +201,9 @@ Results: [`docs/evidence/open5gs-orchestrator-dynamic/`](../../docs/evidence/ope
 | `slice_decisions_by_priority_total{slice,arp,decision}` | admitted / refused / preempted, by ARP level |
 | `slice_preempted_total{sst_sd,traffic_class}` | flows stopped for a higher-priority demand |
 | `slice_control_latency_ms`, `slice_control_short_ratio`, `slice_control_actions_total` | the controller's inputs and actions |
+| `CONTROL_POLICY` = `pi` (default) \| `aimd` \| `mpc` \| `ucb` | the control law that moves the limit; PI won the live comparison ([ADR-018](../../docs/adr/ADR-018-algorithm-comparison.md)) |
+| `ADMISSION_POLICY` = `reservation` (default, `RESERVE="URLLC=4"`) \| `greedy` \| `pricing` | who gets in when a slice is contested; reservation won in simulation |
+| `/plan` `required_mbps` | Kaufman–Roberts sizing for `PLAN_BLOCKING` (1 %); the old mean × 1.25 is `mean_headroom_mbps` |
 | `POST /slices {"name": "mMTC", "active": false}`, `slice_active{slice}` | the admission switch the network orchestrator ([ADR-017](../../docs/adr/ADR-017-network-orchestrator.md)) flips when it deactivates or activates a slice. Demands for an inactive slice are refused but logged, so `/plan` still sees them |
 
 ## Honest limitations

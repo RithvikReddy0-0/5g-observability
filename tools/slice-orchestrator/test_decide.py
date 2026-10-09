@@ -211,7 +211,7 @@ class Controller(unittest.TestCase):
     """The feedback controller moves admission limits (AIMD), eMBB by default; URLLC budget 10 ms."""
 
     def setUp(self):
-        self.o = load({"CORE": "open5gs", "EXECUTE": "0", "PROMETHEUS_URL": "", "CONTROL": "1",
+        self.o = load({"CORE": "open5gs", "EXECUTE": "0", "PROMETHEUS_URL": "", "CONTROL": "1", "CONTROL_POLICY": "aimd",
                        "CONTROL_HOLD": "15"})
         self.o.flow_results.clear()
         self.o.limits.clear()
@@ -279,7 +279,7 @@ class Controller(unittest.TestCase):
         self.assertNotIn("mMTC", self.o.limits)
 
     def test_throttle_list_is_configurable(self):
-        o = load({"CORE": "open5gs", "EXECUTE": "0", "PROMETHEUS_URL": "", "CONTROL": "1",
+        o = load({"CORE": "open5gs", "EXECUTE": "0", "PROMETHEUS_URL": "", "CONTROL": "1", "CONTROL_POLICY": "aimd",
                   "CONTROL_THROTTLE": "eMBB URLLC"})
         o.measured_mbps = lambda: {"eMBB": 300.0, "URLLC": 20.0}
         o.control_step(9.0, now=1000.0)
@@ -300,6 +300,99 @@ class Controller(unittest.TestCase):
         self.assertEqual(o.CONTROL_HOLD, 20.0)
 
 
+class AdmissionPolicies(unittest.TestCase):
+    def mod(self, policy, **extra):
+        env = {"CORE": "open5gs", "EXECUTE": "0", "PROMETHEUS_URL": "", "ADMISSION_POLICY": policy}
+        env.update(extra)
+        return load(env)
+
+    def test_reservation_keeps_room_for_exempt_classes(self):
+        o = self.mod("reservation", RESERVE="URLLC=4", RESERVE_EXEMPT="control")
+        fill(o, "URLLC", 15.0, ARP_STANDARD)
+        r = o.decide("imsi-208930000000001", "blog")          # would leave 4 free: allowed
+        self.assertTrue(r["admitted"])
+        r = o.decide("imsi-208930000000001", "blog")          # would leave 3 free: held back
+        self.assertFalse(r["admitted"])
+        self.assertIn("reservation", r["reason"])
+        r = o.decide("imsi-208930000000001", "control")       # exempt: uses the reserve
+        self.assertTrue(r["admitted"])
+
+    def test_pricing_admits_everything_when_empty_and_only_value_when_full(self):
+        o = self.mod("pricing", CLASS_VALUE="control:10 blog:2 video:1 file:1 sensor:5")
+        self.assertTrue(o.decide("imsi-208930000000001", "blog")["admitted"])
+        fill(o, "URLLC", 17.0, ARP_STANDARD)                  # utilisation 0.9: price near the top
+        self.assertFalse(o.decide("imsi-208930000000001", "blog")["admitted"])
+        self.assertTrue(o.decide("imsi-208930000000001", "control")["admitted"])
+
+
+class Policies(unittest.TestCase):
+    """The alternative control laws (ADR-018): PIE-style PI, one-step MPC with an online model, UCB1."""
+
+    def mod(self, policy, **extra):
+        env = {"CORE": "open5gs", "EXECUTE": "0", "PROMETHEUS_URL": "", "CONTROL": "1", "CONTROL_POLICY": policy}
+        env.update(extra)
+        o = load(env)
+        o.flow_results.clear()
+        o.limits.clear()
+        return o
+
+    def embb(self, o):
+        return o.limit(next(s for s in o.SLICES if s["name"] == "eMBB"))
+
+    def test_pi_cuts_above_target_and_is_bounded(self):
+        o = self.mod("pi")
+        o.measured_mbps = lambda: {"eMBB": 500.0}
+        o.control_step(17.0, now=1000)          # target 6.5 ms; first step has no derivative term
+        self.assertLess(self.embb(o), 500.0)
+        self.assertGreaterEqual(self.embb(o), 500.0 - 0.3 * 500, "at most 30 % of the ceiling per step")
+
+    def test_pi_raises_only_with_demand_pressing(self):
+        o = self.mod("pi")
+        o.limits["eMBB"] = 200.0
+        o.measured_mbps = lambda: {"eMBB": 50.0}
+        o.control_step(3.0, now=1000)
+        self.assertEqual(self.embb(o), 200.0, "below target but nobody needs more")
+        o.measured_mbps = lambda: {"eMBB": 195.0}
+        o.control_step(3.0, now=1005)
+        self.assertGreater(self.embb(o), 200.0)
+
+    def test_mpc_learns_the_model_and_meets_the_target(self):
+        o = self.mod("mpc")
+        o.limits["eMBB"] = 500.0
+        # True plant: p95 = 2 ms + 10 ms per unit of load share. Target 6.5 ms -> load share 0.45.
+        for i, share in enumerate([0.1, 0.3, 0.5, 0.7, 0.9, 0.6, 0.4, 0.8, 0.5, 0.45, 0.45, 0.45]):
+            o.measured_mbps = (lambda m: (lambda: {"eMBB": m}))(share * 500)
+            o.control_step(2.0 + 10.0 * share, now=1000 + 5 * i)
+        a, b = o.control["mpc"]["eMBB"]["theta"]
+        self.assertAlmostEqual(a, 2.0, delta=0.3)
+        self.assertAlmostEqual(b, 10.0, delta=1.0)
+        self.assertAlmostEqual(self.embb(o), 0.45 * 500, delta=30)
+
+    def test_ucb_explores_low_arms_first_then_exploits_the_best(self):
+        o = self.mod("ucb", UCB_DWELL="10", UCB_ARMS="0.2 0.5 1.0")
+        o.measured_mbps = lambda: {"eMBB": 500.0}
+        o.control_step(3.0, now=0)
+        self.assertEqual(self.embb(o), 100.0, "first arm, 0.2 of the ceiling")
+        t = 0
+        # latency is fine up to arm 0.5, violated at 1.0
+        for _ in range(40):
+            t += 5
+            lat = 12.0 if self.embb(o) > 300 else 3.0
+            o.control_step(lat, now=t)
+        st = o.control["ucb"]["eMBB"]
+        self.assertTrue(all(n > 0 for n in st["n"]), "every arm tried")
+        best = max(range(3), key=lambda i: st["sum"][i] / st["n"][i])
+        self.assertEqual(o.UCB_ARMS[best], 0.5, "highest throughput without violating latency")
+
+    def test_short_flows_guard_applies_to_new_policies(self):
+        o = self.mod("pi")
+        o.measured_mbps = lambda: {"eMBB": 300.0}
+        for i in range(5):
+            o.flow_results.append({"slice": "eMBB", "ended": 995.0, "outcome": "short"})
+        o.control_step(3.0, now=1000)
+        self.assertLessEqual(self.embb(o), 0.85 * 300 + 0.01)
+
+
 class Planning(unittest.TestCase):
     def setUp(self):
         self.o = load({"CORE": "open5gs", "EXECUTE": "0", "PROMETHEUS_URL": ""})
@@ -312,7 +405,7 @@ class Planning(unittest.TestCase):
                          {"class": "sensor", "count": 70}])
         self.assertEqual(self.needed(r), {"URLLC", "eMBB", "mMTC"})
         embb = next(s for s in r["slices"] if s["slice"] == "eMBB")
-        self.assertAlmostEqual(embb["required_mbps"], 20 * 8 * 1.25)
+        self.assertAlmostEqual(embb["mean_headroom_mbps"], 20 * 8 * 1.25)
 
     def test_delay_tolerant_demand_needs_one_slice(self):
         r = self.o.plan([{"class": "video", "count": 5}, {"class": "file", "count": 2}])
@@ -328,6 +421,23 @@ class Planning(unittest.TestCase):
         r = self.o.plan([{"class": "hologram", "count": 1}])
         self.assertEqual(r["slices_needed"], 0)
         self.assertEqual(r["unservable"][0]["class"], "hologram")
+
+    def test_kaufman_roberts_reduces_to_erlang_b(self):
+        # One class of 1-unit demands: Erlang B. B(10 Erlangs, 15 servers) = 0.0365 (standard tables).
+        b = self.o.kaufman_roberts([(10.0, 1)], 15)[0]
+        self.assertAlmostEqual(b, 0.0365, places=3)
+
+    def test_kr_sizing_meets_the_blocking_target_and_wider_classes_block_more(self):
+        mbps, unit, block = self.o.kr_size([(10.0, 8.0), (5.0, 15.0)], target=0.01)
+        self.assertLessEqual(max(block), 0.01)
+        self.assertGreater(block[1], block[0], "a 15 Mbps demand is blocked more than an 8 Mbps one")
+        mean = 10 * 8 + 5 * 15
+        self.assertGreater(mbps, 1.25 * mean, "mean x 1.25 is not enough for 1 % blocking here")
+
+    def test_plan_reports_kr_sizing(self):
+        r = self.o.plan([{"class": "video", "count": 20}])
+        embb = next(s for s in r["slices"] if s["slice"] == "eMBB")
+        self.assertGreater(embb["kr_required_mbps"], embb["demand_mbps"])
 
     def test_observed_demand_uses_littles_law(self):
         o = load({"CORE": "open5gs", "EXECUTE": "1", "FLOW_SECONDS": "20", "PROMETHEUS_URL": ""})

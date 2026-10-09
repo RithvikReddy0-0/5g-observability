@@ -95,6 +95,48 @@ class ClosedLoop(unittest.TestCase):
         self.assertEqual(self.o.auto_tick(now=1000, states=states(mMTC="DORMANT")), [])
 
 
+class Predictive(unittest.TestCase):
+    """AUTO_POLICY=predictive (ADR-018): learn the period between demand onsets, switch on early."""
+
+    def setUp(self):
+        self.o = load({"ON_DEMAND": "mMTC", "AUTO_POLICY": "predictive", "ACTIVATE_LEAD": "30",
+                       "IDLE_SECONDS": "120", "MIN_UP": "30"})
+        self.calls = []
+        self.o.submit = lambda kind, name, reason="", **a: (self.calls.append((kind, reason)) or object(), None)
+
+    def onsets(self, *times):
+        for t in times:
+            self.o.auto_tick(now=t, plan=plan(mMTC=0.1), states=states())
+            self.o.auto_tick(now=t + 60, plan=plan(), states=states())
+
+    def test_no_prediction_before_three_onsets(self):
+        self.onsets(1000, 1300)
+        self.assertIsNone(self.o.next_onset("mMTC"))
+
+    def test_switches_on_before_the_predicted_burst(self):
+        self.onsets(1000, 1300, 1600)                      # period 300 -> next burst at 1900
+        self.assertEqual(self.o.next_onset("mMTC"), 1900)
+        self.calls.clear()
+        self.assertEqual(self.o.auto_tick(now=1850, plan=plan(), states=states(mMTC="DORMANT")), [])
+        d = self.o.auto_tick(now=1875, plan=plan(), states=states(mMTC="DORMANT"))
+        self.assertEqual([(k, n) for k, n, _ in d], [("activate", "mMTC")])
+        self.assertIn("predicted", d[0][2])
+
+    def test_stays_on_when_the_next_burst_is_close(self):
+        self.onsets(1000, 1300, 1600)
+        self.o.loop["last_need"]["mMTC"] = 1660
+        self.assertEqual(self.o.auto_tick(now=1880, plan=plan(), states=states()), [],
+                         "idle 220 s, but the next burst is due in 20 s")
+
+    def test_reactive_policy_never_predicts(self):
+        o = load({"ON_DEMAND": "mMTC", "AUTO_POLICY": "reactive"})
+        o.submit = lambda *a, **k: (object(), None)
+        for t in (1000, 1300, 1600):
+            o.auto_tick(now=t, plan=plan(mMTC=0.1), states=states())
+            o.auto_tick(now=t + 60, plan=plan(), states=states())
+        self.assertEqual(o.auto_tick(now=1875, plan=plan(), states=states(mMTC="DORMANT")), [])
+
+
 class Rollback(unittest.TestCase):
     def setUp(self):
         self.o = load({"ACTIVATE_DEADLINE": "100"})

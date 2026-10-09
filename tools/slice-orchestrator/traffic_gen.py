@@ -112,6 +112,11 @@ def main():
         return 1
     pool = weighted_classes()
     iot_pool = weighted_classes(IOT_MIX)
+    # SEED makes the sequence of demands identical between runs, so that policies compared one after
+    # another face the same demand (ADR-018). The database returns subscribers in no fixed order.
+    if os.environ.get("SEED"):
+        supis = sorted(supis)
+        random.seed(int(os.environ["SEED"]))
     print("driving %d real subscribers at ~%g demands/s against %s" % (len(supis), RATE, ORCH))
     print("traffic mix: %s\n" % MIX)
 

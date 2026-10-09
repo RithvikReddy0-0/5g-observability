@@ -67,6 +67,7 @@ Run with: scripts/start_orchestrator.sh              (free5GC)
 """
 
 import json
+import math
 import os
 import random
 import re
@@ -133,8 +134,36 @@ CONTROL_SHORT_MAX = float(os.environ.get("CONTROL_SHORT_MAX", "0.2")) # tolerate
 # by default as long as one executed flow lasts.
 CONTROL_HOLD = float(os.environ.get("CONTROL_HOLD", str(FLOW_SECONDS if EXECUTE else 15)))
 CONTROL_WINDOW = float(os.environ.get("CONTROL_WINDOW", "30"))  # flows finished this recently count
+# Which control law moves the limit (ADR-018). aimd: the original; pi: PIE-style proportional-integral
+# on the latency error (RFC 8033); mpc: one-step model-predictive control on an online least-squares
+# model of latency vs load; ucb: a UCB1 bandit over discrete limit levels. Compared in
+# docs/evidence/open5gs-algorithm-comparison/.
+CONTROL_POLICY = os.environ.get("CONTROL_POLICY", "pi")   # the winner of the live benchmark
+CONTROL_TARGET = float(os.environ.get("CONTROL_TARGET", "0.65"))   # setpoint for pi/mpc, share of budget
+CONTROL_MAX_STEP = float(os.environ.get("CONTROL_MAX_STEP", "0.3"))  # largest move per step, share of ceiling
+PI_ALPHA = float(os.environ.get("PI_ALPHA", "0.15"))   # integral gain on (latency - target) / budget
+PI_BETA = float(os.environ.get("PI_BETA", "0.3"))      # proportional gain on the latency change / budget
+MPC_FORGET = float(os.environ.get("MPC_FORGET", "0.95"))  # RLS forgetting factor: recent behaviour counts more
+UCB_ARMS = [float(x) for x in os.environ.get("UCB_ARMS", "0.1 0.2 0.35 0.5 0.7 1.0").split()]
+UCB_DWELL = float(os.environ.get("UCB_DWELL", "10"))   # seconds an arm is held before it is scored
+UCB_C = float(os.environ.get("UCB_C", "0.5"))          # exploration weight
+UCB_PENALTY = float(os.environ.get("UCB_PENALTY", "1.0"))  # reward lost per share of time over the latency line
 PLAN_WINDOW = float(os.environ.get("PLAN_WINDOW", "300"))     # observed demand used by GET /plan
 PLAN_HEADROOM = float(os.environ.get("PLAN_HEADROOM", "1.25"))
+PLAN_BLOCKING = float(os.environ.get("PLAN_BLOCKING", "0.01"))   # blocking target for Kaufman-Roberts sizing
+
+# Admission policy when a slice is contested (ADR-018), compared in simulation:
+#   greedy       complete sharing, first come first served (the original)
+#   reservation  trunk/bandwidth reservation: classes not in RESERVE_EXEMPT are admitted only if
+#                RESERVE[slice] Mbps stay free afterwards (optimal on a single link: Miller 1969,
+#                Lippman 1975)
+#   pricing      online-knapsack threshold pricing: admit when the class's value per Mbps is at least
+#                psi(z) = (L/e) * (U*e/L)^z at utilisation z (competitive ratio ln(U/L) + 1)
+ADMISSION_POLICY = os.environ.get("ADMISSION_POLICY", "reservation")   # the winner in simulation
+RESERVE = dict((k, float(v)) for k, v in (x.split("=") for x in os.environ.get("RESERVE", "URLLC=4").split()))
+RESERVE_EXEMPT = set(os.environ.get("RESERVE_EXEMPT", "control sensor").split())
+CLASS_VALUE = dict((k, float(v)) for k, v in (x.split(":") for x in os.environ.get(
+    "CLASS_VALUE", "control:10 blog:2 video:1 file:1 sensor:5").split()))
 
 _lock = threading.Lock()
 
@@ -355,6 +384,20 @@ def limit(s):
     return min(s["capacity_mbps"], limits.get(s["name"], s["capacity_mbps"]))
 
 
+def admission_allows(s, cls, need):
+    """The admission policy's verdict for a demand that would fit (ADR-018)."""
+    free_after = limit(s) - in_use(s) - need
+    if ADMISSION_POLICY == "reservation":
+        return cls in RESERVE_EXEMPT or free_after >= RESERVE.get(s["name"], 0.0)
+    if ADMISSION_POLICY == "pricing":
+        values = [v for v in CLASS_VALUE.values() if v > 0]
+        lo, hi = min(values), max(values)
+        z = in_use(s) / limit(s) if limit(s) > 0 else 1.0
+        price = (lo / math.e) * (hi * math.e / lo) ** z
+        return CLASS_VALUE.get(cls, lo) >= price
+    return True
+
+
 def count_priority(s, arp, decision):
     k = (s["name"], arp["priority"], decision)
     by_priority[k] = by_priority.get(k, 0) + 1
@@ -458,6 +501,21 @@ def decide(supi, cls, mbps=None):
         fits_latency = [s for s in fits_latency if s["max_latency_ms"] == loosest]
 
     has_room = [s for s in fits_latency if in_use(s) + need <= limit(s)]
+    held_back = None
+    if has_room and ADMISSION_POLICY != "greedy":
+        kept = [s for s in has_room if admission_allows(s, cls, need)]
+        if not kept:
+            held_back = has_room[0]
+        has_room = kept
+    if held_back is not None:
+        # Room exists, but the admission policy keeps it for more valuable demand. Not a capacity
+        # refusal, so pre-emption does not apply.
+        s = held_back
+        bump("rejected", snssai(s), cls, ADMISSION_POLICY)
+        count_priority(s, arp_of(supi, s), "refused")
+        return {"admitted": False,
+                "reason": "slice %s (%s): %s policy holds the remaining %.1f Mbps for more valuable demand"
+                          % (snssai(s), s["name"], ADMISSION_POLICY, limit(s) - in_use(s))}
     victims = []
     if not has_room:
         # Full. A demand whose ARP may pre-empt can still take the place of lower-priority flows
@@ -670,6 +728,25 @@ def control_step(latency, now=None):
         cur = limit(s)
         sr = short_ratio(name, now)
         control["short_ratio"][name] = sr
+        if CONTROL_POLICY != "aimd":
+            new, action, why = POLICIES[CONTROL_POLICY](s, latency, budget, cur, ceiling, now)
+            # A shared guard for the newer laws: flows missing their rate mean the limit is above what
+            # the host can carry, whatever latency says.
+            if sr is not None and sr > CONTROL_SHORT_MAX and new > 0.85 * in_use(s):
+                new = max(CONTROL_FLOOR * ceiling, 0.85 * in_use(s))
+                why = "%.0f%% of %s flows short; %s" % (100 * sr, name, why)
+            new = min(ceiling, max(CONTROL_FLOOR * ceiling, new))
+            action = "cut" if new < cur - 0.5 else "raise" if new > cur + 0.5 else "hold"
+            hot = short = False
+            limits[name] = round(new, 2)
+            control_actions[(name, action)] = control_actions.get((name, action), 0) + 1
+            if action != "hold":
+                entry = {"t": time.strftime("%H:%M:%S", time.localtime(now)), "slice": name, "action": action,
+                         "from": round(cur, 1), "to": round(new, 1), "why": why, "policy": CONTROL_POLICY}
+                actions.append(entry)
+                control["log"].append(entry)
+                del control["log"][:-200]
+            continue
         hot = latency is not None and budget and latency > CONTROL_HIGH * budget
         short = sr is not None and sr > CONTROL_SHORT_MAX
         if hot or short:
@@ -702,6 +779,89 @@ def control_step(latency, now=None):
             print("CONTROL %-5s %-5s %6.1f -> %6.1f Mbps  (%s)" % (action, name, cur, new, why), flush=True)
     control["steps"] += 1
     return actions
+
+
+def _bounded(cur, target, ceiling):
+    """Move from cur towards target by at most CONTROL_MAX_STEP of the ceiling."""
+    step = CONTROL_MAX_STEP * ceiling
+    return max(cur - step, min(cur + step, target))
+
+
+def _pi(s, latency, budget, cur, ceiling, now):
+    """PIE-style PI control (RFC 8033): limit -= ceiling * (alpha*(L - T) + beta*(L - L_prev)) / budget.
+    Raises only while demand presses on the limit (anti-windup)."""
+    st = control.setdefault("pi", {}).setdefault(s["name"], {"prev": None})
+    if latency is None or not budget:
+        return cur, "hold", "no latency reading"
+    target = CONTROL_TARGET * budget
+    prev = st["prev"] if st["prev"] is not None else latency
+    st["prev"] = latency
+    delta = -ceiling * (PI_ALPHA * (latency - target) + PI_BETA * (latency - prev)) / budget
+    if delta > 0 and in_use(s) < 0.8 * cur:
+        return cur, "hold", "below target but no demand pressing"
+    return _bounded(cur, cur + delta, ceiling), None, "PI: p95 %.1f ms, target %.1f, previous %.1f" % (latency, target, prev)
+
+
+def _mpc(s, latency, budget, cur, ceiling, now):
+    """One-step model-predictive control. Model: p95 = a + b * load, fitted online by recursive least
+    squares with forgetting. Decision: the largest limit whose predicted p95 meets the target."""
+    st = control.setdefault("mpc", {}).setdefault(s["name"], {"theta": [0.0, 0.0], "P": [[1e3, 0.0], [0.0, 1e3]], "n": 0})
+    if latency is None or not budget:
+        return cur, "hold", "no latency reading"
+    x = in_use(s) / ceiling                      # load as a share of the ceiling keeps the numbers well scaled
+    th, P, lam = st["theta"], st["P"], MPC_FORGET
+    phi = [1.0, x]
+    Pphi = [P[0][0] * phi[0] + P[0][1] * phi[1], P[1][0] * phi[0] + P[1][1] * phi[1]]
+    den = lam + phi[0] * Pphi[0] + phi[1] * Pphi[1]
+    k = [Pphi[0] / den, Pphi[1] / den]
+    err = latency - (th[0] + th[1] * x)
+    st["theta"] = th = [th[0] + k[0] * err, th[1] + k[1] * err]
+    st["P"] = [[(P[0][0] - k[0] * Pphi[0]) / lam, (P[0][1] - k[0] * Pphi[1]) / lam],
+               [(P[1][0] - k[1] * Pphi[0]) / lam, (P[1][1] - k[1] * Pphi[1]) / lam]]
+    st["n"] += 1
+    target = CONTROL_TARGET * budget
+    if st["n"] < 4:
+        return cur, "hold", "MPC: learning the model (%d samples)" % st["n"]
+    a_, b_ = th
+    if b_ <= 1e-3:                                # load does not raise latency (yet): no reason to limit
+        best = ceiling
+    else:
+        best = max(0.0, (target - a_) / b_) * ceiling
+    if best > cur and in_use(s) < 0.8 * cur:      # no demand pressing: do not open the limit blindly
+        return cur, "hold", "MPC: model allows %.0f Mbps, no demand pressing" % best
+    return _bounded(cur, best, ceiling), None, "MPC: p95 = %.2f + %.2f x load -> %.0f Mbps for %.1f ms" % (a_, b_, best, target)
+
+
+def _ucb(s, latency, budget, cur, ceiling, now):
+    """UCB1 over discrete limit levels. An arm is held UCB_DWELL seconds; its reward is the share of the
+    ceiling actually carried minus UCB_PENALTY x the share of steps over the latency line."""
+    st = control.setdefault("ucb", {}).get(s["name"])
+    if st is None:                                 # first step: apply the first arm, score nothing yet
+        control["ucb"][s["name"]] = {"n": [0] * len(UCB_ARMS), "sum": [0.0] * len(UCB_ARMS),
+                                     "arm": 0, "since": now, "acc": []}
+        return UCB_ARMS[0] * ceiling, None, "UCB: starting with arm %.2f" % UCB_ARMS[0]
+    if latency is not None and budget:
+        st["acc"].append((min(in_use(s), cur) / ceiling, 1.0 if latency > CONTROL_HIGH * budget else 0.0))
+    if now - st["since"] < UCB_DWELL:
+        return cur, "hold", "UCB: holding arm %.2f" % UCB_ARMS[st["arm"]]
+    if st["acc"]:
+        r = sum(c for c, _ in st["acc"]) / len(st["acc"]) - UCB_PENALTY * sum(v for _, v in st["acc"]) / len(st["acc"])
+        st["n"][st["arm"]] += 1
+        st["sum"][st["arm"]] += r
+    st["acc"], st["since"] = [], now
+    total = sum(st["n"])
+    untried = [i for i, n in enumerate(st["n"]) if n == 0]
+    if untried:
+        st["arm"] = untried[0]                     # lowest limits first: explore safely
+    else:
+        st["arm"] = max(range(len(UCB_ARMS)), key=lambda i: st["sum"][i] / st["n"][i]
+                        + UCB_C * math.sqrt(2 * math.log(total) / st["n"][i]))
+    means = " ".join("%.2f:%s" % (UCB_ARMS[i], ("%.2f" % (st["sum"][i] / st["n"][i])) if st["n"][i] else "-")
+                     for i in range(len(UCB_ARMS)))
+    return UCB_ARMS[st["arm"]] * ceiling, None, "UCB: arm %.2f (means %s)" % (UCB_ARMS[st["arm"]], means)
+
+
+POLICIES = {"pi": _pi, "mpc": _mpc, "ucb": _ucb}
 
 
 def control_loop():
@@ -747,15 +907,71 @@ def plan(demands, headroom=PLAN_HEADROOM):
     for s in SLICES:
         p = per.get(s["name"])
         need = round(p["demand_mbps"] * headroom, 2) if p else 0.0
+        # Kaufman-Roberts (ADR-018): size for a blocking target instead of mean x headroom. Each
+        # class's offered load in Erlangs is its mean number of concurrent demands.
+        loads = [(mbps / TRAFFIC_CLASSES[c]["mbps"], TRAFFIC_CLASSES[c]["mbps"])
+                 for c, mbps in (p["classes"].items() if p else []) if mbps > 0]
+        kr_mbps, _, kr_block = kr_size(loads)
+        mean_headroom, need = need, round(kr_mbps, 2)     # KR is what the plan asks for (ADR-018)
         slices.append({
             "slice": s["name"], "snssai": snssai(s), "needed": bool(p),
             "demand_mbps": round(p["demand_mbps"], 2) if p else 0.0,
             "required_mbps": need, "classes": p["classes"] if p else {},
+            "mean_headroom_mbps": mean_headroom,
+            "kr_required_mbps": round(kr_mbps, 2), "kr_blocking_target": PLAN_BLOCKING,
+            "kr_blocking_at_limit": [round(x, 4) for x in kaufman_roberts(
+                [(a, max(1, int(round(m / kr_unit([mm for _, mm in loads]))))) for a, m in loads],
+                int(limit(s) / kr_unit([mm for _, mm in loads])))] if loads else [],
             "policy_capacity_mbps": s["capacity_mbps"], "current_limit_mbps": round(limit(s), 2),
             "fits_policy": need <= s["capacity_mbps"], "fits_now": need <= limit(s),
         })
     return {"slices_needed": sum(1 for x in slices if x["needed"]),
             "headroom": headroom, "slices": slices, "unservable": unservable}
+
+
+def kaufman_roberts(classes, capacity_units):
+    """Per-class blocking in a multi-rate loss system with complete sharing (Kaufman 1981, Roberts
+    1981). classes: [(offered load in Erlangs = mean concurrent demands, units each)].
+    q(n) = (1/n) * sum_c a_c * b_c * q(n - b_c); class c is blocked in the top b_c states."""
+    C = int(capacity_units)
+    q = [0.0] * (C + 1)
+    q[0] = 1.0
+    for n in range(1, C + 1):
+        q[n] = sum(a * b * q[n - b] for a, b in classes if b <= n) / n
+        if q[n] > 1e250:                          # rescale to stay inside floating point
+            q = [x / 1e250 for x in q]
+    total = sum(q)
+    return [sum(q[max(0, C - b + 1):]) / total for _, b in classes]
+
+
+def kr_unit(sizes):
+    """The largest unit every demand size is a whole multiple of (to 0.01 Mbps): 8 and 15 Mbps give
+    1 Mbps. Rounding 15 Mbps to two 8 Mbps units overstated its blocking (8.1 % predicted, 6.4 %
+    simulated) before this."""
+    g = 0
+    for m in sizes:
+        g = math.gcd(g, max(1, int(round(m * 100))))
+    return g / 100.0
+
+
+def kr_size(class_loads, target=PLAN_BLOCKING, limit_units=200000):
+    """Smallest capacity (Mbps) at which every class's blocking is at most target.
+    class_loads: [(Erlangs, Mbps per demand)]. -> (Mbps, unit, per-class blocking at that size)."""
+    if not class_loads:
+        return 0.0, 1.0, []
+    unit = kr_unit([m for _, m in class_loads])
+    classes = [(a, max(1, int(round(m / unit)))) for a, m in class_loads]
+    lo = max(b for _, b in classes)
+    hi = lo
+    while max(kaufman_roberts(classes, hi)) > target and hi < limit_units:
+        hi *= 2
+    while lo < hi:                                # blocking falls as capacity grows: bisect
+        mid = (lo + hi) // 2
+        if max(kaufman_roberts(classes, mid)) <= target:
+            hi = mid
+        else:
+            lo = mid + 1
+    return hi * unit, unit, kaufman_roberts(classes, hi)
 
 
 def observed_demands(window=PLAN_WINDOW, now=None):
@@ -984,8 +1200,8 @@ if __name__ == "__main__":
               % (s["name"], snssai(s), s["capacity_mbps"], s["max_latency_ms"], s["five_qi"]),
               flush=True)
     if CONTROL:
-        print("  controller: protects %s %s (cut above %.0f%% of its budget), throttles %s, every %gs"
-              % (CONTROL_PROTECT, CONTROL_STAT, 100 * CONTROL_HIGH, " ".join(CONTROL_THROTTLE),
+        print("  controller (%s): protects %s %s (cut above %.0f%% of its budget), throttles %s, every %gs"
+              % (CONTROL_POLICY, CONTROL_PROTECT, CONTROL_STAT, 100 * CONTROL_HIGH, " ".join(CONTROL_THROTTLE),
                  CONTROL_INTERVAL), flush=True)
         threading.Thread(target=control_loop, daemon=True).start()
     ThreadingHTTPServer(("0.0.0.0", PORT), Handler).serve_forever()
