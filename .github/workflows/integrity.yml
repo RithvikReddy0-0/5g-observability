@@ -16,7 +16,7 @@ jobs:
     name: manifest.lock integrity
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: manifest.lock is valid JSON with full 40-char SHAs
         run: |
@@ -62,7 +62,7 @@ jobs:
     name: config validation
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: every YAML config parses
         run: |
@@ -137,7 +137,7 @@ jobs:
     name: KPI gate is defined and effective
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: KPI definitions are structurally valid
         run: |
@@ -206,6 +206,16 @@ jobs:
             exit 1
           fi
           echo "breach correctly rejected"
+
+      - name: Open5GS gate PASSES a healthy 3-slice stack and FAILS each fault on the right KPI
+        run: |
+          # The steps above only ever run the free5GC gate. This stub holds the SERIES of a healthy
+          # Open5GS stack (100 UEs, 130 sessions, 3 UPFs; names and labels as the real exporters
+          # emit them) and evaluates every gate expression against them, so a wrong label or job
+          # name gets no data here as it would live. Each fault (an NF, UPF or gNB down, a slice's
+          # sessions missing, signalling drops, ...) must fail exactly the gates expected, and
+          # every enforcing gate must be seen to fail in some scenario.
+          python3 tools/kpi-gate/test_open5gs_gate.py
 
       - name: an unreachable Prometheus is not a pass
         run: |
