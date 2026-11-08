@@ -14,7 +14,8 @@ experiment.py — does the packet scheduler (ADR-019) do its job? Measured on th
                  host's CPU saturates at 400 Mbps (load average ~10 on 12 threads), so URLLC's tail
                  there is CPU contention, which no queue discipline can fix; D isolates what the
                  scheduler itself does. Two rounds of off / fifo / sliced.
-Parts can be chosen: PARTS=D (default ABCD).
+Parts can be chosen: PARTS=D (default ABCD). MODES="off fifo sliced prio drr hfsc" sets the modes part D
+compares (round 1 in that order, round 2 reversed); EVIDENCE=<dir under docs/evidence> where it writes.
 
 Load is real UDP through each slice's DN, UPF and gNB (flowgen.py, paced, AMBR-limited at the gNB).
 Every run also counts the radio-link failures it caused (UE logs) and checks every UE's data path
@@ -50,6 +51,8 @@ FLOWGEN = os.path.join(REPO, "tools", "slice-orchestrator", "flowgen.py")
 QUICK = os.environ.get("QUICK") == "1"
 T = 20 if QUICK else int(os.environ.get("T", "60"))
 PARTS = os.environ.get("PARTS", "ABCD").upper()
+MODES_D = os.environ.get("MODES", "off fifo sliced").split()
+EVIDENCE = os.environ.get("EVIDENCE", "open5gs-scheduler")
 GW = {"eMBB": "10.45.0.1", "URLLC": "10.46.0.1", "mMTC": "10.47.0.1"}
 DN = {"eMBB": "o5gs-dn-embb", "URLLC": "o5gs-dn-urllc", "mMTC": "o5gs-dn-mmtc"}
 PORT0 = 5600
@@ -258,7 +261,7 @@ def measure(label, cfg, plan, seconds):
 
 def main():
     ts = time.strftime("%Y%m%d-%H%M%SZ", time.gmtime())
-    out_dir = os.path.join(REPO, "docs", "evidence", "open5gs-scheduler", ts)
+    out_dir = os.path.join(REPO, "docs", "evidence", EVIDENCE, ts)
     os.makedirs(out_dir, exist_ok=True)
     subprocess.run(["docker", "exec", "-i", UE, "sh", "-c", "cat > /tmp/fg.py"], stdin=open(FLOWGEN, "rb"), check=True)
     base = api("/state")
@@ -272,7 +275,7 @@ def main():
         [c[0] for c in critical], len(standard), len(dev["eMBB"]), len(dev["mMTC"])), flush=True)
     defaults = {"mode": base["mode"], "cell_dl_mbps": base["cell_mbps"]["downlink"],
                 "cell_ul_mbps": base["cell_mbps"]["uplink"], "shares": base["shares"]}
-    results = {"timestamp": ts, "seconds": T, "parts": PARTS, "scheduler_defaults": defaults,
+    results = {"timestamp": ts, "seconds": T, "parts": PARTS, "modes_d": MODES_D, "scheduler_defaults": defaults,
                "A": [], "B": [], "C": [], "D": []}
 
     # A — isolation under eMBB overload
@@ -308,7 +311,7 @@ def main():
         def plan_d(dev, crit, std):
             return [("eMBB", a, 30) for a, _ in dev["eMBB"][:5]], probes_a(dev, crit, std)
 
-        for rnd, order in ((1, ["off", "fifo", "sliced"]), (2, ["sliced", "fifo", "off"])):
+        for rnd, order in ((1, MODES_D), (2, MODES_D[::-1])):
             for mode in order:
                 results["D"].append(measure("round %d %s" % (rnd, mode), {"mode": mode, "cell_dl_mbps": 100}, plan_d, T))
 

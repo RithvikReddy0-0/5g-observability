@@ -238,6 +238,110 @@ class Tree(unittest.TestCase):
         self.assertEqual(label(t, S.classify(pkt, t["filters"], t["default"])), ("URLLC", "arp2"))
 
 
+def sample_packets():
+    """One packet of every kind the cell carries, both directions: (direction, what, packet)."""
+    out = []
+    for d, wrap in (("downlink", downlink), ("uplink", uplink)):
+        inner = (lambda a: user_ip("10.53.0.52", a)) if d == "downlink" else (lambda a: user_ip(a, "10.53.0.52"))
+        out += [(d, "heartbeat", wrap("eMBB", rls(S.HEARTBEAT))),
+                (d, "rrc", wrap("URLLC", rls(S.PDU_TRANSMISSION, pdu_type=S.PDU_RRC, payload=2, pdu=b"\x10" * 40))),
+                (d, "URLLC critical", wrap("URLLC", rls(S.PDU_TRANSMISSION, pdu_type=S.PDU_DATA, payload=1, pdu=inner("10.46.0.5")))),
+                (d, "URLLC standard", wrap("URLLC", rls(S.PDU_TRANSMISSION, pdu_type=S.PDU_DATA, payload=1, pdu=inner("10.46.0.8")))),
+                (d, "eMBB", wrap("eMBB", rls(S.PDU_TRANSMISSION, pdu_type=S.PDU_DATA, payload=1, pdu=inner("10.45.0.12")))),
+                (d, "mMTC", wrap("mMTC", rls(S.PDU_TRANSMISSION, pdu_type=S.PDU_DATA, payload=1, pdu=inner("10.47.0.3")))),
+                (d, "scrape", ipv4("10.53.0.10", UE_HOST, 6, b"\x23\x99" + b"\0" * 30)),
+                (d, "arp", b"\x00\x01\x08\x00\x06\x04\x00\x01" + b"\0" * 20)]          # not IP at all
+    return out
+
+
+def tree_for(mode, direction="downlink", env=ENV, tiers=CRITICAL):
+    cfg = config(env)
+    cfg["mode"] = mode
+    return S.build(cfg, direction, tiers)
+
+
+class Algorithms(unittest.TestCase):
+    """ADR-021: prio, drr and hfsc re-arrange the sliced tree's classes; the classifier is the same."""
+
+    def test_every_algorithm_puts_every_packet_where_sliced_does(self):
+        for mode in ("prio", "drr", "hfsc"):
+            for d in S.DIRECTIONS:
+                ref, alt = tree_for("sliced", d), tree_for(mode, d)
+                for pd, what, pkt in sample_packets():
+                    if pd != d:
+                        continue
+                    want = label(ref, S.classify(pkt, ref["filters"], ref["default"]))
+                    got = label(alt, S.classify(pkt, alt["filters"], alt["default"]))
+                    self.assertEqual(got, want, (mode, d, what))
+
+    def test_non_ip_packets_reach_the_default_class_in_every_mode(self):
+        # drr has no default class: a packet no filter claims is dropped, so ARP must be claimed
+        arp = sample_packets()[-1][2]
+        for mode in ("sliced", "prio", "drr", "hfsc"):
+            t = tree_for(mode)
+            self.assertEqual(label(t, S.classify(arp, t["filters"], None if mode == "drr" else t["default"])),
+                             ("other", ""), mode)
+        drr = S.tc_batch(tree_for("drr"), "veth0")
+        self.assertTrue(any("protocol all" in l and "match u32 0 0 at 0" in l for l in drr))
+
+    def test_prio_bands_follow_the_sliced_priorities(self):
+        t = tree_for("prio")
+        band = {c["label"]: c["band"] for c in t["classes"] if "band" in c}
+        order = [("signalling", ""), ("URLLC", "arp1"), ("URLLC", "arp2"), ("eMBB", ""), ("mMTC", ""), ("other", "")]
+        self.assertEqual(sorted(band, key=band.get), order)
+        lines = S.tc_batch(t, "veth0")
+        inner = next(l for l in lines if " handle 2: " in l)
+        self.assertIn("parent 1:1 handle 2: prio bands 6 priomap " + " ".join(["5"] * 16), inner)
+
+    def test_drr_quanta_are_proportional_to_the_shares(self):
+        t = tree_for("drr")
+        q = {c["label"]: c["quantum"] for c in t["classes"] if "quantum" in c}
+        self.assertEqual(min(q.values()), S.DRR_QUANTUM_MIN)                  # signalling, 2 %
+        self.assertEqual(q[("eMBB", "")], 30 * S.DRR_QUANTUM_MIN)             # 60 % / 2 %
+        self.assertEqual(q[("mMTC", "")] * 2, 5 * S.DRR_QUANTUM_MIN)          # 5 % / 2 %
+
+    def test_prio_and_drr_shape_the_cell_with_the_same_htb_class_as_sliced(self):
+        for mode in ("prio", "drr"):
+            lines = S.tc_batch(tree_for(mode), "veth0")
+            self.assertEqual(lines[0], "qdisc add dev veth0 root handle 1: htb default 1")
+            self.assertTrue(lines[1].startswith("class add dev veth0 parent 1: classid 1:1 htb rate 250000kbit ceil 250000kbit burst 256k"))
+            self.assertTrue(all(" parent 2: " in l for l in lines if l.startswith("filter")), mode)
+
+    def test_hfsc_delay_bound_does_not_depend_on_the_share(self):
+        # the point of HFSC: URLLC's critical tier keeps its 1 ms bound whether it is guaranteed 10 % or 2 %
+        for share in (10, 2):
+            t = tree_for("hfsc", env=ENV.replace("SLICE_B_SCHED_SHARE=10", "SLICE_B_SCHED_SHARE=%d" % share))
+            crit = next(c for c in t["classes"] if c["label"] == ("URLLC", "arp1"))
+            self.assertAlmostEqual(crit["rt"][2], 250 * share / 100.0 * 3 / 10)    # m2 = its share
+            self.assertLessEqual(S.hfsc_delay_ms(crit["rt"], S.HFSC_UMAX), 1.0 + 1e-9, share)
+        std = next(c for c in t["classes"] if c["label"] == ("URLLC", "arp2"))
+        self.assertLessEqual(S.hfsc_delay_ms(std["rt"], S.HFSC_UMAX), 2.0 + 1e-9)
+
+    def test_hfsc_real_time_curves_fit_in_the_cell_and_bulk_classes_only_link_share(self):
+        for d in S.DIRECTIONS:
+            t = tree_for("hfsc", d)
+            rt = [c for c in t["classes"] if c.get("rt")]
+            self.assertEqual({c["label"] for c in rt}, {("signalling", ""), ("URLLC", "arp1"), ("URLLC", "arp2")})
+            self.assertLess(sum(max(c["rt"][0], c["rt"][2]) for c in rt), t["classes"][0]["ul"])
+            root = t["classes"][0]
+            self.assertEqual((root["classid"], root["ul"]), ("1:1", 250.0 if d == "downlink" else 100.0))
+        lines = S.tc_batch(tree_for("hfsc"), "veth0")
+        self.assertEqual(lines[0], "qdisc add dev veth0 root handle 1: hfsc default 99")
+        embb = next(l for l in lines if "classid 1:20 " in l)
+        self.assertNotIn(" rt ", embb)
+        self.assertIn("ls m2 150000kbit", embb)
+
+    def test_directions_leave_the_other_direction_untouched(self):
+        cfg = config()
+        cfg["directions"] = ["uplink"]
+        self.assertEqual(S.tc_batch(S.build(cfg, "downlink", CRITICAL), "veth0"), [])
+        self.assertNotEqual(S.tc_batch(S.build(cfg, "uplink", CRITICAL), "eth0"), [])
+        cfg["directions"] = ["sideways"]
+        self.assertTrue(any("directions" in e for e in S.validate(cfg)))
+        cfg["directions"] = []
+        self.assertTrue(any("directions" in e for e in S.validate(cfg)))
+
+
 class Configuration(unittest.TestCase):
     def test_the_repository_configuration_is_valid(self):
         cfg = S.load_config()

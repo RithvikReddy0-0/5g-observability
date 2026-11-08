@@ -41,9 +41,18 @@ whole cell; HTB serves classes within their guarantee in priority order, and len
 the highest-priority class that wants more. Shares and priorities are the knobs to tune.
 
 MODES (for comparing like with like, at the same cell capacity)
-    sliced   the tree above
+    sliced   the tree above (HTB)
+    prio     strict priority: the same classes as bands of one prio qdisc, under one HTB class that
+             only shapes the cell. Lower bands get what higher bands leave (ADR-021)
+    drr      deficit round robin (Shreedhar & Varghese 1995): the same classes, served in turn, each
+             with a quantum proportional to its share, under the same cell shaper (ADR-021)
+    hfsc     HFSC (Stoica, Zhang & Ng 1997): the same tree; delay-critical classes get a real-time
+             service curve whose delay bound does not depend on their share, the rest link-share
+             by their shares; the cell is the root's upper limit (ADR-021)
     fifo     one drop-tail FIFO at the cell capacity: what a shared cell does without a scheduler
     off      no shaping at all (the stack as it was before ADR-019)
+Every mode keeps the same classifier: only the tree changes. `directions` (both by default) limits
+the scheduler to the downlink or the uplink; the other direction is left as Docker made it.
 
 It runs as a privileged container on the host's network and PID namespaces
 (scripts/open5gs/start_scheduler.sh) because it changes queues on the host and inside the UE
@@ -85,6 +94,11 @@ HEARTBEAT, HEARTBEAT_ACK, PDU_TRANSMISSION, PDU_TRANSMISSION_ACK = 4, 5, 6, 7
 PDU_RRC, PDU_DATA = 1, 2
 
 DIRECTIONS = ("downlink", "uplink")
+MODES = ("sliced", "prio", "drr", "hfsc", "fifo", "off")
+MTU = 1514                      # bytes on the wire for a full-size packet
+DRR_QUANTUM_MIN = MTU           # the smallest share's quantum: one full packet per round
+HFSC_UMAX = MTU                 # HFSC real-time curves: a packet of up to this size ...
+HFSC_DMAX_MS = {"signalling": 5.0, "tier": 1.0}   # ... leaves within dmax (URLLC tier j: (j+1) x 1 ms)
 
 
 def u8(value, off):
@@ -128,8 +142,13 @@ def matches(packet, keys):
 
 
 def classify(packet, filters, default):
-    """First matching filter, in filter-priority order — the same order tc uses."""
+    """First matching filter, in filter-priority order — the same order tc uses. A filter for
+    `protocol ip` (the default) never sees a packet that is not IPv4 (ARP, for one); a catch-all
+    for `protocol all` sees everything."""
+    is_ip = bool(packet) and packet[0] >> 4 == 4
     for f in sorted(filters, key=lambda f: f["prio"]):
+        if f.get("protocol", "ip") == "ip" and not is_ip:
+            continue
         if matches(packet, f["keys"]):
             return f["classid"]
     return default
@@ -186,6 +205,7 @@ def load_config(env_path=SLICES_ENV, compose_path=COMPOSE):
         imsi += n
     return {
         "mode": env.get("SCHED_MODE", "sliced"),
+        "directions": env.get("SCHED_DIRECTIONS", " ".join(DIRECTIONS)).split(),
         "cell": {"downlink": float(env.get("SCHED_CELL_DL_MBPS", "250")),
                  "uplink": float(env.get("SCHED_CELL_UL_MBPS", "100"))},
         "signalling_share": float(env.get("SCHED_SIGNALLING_SHARE", "2")),
@@ -196,8 +216,11 @@ def load_config(env_path=SLICES_ENV, compose_path=COMPOSE):
 
 def validate(cfg):
     errors = []
-    if cfg["mode"] not in ("sliced", "fifo", "off"):
-        errors.append("mode must be sliced, fifo or off, not %r" % cfg["mode"])
+    if cfg["mode"] not in MODES:
+        errors.append("mode must be one of %s, not %r" % (", ".join(MODES), cfg["mode"]))
+    dirs = cfg.get("directions", list(DIRECTIONS))
+    if not dirs or any(d not in DIRECTIONS for d in dirs):
+        errors.append("directions must be a non-empty subset of %s, not %r" % (", ".join(DIRECTIONS), dirs))
     for d in DIRECTIONS:
         if not cfg["cell"][d] > 0:
             errors.append("%s cell capacity must be positive" % d)
@@ -221,24 +244,41 @@ def kbit(mbps):
 
 
 def build(cfg, direction, tier_addresses):
-    """The HTB tree and filters for one direction, as data: classes, leaf qdiscs, filters.
+    """The tree and filters for one direction, as data: classes, leaf qdiscs, filters.
 
     tier_addresses: {(slice name, tier index): [inner addresses]} for every tier except a slice's
     last, which is matched by the slice's pool (so a UE whose address is not yet known still lands
-    in its slice, in the lowest tier)."""
+    in its slice, in the lowest tier).
+
+    Every scheduling mode starts from the same classes and the same filters (build_sliced); prio,
+    drr and hfsc only re-arrange them into another qdisc. A direction outside cfg["directions"] is
+    left alone ("off")."""
+    cell = cfg["cell"][direction]
+    mode = cfg["mode"]
+    if mode == "off" or direction not in cfg.get("directions", DIRECTIONS):
+        return {"mode": "off", "classes": [], "filters": [], "default": None}
+    if mode == "fifo":
+        classes = [{"classid": "1:1", "parent": "1:", "rate": cell, "ceil": cell, "label": ("cell", "")},
+                   {"classid": "1:10", "parent": "1:1", "rate": cell, "ceil": cell, "prio": 0,
+                    "leaf": "pfifo limit %d" % FIFO_LIMIT, "label": ("all", "")}]
+        return {"mode": "fifo", "root": "htb default 10", "classes": classes, "filters": [], "default": "1:10"}
+    tree = build_sliced(cfg, direction, tier_addresses)
+    if mode == "hfsc":
+        return to_hfsc(tree, cell)
+    if mode in ("prio", "drr"):
+        return to_flat(tree, mode, cell)
+    return tree
+
+
+def build_sliced(cfg, direction, tier_addresses):
+    """The HTB tree (ADR-019). Delay-critical leaves carry dmax_ms, the delay bound HFSC gives them."""
     cell = cfg["cell"][direction]
     classes, filters = [], []
-    if cfg["mode"] == "off":
-        return {"mode": "off", "classes": [], "filters": [], "default": None}
     classes.append({"classid": "1:1", "parent": "1:", "rate": cell, "ceil": cell, "label": ("cell", "")})
-    if cfg["mode"] == "fifo":
-        classes.append({"classid": "1:10", "parent": "1:1", "rate": cell, "ceil": cell, "prio": 0,
-                        "leaf": "pfifo limit %d" % FIFO_LIMIT, "label": ("all", "")})
-        return {"mode": "fifo", "classes": classes, "filters": [], "default": "1:10"}
-
     share = lambda pct: cell * pct / 100.0
     classes.append({"classid": "1:10", "parent": "1:1", "rate": share(cfg["signalling_share"]), "ceil": cell,
-                    "prio": 0, "leaf": "pfifo limit 256", "label": ("signalling", "")})
+                    "prio": 0, "leaf": "pfifo limit 256", "label": ("signalling", ""),
+                    "dmax_ms": HFSC_DMAX_MS["signalling"]})
     classes.append({"classid": "1:99", "parent": "1:1", "rate": share(cfg["default_share"]), "ceil": cell,
                     "prio": 6, "leaf": "fq_codel", "label": ("other", "")})
     radio = radio_keys(direction)
@@ -257,9 +297,10 @@ def build(cfg, direction, tier_addresses):
         short = s["max_latency_ms"] <= 20          # delay-critical: a short FIFO, not a fair queue
         leaf = "pfifo limit 64" if short else "fq_codel"
         tiers = s["tiers"]
+        dmax = lambda j: HFSC_DMAX_MS["tier"] * (j + 1) if short else None
         if len(tiers) == 1:
             classes.append({"classid": "1:%d" % base, "parent": "1:1", "rate": rate, "ceil": cell,
-                            "prio": s["prio"], "leaf": leaf, "label": (s["name"], "")})
+                            "prio": s["prio"], "leaf": leaf, "label": (s["name"], ""), "dmax_ms": dmax(0)})
             pool_filters.append({"classid": "1:%d" % base, "keys": data + prefix16_keys(s["pool"], addr_off),
                                  "what": "%s pool" % s["name"]})
             continue
@@ -270,7 +311,7 @@ def build(cfg, direction, tier_addresses):
             cid = "1:%d" % (base + 1 + j)
             classes.append({"classid": cid, "parent": "1:%d" % base, "rate": rate * t["count"] / total,
                             "ceil": cell, "prio": min(6, s["prio"] + j), "leaf": leaf,
-                            "label": (s["name"], "arp%d" % t["arp"])})
+                            "label": (s["name"], "arp%d" % t["arp"]), "dmax_ms": dmax(j)})
             if j < len(tiers) - 1:
                 for addr in sorted(tier_addresses.get((s["name"], j), [])):
                     fprio_addr = 3
@@ -282,35 +323,129 @@ def build(cfg, direction, tier_addresses):
     for f in pool_filters:
         f["prio"] = 4
         filters.append(f)
-    return {"mode": "sliced", "classes": classes, "filters": filters, "default": "1:99"}
+    return {"mode": "sliced", "root": "htb default 99", "classes": classes, "filters": filters, "default": "1:99"}
+
+
+def leaves(tree):
+    return [c for c in tree["classes"] if "leaf" in c]
+
+
+def to_flat(tree, mode, cell):
+    """prio or drr: the sliced tree's leaf classes, flattened into one qdisc (handle 2:) that sits
+    under a single HTB class shaping the cell — the same shaper as sliced, so only the scheduler
+    differs. prio orders them by their HTB priority (band 0 first; ties by class id). drr gives each
+    a quantum proportional to its guaranteed share, the smallest one full packet. The same filters
+    classify, attached to 2:; a last catch-all filter (protocol all) sends everything else, ARP too,
+    to "other": an unclassified packet would be dropped by drr."""
+    leafs = sorted(leaves(tree), key=lambda c: (c["prio"], int(c["classid"].split(":")[1])))
+    smallest = min(c["rate"] for c in leafs)
+    remap, classes = {}, [{"classid": "1:1", "parent": "1:", "rate": cell, "ceil": cell, "label": ("cell", "")}]
+    for k, c in enumerate(leafs, start=1):
+        n = dict(c, classid="2:%d" % k, parent="2:", kind=mode, leaf_handle="%x" % (0x200 + k))
+        if mode == "prio":
+            n["band"] = k - 1
+        else:
+            n["quantum"] = int(round(DRR_QUANTUM_MIN * c["rate"] / smallest))
+        remap[c["classid"]] = n["classid"]
+        classes.append(n)
+    other = remap[tree["default"]]
+    filters = [dict(f, classid=remap[f["classid"]], parent="2:") for f in tree["filters"]]
+    filters.append({"prio": 9, "classid": other, "parent": "2:", "protocol": "all", "keys": [],
+                    "what": "anything else (catch-all)"})
+    inner = "prio bands %d priomap %s" % (len(leafs), " ".join([str(int(other.split(":")[1]) - 1)] * 16)) \
+        if mode == "prio" else "drr"
+    return {"mode": mode, "root": "htb default 1", "inner": {"parent": "1:1", "handle": "2:", "spec": inner},
+            "classes": classes, "filters": filters, "default": other}
+
+
+def hfsc_rt(umax_bytes, dmax_ms, rate_mbps):
+    """A real-time service curve as (m1 Mbps, d ms, m2 Mbps) such that a packet of umax bytes is
+    served within dmax whatever the rate: the delay bound is decoupled from the share. Concave
+    (m1 > m2) when umax/dmax exceeds the rate; otherwise m1 = 0 for long enough that the umax packet
+    still finishes by dmax. The same conversion tc does for `rt umax .. dmax .. rate ..`."""
+    burst = umax_bytes * 8 / (dmax_ms * 1000.0)            # Mbps: umax bits in dmax
+    if burst > rate_mbps:
+        return burst, dmax_ms, rate_mbps
+    return 0.0, dmax_ms - umax_bytes * 8 / (rate_mbps * 1000.0), rate_mbps
+
+
+def hfsc_delay_ms(rt, size_bytes):
+    """When a packet of size_bytes, arriving to an idle class, has been served by curve rt."""
+    m1, d, m2 = rt
+    bits = size_bytes * 8 / 1000.0                         # kbit; Mbps x ms = kbit
+    if m1 * d >= bits:
+        return bits / m1
+    return d + (bits - m1 * d) / m2
+
+
+def to_hfsc(tree, cell):
+    """hfsc: the same classes and filters. The cell is the root's upper limit; every class
+    link-shares by its guaranteed share; delay-critical leaves also get a real-time curve whose
+    delay bound (dmax) is set per class, not by its share."""
+    classes = []
+    for c in tree["classes"]:
+        n = dict(c, kind="hfsc")
+        if c["classid"] == "1:1":
+            n["ls"], n["ul"] = cell, cell
+        else:
+            n["ls"] = c["rate"]
+            if c.get("dmax_ms"):
+                n["rt"] = hfsc_rt(HFSC_UMAX, c["dmax_ms"], c["rate"])
+        classes.append(n)
+    return dict(tree, mode="hfsc", root="hfsc default 99", classes=classes)
+
+
+def tc_class(dev, c):
+    kind = c.get("kind", "htb")
+    head = "class add dev %s parent %s classid %s " % (dev, c["parent"], c["classid"])
+    if kind == "prio":
+        return None                                          # prio's bands exist with the qdisc
+    if kind == "drr":
+        return head + "drr quantum %d" % c["quantum"]
+    if kind == "hfsc":
+        line = head + "hfsc"
+        if c.get("rt"):
+            m1, d, m2 = c["rt"]
+            line += " rt m1 %s d %dus m2 %s" % (kbit(m1) if m1 > 0 else "0bit", int(round(d * 1000)), kbit(m2))
+        line += " ls m2 %s" % kbit(c["ls"])
+        if c.get("ul"):
+            line += " ul m2 %s" % kbit(c["ul"])
+        return line
+    line = head + "htb rate %s ceil %s" % (kbit(c["rate"]), kbit(c["ceil"]))
+    if c["classid"] == "1:1":
+        line += " burst 256k cburst 256k"
+        if "inner" in c:
+            line += " quantum 60000"
+    else:
+        line += " burst 64k cburst 256k quantum 15140"
+        if "prio" in c:
+            line += " prio %d" % c["prio"]
+    return line
 
 
 def tc_batch(tree, dev):
     """tc -batch lines that install the tree on dev (the old root qdisc is removed first, separately)."""
     if tree["mode"] == "off":
         return []
-    default = tree["default"].split(":")[1]
-    lines = ["qdisc add dev %s root handle 1: htb default %s" % (dev, default)]
+    lines = ["qdisc add dev %s root handle 1: %s" % (dev, tree["root"])]
+    inner = tree.get("inner")
     for c in tree["classes"]:
-        line = "class add dev %s parent %s classid %s htb rate %s ceil %s" % (
-            dev, c["parent"], c["classid"], kbit(c["rate"]), kbit(c["ceil"]))
-        if c["classid"] == "1:1":
-            line += " burst 256k cburst 256k"
-        else:
-            line += " burst 64k cburst 256k quantum 15140"
-            if "prio" in c:
-                line += " prio %d" % c["prio"]
-        lines.append(line)
+        line = tc_class(dev, dict(c, inner=1) if inner and c["classid"] == inner["parent"] else c)
+        if line:
+            lines.append(line)
+        if inner and c["classid"] == inner["parent"]:
+            lines.append("qdisc add dev %s parent %s handle %s %s" % (dev, inner["parent"], inner["handle"], inner["spec"]))
         if "leaf" in c:
             lines.append("qdisc add dev %s parent %s handle %s: %s" % (
-                dev, c["classid"], c["classid"].split(":")[1], c["leaf"]))
+                dev, c["classid"], c.get("leaf_handle", c["classid"].split(":")[1]), c["leaf"]))
     for f in tree["filters"]:
         m = []
         for width, value, mask, off in f["keys"]:
             kind = {1: "u8", 2: "u16", 4: "u32"}[width]
             m.append("match %s 0x%x 0x%x at %d" % (kind, value, mask, off))
-        lines.append("filter add dev %s parent 1: protocol ip prio %d u32 %s flowid %s" % (
-            dev, f["prio"], " ".join(m), f["classid"]))
+        lines.append("filter add dev %s parent %s protocol %s prio %d u32 %s flowid %s" % (
+            dev, f.get("parent", "1:"), f.get("protocol", "ip"), f["prio"],
+            " ".join(m) if m else "match u32 0 0 at 0", f["classid"]))
     return lines
 
 
@@ -466,7 +601,7 @@ class Scheduler:
             rc2, qout = run(prefix + ["-s", "-j", "qdisc", "show", "dev", dev])
             try:
                 for q in (json.loads(qout) if rc2 == 0 and qout else []):
-                    if q.get("parent", "").startswith("1:"):
+                    if q.get("parent") and not q.get("root"):      # 1:x (htb, hfsc) or 2:x (prio, drr)
                         leaves[q["parent"]] = q
             except ValueError:
                 leaves = {}
@@ -493,6 +628,9 @@ class Scheduler:
             cfg = json.loads(json.dumps(self.cfg))
         if "mode" in req:
             cfg["mode"] = req["mode"]
+        if "directions" in req:
+            d = req["directions"]
+            cfg["directions"] = d.replace(",", " ").split() if isinstance(d, str) else list(d)
         if "cell_dl_mbps" in req:
             cfg["cell"]["downlink"] = float(req["cell_dl_mbps"])
         if "cell_ul_mbps" in req:
@@ -520,7 +658,8 @@ class Scheduler:
     def state(self):
         with self.lock:
             return {
-                "mode": self.cfg["mode"], "cell_mbps": self.cfg["cell"],
+                "mode": self.cfg["mode"], "directions": self.cfg.get("directions", list(DIRECTIONS)),
+                "cell_mbps": self.cfg["cell"],
                 "shares": {s["name"]: s["share"] for s in self.cfg["slices"]},
                 "prio": {s["name"]: s["prio"] for s in self.cfg["slices"]},
                 "signalling_share": self.cfg["signalling_share"], "default_share": self.cfg["default_share"],
@@ -528,8 +667,10 @@ class Scheduler:
                 "last_error": self.last_error, "applied_at": self.applied_at, "tracked_addresses": self.tracked,
                 "classes": {d: [{"classid": c["classid"], "slice": c["label"][0], "tier": c["label"][1],
                                  "rate_mbps": round(c["rate"], 3), "ceil_mbps": round(c["ceil"], 3),
-                                 "prio": c.get("prio"), "leaf": c.get("leaf")}
+                                 "prio": c.get("prio"), "leaf": c.get("leaf"), "kind": c.get("kind", "htb"),
+                                 "quantum": c.get("quantum"), "rt": c.get("rt")}
                                 for c in t["classes"]] for d, t in self.trees.items()},
+                "tree_modes": {d: t["mode"] for d, t in self.trees.items()},
                 "filters": {d: [{"prio": f["prio"], "classid": f["classid"], "what": f["what"]}
                                 for f in t["filters"]] for d, t in self.trees.items()},
             }
@@ -541,7 +682,7 @@ class Scheduler:
                 "# HELP packet_scheduler_info Scheduler mode (1 for the active one).",
                 "# TYPE packet_scheduler_info gauge",
             ]
-            for m in ("sliced", "fifo", "off"):
+            for m in MODES:
                 lines.append('packet_scheduler_info{mode="%s"} %d' % (m, int(cfg["mode"] == m)))
             lines += ["# TYPE packet_scheduler_cell_bps gauge"]
             for d in DIRECTIONS:
@@ -664,6 +805,8 @@ if __name__ == "__main__":
         sys.exit(0)
     if len(sys.argv) > 1 and sys.argv[1] in ("--print", "--check"):
         cfg = load_config()
+        if len(sys.argv) > 2:                     # --print <mode>: another mode's tree, same settings
+            cfg["mode"] = sys.argv[2]
         errs = validate(cfg)
         if errs:
             print("\n".join(errs))
