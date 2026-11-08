@@ -64,6 +64,13 @@ scrape_configs:
       - targets: ["10.53.0.1:9113"]
         labels: { component: network-orchestrator }
 
+  # Packet scheduler (ADR-019): a privileged container on the host network, so also reached via
+  # the o5gs_net gateway. Per-class queue counters of the emulated cell, both directions.
+  - job_name: packet-scheduler
+    static_configs:
+      - targets: ["10.53.0.1:9114"]
+        labels: { component: packet-scheduler }
+
   - job_name: prometheus
     static_configs:
       - targets: ["localhost:9090"]

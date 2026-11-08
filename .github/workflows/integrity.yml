@@ -131,7 +131,7 @@ jobs:
 
       - name: Python tools and exporters compile
         run: |
-          python3 -m py_compile tools/kpi-gate/*.py tools/kpi/*.py tools/check_open5gs_slices.py tools/slice-orchestrator/*.py tools/network-orchestrator/*.py deployments/open5gs/k8s/render.py scripts/open5gs/*.py             deployments/open5gs/observability/*.py             && echo "all Python compiles"
+          python3 -m py_compile tools/kpi-gate/*.py tools/kpi/*.py tools/check_open5gs_slices.py tools/slice-orchestrator/*.py tools/network-orchestrator/*.py tools/packet-scheduler/*.py deployments/open5gs/k8s/render.py scripts/open5gs/*.py             deployments/open5gs/observability/*.py             && echo "all Python compiles"
 
   kpi-gate:
     name: KPI gate is defined and effective
@@ -173,6 +173,14 @@ jobs:
           # ADR-017: the closed loop on /plan (with its hysteresis), inventory, rollback of a
           # failed activation, and a CPU quota that must read back as requested.
           python3 tools/network-orchestrator/test_netorch.py
+
+      - name: packet scheduler classification and class tree
+        run: |
+          # ADR-019: the u32 filters are checked byte for byte against packets encoded exactly as
+          # UERANSIM encodes them, and against a capture of real traffic from every slice
+          # (tests/fixtures/rls-sample.pcap). The repository's scheduler settings must be valid.
+          python3 tools/packet-scheduler/scheduler.py --check
+          python3 tools/packet-scheduler/test_scheduler.py
 
       - name: gate PASSES a conforming deployment
         run: |

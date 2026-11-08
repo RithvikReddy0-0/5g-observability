@@ -3045,6 +3045,427 @@
           "instant": true
         }
       ]
+    },
+    {
+      "type": "row",
+      "title": "Packet scheduler \u2014 every radio packet classified and scheduled on the shared cell (ADR-019)",
+      "id": 50,
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 107
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Downlink carried per class",
+      "id": 51,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prom-o5gs"
+      },
+      "description": "Bytes leaving each HTB class on the host side of the UE container's link. The class comes from the packet: RLS message type, then the UE's inner address. Requires scripts/open5gs/start_scheduler.sh.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 108
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bps",
+          "min": 0,
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "stacking": {
+              "mode": "none"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(eMBB|1-010203|internet).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#2E6E8E"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(URLLC|2-112233|urllc).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#C7601F"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(mMTC|3-334455|iot).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#5A8F3C"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "sum by (slice, tier) (rate(packet_scheduler_class_bytes_total{direction=\"downlink\",slice!=\"cell\",tier!=\"all\"}[30s])) * 8",
+          "legendFormat": "{{slice}} {{tier}}"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "max(packet_scheduler_cell_bps{direction=\"downlink\"})",
+          "legendFormat": "cell capacity"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Queued in the cell, per class (downlink)",
+      "id": 52,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prom-o5gs"
+      },
+      "description": "Bytes waiting in each class. Under load eMBB queues and URLLC does not: that is the scheduler working.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 108
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "min": 0,
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "stacking": {
+              "mode": "none"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(eMBB|1-010203|internet).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#2E6E8E"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(URLLC|2-112233|urllc).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#C7601F"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(mMTC|3-334455|iot).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#5A8F3C"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "max by (slice, tier) (packet_scheduler_class_backlog_bytes{direction=\"downlink\",slice!=\"cell\",tier!=\"all\"})",
+          "legendFormat": "{{slice}} {{tier}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Dropped by the cell, per class",
+      "id": 53,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prom-o5gs"
+      },
+      "description": "Signalling must stay at 0 (a gate KPI).",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 116
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "pps",
+          "min": 0,
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "stacking": {
+              "mode": "none"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(eMBB|1-010203|internet).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#2E6E8E"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(URLLC|2-112233|urllc).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#C7601F"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(mMTC|3-334455|iot).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#5A8F3C"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "sum by (direction, slice, tier) (rate(packet_scheduler_class_drops_total{slice!=\"cell\",tier!=\"all\"}[30s]))",
+          "legendFormat": "{{direction}} {{slice}} {{tier}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Uplink carried per class",
+      "id": 54,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prom-o5gs"
+      },
+      "description": "URLLC uplink splits 3:7 between ARP tiers, as its devices do.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 116
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bps",
+          "min": 0,
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "stacking": {
+              "mode": "none"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(eMBB|1-010203|internet).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#2E6E8E"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(URLLC|2-112233|urllc).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#C7601F"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(mMTC|3-334455|iot).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#5A8F3C"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "sum by (slice, tier) (rate(packet_scheduler_class_bytes_total{direction=\"uplink\",slice!=\"cell\",tier!=\"all\"}[30s])) * 8",
+          "legendFormat": "{{slice}} {{tier}}"
+        }
+      ]
     }
   ]
 }

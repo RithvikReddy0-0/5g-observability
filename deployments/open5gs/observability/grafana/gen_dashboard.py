@@ -199,6 +199,30 @@ stat("Last activation (s)", 'max(netorch_operation_seconds{op="activate",result=
 stat("eMBB CPU quota (0 = unlimited)", 'max(netorch_slice_cpus{slice="eMBB"})', 18, y, w=6)
 y += 4
 
+row("Packet scheduler — every radio packet classified and scheduled on the shared cell (ADR-019)", y); y += 1
+ts("Downlink carried per class", [
+    {"expr": 'sum by (slice, tier) (rate(packet_scheduler_class_bytes_total{direction="downlink",slice!="cell",tier!="all"}[30s])) * 8',
+     "legendFormat": "{{slice}} {{tier}}"},
+    {"expr": 'max(packet_scheduler_cell_bps{direction="downlink"})', "legendFormat": "cell capacity"}],
+   0, y, unit="bps", stack=False,
+   desc=("Bytes leaving each HTB class on the host side of the UE container's link. The class comes from "
+         "the packet: RLS message type, then the UE's inner address. Requires scripts/open5gs/start_scheduler.sh."))
+ts("Queued in the cell, per class (downlink)", [
+    {"expr": 'max by (slice, tier) (packet_scheduler_class_backlog_bytes{direction="downlink",slice!="cell",tier!="all"})',
+     "legendFormat": "{{slice}} {{tier}}"}],
+   12, y, unit="bytes",
+   desc="Bytes waiting in each class. Under load eMBB queues and URLLC does not: that is the scheduler working.")
+y += 8
+ts("Dropped by the cell, per class", [
+    {"expr": 'sum by (direction, slice, tier) (rate(packet_scheduler_class_drops_total{slice!="cell",tier!="all"}[30s]))',
+     "legendFormat": "{{direction}} {{slice}} {{tier}}"}],
+   0, y, unit="pps", desc="Signalling must stay at 0 (a gate KPI).")
+ts("Uplink carried per class", [
+    {"expr": 'sum by (slice, tier) (rate(packet_scheduler_class_bytes_total{direction="uplink",slice!="cell",tier!="all"}[30s])) * 8',
+     "legendFormat": "{{slice}} {{tier}}"}],
+   12, y, unit="bps", desc="URLLC uplink splits 3:7 between ARP tiers, as its devices do.")
+y += 8
+
 dash = {
     "uid": "open5gs-slices", "title": "Open5GS — slices, sessions and traffic", "editable": True,
     "schemaVersion": 39, "version": 1, "refresh": "5s",

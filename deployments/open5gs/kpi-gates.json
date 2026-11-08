@@ -43,13 +43,13 @@
     {
       "id": "no-scrape-failures",
       "title": "No network or exporter target is down",
-      "expr": "count(up{job!~\"slice-orchestrator|network-orchestrator\"} == 0) or vector(0)",
+      "expr": "count(up{job!~\"slice-orchestrator|network-orchestrator|packet-scheduler\"} == 0) or vector(0)",
       "op": "eq",
       "threshold": 0,
       "unit": "targets",
       "severity": "gate",
       "requires": "core",
-      "why": "Includes the per-slice traffic and UE probe exporters: a broken observability plane must fail the gate rather than report a silent green. Both orchestrators are excluded — they are optional host processes above the network, and a stopped orchestrator once failed this gate on a healthy stack (the slice orchestrator in Phase 2b, the network orchestrator after a WSL restart on 2026-11-08); each has its own advisory."
+      "why": "Includes the per-slice traffic and UE probe exporters: a broken observability plane must fail the gate rather than report a silent green. Both orchestrators and the packet scheduler are excluded — they are optional processes above the network, and a stopped orchestrator once failed this gate on a healthy stack (the slice orchestrator in Phase 2b, the network orchestrator after a WSL restart on 2026-11-08); each has its own advisory."
     },
     {
       "id": "pfcp-associated",
@@ -86,10 +86,10 @@
     },
     {
       "id": "pdu-sessions-at-upf",
-      "title": "Every UE has a user-plane session at the UPF",
+      "title": "Every PDU session has a user-plane session at a UPF",
       "expr": "sum(fivegs_upffunction_upf_sessionnbr)",
       "op": "gte",
-      "threshold": 100,
+      "threshold": 130,
       "unit": "sessions",
       "severity": "gate",
       "requires": "core",
@@ -108,10 +108,10 @@
     },
     {
       "id": "sessions-embb",
-      "title": "eMBB holds its 20 PDU sessions",
+      "title": "eMBB holds its 30 PDU sessions (20 devices + 10 URLLC devices' second sessions)",
       "expr": "sum(fivegs_smffunction_sm_sessionnbr{snssai=\"1-010203\"}) or vector(0)",
       "op": "gte",
-      "threshold": 20,
+      "threshold": 30,
       "unit": "sessions",
       "severity": "gate",
       "requires": "core",
@@ -119,10 +119,10 @@
     },
     {
       "id": "sessions-urllc",
-      "title": "URLLC holds its 10 PDU sessions",
+      "title": "URLLC holds its 30 PDU sessions (10 devices + 20 eMBB devices' second sessions)",
       "expr": "sum(fivegs_smffunction_sm_sessionnbr{snssai=\"2-112233\"}) or vector(0)",
       "op": "gte",
-      "threshold": 10,
+      "threshold": 30,
       "unit": "sessions",
       "severity": "gate",
       "requires": "core",
@@ -303,6 +303,28 @@
       "severity": "advisory",
       "requires": "core",
       "why": "Advisory: slices cannot be activated, deactivated or scaled while it is down, but the running slices are unaffected. Start it with scripts/open5gs/start_netorch.sh."
+    },
+    {
+      "id": "packet-scheduler-reachable",
+      "title": "The packet scheduler is being scraped",
+      "expr": "max(up{job=\"packet-scheduler\"})",
+      "op": "gte",
+      "threshold": 1,
+      "unit": "up",
+      "severity": "advisory",
+      "requires": "core",
+      "why": "Advisory: the queues it installed stay in place while it is down, but they are no longer re-applied when the UE container is recreated, and the per-class counters stop. Start it with scripts/open5gs/start_scheduler.sh."
+    },
+    {
+      "id": "scheduler-no-signalling-drops",
+      "title": "The cell scheduler drops no signalling",
+      "expr": "sum(increase(packet_scheduler_class_drops_total{slice=\"signalling\"}[5m])) or vector(0)",
+      "op": "eq",
+      "threshold": 0,
+      "unit": "packets",
+      "severity": "gate",
+      "requires": "core",
+      "why": "Heartbeats, acks and RRC/NAS messages have the top priority on the cell. A dropped one means radio links or registrations are at risk however the data slices are doing; it would also mean the scheduler's classification is wrong. 0 when the scheduler is off (no series)."
     }
   ]
 }

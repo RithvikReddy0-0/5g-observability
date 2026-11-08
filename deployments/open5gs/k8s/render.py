@@ -99,7 +99,7 @@ def to_k8s_ue(doc):
     return d
 
 
-HOST_JOBS = ("slice-orchestrator", "network-orchestrator")
+HOST_JOBS = ("slice-orchestrator", "network-orchestrator", "packet-scheduler")   # packet-scheduler: ADR-019, compose only
 
 
 def to_k8s_prometheus(doc):
