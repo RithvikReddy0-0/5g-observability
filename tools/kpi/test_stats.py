@@ -133,6 +133,29 @@ class ClopperPearson(unittest.TestCase):
         # Binomial(10, 0.5): P(X <= 2) = (1 + 10 + 45) / 1024.
         self.assertAlmostEqual(S.binom_cdf(2, 10, 0.5), 56 / 1024, places=14)
 
+    def test_large_k_path_agrees_with_the_sum(self):
+        # Above _SUM_MAX_K the CDF comes from the incomplete beta; it must equal the direct sum.
+        for k, n, p in ((1500, 10000, 0.15), (1200, 331237, 0.004), (5000, 40000, 0.13)):
+            beta = S.binom_cdf(k, n, p)
+            old, S._SUM_MAX_K = S._SUM_MAX_K, 10 ** 9
+            try:
+                direct = S.binom_cdf(k, n, p)
+            finally:
+                S._SUM_MAX_K = old
+            self.assertAlmostEqual(beta / direct, 1.0, places=8)
+
+    def test_large_k_interval_is_fast(self):
+        # A 660 s URLLC run: 219 310 of 331 237 packets later than 1 ms. The direct sum inside a
+        # bisection took minutes; the interval must still bracket k/n and take well under a second.
+        import time
+        t = time.time()
+        lo, hi = S.clopper_pearson(219310, 331237)
+        self.assertLess(time.time() - t, 2.0)
+        self.assertLess(lo, 219310 / 331237)
+        self.assertGreater(hi, 219310 / 331237)
+        self.assertAlmostEqual(S.binom_cdf(219310, 331237, hi), 0.025, places=9)
+        self.assertAlmostEqual(1 - S.binom_cdf(219309, 331237, lo), 0.025, places=9)
+
 
 class RuleOfThree(unittest.TestCase):
     def test_worked_examples(self):

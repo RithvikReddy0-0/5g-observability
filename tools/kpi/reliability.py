@@ -22,41 +22,20 @@ import os
 import sys
 
 
-def binom_cdf(k, n, p):
-    """P(X <= k), X ~ Bin(n, p), summed in log space (fine for k up to a few thousand)."""
-    if p <= 0:
-        return 1.0
-    if p >= 1:
-        return 0.0 if k < n else 1.0
-    lp, lq = math.log(p), math.log1p(-p)
-    total = 0.0
-    for i in range(0, k + 1):
-        total += math.exp(math.lgamma(n + 1) - math.lgamma(i + 1) - math.lgamma(n - i + 1) + i * lp + (n - i) * lq)
-    return min(1.0, total)
-
-
-def bisect(f, lo, hi, it=200):
-    for _ in range(it):
-        mid = (lo + hi) / 2
-        if f(mid):
-            hi = mid
-        else:
-            lo = mid
-    return (lo + hi) / 2
-
-
-def clopper_pearson(k, n, conf=0.95):
-    a = (1 - conf) / 2
-    lo = 0.0 if k == 0 else bisect(lambda p: 1 - binom_cdf(k - 1, n, p) >= a, 0.0, 1.0)
-    hi = 1.0 if k == n else bisect(lambda p: binom_cdf(k, n, p) <= a, 0.0, 1.0)
-    return lo, hi
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from stats import clopper_pearson, clopper_pearson_upper  # noqa: E402  (one implementation, tested)
 
 
 def one_sided_upper(k, n, conf=0.95):
-    return 1.0 if k == n else bisect(lambda p: binom_cdf(k, n, p) <= 1 - conf, 0.0, 1.0)
+    return clopper_pearson_upper(k, n, conf=conf)
 
 
 def main(argv):
+    if not argv or argv[0] in ("-h", "--help"):
+        print(__doc__.strip())
+        return 0 if argv else 2
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")  # the table uses an en dash; Windows consoles are cp1252
     run = argv[0]
     target = float(argv[argv.index("--target") + 1]) if "--target" in argv else 0.99999
     recs = [json.loads(l) for l in open(os.path.join(run, "instances.jsonl"), encoding="utf-8") if l.strip()]

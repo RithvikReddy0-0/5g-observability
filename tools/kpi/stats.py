@@ -262,12 +262,66 @@ def _log_binom_pmf(k, n, p):
             + k * math.log(p) + (n - k) * math.log1p(-p))
 
 
+# Above this many failures the direct sum is too slow inside a bisection (a 660 s URLLC run has
+# k = 219 310 packets over 1 ms: ~10^8 lgamma calls per interval); the incomplete beta is not.
+_SUM_MAX_K = 1000
+
+
+def _betacf(a, b, x):
+    """Continued fraction for the regularized incomplete beta (modified Lentz; Numerical Recipes
+    2nd ed., section 6.4). Converges fast for x < (a + 1) / (a + b + 2)."""
+    tiny, eps = 1e-300, 3e-16
+    qab, qap, qam = a + b, a + 1.0, a - 1.0
+    c, d = 1.0, 1.0 - qab * x / qap
+    d = 1.0 / (d if abs(d) > tiny else tiny)
+    h = d
+    for m in range(1, 100000):
+        m2 = 2 * m
+        aa = m * (b - m) * x / ((qam + m2) * (a + m2))
+        d = 1.0 + aa * d
+        d = 1.0 / (d if abs(d) > tiny else tiny)
+        c = 1.0 + aa / c
+        c = c if abs(c) > tiny else tiny
+        h *= d * c
+        aa = -(a + m) * (qab + m) * x / ((a + m2) * (qap + m2))
+        d = 1.0 + aa * d
+        d = 1.0 / (d if abs(d) > tiny else tiny)
+        c = 1.0 + aa / c
+        c = c if abs(c) > tiny else tiny
+        delta = d * c
+        h *= delta
+        if abs(delta - 1.0) < eps:
+            break
+    return h
+
+
+def betainc_reg(a, b, x):
+    """Regularized incomplete beta I_x(a, b)."""
+    if x <= 0.0:
+        return 0.0
+    if x >= 1.0:
+        return 1.0
+    lfront = (math.lgamma(a + b) - math.lgamma(a) - math.lgamma(b)
+              + a * math.log(x) + b * math.log1p(-x))
+    if x < (a + 1.0) / (a + b + 2.0):
+        return math.exp(lfront) * _betacf(a, b, x) / a
+    return 1.0 - math.exp(lfront) * _betacf(b, a, 1.0 - x) / b
+
+
 def binom_cdf(k, n, p):
-    """P(X <= k) for X ~ Binomial(n, p), summed in log space (exact up to float rounding)."""
+    """P(X <= k) for X ~ Binomial(n, p): summed in log space for small k (exact up to float
+    rounding), and as I_{1-p}(n - k, k + 1) for large k (the same quantity, Abramowitz & Stegun
+    26.5.24), which costs a few hundred steps however large n is."""
     if k < 0:
         return 0.0
     if k >= n:
         return 1.0
+    if p <= 0.0:
+        return 1.0
+    if p >= 1.0:
+        return 0.0
+    if k > _SUM_MAX_K:
+        return min(1.0, max(0.0, betainc_reg(n - k, k + 1, 1.0 - p)))
     logs = [_log_binom_pmf(i, n, p) for i in range(k + 1)]
     m = max(logs)
     if m == -math.inf:

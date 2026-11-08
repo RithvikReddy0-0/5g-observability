@@ -162,6 +162,11 @@ def blocked(runs, key):
 
 
 def main(argv):
+    if not argv or argv[0] in ("-h", "--help"):
+        print(__doc__.strip())
+        return 0 if argv else 2
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")  # tables use the "<=" sign; Windows consoles are cp1252
     if argv and argv[0] == "--stats":
         return stats(argv[1], argv[2:])
     runs = load(argv[0])
