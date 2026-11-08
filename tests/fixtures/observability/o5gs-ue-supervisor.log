@@ -1,0 +1,10 @@
+ue-entrypoint: 13:01:33 supervising: ping each UE's gateway every 10s, restart after 3 misses
+ue_probe_exporter on :9121, every 5s, slices: eMBB via 10.45.0.1, URLLC via 10.46.0.1, mMTC via 10.47.0.1
+ue-entrypoint: 13:05:56 starting 100 UEs (ue-slice-a.yaml:20:10.45.0.1:eMBB ue-slice-b.yaml:10:10.46.0.1:URLLC ue-slice-c.yaml:70:10.47.0.1:mMTC), 10 at a time
+ue-entrypoint: 13:07:28 mMTC imsi-208930000000087 did not come up within 60s; the supervisor will retry
+ue-entrypoint: 13:07:28 99/100 UEs up in 92s
+ue-entrypoint: 13:08:05 mMTC imsi-208930000000087 unhealthy (its session address  is on no interface, 3 checks): restarting this UE only
+ue-entrypoint: 13:08:07 mMTC imsi-208930000000087 back on uesimtun00870
+ue-entrypoint: 13:25:06 eMBB imsi-208930000000005 unhealthy (no reply through the UPF on uesimtun00050 (10.45.2.136), 3 checks): restarting this UE only
+ue-entrypoint: 13:45:39 mMTC imsi-208930000000089 unhealthy (no reply through the UPF on uesimtun00890 (10.47.7.106), 3 checks): restarting this UE only
+ue-entrypoint: 13:46:01 URLLC imsi-208930000000029 unhealthy (no reply through the UPF on uesimtun00290 (10.46.2.255), 3 checks): restarting this UE only

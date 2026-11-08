@@ -1,0 +1,14 @@
+[2026-11-08 14:08:49.631] [rrc] [debug] UE[142] new signal detected
+[2026-11-08 14:08:49.644] [rrc] [info] RRC Setup for UE[142]
+[2026-11-08 14:08:49.646] [ngap] [debug] Initial NAS message received from UE[142]
+[2026-11-08 14:08:49.675] [ngap] [debug] UE Context Release Command received
+[2026-11-08 14:08:49.918] [ngap] [info] PDU session resource(s) setup for UE[142] count[1]
+[2026-11-08 14:08:50.506] [rls] [debug] UE[137] signal lost
+[2026-11-08 14:09:32.689] [ngap] [info] PDU session resource(s) setup for UE[142] count[1]
+[2026-11-08 14:11:24.235] [rls] [debug] UE[133] signal lost
+[2026-11-08 14:11:28.853] [rrc] [debug] UE[143] new signal detected
+[2026-11-08 14:11:28.854] [rrc] [info] RRC Setup for UE[143]
+[2026-11-08 14:11:28.855] [ngap] [debug] Initial NAS message received from UE[143]
+[2026-11-08 14:11:28.966] [ngap] [debug] UE Context Release Command received
+[2026-11-08 14:14:08.644] [rrc] [warning] Discarding RRC Setup Request, UE context already exists
+[2026-11-08 14:14:33.112] [rrc] [warning] Discarding RRC Setup Request, UE context already exists

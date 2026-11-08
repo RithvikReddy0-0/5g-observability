@@ -22,6 +22,8 @@ deployments/compose/cert/
 # --- Runtime artifacts / logs ---
 /logs/
 *.log
+# ...except recorded log lines the observability tests parse (ADR-024; small, anonymised)
+!tests/fixtures/observability/*.log
 *_logs.txt
 
 # --- OS / editor cruft ---

@@ -1,0 +1,6 @@
+11/08 14:05:59.009: [upf] INFO: UE F-SEID[UP:0xa2 CP:0x969] APN[urllc] PDN-Type[1] IPv4[10.46.3.124] IPv6[] (../src/upf/context.c:498)
+11/08 14:05:59.010: [upf] INFO: [Added] Number of UPF-Sessions is now 29 (../src/upf/context.c:212)
+11/08 14:05:59.011: [upf] INFO: UE F-SEID[UP:0x30f CP:0x916] APN[urllc] PDN-Type[1] IPv4[10.46.3.122] IPv6[] (../src/upf/context.c:498)
+11/08 14:05:59.011: [upf] INFO: [Added] Number of UPF-Sessions is now 30 (../src/upf/context.c:212)
+11/08 14:08:49.648: [upf] INFO: [Removed] Number of UPF-sessions is now 29 (../src/upf/context.c:256)
+11/08 14:10:23.980: [upf] INFO: [Removed] Number of UPF-sessions is now 29 (../src/upf/context.c:256)

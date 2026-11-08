@@ -1,0 +1,7 @@
+11/08 08:55:33.839: [pfcp] ERROR: All IP addresses in all subnets are occupied (../lib/pfcp/context.c:2323)
+11/08 08:55:33.839: [upf] ERROR: ogs_pfcp_ue_ip_alloc() failed[75] (../src/upf/context.c:428)
+11/08 08:55:35.184: [pfcp] WARNING: [5821] REMOTE Request Duplicated. Retransmit! for step 2 type 50 peer [10.53.0.4]:8805 (../lib/pfcp/xact.c:421)
+11/08 09:37:05.495: [upf] INFO: PFCP de-associated [10.53.0.4]:8805 (../src/upf/pfcp-sm.c:184)
+11/08 09:37:11.221: [pfcp] INFO: pfcp_server() [10.53.0.9]:8805 (../lib/pfcp/path.c:30)
+11/08 09:37:13.285: [upf] INFO: PFCP associated [10.53.0.4]:8805 (../src/upf/pfcp-sm.c:168)
+11/08 09:37:13.286: [upf] WARNING: PFCP[REQ] has already been associated [10.53.0.4]:8805 (../src/upf/pfcp-sm.c:256)

@@ -1,0 +1,5 @@
+[2026-09-14 09:23:21.216] [sctp] [info] Trying to establish SCTP connection... (10.53.0.5:38413)
+[2026-09-14 09:23:21.237] [sctp] [error] Connecting to 10.53.0.5:38413 failed. SCTP could not connect: Connection refused
+[2026-09-14 09:23:21.302] [rrc] [debug] UE[1] new signal detected
+[2026-09-14 09:23:23.307] [rls] [debug] UE[1] signal lost
+[2026-09-14 09:23:38.280] [rrc] [debug] UE[2] new signal detected

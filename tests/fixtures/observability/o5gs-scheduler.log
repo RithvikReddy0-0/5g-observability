@@ -1,0 +1,5 @@
+packet-scheduler on :9114 — mode sliced, cell {'downlink': 250.0, 'uplink': 100.0} Mbps, slices eMBB 60% prio 3, URLLC 10% prio 1, mMTC 5% prio 4
+07:41:54 applied mode=sliced cell={'downlink': 250.0, 'uplink': 100.0} on {'downlink': 'veth38d2ff2', 'uplink': 'eth0'} (ok=True)
+07:46:22 applied mode=off cell={'downlink': 200.0, 'uplink': 100.0} on {'downlink': 'veth38d2ff2', 'uplink': 'eth0'} (ok=True)
+07:46:50 applied mode=fifo cell={'downlink': 200.0, 'uplink': 100.0} on {'downlink': 'veth38d2ff2', 'uplink': 'eth0'} (ok=True)
+Command failed -:12
