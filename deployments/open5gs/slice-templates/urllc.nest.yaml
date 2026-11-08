@@ -1,0 +1,101 @@
+# NEST for the URLLC slice (ADR-023): GSMA NG.116 v10.0's Generic Network Slice Template filled
+# with this deployment's values. Attribute and parameter names, clauses and units are NG.116's
+# (tools/standards/ng116-v10-gst.json); every value names its source, and `from:` values are
+# re-read from that source by tools/standards/check_nest.py, so this file cannot drift from the
+# deployment. `check:` says how a KPI run (instances.jsonl) is compared with the value.
+#
+# GSMA's own URLLC NEST (NG.116 clause 4.2, Table 78) lists Availability 99.999, SSC 1, 5QI 82 and
+# device velocity 2. Only the 5QI is taken over here: the others are not this project's
+# requirements and are not measured (see docs/standards-mapping.md).
+#
+# Restricted YAML: mappings, lists of mappings, scalars. No anchors, no flow style.
+schema_version: "1"
+gst: GSMA NG.116 v10.0
+nest:
+  name: URLLC
+  sst: 2
+  sd: "112233"
+  gsma_reference_nest: "NG.116 clause 4.2, NEST for ultra-reliable and ultra-low latency communication"
+attributes:
+  - attribute: Slice quality of service
+    clause: "3.4.26"
+    parameter: 3GPP 5QI
+    value: 82
+    unit: NA
+    from: "slices.env:SLICE_B_5QI"
+    source: "deployments/slices.env SLICE_B_5QI (delay-critical GBR, 10 ms PDB)"
+  - attribute: Slice quality of service
+    clause: "3.4.26"
+    parameter: Resource Type
+    value: Delay critical GBR
+    unit: NA
+    from: "TS23501:82:resource_type"
+    source: "TS 23.501 V17.9.0 Table 5.7.4-1, 5QI 82 (standardised default)"
+  - attribute: Slice quality of service
+    clause: "3.4.26"
+    parameter: Packet Delay Budget
+    value: 0.01
+    unit: Seconds
+    from: "kpi-scorecard.json:urllc-latency-p99"
+    source: "project target 10 ms (deployments/open5gs/kpi-scorecard.json urllc-latency-p99); equals the 5QI 82 default PDB"
+    check: pdb_delay_critical
+    measure: urllc
+  - attribute: Slice quality of service
+    clause: "3.4.26"
+    parameter: Packet Error Rate
+    value: 0.0001
+    unit: NA
+    from: "kpi-scorecard.json:urllc-packet-loss"
+    source: "project target 10^-4 (kpi-scorecard.json urllc-packet-loss); equals the 5QI 82 default PER"
+    check: per
+    measure: urllc
+  - attribute: Maximum number of UEs
+    clause: "3.4.17"
+    parameter: Maximum number of UEs
+    value: 10
+    unit: NA
+    from: "slices.env:O5GS_UES:B"
+    source: "deployments/slices.env O5GS_UES (URLLC devices on the Open5GS stack)"
+    check: max_within
+    measure: urllc.devices
+    measure_unit: NA
+  - attribute: Maximum number of PDU sessions
+    clause: "3.4.16"
+    parameter: Maximum number of PDU sessions
+    value: 30
+    unit: PDU sessions
+    from: "kpi-gates.json:sessions-urllc"
+    source: "10 home sessions + 20 eMBB devices' second sessions (ADR-020); the deployment gate expects 30"
+  - attribute: Downlink throughput per network slice
+    clause: "3.4.5"
+    parameter: Maximum downlink throughput
+    value: 20000
+    unit: kbps
+    from: "slices.env:SLICE_B_CAPACITY_MBPS"
+    source: "deployments/slices.env SLICE_B_CAPACITY_MBPS: the ceiling the slice orchestrator admits against"
+  - attribute: Downlink maximum throughput per UE
+    clause: "3.4.6"
+    parameter: Maximum downlink throughput per UE value
+    value: 20000
+    unit: kbps
+    from: "slices.env:SLICE_B_SESSION_AMBR_DL"
+    source: "session AMBR downlink (one session per device on this slice), enforced by the gNB"
+  - attribute: Uplink maximum throughput per UE
+    clause: "3.4.32"
+    parameter: Maximum Uplink Throughput per UE value
+    value: 20000
+    unit: kbps
+    from: "slices.env:SLICE_B_SESSION_AMBR_UL"
+    source: "session AMBR uplink"
+  - attribute: Supported data network
+    clause: "3.4.39"
+    parameter: Supported data network list
+    value: urllc
+    unit: NA
+    source: "deployments/open5gs/config/smf.yaml and scripts/open5gs/provision_subscribers.py DNN for slice B"
+  - attribute: Supported device velocity
+    clause: "3.4.28"
+    parameter: Supported device velocity
+    value: 0
+    unit: Kilometres per hour (km/h)
+    source: "testbed fact: UERANSIM simulates no mobility (stationary devices)"

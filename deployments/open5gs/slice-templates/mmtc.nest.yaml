@@ -1,0 +1,102 @@
+# NEST for the mMTC slice (ADR-023): GSMA NG.116 v10.0's Generic Network Slice Template filled
+# with this deployment's values. Format and rules: see urllc.nest.yaml and
+# tools/standards/check_nest.py.
+#
+# GSMA's Massive IoT NEST (NG.116 clause 4.3, Table 79) lists Availability 99,9, 5QI 9, device
+# velocity 2 and UE density 100000. Only the 5QI is taken over: a lab testbed has no area, so a
+# density per km2 has no meaning here, and availability is not measured.
+#
+# The slice runs on 5QI 9, so the 5QI's default PDB (300 ms) and PER (10^-6) apply to it. They are
+# written out to be checked against the measured report latency and loss. The project's own mMTC
+# targets (registration success >= 99 %, report loss <= 0.1 %, p99 <= 10 s) are in
+# kpi-scorecard.json; NG.116 has no attribute for registration success (TS 28.554 6.2.3 does).
+schema_version: "1"
+gst: GSMA NG.116 v10.0
+nest:
+  name: mMTC
+  sst: 3
+  sd: "334455"
+  gsma_reference_nest: "NG.116 clause 4.3, NEST for Massive IoT"
+attributes:
+  - attribute: Slice quality of service
+    clause: "3.4.26"
+    parameter: 3GPP 5QI
+    value: 9
+    unit: NA
+    from: "slices.env:SLICE_C_5QI"
+    source: "deployments/slices.env SLICE_C_5QI (non-GBR, delay-tolerant)"
+  - attribute: Slice quality of service
+    clause: "3.4.26"
+    parameter: Resource Type
+    value: Non-GBR
+    unit: NA
+    from: "TS23501:9:resource_type"
+    source: "TS 23.501 V17.9.0 Table 5.7.4-1, 5QI 9 (standardised default)"
+  - attribute: Slice quality of service
+    clause: "3.4.26"
+    parameter: Packet Delay Budget
+    value: 0.3
+    unit: Seconds
+    from: "TS23501:9:packet_delay_budget_s"
+    source: "5QI 9 default PDB (TS 23.501 Table 5.7.4-1); for non-GBR, 98 % of packets should not exceed it in uncongested conditions (5.7.3.4)"
+    check: pdb_98pct
+    measure: mmtc
+  - attribute: Slice quality of service
+    clause: "3.4.26"
+    parameter: Packet Error Rate
+    value: 0.000001
+    unit: NA
+    from: "TS23501:9:packet_error_rate"
+    source: "5QI 9 default PER (TS 23.501 Table 5.7.4-1)"
+    check: per
+    measure: mmtc
+  - attribute: Maximum number of UEs
+    clause: "3.4.17"
+    parameter: Maximum number of UEs
+    value: 70
+    unit: NA
+    from: "slices.env:O5GS_UES:C"
+    source: "deployments/slices.env O5GS_UES (IoT devices on the Open5GS stack)"
+    check: max_within
+    measure: mmtc.devices_reporting
+    measure_unit: NA
+  - attribute: Maximum number of PDU sessions
+    clause: "3.4.16"
+    parameter: Maximum number of PDU sessions
+    value: 70
+    unit: PDU sessions
+    from: "kpi-gates.json:sessions-mmtc"
+    source: "one session per IoT device (ADR-020: mMTC devices stay single-session)"
+  - attribute: Downlink throughput per network slice
+    clause: "3.4.5"
+    parameter: Maximum downlink throughput
+    value: 10000
+    unit: kbps
+    from: "slices.env:SLICE_C_CAPACITY_MBPS"
+    source: "deployments/slices.env SLICE_C_CAPACITY_MBPS: the ceiling the slice orchestrator admits against"
+  - attribute: Downlink maximum throughput per UE
+    clause: "3.4.6"
+    parameter: Maximum downlink throughput per UE value
+    value: 1000
+    unit: kbps
+    from: "slices.env:SLICE_C_SESSION_AMBR_DL"
+    source: "session AMBR downlink"
+  - attribute: Uplink maximum throughput per UE
+    clause: "3.4.32"
+    parameter: Maximum Uplink Throughput per UE value
+    value: 1000
+    unit: kbps
+    from: "slices.env:SLICE_C_SESSION_AMBR_UL"
+    source: "session AMBR uplink"
+  - attribute: Supported data network
+    clause: "3.4.39"
+    parameter: Supported data network list
+    value: iot
+    unit: NA
+    source: "deployments/open5gs/config/smf.yaml and scripts/open5gs/provision_subscribers.py DNN for slice C"
+  - attribute: Supported device velocity
+    clause: "3.4.28"
+    parameter: Supported device velocity
+    value: 0
+    unit: Kilometres per hour (km/h)
+    source: "testbed fact: UERANSIM simulates no mobility (stationary devices)"
