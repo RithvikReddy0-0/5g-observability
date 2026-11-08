@@ -184,13 +184,25 @@ def embb_load(n, duration):
          "-t", str(duration), "-J"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True))
         for dev, ip, port in flows]
     res = []
+    deadline = time.time() + duration + 60
     for dev, ip, p in procs:
-        out, _ = p.communicate(timeout=duration + 60)
+        # One shared deadline, and a stuck flow is killed and recorded rather than raised: a single
+        # iperf3 client that never ended (a UE that lost its data path mid-run) used to crash the
+        # runner with TimeoutExpired and throw the whole run away. It now counts as a flow that did
+        # not complete (embb.flows_completed < embb.ues_loaded), which the run log shows.
+        timed_out = False
         try:
-            mbps = json.loads(out)["end"]["sum_received"]["bits_per_second"] / 1e6
+            out, _ = p.communicate(timeout=max(1, deadline - time.time()))
+        except subprocess.TimeoutExpired:
+            p.kill()
+            out, _ = p.communicate()
+            timed_out = True
+        try:
+            mbps = None if timed_out else json.loads(out)["end"]["sum_received"]["bits_per_second"] / 1e6
         except Exception:
             mbps = None
-        res.append({"device": dev, "ip": ip, "mbps": None if mbps is None else round(mbps, 2)})
+        res.append({"device": dev, "ip": ip, "mbps": None if mbps is None else round(mbps, 2),
+                    "timed_out": timed_out})
     return res
 
 
@@ -253,9 +265,10 @@ def instance(label, param=None, value=None, embb_ues=None, duration=None):
     with open(os.path.join(OUT, "instances.jsonl"), "a", encoding="utf-8") as f:
         f.write(json.dumps(rec) + "\n")
     sl = {s["slice"]: s["score"] for s in card["slices"]}
-    log("  URLLC mean %s p99 %s ms loss %s · eMBB p5 %s agg %s Mbps · mMTC reg %s loss %s (res %s) · scores %s · overall %s"
+    log("  URLLC mean %s p99 %s ms loss %s · eMBB p5 %s agg %s Mbps (%d/%d flows completed) · mMTC reg %s loss %s (res %s) · scores %s · overall %s"
         % (measured["urllc.owd_mean_ms"], measured["urllc.owd_p99_ms"], measured["urllc.loss_ratio"],
-           measured["embb.dl_p5_mbps"], measured["embb.dl_aggregate_mbps"], measured["mmtc.registration_success"],
+           measured["embb.dl_p5_mbps"], measured["embb.dl_aggregate_mbps"], len(rates), embb_ues,
+           measured["mmtc.registration_success"],
            measured["mmtc.loss_ratio"], measured["mmtc.loss_resolution"], sl, card["overall"]))
     return rec
 
