@@ -168,6 +168,29 @@ What this says:
    12.5 s sliced against 1.9–2.7 s unshaped; every kernel queue on its path was near-empty, so the
    delay builds inside the overloaded eMBB gNB process. Other slices were unaffected.
 
+### At nominal load (same-day KPI runs, 2026-11-08)
+
+The standard KPI instance (20 eMBB downloads, URLLC and mMTC profiles, 150 s), run with only the
+scheduler's mode and cell changed ([comparison](../evidence/open5gs-kpi/README.md)):
+
+| Scheduler, cell | Runs | URLLC p99 | URLLC loss | eMBB aggregate | Overall score |
+|---|---|---|---|---|---|
+| off (no cell) | 2 | 6.1, 9.8 ms | 0 | 548, 483 Mbps | 0.88, 0.86 |
+| sliced, 250 Mbps | 3 | 7.3, 12.2, 14.7 ms | 0 | 228, 216, 214 Mbps | 0.77, 0.76, 0.75 |
+| sliced, 600 Mbps | 2 | 10.4, 14.0 ms | 0 | 436, 444 Mbps | 0.83, 0.83 |
+| FIFO, 600 Mbps | 2 | 8.0, 8.9 ms | 2.9, 1.3 % | 414, 399 Mbps | 0.66, 0.77 |
+
+6. At the same cell, sliced beats a plain queue at nominal load too: no loss on any slice and no
+   radio-link failure, where FIFO lost URLLC packets and mMTC reports, left eMBB downloads unfinished
+   and caused 3 radio-link failures.
+7. It does not beat **no cell**. Against `off`, the 250 Mbps cell halves eMBB, and URLLC's p99 is
+   longer with the scheduler in place (at 600 Mbps too, where eMBB is not capped). The cause of the
+   longer tail is open. A KPI comparison with an earlier month that credited the scheduler with
+   URLLC's 0.90 → 1.00 was not controlled and is withdrawn: with the scheduler off URLLC also scores 1.00.
+8. A race found while running these: `POST /config` and the main loop both called `step()`, and two
+   concurrent rebuilds of the same qdisc failed ("Exclusivity flag on, cannot modify"); the cell ran
+   half-built until the next cycle. `step()` is now serialised; a unit test reproduces the overlap.
+
 ## Consequences
 
 - (+) The guide's question has a measured answer: packets are classified from their headers and
@@ -181,6 +204,8 @@ What this says:
 - (−) The offsets assume the UERANSIM 3.3.0 RLS layout and an outer IPv4 header without options.
   The unit tests pin both; a UERANSIM upgrade must re-run them against a fresh capture.
 - (−) The cell capacity is a declared number, set below what this laptop can push so that the queue
-  is the bottleneck. With the scheduler on, eMBB is capped at the cell (250 Mbps downlink).
+  is the bottleneck. With the scheduler on, eMBB is capped at the cell (250 Mbps downlink): at nominal
+  load the overall KPI score is 0.75–0.77 at 250 Mbps against 0.83 at 600 and 0.86–0.88 with no cell.
+  The capacity is the largest single knob on the eMBB score.
 - (−) The scheduler is privileged and outside Compose (like the orchestrators, it is optional: the
   gate only advises when it is down). On Kubernetes it would be a privileged DaemonSet; not built.

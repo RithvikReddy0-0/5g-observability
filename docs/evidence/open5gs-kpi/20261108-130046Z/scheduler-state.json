@@ -1,0 +1,43 @@
+{
+  "mode": "off",
+  "cell_mbps": {
+    "downlink": 250.0,
+    "uplink": 100.0
+  },
+  "shares": {
+    "eMBB": 60.0,
+    "URLLC": 10.0,
+    "mMTC": 5.0
+  },
+  "prio": {
+    "eMBB": 3,
+    "URLLC": 1,
+    "mMTC": 4
+  },
+  "signalling_share": 2.0,
+  "default_share": 3.0,
+  "devices": {
+    "downlink": "veth81a041c",
+    "uplink": "eth0"
+  },
+  "ue_pid": 3429852,
+  "applies": 34,
+  "errors": 0,
+  "last_error": "",
+  "applied_at": 1794142872.759662,
+  "tracked_addresses": {
+    "URLLC/0": [
+      "10.46.2.37",
+      "10.46.2.38",
+      "10.46.2.39"
+    ]
+  },
+  "classes": {
+    "downlink": [],
+    "uplink": []
+  },
+  "filters": {
+    "downlink": [],
+    "uplink": []
+  }
+}

@@ -24,7 +24,7 @@ the ratified ODE. That distinction determines what could and could not be proven
 | Phase-1 acceptance (runnable subset) | **PASS=12, FAIL=0** | `tests/acceptance.sh` |
 | KPI gate enforces thresholds in CI | **10 enforced, 2 ODE-only** | `make gate`: 10/10 PASS on a live deployment, exit 1 with an NF stopped |
 | **Open5GS: UEs with a working PDU session** | **100 / 100** in three slices (eMBB 20, URLLC 10, mMTC 70) | interface per UE + ping/iperf3 through each slice's UPF |
-| **Open5GS: per-slice KPIs, with the packet scheduler** | **URLLC 1.00 · eMBB 0.32 · mMTC 1.00** (URLLC p99 7.3 ms, inside 10 ms for the first time; was 0.90 / 0.37 / 1.00 before ADR-019) | scored against the team's targets; Excel report, run 20261108-092934Z |
+| **Open5GS: per-slice KPIs, same day, scheduler off vs on** | **off (no cell): overall 0.86–0.88** (URLLC 1.00, eMBB 483–548 Mbps) · **sliced 250 Mbps cell: 0.75–0.77** (eMBB capped at 214–228 Mbps; URLLC p99 7.3–14.7 ms) · **sliced 600: 0.83** · **FIFO 600: 0.66–0.77** (URLLC loss 1.3–2.9 %, radio-link failures) | 9 runs on 2026-11-08, ABBA order; at nominal load the scheduler's gain is over a plain queue at the same cell, not over no cell ([comparison](evidence/open5gs-kpi/README.md)) |
 | **Open5GS: where this laptop stops** | **~300 UEs** (clean up to 200) | `scale_test.sh`: attach bursts and steps, cgroup CPU |
 | **Open5GS: KPI gate incl. user plane** | **PASS, 0 failed** (24 passed, 3 advisory, 27 KPIs) | live stack, each slice at its own size, incl. "the cell drops no signalling" |
 | **Open5GS: URLLC isolated from a saturated eMBB** | **10 / 10** reachable, 3 of 3 runs | `isolation_test.sh`, a gNB + UPF per slice |
