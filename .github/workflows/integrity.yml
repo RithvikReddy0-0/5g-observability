@@ -16,7 +16,7 @@ jobs:
     name: manifest.lock integrity
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: manifest.lock is valid JSON with full 40-char SHAs
         run: |
@@ -62,7 +62,7 @@ jobs:
     name: config validation
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: every YAML config parses
         run: |
@@ -137,7 +137,7 @@ jobs:
     name: KPI gate is defined and effective
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: KPI definitions are structurally valid
         run: |
