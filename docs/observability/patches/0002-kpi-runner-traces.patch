@@ -1,0 +1,83 @@
+diff --git a/tools/kpi/run_kpis.py b/tools/kpi/run_kpis.py
+index b9b3b1b..e1d312b 100755
+--- a/tools/kpi/run_kpis.py
++++ b/tools/kpi/run_kpis.py
+@@ -42,6 +42,36 @@ sys.path.insert(0, HERE)
+ import scorecard  # noqa: E402
+ import xlsx  # noqa: E402
+ 
++
++def _tracer(service):
++    """Phase traces (ADR-024, tools/observability/trace.py): each instance, its eMBB load and the fresh
++    attach are spans, so a KPI breach can be lined up with what the runner was doing. Off unless
++    OBS_TRACE_FILE or OTEL_EXPORTER_OTLP_ENDPOINT is set; never fatal."""
++    try:
++        import importlib.util
++        spec = importlib.util.spec_from_file_location(
++            "obs_trace", os.path.join(REPO, "tools", "observability", "trace.py"))
++        mod = importlib.util.module_from_spec(spec)
++        spec.loader.exec_module(mod)
++        return mod.Tracer(service)
++    except Exception:
++        class _Off:
++            def span(self, name, **a):
++                return self
++
++            def set(self, **a):
++                return self
++
++            def __enter__(self):
++                return self
++
++            def __exit__(self, *a):
++                return False
++        return _Off()
++
++
++TRACE = _tracer("kpi-runner")
++
+ UE = "o5gs-ue"
+ COLLECTORS = {"URLLC": "http://10.53.0.52:9130", "mMTC": "http://10.53.0.53:9130"}
+ DN_EMBB, DN_EMBB_IP = "o5gs-dn-embb", "10.53.0.51"
+@@ -215,6 +245,18 @@ def cpu_sampler(duration):
+ # ------------------------------------------------------------------ one instance
+ 
+ def instance(label, param=None, value=None, embb_ues=None, duration=None):
++    with TRACE.span("kpi.instance", label=label, param=param, value=value, embb_ues=embb_ues,
++                    duration_s=duration or DURATION) as sp:
++        rec = _instance(label, param, value, embb_ues, duration)
++        m = rec["measured"]
++        sp.set(urllc_p99_ms=m.get("urllc.owd_p99_ms"), urllc_loss_ratio=m.get("urllc.loss_ratio"),
++               embb_dl_aggregate_mbps=m.get("embb.dl_aggregate_mbps"),
++               embb_flows_completed=m.get("embb.flows_completed"), overall_score=rec["card"].get("overall"),
++               host_load1_end=m.get("host.load1_end"))
++    return rec
++
++
++def _instance(label, param=None, value=None, embb_ues=None, duration=None):
+     defs = scorecard.load()
+     embb_ues = STANDARD_EMBB_UES if embb_ues is None else embb_ues
+     duration = duration or DURATION
+@@ -225,7 +267,10 @@ def instance(label, param=None, value=None, embb_ues=None, duration=None):
+     cpu = cpu_sampler(duration)
+     load0 = os.getloadavg()
+     t0 = time.time()
+-    flows = embb_load(embb_ues, duration)
++    with TRACE.span("kpi.embb_load", devices=embb_ues, duration_s=duration) as lsp:
++        flows = embb_load(embb_ues, duration)
++        lsp.set(completed=sum(f["mbps"] is not None for f in flows),
++                timed_out=sum(bool(f.get("timed_out")) for f in flows))
+     stats = {name: http_json(url + "/run/stats") for name, url in COLLECTORS.items()}
+     try:
+         cpu_out = json.loads(cpu.communicate(timeout=30)[0] or "{}")
+@@ -277,7 +322,9 @@ def instance(label, param=None, value=None, embb_ues=None, duration=None):
+ 
+ def standard():
+     log("standard: fresh attach of all UEs (registration KPIs describe this attach)")
+-    r = sh(["bash", os.path.join(REPO, "scripts", "open5gs", "start_ues.sh")], timeout=900)
++    with TRACE.span("kpi.attach", script="scripts/open5gs/start_ues.sh") as sp:
++        r = sh(["bash", os.path.join(REPO, "scripts", "open5gs", "start_ues.sh")], timeout=900)
++        sp.set(returncode=r.returncode)
+     log("  " + " · ".join(l.strip() for l in r.stdout.splitlines() if "interfaces" in l or "attached in" in l))
+     time.sleep(30)
+     return instance("standard", duration=STANDARD_DURATION)

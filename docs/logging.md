@@ -70,3 +70,10 @@ AMF emits slice identity in a fixed, greppable form at INFO level:
   ICR). That choice should be made deliberately, not drifted into.
 - Log level stays at `info` per ADR-005. Debug was trialled and found unnecessary: the slice
   identity we need is already present at INFO.
+
+## Open5GS stack: per-slice parsing of the text logs (ADR-024)
+
+The Open5GS and UERANSIM logs are text too. `tools/observability/logparse.py` turns their lines into
+events with a slice (S-NSSAI, DNN, per-slice container, address or IMSI), tested on real captured
+lines; the optional Loki + Grafana Alloy pipeline is generated from the same rules. See
+[`docs/observability.md`](observability.md) and [ADR-024](adr/ADR-024-observability-logs-correlation-diagnosis.md).
