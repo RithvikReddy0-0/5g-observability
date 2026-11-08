@@ -85,5 +85,11 @@ Simulation results are in [`docs/algorithm-comparison.md`](../algorithm-comparis
   here; a different mix needs the simulation re-run.
 - The predictive switch only helps when demand has a period. Without one it behaves like the
   reactive one, at no cost.
+- **Found after the benchmark: an idle slice was being throttled.** URLLC latency spikes cut
+  eMBB's limit even with eMBB idle. With no demand pressing on the limit it never rose again: after
+  a day idle, eMBB sat at its 50 Mbps floor. Every policy now leaves a slice using under 5 % of its
+  capacity uncut (it cannot be the cause), and relaxes its limit back towards the capacity
+  (`CONTROL_IDLE_SHARE`). The benchmark results stand: eMBB was always loaded during those runs, so
+  the rule never engaged. Pinned by two tests.
 - Pre-emption is unchanged. With every URLLC flow at 1 Mbps, the multi-criteria policies of
   de Oliveira et al. choose the same victims as the 3GPP rule.

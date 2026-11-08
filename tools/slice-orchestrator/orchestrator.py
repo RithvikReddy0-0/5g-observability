@@ -134,6 +134,7 @@ CONTROL_SHORT_MAX = float(os.environ.get("CONTROL_SHORT_MAX", "0.2")) # tolerate
 # by default as long as one executed flow lasts.
 CONTROL_HOLD = float(os.environ.get("CONTROL_HOLD", str(FLOW_SECONDS if EXECUTE else 15)))
 CONTROL_WINDOW = float(os.environ.get("CONTROL_WINDOW", "30"))  # flows finished this recently count
+CONTROL_IDLE_SHARE = float(os.environ.get("CONTROL_IDLE_SHARE", "0.05"))  # below this share of capacity: idle
 # Which control law moves the limit (ADR-018). aimd: the original; pi: PIE-style proportional-integral
 # on the latency error (RFC 8033); mpc: one-step model-predictive control on an online least-squares
 # model of latency vs load; ucb: a UCB1 bandit over discrete limit levels. Compared in
@@ -728,6 +729,24 @@ def control_step(latency, now=None):
         cur = limit(s)
         sr = short_ratio(name, now)
         control["short_ratio"][name] = sr
+        if in_use(s) < CONTROL_IDLE_SHARE * ceiling:
+            # An idle slice cannot be what slows URLLC down, so it is never cut; and its limit
+            # relaxes back towards the capacity, so the next busy period does not start from a
+            # stale floor. Found in report screenshots: idle for a day, eMBB's limit had been cut
+            # to its 50 Mbps floor by URLLC spikes it could not have caused, and stayed there.
+            new = min(ceiling, cur + CONTROL_INCREASE * ceiling)
+            action = "raise" if new > cur + 0.5 else "hold"
+            limits[name] = round(new, 2)
+            control_actions[(name, action)] = control_actions.get((name, action), 0) + 1
+            if action != "hold":
+                entry = {"t": time.strftime("%H:%M:%S", time.localtime(now)), "slice": name, "action": action,
+                         "from": round(cur, 1), "to": round(new, 1),
+                         "why": "%s idle (%.1f Mbps): relaxing towards capacity" % (name, in_use(s)),
+                         "policy": CONTROL_POLICY}
+                actions.append(entry)
+                control["log"].append(entry)
+                del control["log"][:-200]
+            continue
         if CONTROL_POLICY != "aimd":
             new, action, why = POLICIES[CONTROL_POLICY](s, latency, budget, cur, ceiling, now)
             # A shared guard for the newer laws: flows missing their rate mean the limit is above what

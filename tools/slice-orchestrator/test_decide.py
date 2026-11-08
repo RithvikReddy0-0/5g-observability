@@ -234,9 +234,29 @@ class Controller(unittest.TestCase):
         self.assertLess(self.embb_limit(), 210.0)
 
     def test_never_below_the_floor(self):
-        self.o.measured_mbps = lambda: {"eMBB": 10.0}
+        self.o.measured_mbps = lambda: {"eMBB": 30.0}           # busy (6 %), but 0.7 x 30 < floor
         self.o.control_step(9.5, now=1000.0)
         self.assertAlmostEqual(self.embb_limit(), 50.0)       # 10 % of the 500 Mbps ceiling
+
+    def test_an_idle_slice_is_never_cut_and_relaxes_back(self):
+        # Found live: idle for a day, eMBB had been cut to its floor by URLLC spikes it could not cause.
+        self.o.limits["eMBB"] = 50.0
+        self.o.measured_mbps = lambda: {"eMBB": 2.0}            # idle: under 5 % of 500
+        acts = self.o.control_step(15.0, now=1000.0)           # URLLC over budget, but not eMBB's doing
+        self.assertEqual(acts[0]["action"], "raise")
+        self.assertAlmostEqual(self.embb_limit(), 75.0)
+        for i in range(30):
+            self.o.control_step(15.0, now=1005.0 + 5 * i)
+        self.assertAlmostEqual(self.embb_limit(), 500.0, msg="back to the capacity while idle")
+
+    def test_idle_rule_applies_to_every_policy(self):
+        for policy in ("pi", "mpc", "ucb"):
+            o = load({"CORE": "open5gs", "EXECUTE": "0", "PROMETHEUS_URL": "", "CONTROL": "1",
+                      "CONTROL_POLICY": policy})
+            o.limits.clear()
+            o.measured_mbps = lambda: {"eMBB": 0.0}
+            o.control_step(30.0, now=1000.0)
+            self.assertEqual(o.limit(next(s for s in o.SLICES if s["name"] == "eMBB")), 500.0, policy)
 
     def test_raises_only_when_healthy_and_pressed(self):
         self.o.limits["eMBB"] = 200.0
