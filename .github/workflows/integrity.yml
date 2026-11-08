@@ -131,7 +131,7 @@ jobs:
 
       - name: Python tools and exporters compile
         run: |
-          python3 -m py_compile tools/kpi-gate/*.py tools/kpi/*.py tools/standards/*.py tools/check_open5gs_slices.py tools/slice-orchestrator/*.py tools/network-orchestrator/*.py tools/packet-scheduler/*.py deployments/open5gs/k8s/render.py scripts/open5gs/*.py             deployments/open5gs/observability/*.py             && echo "all Python compiles"
+          python3 -m py_compile tools/kpi-gate/*.py tools/kpi/*.py tools/standards/*.py tools/check_open5gs_slices.py tools/slice-orchestrator/*.py tools/network-orchestrator/*.py tools/packet-scheduler/*.py tools/mac-sim/*.py deployments/open5gs/k8s/render.py scripts/open5gs/*.py             deployments/open5gs/observability/*.py             && echo "all Python compiles"
 
   kpi-gate:
     name: KPI gate is defined and effective
@@ -196,6 +196,14 @@ jobs:
           # (tests/fixtures/rls-sample.pcap). The repository's scheduler settings must be valid.
           python3 tools/packet-scheduler/scheduler.py --check
           python3 tools/packet-scheduler/test_scheduler.py
+
+      - name: MAC scheduler simulator (simulation only)
+        run: |
+          # ADR-022: each intra- and inter-slice scheduler of the offline MAC simulation is checked
+          # for its defining property on a small hand-built cell (RR equal turns, Max-C/I best CQI,
+          # PF equal time, M-LWDF oldest first, static shares, RadioSaber channel-aware and fair),
+          # plus determinism and common random numbers across schedulers. A few seconds.
+          python3 tools/mac-sim/test_macsim.py
 
       - name: gate PASSES a conforming deployment
         run: |
