@@ -207,6 +207,16 @@ jobs:
           fi
           echo "breach correctly rejected"
 
+      - name: Open5GS gate PASSES a healthy 3-slice stack and FAILS each fault on the right KPI
+        run: |
+          # The steps above only ever run the free5GC gate. This stub holds the SERIES of a healthy
+          # Open5GS stack (100 UEs, 130 sessions, 3 UPFs; names and labels as the real exporters
+          # emit them) and evaluates every gate expression against them, so a wrong label or job
+          # name gets no data here as it would live. Each fault (an NF, UPF or gNB down, a slice's
+          # sessions missing, signalling drops, ...) must fail exactly the gates expected, and
+          # every enforcing gate must be seen to fail in some scenario.
+          python3 tools/kpi-gate/test_open5gs_gate.py
+
       - name: an unreachable Prometheus is not a pass
         run: |
           # Exit 2, never 0: a gate that could not run has not verified anything.

@@ -8,9 +8,14 @@ standing up a 5G core on a GitHub runner. It mirrors the integrity workflow's ex
 it refuse something.
 
     stub_prometheus.py <port> [--mode good|bad]
+    stub_prometheus.py <port> --stack open5gs [--mode good|<fault>]
 
     good  every KPI conforms                      -> the gate must exit 0
     bad   two NFs down, sustained 5xx, slice full -> the gate must exit 1
+
+--stack open5gs serves the series of a healthy 3-slice Open5GS stack instead, evaluated per
+query rather than looked up (stub_open5gs.py, which also lists the fault modes);
+test_open5gs_gate.py runs the Open5GS gate against every one of them.
 
 Standard library only, so it runs anywhere the gate itself runs.
 """
@@ -80,10 +85,19 @@ def make_handler(table):
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("port", type=int)
-    ap.add_argument("--mode", choices=("good", "bad"), default="good")
+    ap.add_argument("--stack", choices=("free5gc", "open5gs"), default="free5gc")
+    ap.add_argument("--mode", default="good")
     args = ap.parse_args()
-    table = GOOD if args.mode == "good" else BAD
-    HTTPServer(("127.0.0.1", args.port), make_handler(table)).serve_forever()
+    if args.stack == "open5gs":
+        import stub_open5gs
+        if args.mode not in stub_open5gs.SCENARIOS:
+            ap.error("--mode for open5gs: one of %s" % ", ".join(stub_open5gs.SCENARIOS))
+        handler = stub_open5gs.make_handler(args.mode)
+    else:
+        if args.mode not in ("good", "bad"):
+            ap.error("--mode for free5gc: good or bad")
+        handler = make_handler(GOOD if args.mode == "good" else BAD)
+    HTTPServer(("127.0.0.1", args.port), handler).serve_forever()
 
 
 if __name__ == "__main__":
