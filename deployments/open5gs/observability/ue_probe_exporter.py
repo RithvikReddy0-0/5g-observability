@@ -21,6 +21,7 @@ Exported per slice:
     ue_probe_rounds_total, ue_probe_round_duration_seconds
 """
 
+import glob
 import os
 import re
 import subprocess
@@ -37,6 +38,25 @@ SLICES = [tuple(s.split(":")) for s in
           os.environ.get("SLICE_POOLS", "10.45.:10.45.0.1:eMBB 10.46.:10.46.0.1:URLLC").split()]
 
 ADDR_RE = re.compile(r"^\d+:\s+(uesimtun\d+)\s+inet\s+([\d.]+)/", re.M)
+
+HOME_RE = re.compile(r"PDU session\[1\] is successful, TUN interface\[([^,\]]+), ([0-9.]+)\]")
+
+
+def home_sessions():
+    """{(interface, address)} of every UE's HOME session: PDU session 1, the first in its config
+    (ADR-020), from the UE's own log. Interface names follow setup order, so a name ending in 0
+    can be a device's second session; PSI 1 cannot."""
+    out = set()
+    for f in glob.glob("/tmp/ue-[0-9]*.log"):
+        try:
+            with open(f, errors="replace") as fh:
+                found = HOME_RE.findall(fh.read())
+        except OSError:
+            continue
+        if found:
+            out.add(found[-1])
+    return out
+
 # busybox prints "min/avg/max = a/b/c ms"; iputils prints "min/avg/max/mdev = a/b/c/d ms".
 # The first version only matched busybox, and reported 0 reachable UEs while its probes were
 # visibly arriving at the UPF.
@@ -47,8 +67,11 @@ lock = threading.Lock()
 
 
 def interfaces():
+    """Home sessions only: reachability is counted per DEVICE of a slice, and a device's second
+    session on another slice (ADR-020) would count it twice."""
     out = subprocess.run(["ip", "-4", "-o", "addr", "show"], capture_output=True, text=True).stdout
-    return ADDR_RE.findall(out)
+    home = home_sessions()
+    return [x for x in ADDR_RE.findall(out) if x in home]
 
 
 def probe_round():

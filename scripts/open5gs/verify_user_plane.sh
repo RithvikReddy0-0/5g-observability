@@ -39,7 +39,7 @@ done
 # How many UEs the UE container runs: the sum of its UE_PLAN counts (<config>:<UEs>:<gw>:<name>).
 want=$(docker inspect -f '{{range .Config.Env}}{{println .}}{{end}}' "$UE" | sed -n 's/^UE_PLAN=//p' \
        | tr ' ' '\n' | awk -F: 'NF >= 2 {n += $2} END {print n + 0}')
-sessions=$(ue "ip -4 -o addr show | grep -c uesimtun" | tr -d '\r')
+sessions=$(ue "sh /etc/ueransim/ue-slice.sh sessions" | grep -c ' home$')   # home sessions, PSI 1 (ADR-020)
 echo
 echo "-- PDU sessions --"
 if [ "${sessions:-0}" -ge "$want" ]; then ok "$sessions of $want UEs hold a PDU session address"

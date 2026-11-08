@@ -22,8 +22,8 @@ admission switch in the slice orchestrator.
 
 | Operation | Steps, each checked before the next | On failure |
 |---|---|---|
-| `activate` | UPF, then wait for PFCP association with the SMF → data network → gNB, then wait for NG Setup → UEs unparked, then wait for their sessions → ping the gateway from sampled UEs → admit | everything started is stopped again (rollback) |
-| `deactivate` | stop admitting → drain admitted flows → deregister and stop the UEs → stop gNB, data network, UPF → verify no UE is up and the other slices kept theirs, and read the core's session count | reported as failed |
+| `activate` | UPF, then wait for PFCP association with the SMF → data network → gNB, then wait for NG Setup → UEs unparked, then wait for their sessions → ping the gateway from sampled UEs → other slices' devices re-open their second session on it → admit | everything started is stopped again (rollback) |
+| `deactivate` | stop admitting → drain admitted flows → deregister and stop the UEs → other slices' devices release their second session on it (they stay registered) → stop gNB, data network, UPF → verify no UE is up and the other slices kept theirs, and read the core's session count | reported as failed |
 | `scale` | `docker update --cpus` on gNB and UPF, read back | reported as failed if the quota did not take |
 
 **State is discovered, never remembered:** ACTIVE, DORMANT or DEGRADED, from the containers and the
@@ -55,5 +55,8 @@ the last `PLAN_WINDOW` seconds (60) of demand.
   needs AMF/NSSF/SMF configuration and a core restart, which `scripts/open5gs/deploy.sh` owns.
   `deploy.sh` refuses to run while a slice is dormant.
 - The UE container is shared by all slices, so its CPU cannot be split per slice.
+- A slice's **own** devices camp on its gNB, so deactivating eMBB or URLLC still stops them; only
+  the other slices' devices keep their registration (their second session on it is released and
+  re-opened, ADR-020).
 - It runs against Docker. On Kubernetes the same operations would be `kubectl scale`, which is not
   implemented.

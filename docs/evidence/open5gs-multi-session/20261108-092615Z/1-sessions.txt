@@ -1,0 +1,13 @@
+== 1. sessions — 09:26:19
+  two devices, every live session:
+    208930000000005 1 uesimtun00050 10.45.1.192 home
+    208930000000005 2 uesimtun00051 10.46.1.215 second
+    208930000000025 1 uesimtun00250 10.46.1.209 home
+    208930000000025 2 uesimtun00251 10.45.1.220 second
+  per pool and kind:
+  10.45 home       20
+  10.45 second     10
+  10.46 home       10
+  10.46 second     20
+  10.47 home       70
+  core (SMF) sessions: 1-010203 30, 2-112233 30, 3-334455 70

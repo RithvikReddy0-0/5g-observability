@@ -64,28 +64,28 @@ metadata:
   namespace: o5gs
 data:
   gnb-embb.yaml: "mcc: '208'\nmnc: '93'\nnci: '0x000000010'\nidLength: 32\ntac: 1\nlinkIp: POD_IP\nngapIp: POD_IP\ngtpIp:\
-    \ POD_IP\namfConfigs:\n- address: amf.o5gs.svc.cluster.local\n  port: 38412\nslices:\n- sst: 1\n  sd: 66051\nignoreStreamIds:\
-    \ true\n"
+    \ POD_IP\namfConfigs:\n- address: amf.o5gs.svc.cluster.local\n  port: 38412\nslices:\n- sst: 1\n  sd: 66051\n- sst: 2\n\
+    \  sd: 1122867\nignoreStreamIds: true\n"
   gnb-mmtc.yaml: "mcc: '208'\nmnc: '93'\nnci: '0x000000030'\nidLength: 32\ntac: 1\nlinkIp: POD_IP\nngapIp: POD_IP\ngtpIp:\
     \ POD_IP\namfConfigs:\n- address: amf.o5gs.svc.cluster.local\n  port: 38412\nslices:\n- sst: 3\n  sd: 3359829\nignoreStreamIds:\
     \ true\n"
   gnb-urllc.yaml: "mcc: '208'\nmnc: '93'\nnci: '0x000000020'\nidLength: 32\ntac: 1\nlinkIp: POD_IP\nngapIp: POD_IP\ngtpIp:\
-    \ POD_IP\namfConfigs:\n- address: amf.o5gs.svc.cluster.local\n  port: 38412\nslices:\n- sst: 2\n  sd: 1122867\nignoreStreamIds:\
-    \ true\n"
+    \ POD_IP\namfConfigs:\n- address: amf.o5gs.svc.cluster.local\n  port: 38412\nslices:\n- sst: 2\n  sd: 1122867\n- sst:\
+    \ 1\n  sd: 66051\nignoreStreamIds: true\n"
   ue-slice-a.yaml: "supi: imsi-208930000000001\nmcc: '208'\nmnc: '93'\nkey: 8baf473f2f8fd09487cccbd7097c6862\nop: 8e27b6af0e692e750f32667a3b14605d\n\
     opType: OPC\namf: '8000'\nimei: '356938035643803'\nimeiSv: '4370816125816151'\ngnbSearchList:\n- gnb-embb.o5gs.svc.cluster.local\n\
     uacAic:\n  mps: false\n  mcs: false\nuacAcc:\n  normalClass: 0\n  class11: false\n  class12: false\n  class13: false\n\
-    \  class14: false\n  class15: false\nsessions:\n- type: IPv4\n  apn: internet\n  slice:\n    sst: 1\n    sd: 66051\nconfigured-nssai:\n\
-    - sst: 1\n  sd: 66051\n- sst: 2\n  sd: 1122867\ndefault-nssai:\n- sst: 1\n  sd: 66051\nintegrity:\n  IA1: true\n  IA2:\
-    \ true\n  IA3: true\nciphering:\n  EA1: true\n  EA2: true\n  EA3: true\nintegrityMaxRate:\n  uplink: full\n  downlink:\
-    \ full\n"
+    \  class14: false\n  class15: false\nsessions:\n- type: IPv4\n  apn: internet\n  slice:\n    sst: 1\n    sd: 66051\nextraSessions:\n\
+    - type: IPv4\n  apn: urllc\n  slice:\n    sst: 2\n    sd: 1122867\nconfigured-nssai:\n- sst: 1\n  sd: 66051\n- sst: 2\n\
+    \  sd: 1122867\ndefault-nssai:\n- sst: 1\n  sd: 66051\nintegrity:\n  IA1: true\n  IA2: true\n  IA3: true\nciphering:\n\
+    \  EA1: true\n  EA2: true\n  EA3: true\nintegrityMaxRate:\n  uplink: full\n  downlink: full\n"
   ue-slice-b.yaml: "supi: imsi-208930000000021\nmcc: '208'\nmnc: '93'\nkey: 8baf473f2f8fd09487cccbd7097c6862\nop: 8e27b6af0e692e750f32667a3b14605d\n\
     opType: OPC\namf: '8000'\nimei: '356938035643803'\nimeiSv: '4370816125816151'\ngnbSearchList:\n- gnb-urllc.o5gs.svc.cluster.local\n\
     uacAic:\n  mps: false\n  mcs: false\nuacAcc:\n  normalClass: 0\n  class11: false\n  class12: false\n  class13: false\n\
-    \  class14: false\n  class15: false\nsessions:\n- type: IPv4\n  apn: urllc\n  slice:\n    sst: 2\n    sd: 1122867\nconfigured-nssai:\n\
-    - sst: 2\n  sd: 1122867\n- sst: 1\n  sd: 66051\ndefault-nssai:\n- sst: 2\n  sd: 1122867\nintegrity:\n  IA1: true\n  IA2:\
-    \ true\n  IA3: true\nciphering:\n  EA1: true\n  EA2: true\n  EA3: true\nintegrityMaxRate:\n  uplink: full\n  downlink:\
-    \ full\n"
+    \  class14: false\n  class15: false\nsessions:\n- type: IPv4\n  apn: urllc\n  slice:\n    sst: 2\n    sd: 1122867\nextraSessions:\n\
+    - type: IPv4\n  apn: internet\n  slice:\n    sst: 1\n    sd: 66051\nconfigured-nssai:\n- sst: 2\n  sd: 1122867\n- sst:\
+    \ 1\n  sd: 66051\ndefault-nssai:\n- sst: 2\n  sd: 1122867\nintegrity:\n  IA1: true\n  IA2: true\n  IA3: true\nciphering:\n\
+    \  EA1: true\n  EA2: true\n  EA3: true\nintegrityMaxRate:\n  uplink: full\n  downlink: full\n"
   ue-slice-c.yaml: "supi: imsi-208930000000031\nmcc: '208'\nmnc: '93'\nkey: 8baf473f2f8fd09487cccbd7097c6862\nop: 8e27b6af0e692e750f32667a3b14605d\n\
     opType: OPC\namf: '8000'\nimei: '356938035643803'\nimeiSv: '4370816125816151'\ngnbSearchList:\n- gnb-mmtc.o5gs.svc.cluster.local\n\
     uacAic:\n  mps: false\n  mcs: false\nuacAcc:\n  normalClass: 0\n  class11: false\n  class12: false\n  class13: false\n\
@@ -137,32 +137,43 @@ data:
     \ follows them across restarts. Metrics on :9122.\n( while true; do python3 -u /opt/o5gs-obs/traffic_agent.py; sleep 2;\
     \ done ) &\n\ntotal=$(plan | wc -l)\nif [ \"$total\" -le 0 ]; then\n  log \"UE_PLAN is empty, idling\"; exec sleep infinity\n\
     fi\n\n# Each UE's own interface prefix, \"uesimtun\" + the last four digits of its IMSI (UERANSIM allows\n# 12 characters).\
-    \ Its one session is then uesimtun<NNNN>0 \u2014 still matched by every tool that\n# looks for \"uesimtun\" \u2014 and\
-    \ no prefix is the start of another, so no two UEs can collide.\n# The routing table nr-ue will ask for is rt_<interface>;\
-    \ give each a unique id up front, from\n# 2000 up \u2014 nr-ue itself allocates from 1000, so an entry left by an older\
-    \ run cannot collide.\nplan | while read -r imsi cfg gw name; do\n  t=$(tag_of \"$imsi\")\n  { cat \"$CFG/$cfg\"; echo;\
-    \ echo \"tunName: \\\"uesimtun$t\\\"\"; } > \"$RUN/$imsi.yaml\"\n  grep -q \"[[:space:]]rt_uesimtun${t}0\\$\" /etc/iproute2/rt_tables\
-    \ 2>/dev/null \\\n    || printf '%d\\trt_uesimtun%s0\\n' $(( 2000 + imsi % 10000 )) \"$t\" >> /etc/iproute2/rt_tables\n\
-    done\n\nlog \"starting $total UEs ($UE_PLAN), $START_BATCH at a time\"\nstarted=$(date +%s)\nplan > \"$STATE/plan\"\n\
-    batch=\"\"\nn=0\nwhile read -r imsi cfg gw name; do\n  parked \"$name\" && continue          # deactivated by the network\
+    \ Its sessions are then uesimtun<NNNN>0 and <NNNN>1, numbered in the order they\n# finish setting up (NOT by session:\
+    \ PSI 1, the home session, can be either; ue-lib.sh ip_of) \u2014\n# still matched by every tool that looks for \"uesimtun\"\
+    \ \u2014 and no prefix is the start of another.\n# The routing table nr-ue will ask for is rt_<interface>; give each a\
+    \ unique id up front, from\n# 2000 up \u2014 nr-ue itself allocates from 1000, so an entry left by an older run cannot\
+    \ collide.\nplan | while read -r imsi cfg gw name; do\n  t=$(tag_of \"$imsi\")\n  { cat \"$CFG/$cfg\"; echo; echo \"tunName:\
+    \ \\\"uesimtun$t\\\"\"; } > \"$RUN/$imsi.yaml\"\n  # one per session interface: with a second session (ADR-020) there\
+    \ is a <NNNN>1, ids from 20000\n  for k in 0 1; do\n    grep -q \"[[:space:]]rt_uesimtun${t}${k}\\$\" /etc/iproute2/rt_tables\
+    \ 2>/dev/null \\\n      || printf '%d\\trt_uesimtun%s%s\\n' $(( 2000 + 18000 * k + imsi % 10000 )) \"$t\" \"$k\" >> /etc/iproute2/rt_tables\n\
+    \  done\ndone\n\nlog \"starting $total UEs ($UE_PLAN), $START_BATCH at a time\"\nstarted=$(date +%s)\nplan > \"$STATE/plan\"\
+    \nbatch=\"\"\nn=0\nwhile read -r imsi cfg gw name; do\n  parked \"$name\" && continue          # deactivated by the network\
     \ orchestrator: stays down\n  launch_ue \"$imsi\"\n  batch=\"$batch $imsi\"; n=$((n + 1))\n  if [ \"$n\" -ge \"$START_BATCH\"\
     \ ]; then\n    # shellcheck disable=SC2086\n    wait_up $batch; batch=\"\"; n=0\n  fi\ndone < \"$STATE/plan\"\n# shellcheck\
     \ disable=SC2086\n[ -n \"$batch\" ] && wait_up $batch\n\nup=0\nwhile read -r imsi cfg gw name; do\n  parked \"$name\"\
     \ && continue\n  if [ -n \"$(tun_of \"$imsi\")\" ]; then up=$((up + 1))\n  else log \"$name imsi-$imsi did not come up\
     \ within ${START_WAIT}s; the supervisor will retry\"; fi\ndone < \"$STATE/plan\"\nlog \"$up/$total UEs up in $(( $(date\
-    \ +%s) - started ))s\"\necho \"$up $total $(( $(date +%s) - started )) $START_BATCH\" > \"$STATE/startup\"\n\nlog \"supervising:\
-    \ ping each UE's gateway every ${CHECK_EVERY}s, restart after ${CHECK_STRIKES} misses\"\nwhile true; do\n  sleep \"$CHECK_EVERY\"\
-    \n  while read -r imsi cfg gw name; do\n    parked \"$name\" && continue        # deliberately down (ADR-017): not a failure\n\
-    \    pid=$(cat \"$STATE/$imsi.pid\" 2>/dev/null)\n    t=$(tun_of \"$imsi\")\n    if ! kill -0 \"$pid\" 2>/dev/null; then\n\
-    \      reason=\"process exited\"\n    elif [ -z \"$t\" ]; then\n      reason=\"its session address $(ip_of \"$imsi\")\
-    \ is on no interface\"\n    elif ping -I \"$t\" -c 1 -W 2 \"$gw\" >/dev/null 2>&1; then\n      echo 0 > \"$STATE/$imsi.strikes\"\
-    ; continue\n    else\n      reason=\"no reply through the UPF on $t ($(ip_of \"$imsi\"))\"\n    fi\n    s=$(( $(cat \"\
-    $STATE/$imsi.strikes\" 2>/dev/null || echo 0) + 1 ))\n    echo \"$s\" > \"$STATE/$imsi.strikes\"\n    if [ \"$s\" -ge\
-    \ \"$CHECK_STRIKES\" ]; then\n      log \"$name imsi-$imsi unhealthy ($reason, $s checks): restarting this UE only\"\n\
-    \      echo \"$(date -u +%Y-%m-%dT%H:%M:%SZ) imsi-$imsi $name $reason\" >> \"$STATE/restarts.log\"\n      stop_ue \"$imsi\"\
-    \n      launch_ue \"$imsi\"\n      wait_up \"$imsi\"\n      if [ -n \"$(tun_of \"$imsi\")\" ]; then log \"$name imsi-$imsi\
-    \ back on $(tun_of \"$imsi\")\"\n      else log \"$name imsi-$imsi restart did not complete; will retry\"; fi\n    fi\n\
-    \  done < \"$STATE/plan\"\ndone\n"
+    \ +%s) - started ))s\"\n# ADR-020: each device's session on its other permitted slice, opened on demand (ue-lib.sh).\n\
+    # Wait for THESE jobs only: the nr-ue processes are background children of this shell too, and a\n# bare `wait` waits\
+    \ for them \u2014 forever (it once left the supervisor below never starting).\n# START_BATCH at a time, like the UEs themselves:\
+    \ all 30 at once once cost 4 home sessions their data\n# path at start (the supervisor restarted them); requests are also\
+    \ retried after T3580 (16 s).\nprune_proc_table\njobs_extra=\"\"; n=0\nwhile read -r imsi cfg gw name; do\n  parked \"\
+    $name\" && continue\n  [ -n \"$(sessions_of \"$cfg\" extraSessions)\" ] || continue\n  ensure_extra \"$imsi\" \"$cfg\"\
+    \ force &\n  jobs_extra=\"$jobs_extra $!\"; n=$((n + 1))\n  if [ \"$n\" -ge \"$START_BATCH\" ]; then\n    # shellcheck\
+    \ disable=SC2086\n    wait $jobs_extra; jobs_extra=\"\"; n=0\n  fi\ndone < \"$STATE/plan\"\n# shellcheck disable=SC2086\n\
+    [ -n \"$jobs_extra\" ] && wait $jobs_extra\necho \"$up $total $(( $(date +%s) - started )) $START_BATCH\" > \"$STATE/startup\"\
+    \n\nlog \"supervising: ping each UE's gateway every ${CHECK_EVERY}s, restart after ${CHECK_STRIKES} misses\"\nwhile true;\
+    \ do\n  sleep \"$CHECK_EVERY\"\n  while read -r imsi cfg gw name; do\n    parked \"$name\" && continue        # deliberately\
+    \ down (ADR-017): not a failure\n    pid=$(cat \"$STATE/$imsi.pid\" 2>/dev/null)\n    t=$(tun_of \"$imsi\")\n    if !\
+    \ kill -0 \"$pid\" 2>/dev/null; then\n      reason=\"process exited\"\n    elif [ -z \"$t\" ]; then\n      reason=\"its\
+    \ session address $(ip_of \"$imsi\") is on no interface\"\n    elif ping -I \"$t\" -c 1 -W 2 \"$gw\" >/dev/null 2>&1;\
+    \ then\n      echo 0 > \"$STATE/$imsi.strikes\"\n      ensure_extra \"$imsi\" \"$cfg\"            # at most once a minute\
+    \ per UE (ADR-020)\n      continue\n    else\n      reason=\"no reply through the UPF on $t ($(ip_of \"$imsi\"))\"\n \
+    \   fi\n    s=$(( $(cat \"$STATE/$imsi.strikes\" 2>/dev/null || echo 0) + 1 ))\n    echo \"$s\" > \"$STATE/$imsi.strikes\"\
+    \n    if [ \"$s\" -ge \"$CHECK_STRIKES\" ]; then\n      log \"$name imsi-$imsi unhealthy ($reason, $s checks): restarting\
+    \ this UE only\"\n      echo \"$(date -u +%Y-%m-%dT%H:%M:%SZ) imsi-$imsi $name $reason\" >> \"$STATE/restarts.log\"\n\
+    \      stop_ue \"$imsi\"\n      launch_ue \"$imsi\"\n      wait_up \"$imsi\"\n      if [ -n \"$(tun_of \"$imsi\")\" ];\
+    \ then log \"$name imsi-$imsi back on $(tun_of \"$imsi\")\"\n      else log \"$name imsi-$imsi restart did not complete;\
+    \ will retry\"; fi\n    fi\n  done < \"$STATE/plan\"\ndone\n"
   ue-lib.sh: "#!/bin/sh\n# ue-lib.sh \u2014 UE process helpers shared by ue-entrypoint.sh (start + supervise every UE) and\n\
     # ue-slice.sh (park / unpark one slice's UEs for the network orchestrator, ADR-017).\n# Sourced, not run. Expects UE_PLAN\
     \ and FIRST_IMSI to be set when plan() is used.\n\nCFG=/etc/ueransim\nRUN=/tmp/ue-cfg\nSTATE=/tmp/ues\nSTART_WAIT=\"${UE_START_WAIT:-60}\"\
@@ -176,13 +187,44 @@ data:
     \  grep -qx \"$1\" \"$STATE/parked\" 2>/dev/null\n}\n\n# A UE is identified by its PDU-session ADDRESS, never by its interface\
     \ NAME. With the old shared\n# prefix, names were reused after a session dropped, and checking by name once marked two\
     \ dead\n# UEs healthy. Addresses are allocated uniquely by the SMF, so an address can only ever mean one\n# live session;\
-    \ with per-UE prefixes this is now doubly safe.\nip_of() {    # <imsi> -> the UE's latest session address from its own\
-    \ log, or empty\n  sed -n 's/.*TUN interface\\[uesimtun[0-9]*, \\([0-9.]*\\)\\].*/\\1/p' \"/tmp/ue-$1.log\" 2>/dev/null\
-    \ | tail -1\n}\n\ntun_of() {   # <imsi> -> the interface CURRENTLY holding that UE's address, or empty\n  a=$(ip_of \"\
-    $1\")\n  [ -n \"$a\" ] || return 0\n  ip -4 -o addr show 2>/dev/null | awk -v a=\"$a\" '/uesimtun/ { split($4, p, \"/\"\
-    ); if (p[1] == a) { print $2; exit } }'\n}\n\nlaunch_ue() {   # <imsi>: start it, do not wait\n  : > \"/tmp/ue-$1.log\"\
-    \n  nr-ue -c \"$RUN/$1.yaml\" -i \"imsi-$1\" < /dev/null >> \"/tmp/ue-$1.log\" 2>&1 &\n  echo $! > \"$STATE/$1.pid\"\n\
-    \  echo 0 > \"$STATE/$1.strikes\"\n}\n\nwait_up() {     # <imsi>...: wait until each has its interface, has died, or START_WAIT\
+    \ with per-UE prefixes this is now doubly safe.\n# A UE may hold several sessions (ADR-020). Its home slice's session\
+    \ is the first in its config,\n# so it is PDU session 1 (PSI 1): sessions are requested in config order. Its INTERFACE\
+    \ name says\n# nothing: UERANSIM numbers interfaces in the order sessions finish setting up, and a URLLC device's\n# eMBB\
+    \ session was found on uesimtun<NNNN>0 \u2014 the supervisor then pinged the wrong gateway and\n# restarted healthy UEs.\
+    \ \"The UE's address\" means the PSI-1 address everywhere.\nip_of() {    # <imsi> -> the UE's latest HOME-session (PSI\
+    \ 1) address from its own log, or empty\n  sed -n 's/.*PDU session\\[1\\] is successful, TUN interface\\[[^,]*, \\([0-9.]*\\\
+    )\\].*/\\1/p' \"/tmp/ue-$1.log\" 2>/dev/null | tail -1\n}\n\n# <cfg> <block>: \"<dnn> <sst> <sd>\" of each session in\
+    \ a block of a UE config (\"sessions\" = the\n# default ones, home first; \"extraSessions\" = opened on demand, ADR-020)\n\
+    sessions_of() { awk -v b=\"$2:\" '$1 == b {in_s=1; next} in_s && /^[^ #-]/ {in_s=0}\n  in_s && /apn:/ {gsub(/[\" ]/, \"\
+    \", $2); d=$2} in_s && /sst:/ {t=$2} in_s && /sd:/ {print d, t, $2}' \"$CFG/$1\"; }\n\n# <dnn> -> its address pool (\"\
+    10.46.\"), from the plan: the slice whose home session uses that DNN.\npool_of_dnn() {\n  awk '{print $2, $3}' \"$STATE/plan\"\
+    \ | sort -u | while read -r c g; do\n    [ \"$(sessions_of \"$c\" sessions | head -1 | cut -d' ' -f1)\" = \"$1\" ] &&\
+    \ { echo \"$g\" | cut -d. -f1,2 | sed 's/$/./'; break; }\n  done\n}\n\n# <imsi>: \"<psi> <interface> <address>\" of each\
+    \ live session of one UE, from its own log\nue_sessions() {\n  live=$(ip -4 -o addr show 2>/dev/null | awk '/uesimtun/\
+    \ { split($4, p, \"/\"); print $2 \" \" p[1] }')\n  sed -n 's/.*PDU session\\[\\([0-9]*\\)\\] is successful, TUN interface\\\
+    [\\([^,]*\\), \\([0-9.]*\\)\\].*/\\1 \\2 \\3/p' \"/tmp/ue-$1.log\" 2>/dev/null |\n    awk '{ last[$1] = $2 \" \" $3 }\
+    \ END { for (p in last) print p, last[p] }' | while read -r psi ifc addr; do\n      echo \"$live\" | grep -qx \"$ifc $addr\"\
+    \ && echo \"$psi $ifc $addr\"\n    done\n}\n\n# A DNN is RELEASED while its slice is off (ue-slice.sh release): its extra\
+    \ sessions stay closed.\ndnn_released() { grep -qx \"$1\" \"$STATE/released\" 2>/dev/null; }\n\n# <imsi> <cfg> [force]:\
+    \ open each extra session that is not live and whose DNN is not released.\n# Without force, at most once a minute per\
+    \ UE: a request takes a moment to complete, and a second\n# request for the same DNN would open a duplicate session.\n\
+    ensure_extra() {\n  [ -n \"$(sessions_of \"$2\" extraSessions)\" ] || return 0\n  now=$(date +%s); last=$(cat \"$STATE/$1.extra\"\
+    \ 2>/dev/null || echo 0)\n  [ \"${3:-}\" = force ] || [ $((now - last)) -ge 60 ] || return 0\n  echo \"$now\" > \"$STATE/$1.extra\"\
+    \n  mine=$(ue_sessions \"$1\")\n  sessions_of \"$2\" extraSessions | while read -r dnn sst sd; do\n    dnn_released \"\
+    $dnn\" && continue\n    pool=$(pool_of_dnn \"$dnn\"); [ -n \"$pool\" ] || continue\n    echo \"$mine\" | awk -v p=\"$pool\"\
+    \ 'index($3, p) == 1 {f=1} END {exit !f}' && continue\n    timeout 8 nr-cli \"imsi-$1\" -e \"ps-establish IPv4 --sst $sst\
+    \ --sd $sd --dnn $dnn\" >/dev/null 2>&1\n  done\n}\n\n# Every live PDU session, from the UEs' own logs: \"<imsi> <psi>\
+    \ <interface> <address>\", only those\n# whose address is on an interface right now (a released session's log line stays\
+    \ behind).\nsessions_table() {\n  live=$(ip -4 -o addr show 2>/dev/null | awk '/uesimtun/ { split($4, p, \"/\"); print\
+    \ $2 \" \" p[1] }')\n  for f in /tmp/ue-[0-9]*.log; do\n    [ -f \"$f\" ] || continue\n    i=${f#/tmp/ue-}; i=${i%.log}\n\
+    \    sed -n 's/.*PDU session\\[\\([0-9]*\\)\\] is successful, TUN interface\\[\\([^,]*\\), \\([0-9.]*\\)\\].*/\\1 \\2\
+    \ \\3/p' \"$f\" |\n      awk -v i=\"$i\" '{ last[$1] = $2 \" \" $3 } END { for (p in last) print i, p, last[p] }'\n  done\
+    \ | while read -r i psi ifc addr; do\n    echo \"$live\" | grep -qx \"$ifc $addr\" && echo \"$i $psi $ifc $addr\"\n  done\n\
+    }\n\ntun_of() {   # <imsi> -> the interface CURRENTLY holding that UE's address, or empty\n  a=$(ip_of \"$1\")\n  [ -n\
+    \ \"$a\" ] || return 0\n  ip -4 -o addr show 2>/dev/null | awk -v a=\"$a\" '/uesimtun/ { split($4, p, \"/\"); if (p[1]\
+    \ == a) { print $2; exit } }'\n}\n\nlaunch_ue() {   # <imsi>: start it, do not wait\n  : > \"/tmp/ue-$1.log\"\n  nr-ue\
+    \ -c \"$RUN/$1.yaml\" -i \"imsi-$1\" < /dev/null >> \"/tmp/ue-$1.log\" 2>&1 &\n  echo $! > \"$STATE/$1.pid\"\n  echo 0\
+    \ > \"$STATE/$1.strikes\"\n}\n\nwait_up() {     # <imsi>...: wait until each has its interface, has died, or START_WAIT\
     \ passes\n  w=0\n  while [ \"$w\" -lt \"$START_WAIT\" ]; do\n    pending=0\n    for i in \"$@\"; do\n      [ -n \"$(tun_of\
     \ \"$i\")\" ] && continue\n      kill -0 \"$(cat \"$STATE/$i.pid\")\" 2>/dev/null && pending=$((pending + 1))\n    done\n\
     \    [ \"$pending\" -eq 0 ] && return 0\n    w=$((w + 1)); sleep 1\n  done\n}\n\n# nr-cli finds a UE through /tmp/UERANSIM.proc-table/,\
@@ -203,16 +245,23 @@ data:
     \ deregisters (switch-off), which\n#   releases its session in the core, and its process is stopped. A second sweep catches\
     \ a UE the\n#   supervisor was restarting at that moment.\n# unpark: the slice leaves the list and all its UEs start together\
     \ (their own interface prefixes\n#   and routing tables make that safe, ADR-014), then this waits until they are up.\n\
-    # Prints one line: \"<op> <slice> <UEs> <up> <seconds>\".\nset -u\n. /etc/ueransim/ue-lib.sh\n\nop=\"${1:-status}\"\n\
-    slice=\"${2:-}\"\n[ -f \"$STATE/plan\" ] || { echo \"error: no UE plan yet ($STATE/plan)\"; exit 2; }\n\nues_of() { awk\
-    \ -v s=\"$1\" '$4 == s { print $1 }' \"$STATE/plan\"; }\ncount_up() { n=0; for i in $(ues_of \"$1\"); do [ -n \"$(tun_of\
-    \ \"$i\")\" ] && n=$((n + 1)); done; echo \"$n\"; }\n\ncase \"$op\" in\n  park)\n    [ -n \"$(ues_of \"$slice\")\" ] ||\
-    \ { echo \"error: no UEs for slice '$slice'\"; exit 2; }\n    started=$(date +%s)\n    grep -qx \"$slice\" \"$STATE/parked\"\
-    \ 2>/dev/null || echo \"$slice\" >> \"$STATE/parked\"\n    prune_proc_table                    # or nr-cli may address\
-    \ a dead process (ue-lib.sh)\n    # nr-cli answers \"triggered\" before the UE has sent its Deregistration Request; the\
-    \ UE then\n    # switches itself off within about half a second. Killing it on nr-cli's answer cut most\n    # deregistrations\
-    \ short and left their sessions in the core, so wait for the UE to exit on its\n    # own and kill only a straggler. Ten\
-    \ at a time.\n    n=0\n    for i in $(ues_of \"$slice\"); do\n      ( timeout 8 nr-cli \"imsi-$i\" -e \"deregister switch-off\"\
+    # release: OTHER slices' devices drop their second session on <slice> (ADR-020) \u2014 they stay\n#   registered and keep\
+    \ their home session; only the PDU session on <slice> is released.\n# establish: those devices open their second session\
+    \ on <slice> again.\n# sessions: every live PDU session, \"<imsi> <psi> <interface> <address> <home|second>\" (PSI 1 =\
+    \ home).\n# Prints one line: \"<op> <slice> <UEs> <up> <seconds>\".\nset -u\n. /etc/ueransim/ue-lib.sh\n\nop=\"${1:-status}\"\
+    \nslice=\"${2:-}\"\n[ -f \"$STATE/plan\" ] || { echo \"error: no UE plan yet ($STATE/plan)\"; exit 2; }\n\nues_of() {\
+    \ awk -v s=\"$1\" '$4 == s { print $1 }' \"$STATE/plan\"; }\nothers_of() { awk -v s=\"$1\" '$4 != s { print $1, $2, $4\
+    \ }' \"$STATE/plan\"; }   # <imsi> <cfg> <home>\npool_of() { awk -v s=\"$1\" '$4 == s { split($3, g, \".\"); print g[1]\
+    \ \".\" g[2] \".\"; exit }' \"$STATE/plan\"; }\n# <imsi> <pool> [table]: the PSI of the UE's live session with an address\
+    \ in the pool, if any\npsi_in() { printf '%s\\n' \"${3:-$(sessions_table)}\" | awk -v i=\"$1\" -v p=\"$2\" '$1 == i &&\
+    \ index($4, p) == 1 { print $2; exit }'; }\ncount_up() { n=0; for i in $(ues_of \"$1\"); do [ -n \"$(tun_of \"$i\")\"\
+    \ ] && n=$((n + 1)); done; echo \"$n\"; }\n\ncase \"$op\" in\n  park)\n    [ -n \"$(ues_of \"$slice\")\" ] || { echo \"\
+    error: no UEs for slice '$slice'\"; exit 2; }\n    started=$(date +%s)\n    grep -qx \"$slice\" \"$STATE/parked\" 2>/dev/null\
+    \ || echo \"$slice\" >> \"$STATE/parked\"\n    prune_proc_table                    # or nr-cli may address a dead process\
+    \ (ue-lib.sh)\n    # nr-cli answers \"triggered\" before the UE has sent its Deregistration Request; the UE then\n   \
+    \ # switches itself off within about half a second. Killing it on nr-cli's answer cut most\n    # deregistrations short\
+    \ and left their sessions in the core, so wait for the UE to exit on its\n    # own and kill only a straggler. Ten at\
+    \ a time.\n    n=0\n    for i in $(ues_of \"$slice\"); do\n      ( timeout 8 nr-cli \"imsi-$i\" -e \"deregister switch-off\"\
     \ >/dev/null 2>&1\n        pid=$(cat \"$STATE/$i.pid\" 2>/dev/null)\n        for _ in 1 2 3 4 5 6; do kill -0 \"$pid\"\
     \ 2>/dev/null || break; sleep 0.5; done\n        stop_ue \"$i\" ) &\n      n=$((n + 1))\n      [ $((n % 10)) -eq 0 ] &&\
     \ wait\n    done\n    wait\n    sleep 2\n    for i in $(ues_of \"$slice\"); do stop_ue \"$i\"; done\n    echo \"park $slice\
@@ -220,11 +269,40 @@ data:
     \ \"$slice\")\" ] || { echo \"error: no UEs for slice '$slice'\"; exit 2; }\n    started=$(date +%s)\n    if [ -f \"$STATE/parked\"\
     \ ]; then\n      grep -vx \"$slice\" \"$STATE/parked\" > \"$STATE/parked.new\" || true\n      mv \"$STATE/parked.new\"\
     \ \"$STATE/parked\"\n    fi\n    for i in $(ues_of \"$slice\"); do\n      kill -0 \"$(cat \"$STATE/$i.pid\" 2>/dev/null)\"\
-    \ 2>/dev/null || launch_ue \"$i\"\n    done\n    # shellcheck disable=SC2046\n    wait_up $(ues_of \"$slice\")\n    echo\
-    \ \"unpark $slice $(ues_of \"$slice\" | wc -l) $(count_up \"$slice\") $(( $(date +%s) - started ))\"\n    ;;\n  status)\n\
-    \    prune_proc_table\n    for s in $(awk '{ print $4 }' \"$STATE/plan\" | uniq); do\n      if parked \"$s\"; then st=parked;\
-    \ else st=active; fi\n      echo \"$s $st $(ues_of \"$s\" | wc -l) $(count_up \"$s\")\"\n    done\n    ;;\n  *)\n    echo\
-    \ \"usage: ue-slice.sh park|unpark <slice> | status\"; exit 2 ;;\nesac\n"
+    \ 2>/dev/null || launch_ue \"$i\"\n    done\n    # shellcheck disable=SC2046\n    wait_up $(ues_of \"$slice\")\n    prune_proc_table\n\
+    \    jobs_extra=\"\"\n    for i in $(ues_of \"$slice\"); do                   # their extra sessions (ADR-020)\n     \
+    \ ensure_extra \"$i\" \"$(awk -v i=\"$i\" '$1 == i { print $2; exit }' \"$STATE/plan\")\" force &\n      jobs_extra=\"\
+    $jobs_extra $!\"\n    done\n    # only these jobs: the UEs just launched are children of this shell, and a bare `wait`\n\
+    \    # waited for them until the 180 s timeout (an activation rolled back on it)\n    # shellcheck disable=SC2086\n  \
+    \  [ -n \"$jobs_extra\" ] && wait $jobs_extra\n    echo \"unpark $slice $(ues_of \"$slice\" | wc -l) $(count_up \"$slice\"\
+    ) $(( $(date +%s) - started ))\"\n    ;;\n  release)\n    pool=$(pool_of \"$slice\"); [ -n \"$pool\" ] || { echo \"error:\
+    \ no slice '$slice'\"; exit 2; }\n    started=$(date +%s); prune_proc_table\n    hc=$(awk -v s=\"$slice\" '$4 == s { print\
+    \ $2; exit }' \"$STATE/plan\")\n    dnn=$(sessions_of \"$hc\" sessions | head -1 | cut -d' ' -f1)\n    # first mark it\
+    \ released, so neither the supervisor nor a UE restart opens it again\n    dnn_released \"$dnn\" || echo \"$dnn\" >> \"\
+    $STATE/released\"\n    tab=$(sessions_table)\n    for line in $(others_of \"$slice\" | tr ' ' '|'); do\n      imsi=${line%%|*};\
+    \ home=${line##*|}\n      parked \"$home\" && continue\n      psi=$(psi_in \"$imsi\" \"$pool\" \"$tab\"); [ -n \"$psi\"\
+    \ ] || continue\n      timeout 8 nr-cli \"imsi-$imsi\" -e \"ps-release $psi\" >/dev/null 2>&1 &\n    done\n    wait\n\
+    \    for _ in $(seq 15); do                      # until no other slice's device holds the pool\n      tab=$(sessions_table);\
+    \ left=0\n      for imsi in $(others_of \"$slice\" | awk '{print $1}'); do [ -n \"$(psi_in \"$imsi\" \"$pool\" \"$tab\"\
+    )\" ] && left=$((left + 1)); done\n      [ \"$left\" -eq 0 ] && break; sleep 1\n    done\n    echo \"release $slice $left\
+    \ $(( $(date +%s) - started ))\"\n    ;;\n  establish)\n    pool=$(pool_of \"$slice\"); [ -n \"$pool\" ] || { echo \"\
+    error: no slice '$slice'\"; exit 2; }\n    started=$(date +%s); prune_proc_table; want=0; tab=$(sessions_table)\n    hc=$(awk\
+    \ -v s=\"$slice\" '$4 == s { print $2; exit }' \"$STATE/plan\")\n    set -- $(sessions_of \"$hc\" sessions | head -1)\
+    \     # the slice's own session: dnn sst sd\n    dnn=$1; sst=$2; sd=$3\n    if [ -f \"$STATE/released\" ]; then      \
+    \           # open again from now on\n      grep -vx \"$dnn\" \"$STATE/released\" > \"$STATE/released.new\" || true\n\
+    \      mv \"$STATE/released.new\" \"$STATE/released\"\n    fi\n    for line in $(others_of \"$slice\" | tr ' ' '|'); do\n\
+    \      imsi=${line%%|*}; rest=${line#*|}; cfg=${rest%%|*}; home=${rest#*|}\n      parked \"$home\" && continue\n     \
+    \ sessions_of \"$cfg\" extraSessions | awk -v d=\"$dnn\" '$1 == d {f=1} END {exit !f}' || continue\n      want=$((want\
+    \ + 1))\n      [ -n \"$(psi_in \"$imsi\" \"$pool\" \"$tab\")\" ] && continue\n      timeout 8 nr-cli \"imsi-$imsi\" -e\
+    \ \"ps-establish IPv4 --sst $sst --sd $sd --dnn $dnn\" >/dev/null 2>&1 &\n    done\n    wait\n    for _ in $(seq 30);\
+    \ do\n      tab=$(sessions_table); got=0\n      for imsi in $(others_of \"$slice\" | awk '{print $1}'); do [ -n \"$(psi_in\
+    \ \"$imsi\" \"$pool\" \"$tab\")\" ] && got=$((got + 1)); done\n      [ \"$got\" -ge \"$want\" ] && break; sleep 1\n  \
+    \  done\n    echo \"establish $slice $want $got $(( $(date +%s) - started ))\"\n    ;;\n  sessions)    # every live PDU\
+    \ session: <imsi> <psi> <interface> <address> <home|second>\n    sessions_table | sort | awk '{ print $0, ($2 == 1 ? \"\
+    home\" : \"second\") }'\n    ;;\n  status)\n    prune_proc_table\n    for s in $(awk '{ print $4 }' \"$STATE/plan\" |\
+    \ uniq); do\n      if parked \"$s\"; then st=parked; else st=active; fi\n      echo \"$s $st $(ues_of \"$s\" | wc -l)\
+    \ $(count_up \"$s\")\"\n    done\n    ;;\n  *)\n    echo \"usage: ue-slice.sh park|unpark|release|establish <slice> |\
+    \ status | sessions\"; exit 2 ;;\nesac\n"
   gnb-entrypoint.sh: "#!/bin/sh\n# gnb-entrypoint.sh <config> \u2014 run one UERANSIM gNB, and exit when its N2 link to the\
     \ AMF is down,\n# so that Docker (restart: unless-stopped) or Kubernetes (restartPolicy: Always) starts a fresh one.\n\
     #\n# WHY: UERANSIM v3.3.0's gNB connects to the AMF once. A refused connection is logged\n# (\"Connecting to ... failed\"\
@@ -359,69 +437,77 @@ data:
     \ are PROVISIONAL defaults (the KPI notes do not fix them); a sweep overrides\nthem at run time by writing /tmp/traffic-profile.json,\
     \ e.g.\n    {\"mMTC\": {\"interval\": 1}, \"URLLC\": {\"enabled\": false}}\nwhich this agent re-reads every 2 s.\n\nEach\
     \ device starts at a random phase, so 70 IoT devices do not all report in the same instant.\nPacket formats are documented\
-    \ in kpi_collector.py. Exposes sent counts on :9122 (/metrics).\n\"\"\"\n\nimport heapq\nimport json\nimport os\nimport\
-    \ random\nimport re\nimport socket\nimport struct\nimport subprocess\nimport threading\nimport time\nfrom http.server\
+    \ in kpi_collector.py. Exposes sent counts on :9122 (/metrics).\n\"\"\"\n\nimport glob\nimport heapq\nimport json\nimport\
+    \ os\nimport random\nimport re\nimport socket\nimport struct\nimport subprocess\nimport threading\nimport time\nfrom http.server\
     \ import BaseHTTPRequestHandler, HTTPServer\n\nDEFAULT = (\"URLLC:10.46.:10.53.0.52:5400:64:0.02 \"\n           \"mMTC:10.47.:10.53.0.53:5401:10:10\"\
     )\nOVERRIDE = \"/tmp/traffic-profile.json\"\nPORT = int(os.environ.get(\"AGENT_PORT\", \"9122\"))\nURLLC = struct.Struct(\"\
     !HBIQ\")\nEPOCH = random.randrange(256)          # changes on every restart: a new sequence is not loss\n\nADDR_RE = re.compile(r\"\
-    ^\\d+:\\s+(uesimtun(\\d{4})\\d)\\s+inet\\s+([\\d.]+)/\", re.M)\n\nstate_lock = threading.Lock()\nsent = {}           \
-    \ # slice -> packets sent\nerrors = {}          # slice -> send errors\ndevices = {}         # slice -> devices currently\
-    \ sending\n\n\ndef parse_profiles(text):\n    out = {}\n    for item in text.split():\n        name, prefix, dst, port,\
-    \ size, interval = item.split(\":\")\n        out[name] = {\"prefix\": prefix, \"dst\": dst, \"port\": int(port), \"bytes\"\
-    : int(size),\n                     \"interval\": float(interval), \"enabled\": True}\n    return out\n\n\nBASE = parse_profiles(os.environ.get(\"\
-    TRAFFIC_PROFILES\", DEFAULT))\n\n\ndef effective():\n    \"\"\"The base profiles with the run-time override applied.\"\
-    \"\"\n    prof = {k: dict(v) for k, v in BASE.items()}\n    try:\n        with open(OVERRIDE) as f:\n            ov =\
-    \ json.load(f)\n        for name, changes in ov.items():\n            if name in prof and isinstance(changes, dict):\n\
-    \                prof[name].update({k: v for k, v in changes.items() if k in (\"interval\", \"bytes\", \"enabled\")})\n\
-    \    except (OSError, ValueError):\n        pass\n    return prof\n\n\ndef ue_addresses():\n    \"\"\"[(device id, address)]\
-    \ for every UE interface that holds an address.\"\"\"\n    out = subprocess.run([\"ip\", \"-4\", \"-o\", \"addr\", \"\
-    show\"], capture_output=True, text=True).stdout\n    return [(int(tag), ip) for _, tag, ip in ADDR_RE.findall(out)]\n\n\
-    \ndef resolve(host):\n    try:\n        return socket.gethostbyname(host)\n    except OSError:\n        return None\n\n\
-    \nclass Device:\n    def __init__(self, slice_name, dev, ip):\n        self.slice, self.dev, self.ip = slice_name, dev,\
-    \ ip\n        self.seq = 0\n        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\n        self.sock.bind((ip,\
-    \ 0))            # the UE's own address -> its PDU session -> its UPF\n\n    def payload(self, size):\n        now = time.monotonic_ns()\n\
-    \        if self.slice == \"mMTC\" or size == 10:\n            body = (self.dev.to_bytes(2, \"big\") + bytes([EPOCH])\
-    \ + (self.seq % (1 << 24)).to_bytes(3, \"big\")\n                    + ((now // 1_000_000) % (1 << 32)).to_bytes(4, \"\
-    big\"))\n            return body[:max(size, 10)]\n        head = URLLC.pack(self.dev, EPOCH, self.seq % (1 << 32), now)\n\
-    \        return head + b\"\\0\" * max(0, size - len(head))\n\n    def close(self):\n        try:\n            self.sock.close()\n\
-    \        except OSError:\n            pass\n\n\ndef run():\n    devs = {}                  # (slice, dev) -> Device\n\
-    \    heap = []                  # (due monotonic s, slice, dev)\n    dst_cache = {}\n    next_scan = 0.0\n    prof = effective()\n\
-    \    while True:\n        now = time.monotonic()\n        if now >= next_scan:\n            prof = effective()\n     \
-    \       addrs = ue_addresses()\n            wanted = {}\n            for name, p in prof.items():\n                if\
-    \ not p[\"enabled\"]:\n                    continue\n                for dev, ip in addrs:\n                    if ip.startswith(p[\"\
-    prefix\"]):\n                        wanted[(name, dev)] = ip\n            for key in list(devs):                    \
-    \     # gone, disabled, or re-addressed\n                if wanted.get(key) != devs[key].ip:\n                    devs.pop(key).close()\n\
-    \            for key, ip in wanted.items():\n                if key not in devs:\n                    try:\n         \
-    \               devs[key] = Device(key[0], key[1], ip)\n                    except OSError:\n                        continue\n\
-    \                    interval = prof[key[0]][\"interval\"]\n                    heapq.heappush(heap, (now + random.uniform(0,\
-    \ interval), key[0], key[1]))\n            with state_lock:\n                for name in prof:\n                    devices[name]\
-    \ = sum(1 for k in devs if k[0] == name)\n            next_scan = now + 2.0\n        if not heap:\n            time.sleep(0.5)\n\
-    \            continue\n        due, name, dev = heap[0]\n        if due > now:\n            time.sleep(min(due - now,\
-    \ max(0.0, next_scan - now), 0.5))\n            continue\n        heapq.heappop(heap)\n        d = devs.get((name, dev))\n\
-    \        if d is None:                                      # removed since it was scheduled\n            continue\n \
-    \       p = prof[name]\n        if p[\"dst\"] not in dst_cache:\n            dst_cache[p[\"dst\"]] = resolve(p[\"dst\"\
-    ])\n        dst = dst_cache[p[\"dst\"]]\n        try:\n            if dst is None:\n                raise OSError(\"cannot\
-    \ resolve %s\" % p[\"dst\"])\n            d.sock.sendto(d.payload(p[\"bytes\"]), (dst, p[\"port\"]))\n            d.seq\
-    \ += 1\n            with state_lock:\n                sent[name] = sent.get(name, 0) + 1\n        except OSError:\n  \
-    \          with state_lock:\n                errors[name] = errors.get(name, 0) + 1\n            dst_cache.pop(p[\"dst\"\
-    ], None)\n        # Next send: on schedule, never in a burst to catch up after a stall.\n        heapq.heappush(heap,\
-    \ (max(due + p[\"interval\"], time.monotonic()), name, dev))\n\n\nclass Handler(BaseHTTPRequestHandler):\n    def do_GET(self):\n\
-    \        if self.path.split(\"?\")[0] != \"/metrics\":\n            self.send_response(404)\n            self.end_headers()\n\
-    \            return\n        prof = effective()\n        with state_lock:\n            lines = [\"# HELP kpi_agent_sent_total\
-    \ Measurement packets sent by the traffic agent.\",\n                     \"# TYPE kpi_agent_sent_total counter\"]\n \
-    \           lines += ['kpi_agent_sent_total{slice=\"%s\"} %d' % (n, sent.get(n, 0)) for n in prof]\n            lines\
-    \ += [\"# TYPE kpi_agent_send_errors_total counter\"]\n            lines += ['kpi_agent_send_errors_total{slice=\"%s\"\
-    } %d' % (n, errors.get(n, 0)) for n in prof]\n            lines += [\"# HELP kpi_agent_devices Devices currently sending.\"\
-    , \"# TYPE kpi_agent_devices gauge\"]\n            lines += ['kpi_agent_devices{slice=\"%s\"} %d' % (n, devices.get(n,\
-    \ 0)) for n in prof]\n            lines += [\"# HELP kpi_agent_interval_seconds Current reporting interval per device.\"\
-    ,\n                      \"# TYPE kpi_agent_interval_seconds gauge\"]\n            lines += ['kpi_agent_interval_seconds{slice=\"\
-    %s\"} %s' % (n, p[\"interval\"] if p[\"enabled\"] else 0)\n                      for n, p in prof.items()]\n        body\
-    \ = (\"\\n\".join(lines) + \"\\n\").encode()\n        self.send_response(200)\n        self.send_header(\"Content-Type\"\
-    , \"text/plain; version=0.0.4\")\n        self.send_header(\"Content-Length\", str(len(body)))\n        self.end_headers()\n\
-    \        self.wfile.write(body)\n\n    def log_message(self, *args):\n        pass\n\n\nif __name__ == \"__main__\":\n\
-    \    print(\"traffic_agent: %s (override file %s), metrics on :%d\"\n          % (\", \".join(\"%s %dB every %gs -> %s:%d\"\
-    \ % (n, p[\"bytes\"], p[\"interval\"], p[\"dst\"], p[\"port\"])\n                       for n, p in BASE.items()), OVERRIDE,\
-    \ PORT), flush=True)\n    threading.Thread(target=run, daemon=True).start()\n    HTTPServer((\"0.0.0.0\", PORT), Handler).serve_forever()\n"
+    ^\\d+:\\s+(uesimtun(\\d{4})\\d)\\s+inet\\s+([\\d.]+)/\", re.M)\n\nHOME_RE = re.compile(r\"PDU session\\[1\\] is successful,\
+    \ TUN interface\\[([^,\\]]+), ([0-9.]+)\\]\")\n\n\ndef home_sessions():\n    \"\"\"{(interface, address)} of every UE's\
+    \ HOME session: PDU session 1, the first in its config\n    (ADR-020), from the UE's own log. Interface names follow setup\
+    \ order, so a name ending in 0\n    can be a device's second session; PSI 1 cannot.\"\"\"\n    out = set()\n    for f\
+    \ in glob.glob(\"/tmp/ue-[0-9]*.log\"):\n        try:\n            with open(f, errors=\"replace\") as fh:\n         \
+    \       found = HOME_RE.findall(fh.read())\n        except OSError:\n            continue\n        if found:\n       \
+    \     out.add(found[-1])\n    return out\n\n\nstate_lock = threading.Lock()\nsent = {}            # slice -> packets sent\n\
+    errors = {}          # slice -> send errors\ndevices = {}         # slice -> devices currently sending\n\n\ndef parse_profiles(text):\n\
+    \    out = {}\n    for item in text.split():\n        name, prefix, dst, port, size, interval = item.split(\":\")\n  \
+    \      out[name] = {\"prefix\": prefix, \"dst\": dst, \"port\": int(port), \"bytes\": int(size),\n                   \
+    \  \"interval\": float(interval), \"enabled\": True}\n    return out\n\n\nBASE = parse_profiles(os.environ.get(\"TRAFFIC_PROFILES\"\
+    , DEFAULT))\n\n\ndef effective():\n    \"\"\"The base profiles with the run-time override applied.\"\"\"\n    prof = {k:\
+    \ dict(v) for k, v in BASE.items()}\n    try:\n        with open(OVERRIDE) as f:\n            ov = json.load(f)\n    \
+    \    for name, changes in ov.items():\n            if name in prof and isinstance(changes, dict):\n                prof[name].update({k:\
+    \ v for k, v in changes.items() if k in (\"interval\", \"bytes\", \"enabled\")})\n    except (OSError, ValueError):\n\
+    \        pass\n    return prof\n\n\ndef ue_addresses():\n    \"\"\"[(device id, address)] for every UE's HOME session\
+    \ that holds an address. A device's second\n    session on another slice (ADR-020) is not a device of that slice: it must\
+    \ not send its traffic.\"\"\"\n    out = subprocess.run([\"ip\", \"-4\", \"-o\", \"addr\", \"show\"], capture_output=True,\
+    \ text=True).stdout\n    home = home_sessions()\n    return [(int(tag), ip) for dev, tag, ip in ADDR_RE.findall(out) if\
+    \ (dev, ip) in home]\n\n\ndef resolve(host):\n    try:\n        return socket.gethostbyname(host)\n    except OSError:\n\
+    \        return None\n\n\nclass Device:\n    def __init__(self, slice_name, dev, ip):\n        self.slice, self.dev, self.ip\
+    \ = slice_name, dev, ip\n        self.seq = 0\n        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\n\
+    \        self.sock.bind((ip, 0))            # the UE's own address -> its PDU session -> its UPF\n\n    def payload(self,\
+    \ size):\n        now = time.monotonic_ns()\n        if self.slice == \"mMTC\" or size == 10:\n            body = (self.dev.to_bytes(2,\
+    \ \"big\") + bytes([EPOCH]) + (self.seq % (1 << 24)).to_bytes(3, \"big\")\n                    + ((now // 1_000_000) %\
+    \ (1 << 32)).to_bytes(4, \"big\"))\n            return body[:max(size, 10)]\n        head = URLLC.pack(self.dev, EPOCH,\
+    \ self.seq % (1 << 32), now)\n        return head + b\"\\0\" * max(0, size - len(head))\n\n    def close(self):\n    \
+    \    try:\n            self.sock.close()\n        except OSError:\n            pass\n\n\ndef run():\n    devs = {}   \
+    \               # (slice, dev) -> Device\n    heap = []                  # (due monotonic s, slice, dev)\n    dst_cache\
+    \ = {}\n    next_scan = 0.0\n    prof = effective()\n    while True:\n        now = time.monotonic()\n        if now >=\
+    \ next_scan:\n            prof = effective()\n            addrs = ue_addresses()\n            wanted = {}\n          \
+    \  for name, p in prof.items():\n                if not p[\"enabled\"]:\n                    continue\n              \
+    \  for dev, ip in addrs:\n                    if ip.startswith(p[\"prefix\"]):\n                        wanted[(name,\
+    \ dev)] = ip\n            for key in list(devs):                         # gone, disabled, or re-addressed\n         \
+    \       if wanted.get(key) != devs[key].ip:\n                    devs.pop(key).close()\n            for key, ip in wanted.items():\n\
+    \                if key not in devs:\n                    try:\n                        devs[key] = Device(key[0], key[1],\
+    \ ip)\n                    except OSError:\n                        continue\n                    interval = prof[key[0]][\"\
+    interval\"]\n                    heapq.heappush(heap, (now + random.uniform(0, interval), key[0], key[1]))\n         \
+    \   with state_lock:\n                for name in prof:\n                    devices[name] = sum(1 for k in devs if k[0]\
+    \ == name)\n            next_scan = now + 2.0\n        if not heap:\n            time.sleep(0.5)\n            continue\n\
+    \        due, name, dev = heap[0]\n        if due > now:\n            time.sleep(min(due - now, max(0.0, next_scan - now),\
+    \ 0.5))\n            continue\n        heapq.heappop(heap)\n        d = devs.get((name, dev))\n        if d is None: \
+    \                                     # removed since it was scheduled\n            continue\n        p = prof[name]\n\
+    \        if p[\"dst\"] not in dst_cache:\n            dst_cache[p[\"dst\"]] = resolve(p[\"dst\"])\n        dst = dst_cache[p[\"\
+    dst\"]]\n        try:\n            if dst is None:\n                raise OSError(\"cannot resolve %s\" % p[\"dst\"])\n\
+    \            d.sock.sendto(d.payload(p[\"bytes\"]), (dst, p[\"port\"]))\n            d.seq += 1\n            with state_lock:\n\
+    \                sent[name] = sent.get(name, 0) + 1\n        except OSError:\n            with state_lock:\n         \
+    \       errors[name] = errors.get(name, 0) + 1\n            dst_cache.pop(p[\"dst\"], None)\n        # Next send: on schedule,\
+    \ never in a burst to catch up after a stall.\n        heapq.heappush(heap, (max(due + p[\"interval\"], time.monotonic()),\
+    \ name, dev))\n\n\nclass Handler(BaseHTTPRequestHandler):\n    def do_GET(self):\n        if self.path.split(\"?\")[0]\
+    \ != \"/metrics\":\n            self.send_response(404)\n            self.end_headers()\n            return\n        prof\
+    \ = effective()\n        with state_lock:\n            lines = [\"# HELP kpi_agent_sent_total Measurement packets sent\
+    \ by the traffic agent.\",\n                     \"# TYPE kpi_agent_sent_total counter\"]\n            lines += ['kpi_agent_sent_total{slice=\"\
+    %s\"} %d' % (n, sent.get(n, 0)) for n in prof]\n            lines += [\"# TYPE kpi_agent_send_errors_total counter\"]\n\
+    \            lines += ['kpi_agent_send_errors_total{slice=\"%s\"} %d' % (n, errors.get(n, 0)) for n in prof]\n       \
+    \     lines += [\"# HELP kpi_agent_devices Devices currently sending.\", \"# TYPE kpi_agent_devices gauge\"]\n       \
+    \     lines += ['kpi_agent_devices{slice=\"%s\"} %d' % (n, devices.get(n, 0)) for n in prof]\n            lines += [\"\
+    # HELP kpi_agent_interval_seconds Current reporting interval per device.\",\n                      \"# TYPE kpi_agent_interval_seconds\
+    \ gauge\"]\n            lines += ['kpi_agent_interval_seconds{slice=\"%s\"} %s' % (n, p[\"interval\"] if p[\"enabled\"\
+    ] else 0)\n                      for n, p in prof.items()]\n        body = (\"\\n\".join(lines) + \"\\n\").encode()\n\
+    \        self.send_response(200)\n        self.send_header(\"Content-Type\", \"text/plain; version=0.0.4\")\n        self.send_header(\"\
+    Content-Length\", str(len(body)))\n        self.end_headers()\n        self.wfile.write(body)\n\n    def log_message(self,\
+    \ *args):\n        pass\n\n\nif __name__ == \"__main__\":\n    print(\"traffic_agent: %s (override file %s), metrics on\
+    \ :%d\"\n          % (\", \".join(\"%s %dB every %gs -> %s:%d\" % (n, p[\"bytes\"], p[\"interval\"], p[\"dst\"], p[\"\
+    port\"])\n                       for n, p in BASE.items()), OVERRIDE, PORT), flush=True)\n    threading.Thread(target=run,\
+    \ daemon=True).start()\n    HTTPServer((\"0.0.0.0\", PORT), Handler).serve_forever()\n"
   ue_probe_exporter.py: "#!/usr/bin/env python3\n\"\"\"\nue_probe_exporter.py \u2014 per-slice reachability and latency, measured\
     \ from the UEs themselves.\n\nWHY THIS EXISTS\nStopping every UE abruptly left the core's metrics unchanged: the AMF still\
     \ reported 20 UEs\non the RAN and the UPF still held 20 sessions, because nothing told the core the UEs had\ngone. A KPI\
@@ -432,16 +518,24 @@ data:
     \ namespace. It never touches the UE processes.\n\nExported per slice:\n    ue_probe_interfaces{slice}        UE interfaces\
     \ holding an address from the slice's pool\n    ue_probe_reachable{slice}         of those, how many answered the last\
     \ round\n    ue_probe_rtt_ms{slice,stat}       min / avg / max round-trip time of the last round\n    ue_probe_rounds_total,\
-    \ ue_probe_round_duration_seconds\n\"\"\"\n\nimport os\nimport re\nimport subprocess\nimport threading\nimport time\n\
-    from http.server import BaseHTTPRequestHandler, HTTPServer\n\nPORT = int(os.environ.get(\"PORT\", \"9121\"))\nINTERVAL\
-    \ = float(os.environ.get(\"INTERVAL\", \"5\"))\nTIMEOUT_S = int(os.environ.get(\"PROBE_TIMEOUT\", \"1\"))\n\n# prefix:gateway:name\
-    \ \u2014 the pools from deployments/open5gs/config/smf.yaml\nSLICES = [tuple(s.split(\":\")) for s in\n          os.environ.get(\"\
-    SLICE_POOLS\", \"10.45.:10.45.0.1:eMBB 10.46.:10.46.0.1:URLLC\").split()]\n\nADDR_RE = re.compile(r\"^\\d+:\\s+(uesimtun\\\
-    d+)\\s+inet\\s+([\\d.]+)/\", re.M)\n# busybox prints \"min/avg/max = a/b/c ms\"; iputils prints \"min/avg/max/mdev = a/b/c/d\
-    \ ms\".\n# The first version only matched busybox, and reported 0 reachable UEs while its probes were\n# visibly arriving\
-    \ at the UPF.\nRTT_RE = re.compile(r\"= [\\d.]+/([\\d.]+)/[\\d.]+(?:/[\\d.]+)? ms\")\n\nstate = {\"slices\": {}, \"rounds\"\
-    : 0, \"duration\": 0.0}\nlock = threading.Lock()\n\n\ndef interfaces():\n    out = subprocess.run([\"ip\", \"-4\", \"\
-    -o\", \"addr\", \"show\"], capture_output=True, text=True).stdout\n    return ADDR_RE.findall(out)\n\n\ndef probe_round():\n\
+    \ ue_probe_round_duration_seconds\n\"\"\"\n\nimport glob\nimport os\nimport re\nimport subprocess\nimport threading\n\
+    import time\nfrom http.server import BaseHTTPRequestHandler, HTTPServer\n\nPORT = int(os.environ.get(\"PORT\", \"9121\"\
+    ))\nINTERVAL = float(os.environ.get(\"INTERVAL\", \"5\"))\nTIMEOUT_S = int(os.environ.get(\"PROBE_TIMEOUT\", \"1\"))\n\
+    \n# prefix:gateway:name \u2014 the pools from deployments/open5gs/config/smf.yaml\nSLICES = [tuple(s.split(\":\")) for\
+    \ s in\n          os.environ.get(\"SLICE_POOLS\", \"10.45.:10.45.0.1:eMBB 10.46.:10.46.0.1:URLLC\").split()]\n\nADDR_RE\
+    \ = re.compile(r\"^\\d+:\\s+(uesimtun\\d+)\\s+inet\\s+([\\d.]+)/\", re.M)\n\nHOME_RE = re.compile(r\"PDU session\\[1\\\
+    ] is successful, TUN interface\\[([^,\\]]+), ([0-9.]+)\\]\")\n\n\ndef home_sessions():\n    \"\"\"{(interface, address)}\
+    \ of every UE's HOME session: PDU session 1, the first in its config\n    (ADR-020), from the UE's own log. Interface\
+    \ names follow setup order, so a name ending in 0\n    can be a device's second session; PSI 1 cannot.\"\"\"\n    out\
+    \ = set()\n    for f in glob.glob(\"/tmp/ue-[0-9]*.log\"):\n        try:\n            with open(f, errors=\"replace\"\
+    ) as fh:\n                found = HOME_RE.findall(fh.read())\n        except OSError:\n            continue\n        if\
+    \ found:\n            out.add(found[-1])\n    return out\n\n# busybox prints \"min/avg/max = a/b/c ms\"; iputils prints\
+    \ \"min/avg/max/mdev = a/b/c/d ms\".\n# The first version only matched busybox, and reported 0 reachable UEs while its\
+    \ probes were\n# visibly arriving at the UPF.\nRTT_RE = re.compile(r\"= [\\d.]+/([\\d.]+)/[\\d.]+(?:/[\\d.]+)? ms\")\n\
+    \nstate = {\"slices\": {}, \"rounds\": 0, \"duration\": 0.0}\nlock = threading.Lock()\n\n\ndef interfaces():\n    \"\"\
+    \"Home sessions only: reachability is counted per DEVICE of a slice, and a device's second\n    session on another slice\
+    \ (ADR-020) would count it twice.\"\"\"\n    out = subprocess.run([\"ip\", \"-4\", \"-o\", \"addr\", \"show\"], capture_output=True,\
+    \ text=True).stdout\n    home = home_sessions()\n    return [x for x in ADDR_RE.findall(out) if x in home]\n\n\ndef probe_round():\n\
     \    started = time.time()\n    ifaces = interfaces()\n    procs = []\n    for prefix, gw, name in SLICES:\n        for\
     \ dev, ip in ifaces:\n            if ip.startswith(prefix):\n                p = subprocess.Popen([\"ping\", \"-I\", dev,\
     \ \"-c\", \"1\", \"-W\", str(TIMEOUT_S), gw],\n                                     stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,\

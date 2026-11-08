@@ -105,8 +105,9 @@ def ue_plan():
 
 
 def ue_addresses():
-    out = dexec(UE, "ip", "-4", "-o", "addr", "show").stdout
-    return [(int(t), ip) for _, t, ip in re.findall(r"^\d+:\s+(uesimtun(\d{4})\d)\s+inet\s+([\d.]+)/", out, re.M)]
+    # home sessions (PSI 1) only: a device's second session on another slice (ADR-020) is not a device of it
+    out = dexec(UE, "sh", "/etc/ueransim/ue-slice.sh", "sessions").stdout
+    return [(int(f[0]) % 10000, f[3]) for f in (l.split() for l in out.splitlines()) if len(f) == 5 and f[4] == "home"]
 
 
 def wait_ues(want, timeout=300):

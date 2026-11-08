@@ -67,7 +67,7 @@ subs=$(docker exec o5gs-mongodb mongo open5gs --quiet --eval 'var r={}; db.subsc
   && echo "$subs" | grep -q '"3/334455":70' \
   && ok "100 subscribers: eMBB 20, URLLC 10, mMTC 70 by home slice ($subs)" || no "subscribers: ${subs:-unreadable}"
 targets=$(curl -s --max-time 5 http://localhost:9091/api/v1/targets | python3 -c "import json,sys
-t=[x for x in json.load(sys.stdin)['data']['activeTargets'] if x['labels']['job'] not in ('slice-orchestrator', 'network-orchestrator')]
+t=[x for x in json.load(sys.stdin)['data']['activeTargets'] if x['labels']['job'] not in ('slice-orchestrator', 'network-orchestrator', 'packet-scheduler')]
 print(sum(x['health']=='up' for x in t), len(t))" 2>/dev/null)
 set -- ${targets:-0 0}
 [ "$1" -gt 0 ] && [ "$1" = "$2" ] && ok "Prometheus: $1/$2 stack targets up" || no "Prometheus targets up: ${1}/${2}"
@@ -78,11 +78,20 @@ echo; echo "-- End-to-end function --"
 logs=$(i=1; while [ "$i" -le 100 ]; do printf '/tmp/ue-20893%010d.log ' "$i"; i=$((i+1)); done)
 reg=$(docker exec o5gs-ue sh -c "grep -l 'Initial Registration is successful' $logs 2>/dev/null | wc -l" | tr -d ' ')
 [ "${reg:-0}" -ge 100 ] && ok "UE registration: $reg/100 UEs registered" || no "UE registration: ${reg:-0}/100"
-live=$(docker exec o5gs-ue sh -c 'for f in /tmp/ue-2089*.log; do a=$(sed -n "s/.*TUN interface\[uesimtun[0-9]*, \([0-9.]*\)\].*/\1/p" $f | tail -1); [ -n "$a" ] && ip -4 -o addr show | grep -q " $a/" && echo "$a"; done' 2>/dev/null)
+# live sessions from the UEs' own logs: PSI 1 is each device's home session (ADR-020)
+sess=$(docker exec o5gs-ue sh /etc/ueransim/ue-slice.sh sessions 2>/dev/null)
+live=$(echo "$sess" | awk '$5 == "home" {print $4}')
 na=$(echo "$live" | grep -c '^10\.45\.'); nb=$(echo "$live" | grep -c '^10\.46\.'); nc=$(echo "$live" | grep -c '^10\.47\.')
 [ "$na" -ge 20 ] && [ "$nb" -ge 10 ] && [ "$nc" -ge 70 ] \
   && ok "PDU session established, UE addressed from its slice's pool: eMBB $na/20, URLLC $nb/10, mMTC $nc/70" \
   || no "PDU sessions with a live address: eMBB $na/20, URLLC $nb/10, mMTC $nc/70"
+# ADR-020: eMBB and URLLC devices also hold a session on the other slice they are permitted on
+# (PSI 2), through their own cell but the other slice's UPF.
+sa=$(echo "$sess" | awk '$5 == "second" && $4 ~ /^10\.46\./' | wc -l)
+sb=$(echo "$sess" | awk '$5 == "second" && $4 ~ /^10\.45\./' | wc -l)
+[ "${sa:-0}" -ge 20 ] && [ "${sb:-0}" -ge 10 ] \
+  && ok "second PDU session on the other permitted slice: eMBB devices on URLLC $sa/20, URLLC devices on eMBB $sb/10 (ADR-020)" \
+  || no "second PDU sessions: eMBB devices on URLLC ${sa:-0}/20, URLLC devices on eMBB ${sb:-0}/10"
 if bash scripts/open5gs/verify_user_plane.sh > /tmp/acc-up.txt 2>&1; then
   ok "end-to-end user plane: ping and iperf3 through the UPF on all three slices, internet egress ($(grep -oE 'PASS=[0-9]+ +FAIL=[0-9]+' /tmp/acc-up.txt))"
 else no "user-plane verification failed: $(grep 'FAIL ]' /tmp/acc-up.txt | head -2 | tr -s ' ')"; fi
@@ -110,8 +119,10 @@ if [ -n "$latest" ] && grep -q "^RESULT: PASS" "$latest"; then
 else no "no passing teardown/rebuild evidence (run tests/open5gs-rebuild.sh --yes)"; fi
 
 echo; echo "-- Freeze --"
-tag=$(git tag --points-at HEAD | grep -E '^open5gs-baseline' | head -1)
-if [ -n "$tag" ]; then ok "baseline tagged ($tag)"
+# A baseline is frozen once and work continues on top of it: any baseline tag in HEAD's history
+# counts (only one at HEAD itself did, so every later commit "unfroze" it).
+tag=$(git tag --merged HEAD --sort=-creatordate -l 'open5gs-baseline*' 2>/dev/null | head -1)
+if [ -n "$tag" ]; then ok "baseline tagged ($tag; $(git rev-list --count "$tag"..HEAD) commits since)"
 else own "baseline not tagged — freezing a baseline is the project owner's decision (git tag open5gs-baseline-<date>)"; fi
 
 echo

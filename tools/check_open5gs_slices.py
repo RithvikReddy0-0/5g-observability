@@ -50,7 +50,7 @@ def main(base):
     bad = checked = 0
     for f in sorted(glob.glob(f"{base}/ran/ue-*.yaml")):
         ue = load(f)
-        for sess in ue["sessions"]:
+        for sess in ue["sessions"] + (ue.get("extraSessions") or []):
             checked += 1
             sl, dnn = norm(sess["slice"]["sst"], sess["slice"]["sd"]), sess["apn"]
             errors = []
@@ -111,6 +111,18 @@ def check_plan(base, load, smf):
                           % (gw, name, sess["apn"], gateways.get(sess["apn"])))
         if not any(p.split(":")[1:2] == [gw] for p in pools):
             errors.append("SLICE_POOLS has no probe entry for gateway %s (%s)" % (gw, name))
+        # ADR-020: the home session is the only default session (UERANSIM re-opens every default
+        # session as soon as it is released), and extraSessions — opened on demand — are exactly
+        # the slices in SLICE_<X>_ALSO_PERMITTED, in that order.
+        if len(ue["sessions"]) != 1:
+            errors.append("%s (%s) has %d default sessions; only the home session may be one (ADR-020)"
+                          % (cfg, name, len(ue["sessions"])))
+        extra = [norm(x["slice"]["sst"], x["slice"]["sd"]) for x in (ue.get("extraSessions") or [])]
+        allowed = [norm(env["SLICE_%s_SST" % o], env["SLICE_%s_SD" % o])
+                   for o in env.get("SLICE_%s_ALSO_PERMITTED" % letter, "")]
+        if extra != allowed:
+            errors.append("%s (%s) has extra sessions on %s, but SLICE_%s_ALSO_PERMITTED permits %s"
+                          % (cfg, name, extra, letter, allowed))
     # ARP tiers (ADR-016) are applied in IMSI order to a slice's home subscribers, so they must
     # cover exactly that slice's UEs — a short list would leave some devices on the slice default.
     for letter, count in want:

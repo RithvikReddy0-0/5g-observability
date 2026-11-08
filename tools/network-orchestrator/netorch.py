@@ -342,6 +342,25 @@ def activate(op):
 
         op.step("data path", lambda: datapath(s))
 
+        def second_sessions():
+            # ADR-020: other slices' devices open their second session on this slice again.
+            line = ue_slice("establish", s["name"])[-1].split()     # establish <slice> <want> <got> <s>
+            want, got = int(line[2]), int(line[3])
+            if got < want:
+                op.warnings.append("%d of %d second sessions on %s re-established" % (got, want, s["name"]))
+            # An interface is not a data path: after a UPF restart a session can exist on the UE and
+            # in the SMF without its PFCP session (ADR-014). Ping the gateway from a sample of them.
+            second = [f[2] for f in (l.split() for l in ue_slice("sessions"))
+                      if len(f) == 5 and f[4] == "second" and f[3].startswith(s["pool"])]
+            sample = random.sample(second, min(3, len(second)))
+            ok = sum(sh(["docker", "exec", UE_CONTAINER, "ping", "-I", t, "-c", "2", "-W", "2", s["gateway"]],
+                        timeout=15)[0] == 0 for t in sample)
+            if sample and ok < len(sample):
+                op.warnings.append("data path: %d of %d sampled second sessions reach %s" % (ok, len(sample), s["gateway"]))
+            return ("%d/%d other slices' devices have their second session on %s again; %d/%d sampled reach %s"
+                    % (got, want, s["name"], ok, len(sample), s["gateway"]))
+        op.step("second sessions", second_sessions)
+
         def admit():
             r = orch("POST", "/slices", {"name": s["name"], "active": True})
             return "slice orchestrator admits" if r else "slice orchestrator not running (nothing to admit)"
@@ -368,9 +387,9 @@ def activate(op):
 
 def datapath(s):
     """Ping the slice's UPF gateway from up to three of its UEs, through their own interfaces."""
-    rc, out = sh(["docker", "exec", UE_CONTAINER, "ip", "-4", "-o", "addr", "show"], timeout=10)
-    tuns = [m.group(1) for m in re.finditer(r"^\d+:\s+(uesimtun\d+)\s+inet\s+([\d.]+)/", out, re.M)
-            if m.group(2).startswith(s["pool"])]
+    # the slice's own devices: home sessions (PSI 1, ADR-020) with an address in its pool
+    tuns = [f[2] for f in (l.split() for l in ue_slice("sessions"))
+            if len(f) == 5 and f[4] == "home" and f[3].startswith(s["pool"])]
     if not tuns:
         raise Failure("no UE interface on %s*" % s["pool"])
     sample = random.sample(tuns, min(3, len(tuns)))
@@ -408,6 +427,15 @@ def deactivate(op):
             line = ue_slice("park", s["name"])[-1].split()
             return "%s UEs deregistered and stopped, %s still up" % (line[2], line[3])
         op.step("ues", park)
+
+        def release():
+            # ADR-020: other slices' devices hold a second session on this slice. Release just that
+            # session, BEFORE its UPF stops: the devices stay registered and keep their home session.
+            line = ue_slice("release", s["name"])[-1].split()       # release <slice> <left> <s>
+            if int(line[2]):
+                op.warnings.append("%s second sessions on %s were not released" % (line[2], s["name"]))
+            return "other slices' devices released their second session on %s (%s left)" % (s["name"], line[2])
+        op.step("second sessions", release)
 
         def stop_nfs():
             for key in ("gnb", "dn", "upf"):

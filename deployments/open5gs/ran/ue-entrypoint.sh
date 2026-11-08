@@ -81,15 +81,19 @@ if [ "$total" -le 0 ]; then
 fi
 
 # Each UE's own interface prefix, "uesimtun" + the last four digits of its IMSI (UERANSIM allows
-# 12 characters). Its one session is then uesimtun<NNNN>0 — still matched by every tool that
-# looks for "uesimtun" — and no prefix is the start of another, so no two UEs can collide.
+# 12 characters). Its sessions are then uesimtun<NNNN>0 and <NNNN>1, numbered in the order they
+# finish setting up (NOT by session: PSI 1, the home session, can be either; ue-lib.sh ip_of) —
+# still matched by every tool that looks for "uesimtun" — and no prefix is the start of another.
 # The routing table nr-ue will ask for is rt_<interface>; give each a unique id up front, from
 # 2000 up — nr-ue itself allocates from 1000, so an entry left by an older run cannot collide.
 plan | while read -r imsi cfg gw name; do
   t=$(tag_of "$imsi")
   { cat "$CFG/$cfg"; echo; echo "tunName: \"uesimtun$t\""; } > "$RUN/$imsi.yaml"
-  grep -q "[[:space:]]rt_uesimtun${t}0\$" /etc/iproute2/rt_tables 2>/dev/null \
-    || printf '%d\trt_uesimtun%s0\n' $(( 2000 + imsi % 10000 )) "$t" >> /etc/iproute2/rt_tables
+  # one per session interface: with a second session (ADR-020) there is a <NNNN>1, ids from 20000
+  for k in 0 1; do
+    grep -q "[[:space:]]rt_uesimtun${t}${k}\$" /etc/iproute2/rt_tables 2>/dev/null \
+      || printf '%d\trt_uesimtun%s%s\n' $(( 2000 + 18000 * k + imsi % 10000 )) "$t" "$k" >> /etc/iproute2/rt_tables
+  done
 done
 
 log "starting $total UEs ($UE_PLAN), $START_BATCH at a time"
@@ -116,6 +120,25 @@ while read -r imsi cfg gw name; do
   else log "$name imsi-$imsi did not come up within ${START_WAIT}s; the supervisor will retry"; fi
 done < "$STATE/plan"
 log "$up/$total UEs up in $(( $(date +%s) - started ))s"
+# ADR-020: each device's session on its other permitted slice, opened on demand (ue-lib.sh).
+# Wait for THESE jobs only: the nr-ue processes are background children of this shell too, and a
+# bare `wait` waits for them — forever (it once left the supervisor below never starting).
+# START_BATCH at a time, like the UEs themselves: all 30 at once once cost 4 home sessions their data
+# path at start (the supervisor restarted them); requests are also retried after T3580 (16 s).
+prune_proc_table
+jobs_extra=""; n=0
+while read -r imsi cfg gw name; do
+  parked "$name" && continue
+  [ -n "$(sessions_of "$cfg" extraSessions)" ] || continue
+  ensure_extra "$imsi" "$cfg" force &
+  jobs_extra="$jobs_extra $!"; n=$((n + 1))
+  if [ "$n" -ge "$START_BATCH" ]; then
+    # shellcheck disable=SC2086
+    wait $jobs_extra; jobs_extra=""; n=0
+  fi
+done < "$STATE/plan"
+# shellcheck disable=SC2086
+[ -n "$jobs_extra" ] && wait $jobs_extra
 echo "$up $total $(( $(date +%s) - started )) $START_BATCH" > "$STATE/startup"
 
 log "supervising: ping each UE's gateway every ${CHECK_EVERY}s, restart after ${CHECK_STRIKES} misses"
@@ -130,7 +153,9 @@ while true; do
     elif [ -z "$t" ]; then
       reason="its session address $(ip_of "$imsi") is on no interface"
     elif ping -I "$t" -c 1 -W 2 "$gw" >/dev/null 2>&1; then
-      echo 0 > "$STATE/$imsi.strikes"; continue
+      echo 0 > "$STATE/$imsi.strikes"
+      ensure_extra "$imsi" "$cfg"            # at most once a minute per UE (ADR-020)
+      continue
     else
       reason="no reply through the UPF on $t ($(ip_of "$imsi"))"
     fi

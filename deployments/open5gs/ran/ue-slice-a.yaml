@@ -26,6 +26,18 @@ sessions:
       sst: 0x01
       sd: 0x010203
 
+# ADR-020: the device's session on its other permitted slice is NOT a default session. UERANSIM
+# re-opens every session in `sessions:` as soon as it is released (establishRequiredSessions), so a
+# slice that is switched off could never get rid of it. It is listed here instead, a key UERANSIM
+# ignores, and opened on demand (nr-cli ps-establish) by ran/ue-entrypoint.sh after registration;
+# ue-slice.sh release/establish keep it down while that slice is off.
+extraSessions:
+  - type: "IPv4"           # URLLC: SLICE_A_ALSO_PERMITTED
+    apn: "urllc"
+    slice:
+      sst: 0x02
+      sd: 0x112233
+
 # Requested at registration: its own slice plus the other one it is subscribed to.
 configured-nssai:
   - sst: 0x01

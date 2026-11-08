@@ -133,9 +133,12 @@ scripts/open5gs/orchestrator_demo.sh   # the two experiments below, saved as evi
 | Admitted demand | a reservation | **a real UDP flow at that bitrate**, device ↔ gNB ↔ UPF ↔ data network |
 | Result per demand | none | delivered Mbps and loss; `met` = ≥ 95 % of the rate with ≤ 2 % loss |
 
-**Boundary:** each device holds a session on its home slice only, and a slice's gNB serves only
-that slice (ADR-011). An admitted flow therefore runs on the least-busy device *of the chosen
-slice*. The requesting subscriber must still be permitted on that slice.
+**Whose device carries the flow (ADR-020).** eMBB and URLLC devices hold a session on every slice
+they are permitted on, home slice first. An admitted flow runs on the **requesting subscriber's own
+session** on the chosen slice. Only a subscriber with no session there (an IoT device, or a session
+that is down) falls back to the least-busy device of the slice;
+`slice_flow_device_total{kind="own"|"other"}` counts both. Before ADR-020 every device had its home
+session only, and that fallback was the only path.
 
 **Premium capacity is protected.** A demand is placed only on the least specialised slices that
 meet its latency need and is refused if they are full. Found on real traffic: with eMBB full,

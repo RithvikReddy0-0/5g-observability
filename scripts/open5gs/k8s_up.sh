@@ -87,9 +87,9 @@ for _ in $(seq 100); do
 done
 echo "  UE session addresses: ${live:-0}"
 check "100 UEs with a PDU session" '[ "${live:-0}" -ge 100 ]'
-na=$(uex sh -c "ip -4 -o addr show | grep -c 'uesimtun.* 10[.]45[.]'" | tr -d '\r')
-nb=$(uex sh -c "ip -4 -o addr show | grep -c 'uesimtun.* 10[.]46[.]'" | tr -d '\r')
-nc=$(uex sh -c "ip -4 -o addr show | grep -c 'uesimtun.* 10[.]47[.]'" | tr -d '\r')
+# home sessions only (PSI 1, ADR-020)
+hs=$(uex sh /etc/ueransim/ue-slice.sh sessions 2>/dev/null | tr -d '\r' | awk '$5 == "home" {print $4}')
+na=$(echo "$hs" | grep -c '^10\.45\.'); nb=$(echo "$hs" | grep -c '^10\.46\.'); nc=$(echo "$hs" | grep -c '^10\.47\.')
 check "each slice at its size, from its own pool (eMBB $na/20, URLLC $nb/10, mMTC $nc/70)" '[ "$na" -ge 20 ] && [ "$nb" -ge 10 ] && [ "$nc" -ge 70 ]'
 
 say "6. user plane, per slice"

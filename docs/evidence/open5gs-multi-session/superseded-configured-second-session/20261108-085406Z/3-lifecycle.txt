@@ -1,0 +1,41 @@
+== 3. lifecycle with second sessions — URLLC off, then on
+  before:
+  10.45 home       20
+  10.45 second     10
+  10.46 home       10
+  10.46 second     20
+  10.47 home       70
+
+-- deactivate URLLC
+  stop admitting        0.0s  slice orchestrator admits nothing more; 0 flows active
+  drain                 0.0s  no admitted flows left
+  ues                   3.7s  10 UEs deregistered and stopped, 0 still up
+  second sessions       1.7s  other slices' devices released their second session on URLLC (0 left)
+  network functions     3.0s  gNB, data network and UPF stopped
+  verify               21.2s  other slices kept every UE; core still holds 20 session(s) on URLLC
+  WARNING: core still holds 20 stale session(s) on URLLC until its UEs re-attach
+deactivate URLLC: done in 30.9s
+
+  after deactivation:
+  10.45 home       20
+  10.47 home       70
+  core (SMF) sessions: 1-010203 20, 2-112233 20, 3-334455 70
+  eMBB phones still registered with their home session: 20/20
+
+-- activate URLLC
+  upf                   4.7s  associated with the SMF (10.53.0.8)
+  data network          0.3s  running
+  gnb                   1.7s  NG Setup done
+  ues                   3.7s  10/10 UEs with a PDU session
+  data path             4.0s  3/3 sampled UEs reach 10.46.0.1 through the UPF
+  second sessions       2.2s  20/20 other slices' devices have their second session on URLLC again
+  admit                 0.0s  slice orchestrator admits
+activate URLLC: done in 16.7s
+
+  after activation:
+  10.45 home       20
+  10.45 second     10
+  10.46 home       10
+  10.46 second     20
+  10.47 home       70
+  core (SMF) sessions: 1-010203 30, 2-112233 30, 3-334455 70

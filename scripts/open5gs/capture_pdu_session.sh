@@ -33,7 +33,7 @@ docker exec o5gs-ue nr-cli "$IMSI" -e "ps-release 1"
 sleep 3
 docker exec o5gs-ue nr-cli "$IMSI" -e "ps-establish IPv4 --sst 1 --sd 0x010203 --dnn internet"
 sleep 4
-dev=$(docker exec o5gs-ue sh -c "sed -n 's/.*TUN interface\[\(uesimtun[0-9]*\), .*/\1/p' /tmp/ue-${IMSI#imsi-}.log | tail -1")
+dev=$(docker exec o5gs-ue sh -c "sed -n 's/.*PDU session\[1\] is successful, TUN interface\[\([^,]*\), .*/\1/p' /tmp/ue-${IMSI#imsi-}.log | tail -1")
 echo "user data: 2 pings through $dev"
 docker exec o5gs-ue ping -I "$dev" -c 2 -W 2 10.53.0.51 | tail -2
 sleep 2

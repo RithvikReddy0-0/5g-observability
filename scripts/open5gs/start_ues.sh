@@ -67,7 +67,9 @@ echo "== provisioning subscribers"
 python3 "$REPO_ROOT/scripts/open5gs/provision_subscribers.py" || exit 1
 
 # Interfaces holding an address from a pool (gateway 10.45.0.1 -> pool 10.45.).
-tuns() { docker exec "$UE" sh -c "ip -4 -o addr show | grep -c 'uesimtun.* ${1//./\\.}'" | tr -d '\r'; }
+# Home sessions only (PSI 1, from the UEs' logs): a UE's second session on another slice (ADR-020)
+# must not count as a device of that slice.
+tuns() { docker exec "$UE" sh /etc/ueransim/ue-slice.sh sessions 2>/dev/null | awk -v p="$1" '$5 == "home" && index($4, p) == 1' | wc -l; }
 
 # The UEs are the o5gs-ue container's own workload (deployments/open5gs/ran/ue-entrypoint.sh),
 # so that an engine restart brings them back. Restarting the container relaunches all of them,
@@ -90,6 +92,23 @@ for s in $PLAN; do
   done
   if [ "${got:-0}" -ge "$n" ]; then echo " ok"; else echo " timed out ($got/$n)"; ok=0; fi
 done
+# ADR-020: devices then open their session on their other permitted slice (extraSessions in their
+# config, opened on demand by the UE container once every UE is up). Wait for those too.
+want2=0
+for s in $PLAN; do
+  cfg=$(echo "$s" | cut -d: -f1); n=$(echo "$s" | cut -d: -f2)
+  k=$(awk '/^extraSessions:/ {b=1; next} b && /^[^ #-]/ {b=0} b && /apn:/ {c++} END {print c+0}' "$REPO_ROOT/deployments/open5gs/ran/$cfg")
+  want2=$((want2 + n * k))
+done
+if [ "$want2" -gt 0 ]; then
+  printf "   waiting for %s second sessions " "$want2"
+  for _ in $(seq "$WAIT"); do
+    got2=$(docker exec "$UE" sh /etc/ueransim/ue-slice.sh sessions 2>/dev/null | grep -c ' second$')
+    [ "${got2:-0}" -ge "$want2" ] && break
+    printf "."; sleep 1
+  done
+  [ "${got2:-0}" -ge "$want2" ] && echo " ok" || { echo " timed out ($got2/$want2)"; ok=0; }
+fi
 elapsed=$(( $(date +%s) - t0 ))
 
 # One log per UE (ran/ue-entrypoint.sh runs a process per UE). Count only the UEs in this plan:
@@ -109,6 +128,7 @@ for s in $PLAN; do
   pool="${gw%.*.*}."
   printf "  %-6s interfaces     : %s / %s   (%s0.0/16)\n" "$name" "$(tuns "$pool")" "$n" "$pool"
 done
+echo "  second sessions       : $(docker exec "$UE" sh /etc/ueransim/ue-slice.sh sessions 2>/dev/null | grep -c ' second$') (eMBB/URLLC devices on their other permitted slice, ADR-020)"
 echo "  TUN allocation errors : $tunfail"
 echo "  all attached in       : ${elapsed}s"
 

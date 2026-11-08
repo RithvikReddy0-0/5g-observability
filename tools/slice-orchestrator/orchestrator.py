@@ -41,10 +41,12 @@ TWO MODES, ONE DECISION LOGIC
     * EXECUTE=1      : every admitted demand becomes a real UDP flow at the demanded bitrate
                        on a device session of the chosen slice, through that slice's gNB and
                        UPF; delivered throughput and loss are measured per flow.
-  Boundary in Open5GS mode: each device holds a PDU session on its home slice only, and a
-  slice's gNB serves only that slice (ADR-011). An admitted flow therefore runs on the
-  least-busy device of the CHOSEN slice — the requesting subscriber must still be permitted
-  on that slice, but the packets need not leave from that subscriber's own device.
+  Whose device carries the flow (ADR-020): eMBB and URLLC devices hold a PDU session on every
+  slice they are permitted on — their home slice first, then the others — so an admitted flow runs
+  on the REQUESTING subscriber's own session on the chosen slice. Only when that subscriber has no
+  session up on it (an IoT device, or a session that is down) does the flow fall back to the
+  least-busy device of the chosen slice; slice_flow_device_total{kind="own"|"other"} counts both.
+  Before ADR-020 every device had its home session only, and the fallback was the only path.
 
 DYNAMIC ALLOCATION (Phase 2b, ADR-016)
 --------------------------------------
@@ -597,21 +599,35 @@ def device_sessions(sn):
     return [(dev, ip) for dev, ip in found if ip.startswith(prefix)]
 
 
+def pick_device(supi, sessions, busy):
+    """(ip, "own"|"other"): the requesting subscriber's own session on this slice if it has one up,
+    otherwise the least-busy device of the slice. A UE's interfaces are named uesimtun + the last
+    four digits of its IMSI + a digit (ran/ue-entrypoint.sh), so the name says whose session it is;
+    the address pool says which slice. (The last digit follows setup order, not the session.)"""
+    tag = re.sub(r"\D", "", supi)[-4:]
+    own = [ip for dev, ip in sessions if dev[len("uesimtun"):len("uesimtun") + 4] == tag]
+    if own:
+        return own[0], "own"
+    return min(sessions, key=lambda d: (busy.get(d[1], 0), random.random()))[1], "other"
+
+
 def start_flow(flow):
-    """Pick the least-busy device on the chosen slice and launch the flow in the background.
+    """Launch the flow in the background on the subscriber's own session of the chosen slice, or
+    on the least-busy device of the slice if it has none (pick_device).
     Called with _lock held; the flow itself runs outside the lock."""
     sessions = device_sessions(flow["snssai"])
     if not sessions:
         flow["expires"] = 0          # nothing can carry it; release the capacity immediately
         bump("exec_failed", flow["snssai"], flow["cls"], "no_device_session")
         return {"started": False, "reason": "no device session up on this slice"}
-    ip = min(sessions, key=lambda d: (busy_devices.get(d[1], 0), random.random()))[1]
+    ip, kind = pick_device(flow["supi"], sessions, busy_devices)
+    bump("device_" + kind, flow["snssai"], flow["cls"])
     port = next(p for p in range(FLOW_PORT_FIRST, FLOW_PORT_FIRST + 300) if p not in _ports)
     _ports.add(port)
     busy_devices[ip] = busy_devices.get(ip, 0) + 1
-    flow.update({"device": ip, "port": port})
+    flow.update({"device": ip, "device_kind": kind, "port": port})
     threading.Thread(target=run_flow, args=(flow,), daemon=True).start()
-    return {"started": True, "device": ip, "seconds": FLOW_SECONDS, "id": flow["id"]}
+    return {"started": True, "device": ip, "device_kind": kind, "seconds": FLOW_SECONDS, "id": flow["id"]}
 
 
 def stop_flow(flow):
@@ -1075,8 +1091,11 @@ def metrics():
             "1 when the last measured-load query to Prometheus succeeded.",
             ["slice_measurement_ok %d" % (1 if _measured["ok"] else 0)])
 
-    adm, rej, done, failed, pre = [], [], [], [], []
+    adm, rej, done, failed, pre, devk = [], [], [], [], [], []
     for (event, sn, cls, reason), count in sorted(counters.items()):
+        if event.startswith("device_"):
+            devk.append('slice_flow_device_total{sst_sd="%s",traffic_class="%s",kind="%s"} %d'
+                        % (sn, cls, event[len("device_"):], count))
         if event == "preempted":
             pre.append('slice_preempted_total{sst_sd="%s",traffic_class="%s"} %d' % (sn, cls, count))
         if event == "completed":
@@ -1103,6 +1122,9 @@ def metrics():
             done)
         add("slice_flow_start_failed_total", "counter",
             "Admitted demands that could not be started (no device session on the slice).", failed)
+        add("slice_flow_device_total", "counter",
+            "Executed flows by whose device carried them: own = the requesting subscriber's own session "
+            "on the chosen slice (ADR-020), other = the least-busy device of the slice.", devk)
         recent = flow_results[-200:]
         rows = []
         for s in SLICES:

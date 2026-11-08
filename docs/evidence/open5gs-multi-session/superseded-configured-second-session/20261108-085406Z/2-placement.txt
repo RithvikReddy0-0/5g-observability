@@ -1,0 +1,12 @@
+== 2. placement — demands on the other slice run on the requester's own session
+  eMBB phone (imsi-...001)   control  -> URLLC  on 10.46.0.175   own = its own session
+  eMBB phone (imsi-...002)   control  -> URLLC  on 10.46.0.180   own = its own session
+  eMBB phone (imsi-...003)   control  -> URLLC  on 10.46.0.178   own = its own session
+  URLLC (standard) device (imsi-...024) video    -> eMBB   on 10.45.1.56    own = its own session
+  URLLC (standard) device (imsi-...025) video    -> eMBB   on 10.45.1.57    own = its own session
+  URLLC (standard) device (imsi-...026) video    -> eMBB   on 10.45.1.60    own = its own session
+  IoT device (imsi-...040)   control  -> REFUSED on -             control needs <=10ms; best permitted slice 3/334455 offers only 1000ms
+
+  slice_flow_device_total:
+    slice_flow_device_total{sst_sd="1/010203",traffic_class="video",kind="own"} 3
+    slice_flow_device_total{sst_sd="2/112233",traffic_class="control",kind="own"} 3

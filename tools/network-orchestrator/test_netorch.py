@@ -180,7 +180,19 @@ class Rollback(unittest.TestCase):
         self.o.datapath = lambda s: "ok"
         op = self.run_op("never")
         self.assertEqual(op.result, "done")
-        self.assertEqual([s["step"] for s in op.steps], ["upf", "data network", "gnb", "ues", "data path", "admit"])
+        self.assertEqual([s["step"] for s in op.steps],
+                         ["upf", "data network", "gnb", "ues", "data path", "second sessions", "admit"])
+        self.assertEqual(self.ue_ops, ["unpark", "establish", "sessions"])   # sessions: data-path sample
+
+    def test_second_sessions_short_is_a_warning_not_a_rollback(self):
+        # ADR-020: other slices' devices re-open their second session on the activated slice; if
+        # some do not, the slice itself is still up — warn, do not undo the activation.
+        self.o.datapath = lambda s: "ok"
+        self.o.ue_slice = lambda op, name="": self.ue_ops.append(op) or (
+            ["establish URLLC 20 17 6"] if op == "establish" else ["%s mMTC 70 70 5" % op])
+        op = self.run_op("never")
+        self.assertEqual(op.result, "done")
+        self.assertTrue(any("17 of 20" in w for w in op.warnings), op.warnings)
 
     def test_already_running_functions_are_not_stopped_on_rollback(self):
         self.o.running = lambda c: c == "o5gs-upf-mmtc"
@@ -188,6 +200,35 @@ class Rollback(unittest.TestCase):
         self.assertEqual(op.result, "rolled_back")
         stops = [c.split()[-1] for c in self.cmds if c.startswith("docker stop")]
         self.assertEqual(stops, ["o5gs-gnb-mmtc", "o5gs-dn-mmtc"], "the UPF was already running")
+
+
+class Deactivate(unittest.TestCase):
+    """ADR-020: the other slices' second sessions are released BEFORE the slice's UPF stops."""
+
+    def setUp(self):
+        self.o = o = load()
+        self.events = []
+        o.orch = lambda method, path, body=None: {}
+        o.core_sessions = lambda: {}
+
+        def sh(args, timeout=30, stdin=None):
+            self.events.append(" ".join(args[:3]))
+            return 0, ""
+        o.sh = sh
+
+        def ue_slice(op, name=""):
+            self.events.append("ue-slice " + op)
+            if op == "status":
+                return ["eMBB active 20 20", "URLLC active 10 10", "mMTC active 70 70"]
+            return {"park": ["park URLLC 10 0 3"], "release": ["release URLLC 0 2"]}[op]
+        o.ue_slice = ue_slice
+
+    def test_release_comes_after_parking_and_before_the_upf_stops(self):
+        op = self.o.Op("deactivate", "URLLC", "test")
+        self.o.deactivate(op)
+        names = [e for e in self.events if e.startswith(("ue-slice park", "ue-slice release", "docker stop"))]
+        self.assertEqual(names[:3], ["ue-slice park", "ue-slice release", "docker stop -t"])
+        self.assertIn("second sessions", [s["step"] for s in op.steps])
 
 
 class Scale(unittest.TestCase):

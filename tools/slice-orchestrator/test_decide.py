@@ -466,5 +466,31 @@ class Planning(unittest.TestCase):
         self.assertAlmostEqual(d["video"], 30 * 8.0 * 20 / 300)            # 16 Mbps on average
 
 
+
+class OwnDevice(unittest.TestCase):
+    """ADR-020: a flow runs on the requesting subscriber's own session on the chosen slice."""
+
+    def setUp(self):
+        self.o = load({"CORE": "open5gs"})
+        # URLLC pool: two URLLC devices' home sessions and an eMBB device's second session
+        self.urllc = [("uesimtun00210", "10.46.0.23"), ("uesimtun00240", "10.46.0.28"),
+                      ("uesimtun00051", "10.46.0.61")]
+
+    def test_the_requesters_own_session_is_used(self):
+        self.assertEqual(self.o.pick_device("imsi-208930000000024", self.urllc, {}), ("10.46.0.28", "own"))
+
+    def test_a_secondary_session_counts_as_own(self):
+        # eMBB device 005 asks for URLLC: its own second session (index 1) carries it
+        self.assertEqual(self.o.pick_device("imsi-208930000000005", self.urllc, {}), ("10.46.0.61", "own"))
+
+    def test_own_wins_even_when_busier(self):
+        busy = {"10.46.0.28": 5}
+        self.assertEqual(self.o.pick_device("208930000000024", self.urllc, busy)[1], "own")
+
+    def test_without_an_own_session_the_least_busy_device_is_used(self):
+        busy = {"10.46.0.23": 2, "10.46.0.61": 1}
+        self.assertEqual(self.o.pick_device("imsi-208930000000031", self.urllc, busy), ("10.46.0.28", "other"))
+
+
 if __name__ == "__main__":
     sys.exit(0 if unittest.main(exit=False, verbosity=2).result.wasSuccessful() else 1)

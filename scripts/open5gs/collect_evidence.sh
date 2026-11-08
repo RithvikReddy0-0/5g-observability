@@ -69,9 +69,11 @@ step 4 "UE registration and PDU sessions (UE side, ground truth)"
   docker exec o5gs-ue ip -4 -o addr show | awk '/uesimtun/ {print $2, $4}' | sort -V
   echo
   echo "interfaces total: $(docker exec o5gs-ue ip -4 -o addr show | grep -c uesimtun)"
-  echo "  eMBB  (10.45/16): $(docker exec o5gs-ue ip -4 -o addr show | grep -c 'uesimtun.* 10[.]45[.]')"
-  echo "  URLLC (10.46/16): $(docker exec o5gs-ue ip -4 -o addr show | grep -c 'uesimtun.* 10[.]46[.]')"
-  echo "  mMTC  (10.47/16): $(docker exec o5gs-ue ip -4 -o addr show | grep -c 'uesimtun.* 10[.]47[.]')"
+  sess=$(docker exec o5gs-ue sh /etc/ueransim/ue-slice.sh sessions 2>/dev/null)   # PSI 1 = home (ADR-020)
+  for p in "eMBB 10.45" "URLLC 10.46" "mMTC 10.47"; do
+    set -- $p
+    echo "  $1 ($2/16): $(echo "$sess" | awk -v p="$2." '$5 == "home" && index($4, p) == 1' | wc -l) home, $(echo "$sess" | awk -v p="$2." '$5 == "second" && index($4, p) == 1' | wc -l) second sessions"
+  done
   echo
   echo "--- per-UE session lines from the UE logs (one log per UE process) ---"
   docker exec o5gs-ue sh -c 'cat /tmp/ue-2089*.log' | grep 'TUN interface' | sed -E 's/^\[[^]]+\] //'
