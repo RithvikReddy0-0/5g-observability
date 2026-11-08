@@ -1,0 +1,62 @@
+# downlink (vethde2bc90)
+qdisc htb 1: root refcnt 13 r2q 10 default 0x1 direct_packets_stat 1 direct_qlen 1000
+ Sent 4469371448 bytes 3081095 pkt (dropped 1120, overlimits 1325435 requeues 0) 
+ backlog 0b 0p requeues 0
+qdisc drr 2: parent 1:1 
+ Sent 4469371356 bytes 3081094 pkt (dropped 1120, overlimits 0 requeues 0) 
+ backlog 0b 0p requeues 0
+qdisc pfifo 201: parent 2:1 limit 256p
+ Sent 2442722 bytes 32031 pkt (dropped 0, overlimits 0 requeues 0) 
+ backlog 0b 0p requeues 0
+qdisc fq_codel 205: parent 2:5 limit 10240p flows 1024 quantum 1514 target 5ms interval 100ms memory_limit 32Mb ecn drop_batch 64 
+ Sent 590976 bytes 3888 pkt (dropped 0, overlimits 0 requeues 0) 
+ backlog 0b 0p requeues 0
+  maxpacket 152 drop_overlimit 0 new_flow_count 3888 ecn_mark 0
+  new_flows_len 1 old_flows_len 0
+qdisc pfifo 203: parent 2:3 limit 64p
+ Sent 61712 bytes 406 pkt (dropped 0, overlimits 0 requeues 0) 
+ backlog 0b 0p requeues 0
+qdisc pfifo 202: parent 2:2 limit 64p
+ Sent 26448 bytes 174 pkt (dropped 0, overlimits 0 requeues 0) 
+ backlog 0b 0p requeues 0
+qdisc fq_codel 204: parent 2:4 limit 10240p flows 1024 quantum 1514 target 5ms interval 100ms memory_limit 32Mb ecn drop_batch 64 
+ Sent 4466169017 bytes 3043971 pkt (dropped 1120, overlimits 0 requeues 0) 
+ backlog 0b 0p requeues 0
+  maxpacket 1468 drop_overlimit 0 new_flow_count 470244 ecn_mark 0
+  new_flows_len 1 old_flows_len 14
+qdisc fq_codel 206: parent 2:6 limit 10240p flows 1024 quantum 1514 target 5ms interval 100ms memory_limit 32Mb ecn drop_batch 64 
+ Sent 80481 bytes 624 pkt (dropped 0, overlimits 0 requeues 0) 
+ backlog 0b 0p requeues 0
+  maxpacket 491 drop_overlimit 0 new_flow_count 125 ecn_mark 0
+  new_flows_len 1 old_flows_len 0
+# uplink (UE eth0)
+qdisc htb 1: root refcnt 13 r2q 10 default 0x1 direct_packets_stat 0 direct_qlen 1000
+ Sent 155850679 bytes 1260747 pkt (dropped 1, overlimits 0 requeues 0) 
+ backlog 0b 0p requeues 0
+qdisc drr 2: parent 1:1 
+ Sent 155850679 bytes 1260747 pkt (dropped 1, overlimits 0 requeues 0) 
+ backlog 0b 0p requeues 0
+qdisc pfifo 201: parent 2:1 limit 256p
+ Sent 1520481 bytes 22454 pkt (dropped 0, overlimits 0 requeues 0) 
+ backlog 0b 0p requeues 0
+qdisc fq_codel 205: parent 2:5 limit 10240p flows 1024 quantum 1514 target 5ms interval 100ms memory_limit 32Mb ecn drop_batch 64 
+ Sent 755912 bytes 5444 pkt (dropped 0, overlimits 0 requeues 0) 
+ backlog 0b 0p requeues 0
+  maxpacket 152 drop_overlimit 0 new_flow_count 5440 ecn_mark 0
+  new_flows_len 1 old_flows_len 0
+qdisc pfifo 203: parent 2:3 limit 64p
+ Sent 13126192 bytes 82059 pkt (dropped 0, overlimits 0 requeues 0) 
+ backlog 0b 0p requeues 0
+qdisc pfifo 202: parent 2:2 limit 64p
+ Sent 5625328 bytes 35167 pkt (dropped 0, overlimits 0 requeues 0) 
+ backlog 0b 0p requeues 0
+qdisc fq_codel 204: parent 2:4 limit 10240p flows 1024 quantum 1514 target 5ms interval 100ms memory_limit 32Mb ecn drop_batch 64 
+ Sent 134534259 bytes 1113912 pkt (dropped 0, overlimits 0 requeues 0) 
+ backlog 0b 0p requeues 0
+  maxpacket 450 drop_overlimit 0 new_flow_count 733978 ecn_mark 0
+  new_flows_len 1 old_flows_len 15
+qdisc fq_codel 206: parent 2:6 limit 10240p flows 1024 quantum 1514 target 5ms interval 100ms memory_limit 32Mb ecn drop_batch 64 
+ Sent 288507 bytes 1711 pkt (dropped 0, overlimits 0 requeues 0) 
+ backlog 0b 0p requeues 0
+  maxpacket 1362 drop_overlimit 0 new_flow_count 966 ecn_mark 0
+  new_flows_len 1 old_flows_len 4

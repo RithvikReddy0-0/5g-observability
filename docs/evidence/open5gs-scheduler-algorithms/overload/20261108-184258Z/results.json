@@ -1,0 +1,1168 @@
+{
+  "timestamp": "20261108-184258Z",
+  "seconds": 60,
+  "parts": "D",
+  "modes_d": [
+    "off",
+    "fifo",
+    "sliced",
+    "prio",
+    "drr",
+    "hfsc"
+  ],
+  "scheduler_defaults": {
+    "mode": "sliced",
+    "cell_dl_mbps": 250.0,
+    "cell_ul_mbps": 100.0,
+    "shares": {
+      "eMBB": 60.0,
+      "URLLC": 10.0,
+      "mMTC": 5.0
+    }
+  },
+  "A": [],
+  "B": [],
+  "C": [],
+  "D": [
+    {
+      "label": "round 1 off",
+      "mode": "off",
+      "cell_mbps": {
+        "downlink": 100.0,
+        "uplink": 100.0
+      },
+      "shares": {
+        "eMBB": 60.0,
+        "URLLC": 10.0,
+        "mMTC": 5.0
+      },
+      "seconds": 60,
+      "started": "2026-11-08T18:43:06Z",
+      "restored_before": false,
+      "radio_link_failures": 0,
+      "ues_without_data_path_after": 0,
+      "probes": {
+        "URLLC critical": {
+          "sent": 2700,
+          "received": 2700,
+          "loss_percent": 0.0,
+          "p50": 3.07,
+          "p95": 36.4,
+          "p99": 58.41,
+          "max": 98.9,
+          "mean": 9.142
+        },
+        "URLLC standard": {
+          "sent": 2700,
+          "received": 2700,
+          "loss_percent": 0.0,
+          "p50": 3.32,
+          "p95": 34.4,
+          "p99": 58.508,
+          "max": 93.7,
+          "mean": 9.295
+        },
+        "mMTC": {
+          "sent": 270,
+          "received": 270,
+          "loss_percent": 0.0,
+          "p50": 3.35,
+          "p95": 34.61,
+          "p99": 50.816,
+          "max": 89.9,
+          "mean": 9.013
+        },
+        "eMBB unloaded": {
+          "sent": 540,
+          "received": 540,
+          "loss_percent": 0.0,
+          "p50": 650.0,
+          "p95": 4400.6,
+          "p99": 4634.61,
+          "max": 4777.0,
+          "mean": 1563.518
+        }
+      },
+      "load": {
+        "eMBB": {
+          "flows": 5,
+          "offered_mbps": 150.0,
+          "delivered_mbps": 149.32,
+          "loss_percent_mean": 0.45
+        }
+      },
+      "classes": {}
+    },
+    {
+      "label": "round 1 fifo",
+      "mode": "fifo",
+      "cell_mbps": {
+        "downlink": 100.0,
+        "uplink": 100.0
+      },
+      "shares": {
+        "eMBB": 60.0,
+        "URLLC": 10.0,
+        "mMTC": 5.0
+      },
+      "seconds": 60,
+      "started": "2026-11-08T18:44:19Z",
+      "restored_before": false,
+      "radio_link_failures": 98,
+      "ues_without_data_path_after": 126,
+      "probes": {
+        "URLLC critical": {
+          "sent": 2700,
+          "received": 963,
+          "loss_percent": 64.33,
+          "p50": 104.0,
+          "p95": 107.0,
+          "p99": 116.38,
+          "max": 147.0,
+          "mean": 104.019
+        },
+        "URLLC standard": {
+          "sent": 2700,
+          "received": 1826,
+          "loss_percent": 32.37,
+          "p50": 104.0,
+          "p95": 123.0,
+          "p99": 144.5,
+          "max": 174.0,
+          "mean": 90.098
+        },
+        "mMTC": {
+          "sent": 270,
+          "received": 162,
+          "loss_percent": 40.0,
+          "p50": 104.0,
+          "p95": 115.9,
+          "p99": 129.39,
+          "max": 132.0,
+          "mean": 93.871
+        },
+        "eMBB unloaded": {
+          "sent": 540,
+          "received": 0,
+          "loss_percent": 100.0,
+          "p50": null,
+          "p95": null,
+          "p99": null,
+          "max": null,
+          "mean": null
+        }
+      },
+      "load": {
+        "eMBB": {
+          "flows": 5,
+          "offered_mbps": 150.0,
+          "delivered_mbps": 46.22,
+          "loss_percent_mean": 69.18
+        }
+      },
+      "classes": {
+        "downlink all": {
+          "mbps": 80.01,
+          "drops": 350361
+        },
+        "uplink all": {
+          "mbps": 0.301,
+          "drops": 0
+        }
+      }
+    },
+    {
+      "label": "round 1 sliced",
+      "mode": "sliced",
+      "cell_mbps": {
+        "downlink": 100.0,
+        "uplink": 100.0
+      },
+      "shares": {
+        "eMBB": 60.0,
+        "URLLC": 10.0,
+        "mMTC": 5.0
+      },
+      "seconds": 60,
+      "started": "2026-11-08T18:49:04Z",
+      "restored_before": true,
+      "radio_link_failures": 0,
+      "ues_without_data_path_after": 0,
+      "probes": {
+        "URLLC critical": {
+          "sent": 2700,
+          "received": 2700,
+          "loss_percent": 0.0,
+          "p50": 17.9,
+          "p95": 72.205,
+          "p99": 105.02,
+          "max": 177.0,
+          "mean": 24.591
+        },
+        "URLLC standard": {
+          "sent": 2700,
+          "received": 2700,
+          "loss_percent": 0.0,
+          "p50": 17.6,
+          "p95": 72.51,
+          "p99": 108.01,
+          "max": 176.0,
+          "mean": 24.691
+        },
+        "mMTC": {
+          "sent": 270,
+          "received": 270,
+          "loss_percent": 0.0,
+          "p50": 16.85,
+          "p95": 71.985,
+          "p99": 85.703,
+          "max": 129.0,
+          "mean": 22.768
+        },
+        "eMBB unloaded": {
+          "sent": 540,
+          "received": 538,
+          "loss_percent": 0.37,
+          "p50": 46350.5,
+          "p95": 62899.05,
+          "p99": 64180.63,
+          "max": 64619.0,
+          "mean": 42986.268
+        }
+      },
+      "load": {
+        "eMBB": {
+          "flows": 5,
+          "offered_mbps": 150.0,
+          "delivered_mbps": 96.03,
+          "loss_percent_mean": 35.98
+        }
+      },
+      "classes": {
+        "downlink signalling": {
+          "mbps": 0.064,
+          "drops": 0
+        },
+        "downlink other": {
+          "mbps": 0.003,
+          "drops": 0
+        },
+        "downlink eMBB": {
+          "mbps": 60.635,
+          "drops": 96432
+        },
+        "downlink URLLC arp1": {
+          "mbps": 0.024,
+          "drops": 0
+        },
+        "downlink URLLC arp2": {
+          "mbps": 0.025,
+          "drops": 0
+        },
+        "downlink mMTC": {
+          "mbps": 0.022,
+          "drops": 0
+        },
+        "uplink signalling": {
+          "mbps": 0.052,
+          "drops": 0
+        },
+        "uplink other": {
+          "mbps": 0.006,
+          "drops": 0
+        },
+        "uplink eMBB": {
+          "mbps": 0.012,
+          "drops": 0
+        },
+        "uplink URLLC arp1": {
+          "mbps": 0.216,
+          "drops": 0
+        },
+        "uplink URLLC arp2": {
+          "mbps": 0.473,
+          "drops": 0
+        },
+        "uplink mMTC": {
+          "mbps": 0.028,
+          "drops": 0
+        }
+      }
+    },
+    {
+      "label": "round 1 prio",
+      "mode": "prio",
+      "cell_mbps": {
+        "downlink": 100.0,
+        "uplink": 100.0
+      },
+      "shares": {
+        "eMBB": 60.0,
+        "URLLC": 10.0,
+        "mMTC": 5.0
+      },
+      "seconds": 60,
+      "started": "2026-11-08T18:51:38Z",
+      "restored_before": false,
+      "radio_link_failures": 88,
+      "ues_without_data_path_after": 110,
+      "probes": {
+        "URLLC critical": {
+          "sent": 2700,
+          "received": 2700,
+          "loss_percent": 0.0,
+          "p50": 2.44,
+          "p95": 6.715,
+          "p99": 18.602,
+          "max": 99.3,
+          "mean": 3.382
+        },
+        "URLLC standard": {
+          "sent": 2700,
+          "received": 2700,
+          "loss_percent": 0.0,
+          "p50": 2.425,
+          "p95": 7.152,
+          "p99": 20.006,
+          "max": 106.0,
+          "mean": 3.376
+        },
+        "mMTC": {
+          "sent": 270,
+          "received": 0,
+          "loss_percent": 100.0,
+          "p50": null,
+          "p95": null,
+          "p99": null,
+          "max": null,
+          "mean": null
+        },
+        "eMBB unloaded": {
+          "sent": 540,
+          "received": 304,
+          "loss_percent": 43.7,
+          "p50": 3.815,
+          "p95": 43.42,
+          "p99": 179.43,
+          "max": 202.0,
+          "mean": 11.371
+        }
+      },
+      "load": {
+        "eMBB": {
+          "flows": 5,
+          "offered_mbps": 150.0,
+          "delivered_mbps": 49.79,
+          "loss_percent_mean": 66.8
+        }
+      },
+      "classes": {
+        "downlink signalling": {
+          "mbps": 0.206,
+          "drops": 0
+        },
+        "downlink URLLC arp1": {
+          "mbps": 0.052,
+          "drops": 0
+        },
+        "downlink URLLC arp2": {
+          "mbps": 0.053,
+          "drops": 0
+        },
+        "downlink eMBB": {
+          "mbps": 58.93,
+          "drops": 204341
+        },
+        "downlink mMTC": {
+          "mbps": 0.002,
+          "drops": 0
+        },
+        "downlink other": {
+          "mbps": 0.003,
+          "drops": 1
+        },
+        "uplink signalling": {
+          "mbps": 0.045,
+          "drops": 0
+        },
+        "uplink URLLC arp1": {
+          "mbps": 0.24,
+          "drops": 0
+        },
+        "uplink URLLC arp2": {
+          "mbps": 0.491,
+          "drops": 0
+        },
+        "uplink eMBB": {
+          "mbps": 0.015,
+          "drops": 0
+        },
+        "uplink mMTC": {
+          "mbps": 0.018,
+          "drops": 0
+        },
+        "uplink other": {
+          "mbps": 0.005,
+          "drops": 0
+        }
+      }
+    },
+    {
+      "label": "round 1 drr",
+      "mode": "drr",
+      "cell_mbps": {
+        "downlink": 100.0,
+        "uplink": 100.0
+      },
+      "shares": {
+        "eMBB": 60.0,
+        "URLLC": 10.0,
+        "mMTC": 5.0
+      },
+      "seconds": 60,
+      "started": "2026-11-08T18:54:00Z",
+      "restored_before": true,
+      "radio_link_failures": 0,
+      "ues_without_data_path_after": 0,
+      "probes": {
+        "URLLC critical": {
+          "sent": 2700,
+          "received": 2700,
+          "loss_percent": 0.0,
+          "p50": 4.2,
+          "p95": 7.761,
+          "p99": 13.9,
+          "max": 41.0,
+          "mean": 4.424
+        },
+        "URLLC standard": {
+          "sent": 2700,
+          "received": 2700,
+          "loss_percent": 0.0,
+          "p50": 4.16,
+          "p95": 7.63,
+          "p99": 13.703,
+          "max": 33.2,
+          "mean": 4.394
+        },
+        "mMTC": {
+          "sent": 270,
+          "received": 270,
+          "loss_percent": 0.0,
+          "p50": 4.21,
+          "p95": 8.424,
+          "p99": 11.555,
+          "max": 28.6,
+          "mean": 4.47
+        },
+        "eMBB unloaded": {
+          "sent": 540,
+          "received": 540,
+          "loss_percent": 0.0,
+          "p50": 3.385,
+          "p95": 18.635,
+          "p99": 57.464,
+          "max": 102.0,
+          "mean": 5.885
+        }
+      },
+      "load": {
+        "eMBB": {
+          "flows": 5,
+          "offered_mbps": 150.0,
+          "delivered_mbps": 93.4,
+          "loss_percent_mean": 37.73
+        }
+      },
+      "classes": {
+        "downlink signalling": {
+          "mbps": 0.065,
+          "drops": 0
+        },
+        "downlink URLLC arp1": {
+          "mbps": 0.051,
+          "drops": 0
+        },
+        "downlink URLLC arp2": {
+          "mbps": 0.052,
+          "drops": 0
+        },
+        "downlink eMBB": {
+          "mbps": 92.474,
+          "drops": 353784
+        },
+        "downlink mMTC": {
+          "mbps": 0.026,
+          "drops": 0
+        },
+        "downlink other": {
+          "mbps": 0.003,
+          "drops": 0
+        },
+        "uplink signalling": {
+          "mbps": 0.052,
+          "drops": 0
+        },
+        "uplink URLLC arp1": {
+          "mbps": 0.243,
+          "drops": 0
+        },
+        "uplink URLLC arp2": {
+          "mbps": 0.501,
+          "drops": 0
+        },
+        "uplink eMBB": {
+          "mbps": 0.016,
+          "drops": 0
+        },
+        "uplink mMTC": {
+          "mbps": 0.032,
+          "drops": 0
+        },
+        "uplink other": {
+          "mbps": 0.007,
+          "drops": 0
+        }
+      }
+    },
+    {
+      "label": "round 1 hfsc",
+      "mode": "hfsc",
+      "cell_mbps": {
+        "downlink": 100.0,
+        "uplink": 100.0
+      },
+      "shares": {
+        "eMBB": 60.0,
+        "URLLC": 10.0,
+        "mMTC": 5.0
+      },
+      "seconds": 60,
+      "started": "2026-11-08T18:55:14Z",
+      "restored_before": false,
+      "radio_link_failures": 0,
+      "ues_without_data_path_after": 0,
+      "probes": {
+        "URLLC critical": {
+          "sent": 2700,
+          "received": 2700,
+          "loss_percent": 0.0,
+          "p50": 1.89,
+          "p95": 7.025,
+          "p99": 21.201,
+          "max": 85.3,
+          "mean": 2.824
+        },
+        "URLLC standard": {
+          "sent": 2700,
+          "received": 2700,
+          "loss_percent": 0.0,
+          "p50": 1.915,
+          "p95": 7.778,
+          "p99": 21.802,
+          "max": 68.7,
+          "mean": 2.92
+        },
+        "mMTC": {
+          "sent": 270,
+          "received": 270,
+          "loss_percent": 0.0,
+          "p50": 1.985,
+          "p95": 8.654,
+          "p99": 30.606,
+          "max": 55.4,
+          "mean": 3.311
+        },
+        "eMBB unloaded": {
+          "sent": 540,
+          "received": 540,
+          "loss_percent": 0.0,
+          "p50": 2.855,
+          "p95": 80.455,
+          "p99": 263.81,
+          "max": 327.0,
+          "mean": 13.233
+        }
+      },
+      "load": {
+        "eMBB": {
+          "flows": 5,
+          "offered_mbps": 150.0,
+          "delivered_mbps": 93.3,
+          "loss_percent_mean": 37.8
+        }
+      },
+      "classes": {}
+    },
+    {
+      "label": "round 2 hfsc",
+      "mode": "hfsc",
+      "cell_mbps": {
+        "downlink": 100.0,
+        "uplink": 100.0
+      },
+      "shares": {
+        "eMBB": 60.0,
+        "URLLC": 10.0,
+        "mMTC": 5.0
+      },
+      "seconds": 60,
+      "started": "2026-11-08T18:56:28Z",
+      "restored_before": false,
+      "radio_link_failures": 0,
+      "ues_without_data_path_after": 0,
+      "probes": {
+        "URLLC critical": {
+          "sent": 2700,
+          "received": 2700,
+          "loss_percent": 0.0,
+          "p50": 1.91,
+          "p95": 4.481,
+          "p99": 10.006,
+          "max": 70.6,
+          "mean": 2.371
+        },
+        "URLLC standard": {
+          "sent": 2700,
+          "received": 2700,
+          "loss_percent": 0.0,
+          "p50": 1.9,
+          "p95": 4.431,
+          "p99": 9.802,
+          "max": 54.6,
+          "mean": 2.349
+        },
+        "mMTC": {
+          "sent": 270,
+          "received": 270,
+          "loss_percent": 0.0,
+          "p50": 1.98,
+          "p95": 5.442,
+          "p99": 7.233,
+          "max": 13.8,
+          "mean": 2.429
+        },
+        "eMBB unloaded": {
+          "sent": 540,
+          "received": 540,
+          "loss_percent": 0.0,
+          "p50": 3.005,
+          "p95": 9.624,
+          "p99": 35.486,
+          "max": 123.0,
+          "mean": 4.509
+        }
+      },
+      "load": {
+        "eMBB": {
+          "flows": 5,
+          "offered_mbps": 150.0,
+          "delivered_mbps": 93.38,
+          "loss_percent_mean": 37.75
+        }
+      },
+      "classes": {}
+    },
+    {
+      "label": "round 2 drr",
+      "mode": "drr",
+      "cell_mbps": {
+        "downlink": 100.0,
+        "uplink": 100.0
+      },
+      "shares": {
+        "eMBB": 60.0,
+        "URLLC": 10.0,
+        "mMTC": 5.0
+      },
+      "seconds": 60,
+      "started": "2026-11-08T18:57:41Z",
+      "restored_before": false,
+      "radio_link_failures": 0,
+      "ues_without_data_path_after": 0,
+      "probes": {
+        "URLLC critical": {
+          "sent": 2700,
+          "received": 2700,
+          "loss_percent": 0.0,
+          "p50": 3.97,
+          "p95": 6.9,
+          "p99": 14.701,
+          "max": 68.0,
+          "mean": 4.304
+        },
+        "URLLC standard": {
+          "sent": 2700,
+          "received": 2700,
+          "loss_percent": 0.0,
+          "p50": 3.99,
+          "p95": 6.711,
+          "p99": 13.902,
+          "max": 75.0,
+          "mean": 4.282
+        },
+        "mMTC": {
+          "sent": 270,
+          "received": 270,
+          "loss_percent": 0.0,
+          "p50": 4.105,
+          "p95": 8.349,
+          "p99": 15.024,
+          "max": 94.1,
+          "mean": 4.747
+        },
+        "eMBB unloaded": {
+          "sent": 540,
+          "received": 540,
+          "loss_percent": 0.0,
+          "p50": 3.06,
+          "p95": 13.2,
+          "p99": 122.88,
+          "max": 198.0,
+          "mean": 6.886
+        }
+      },
+      "load": {
+        "eMBB": {
+          "flows": 5,
+          "offered_mbps": 150.0,
+          "delivered_mbps": 93.39,
+          "loss_percent_mean": 37.74
+        }
+      },
+      "classes": {
+        "downlink signalling": {
+          "mbps": 0.063,
+          "drops": 0
+        },
+        "downlink URLLC arp1": {
+          "mbps": 0.051,
+          "drops": 0
+        },
+        "downlink URLLC arp2": {
+          "mbps": 0.052,
+          "drops": 0
+        },
+        "downlink eMBB": {
+          "mbps": 92.456,
+          "drops": 353863
+        },
+        "downlink mMTC": {
+          "mbps": 0.028,
+          "drops": 0
+        },
+        "downlink other": {
+          "mbps": 0.003,
+          "drops": 0
+        },
+        "uplink signalling": {
+          "mbps": 0.052,
+          "drops": 0
+        },
+        "uplink URLLC arp1": {
+          "mbps": 0.243,
+          "drops": 0
+        },
+        "uplink URLLC arp2": {
+          "mbps": 0.501,
+          "drops": 0
+        },
+        "uplink eMBB": {
+          "mbps": 0.017,
+          "drops": 0
+        },
+        "uplink mMTC": {
+          "mbps": 0.034,
+          "drops": 0
+        },
+        "uplink other": {
+          "mbps": 0.006,
+          "drops": 0
+        }
+      }
+    },
+    {
+      "label": "round 2 prio",
+      "mode": "prio",
+      "cell_mbps": {
+        "downlink": 100.0,
+        "uplink": 100.0
+      },
+      "shares": {
+        "eMBB": 60.0,
+        "URLLC": 10.0,
+        "mMTC": 5.0
+      },
+      "seconds": 60,
+      "started": "2026-11-08T18:58:54Z",
+      "restored_before": false,
+      "radio_link_failures": 180,
+      "ues_without_data_path_after": 130,
+      "probes": {
+        "URLLC critical": {
+          "sent": 2700,
+          "received": 140,
+          "loss_percent": 94.81,
+          "p50": 2.015,
+          "p95": 11.63,
+          "p99": 23.954,
+          "max": 29.0,
+          "mean": 3.531
+        },
+        "URLLC standard": {
+          "sent": 2700,
+          "received": 138,
+          "loss_percent": 94.89,
+          "p50": 2.065,
+          "p95": 11.09,
+          "p99": 21.584,
+          "max": 36.8,
+          "mean": 3.727
+        },
+        "mMTC": {
+          "sent": 270,
+          "received": 0,
+          "loss_percent": 100.0,
+          "p50": null,
+          "p95": null,
+          "p99": null,
+          "max": null,
+          "mean": null
+        },
+        "eMBB unloaded": {
+          "sent": 540,
+          "received": 100,
+          "loss_percent": 81.48,
+          "p50": 3.44,
+          "p95": 46.83,
+          "p99": 100.15,
+          "max": 115.0,
+          "mean": 10.239
+        }
+      },
+      "load": {
+        "eMBB": {
+          "flows": 5,
+          "offered_mbps": 150.0,
+          "delivered_mbps": 68.92,
+          "loss_percent_mean": 54.06
+        }
+      },
+      "classes": {
+        "downlink signalling": {
+          "mbps": 0.188,
+          "drops": 0
+        },
+        "downlink URLLC arp1": {
+          "mbps": 0.003,
+          "drops": 0
+        },
+        "downlink URLLC arp2": {
+          "mbps": 0.003,
+          "drops": 0
+        },
+        "downlink eMBB": {
+          "mbps": 64.426,
+          "drops": 257742
+        },
+        "downlink mMTC": {
+          "mbps": 0.003,
+          "drops": 0
+        },
+        "downlink other": {
+          "mbps": 0.003,
+          "drops": 3
+        },
+        "uplink signalling": {
+          "mbps": 0.049,
+          "drops": 0
+        },
+        "uplink URLLC arp1": {
+          "mbps": 0.064,
+          "drops": 0
+        },
+        "uplink URLLC arp2": {
+          "mbps": 0.137,
+          "drops": 0
+        },
+        "uplink eMBB": {
+          "mbps": 0.005,
+          "drops": 0
+        },
+        "uplink mMTC": {
+          "mbps": 0.011,
+          "drops": 0
+        },
+        "uplink other": {
+          "mbps": 0.003,
+          "drops": 0
+        }
+      }
+    },
+    {
+      "label": "round 2 sliced",
+      "mode": "sliced",
+      "cell_mbps": {
+        "downlink": 100.0,
+        "uplink": 100.0
+      },
+      "shares": {
+        "eMBB": 60.0,
+        "URLLC": 10.0,
+        "mMTC": 5.0
+      },
+      "seconds": 60,
+      "started": "2026-11-08T19:01:45Z",
+      "restored_before": true,
+      "radio_link_failures": 0,
+      "ues_without_data_path_after": 0,
+      "probes": {
+        "URLLC critical": {
+          "sent": 2700,
+          "received": 2700,
+          "loss_percent": 0.0,
+          "p50": 1.82,
+          "p95": 3.021,
+          "p99": 5.54,
+          "max": 11.9,
+          "mean": 1.979
+        },
+        "URLLC standard": {
+          "sent": 2700,
+          "received": 2700,
+          "loss_percent": 0.0,
+          "p50": 1.82,
+          "p95": 3.17,
+          "p99": 5.8,
+          "max": 16.3,
+          "mean": 1.995
+        },
+        "mMTC": {
+          "sent": 270,
+          "received": 270,
+          "loss_percent": 0.0,
+          "p50": 1.875,
+          "p95": 3.494,
+          "p99": 5.255,
+          "max": 6.97,
+          "mean": 2.036
+        },
+        "eMBB unloaded": {
+          "sent": 540,
+          "received": 540,
+          "loss_percent": 0.0,
+          "p50": 2.775,
+          "p95": 5.693,
+          "p99": 9.516,
+          "max": 15.6,
+          "mean": 3.241
+        }
+      },
+      "load": {
+        "eMBB": {
+          "flows": 5,
+          "offered_mbps": 150.0,
+          "delivered_mbps": 93.08,
+          "loss_percent_mean": 37.95
+        }
+      },
+      "classes": {
+        "downlink signalling": {
+          "mbps": 0.063,
+          "drops": 0
+        },
+        "downlink other": {
+          "mbps": 0.003,
+          "drops": 0
+        },
+        "downlink eMBB": {
+          "mbps": 92.124,
+          "drops": 306557
+        },
+        "downlink URLLC arp1": {
+          "mbps": 0.051,
+          "drops": 0
+        },
+        "downlink URLLC arp2": {
+          "mbps": 0.052,
+          "drops": 0
+        },
+        "downlink mMTC": {
+          "mbps": 0.026,
+          "drops": 0
+        },
+        "uplink signalling": {
+          "mbps": 0.052,
+          "drops": 0
+        },
+        "uplink other": {
+          "mbps": 0.008,
+          "drops": 0
+        },
+        "uplink eMBB": {
+          "mbps": 0.016,
+          "drops": 0
+        },
+        "uplink URLLC arp1": {
+          "mbps": 0.243,
+          "drops": 0
+        },
+        "uplink URLLC arp2": {
+          "mbps": 0.499,
+          "drops": 0
+        },
+        "uplink mMTC": {
+          "mbps": 0.032,
+          "drops": 0
+        }
+      }
+    },
+    {
+      "label": "round 2 fifo",
+      "mode": "fifo",
+      "cell_mbps": {
+        "downlink": 100.0,
+        "uplink": 100.0
+      },
+      "shares": {
+        "eMBB": 60.0,
+        "URLLC": 10.0,
+        "mMTC": 5.0
+      },
+      "seconds": 60,
+      "started": "2026-11-08T19:02:57Z",
+      "restored_before": false,
+      "radio_link_failures": 97,
+      "ues_without_data_path_after": 124,
+      "probes": {
+        "URLLC critical": {
+          "sent": 2700,
+          "received": 2425,
+          "loss_percent": 10.19,
+          "p50": 104.0,
+          "p95": 105.0,
+          "p99": 106.0,
+          "max": 110.0,
+          "mean": 95.667
+        },
+        "URLLC standard": {
+          "sent": 2700,
+          "received": 137,
+          "loss_percent": 94.93,
+          "p50": 104.0,
+          "p95": 105.0,
+          "p99": 106.64,
+          "max": 108.0,
+          "mean": 103.436
+        },
+        "mMTC": {
+          "sent": 270,
+          "received": 240,
+          "loss_percent": 11.11,
+          "p50": 104.0,
+          "p95": 105.0,
+          "p99": 106.0,
+          "max": 108.0,
+          "mean": 103.958
+        },
+        "eMBB unloaded": {
+          "sent": 540,
+          "received": 175,
+          "loss_percent": 67.59,
+          "p50": 104.0,
+          "p95": 107.0,
+          "p99": 108.0,
+          "max": 109.0,
+          "mean": 104.554
+        }
+      },
+      "load": {
+        "eMBB": {
+          "flows": 5,
+          "offered_mbps": 150.0,
+          "delivered_mbps": 61.52,
+          "loss_percent_mean": 58.99
+        }
+      },
+      "classes": {
+        "downlink all": {
+          "mbps": 84.982,
+          "drops": 360290
+        },
+        "uplink all": {
+          "mbps": 0.309,
+          "drops": 0
+        }
+      }
+    },
+    {
+      "label": "round 2 off",
+      "mode": "off",
+      "cell_mbps": {
+        "downlink": 100.0,
+        "uplink": 100.0
+      },
+      "shares": {
+        "eMBB": 60.0,
+        "URLLC": 10.0,
+        "mMTC": 5.0
+      },
+      "seconds": 60,
+      "started": "2026-11-08T19:05:31Z",
+      "restored_before": true,
+      "radio_link_failures": 0,
+      "ues_without_data_path_after": 0,
+      "probes": {
+        "URLLC critical": {
+          "sent": 2700,
+          "received": 2700,
+          "loss_percent": 0.0,
+          "p50": 2.03,
+          "p95": 3.241,
+          "p99": 5.33,
+          "max": 55.0,
+          "mean": 2.201
+        },
+        "URLLC standard": {
+          "sent": 2700,
+          "received": 2700,
+          "loss_percent": 0.0,
+          "p50": 2.035,
+          "p95": 3.15,
+          "p99": 6.09,
+          "max": 51.1,
+          "mean": 2.218
+        },
+        "mMTC": {
+          "sent": 270,
+          "received": 270,
+          "loss_percent": 0.0,
+          "p50": 2.09,
+          "p95": 3.246,
+          "p99": 4.341,
+          "max": 7.58,
+          "mean": 2.205
+        },
+        "eMBB unloaded": {
+          "sent": 540,
+          "received": 540,
+          "loss_percent": 0.0,
+          "p50": 2.61,
+          "p95": 5.09,
+          "p99": 8.246,
+          "max": 119.0,
+          "mean": 3.33
+        }
+      },
+      "load": {
+        "eMBB": {
+          "flows": 5,
+          "offered_mbps": 150.0,
+          "delivered_mbps": 150.0,
+          "loss_percent_mean": 0.0
+        }
+      },
+      "classes": {}
+    }
+  ]
+}

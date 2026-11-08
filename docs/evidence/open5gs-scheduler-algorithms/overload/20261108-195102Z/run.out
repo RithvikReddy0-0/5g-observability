@@ -1,0 +1,14 @@
+devices: critical URLLC ['10.46.8.84', '10.46.8.86', '10.46.8.87'], standard URLLC 7, eMBB 20, mMTC 70
+D: eMBB offers 150 Mbps into a 100 Mbps cell (the cell, not the CPU, is the bottleneck)
+  round 1 hfsc               RLF 0   broken after 0   URLLC critical p99 8.81 loss 0.0%  URLLC standard p99 10.411 loss 0.0%  mMTC p99 7.071 loss 0.0%  eMBB unloaded p99 46.249 loss 0.0%
+  round 1 drr                RLF 0   broken after 0   URLLC critical p99 7.39 loss 0.0%  URLLC standard p99 7.282 loss 0.0%  mMTC p99 7.531 loss 0.0%  eMBB unloaded p99 7.528 loss 0.0%
+  round 1 sliced             RLF 0   broken after 0   URLLC critical p99 4.94 loss 0.0%  URLLC standard p99 5.42 loss 0.0%  mMTC p99 4.258 loss 0.0%  eMBB unloaded p99 9.615 loss 0.0%
+  round 1 off                RLF 0   broken after 0   URLLC critical p99 5.87 loss 0.0%  URLLC standard p99 5.39 loss 0.0%  mMTC p99 5.039 loss 0.0%  eMBB unloaded p99 8.689 loss 0.0%
+  round 2 off                RLF 0   broken after 0   URLLC critical p99 4.72 loss 0.0%  URLLC standard p99 4.74 loss 0.0%  mMTC p99 4.926 loss 0.0%  eMBB unloaded p99 6.548 loss 0.0%
+  round 2 sliced             RLF 0   broken after 0   URLLC critical p99 6.551 loss 0.0%  URLLC standard p99 6.821 loss 0.0%  mMTC p99 8.059 loss 0.0%  eMBB unloaded p99 44.799 loss 0.0%
+  round 2 drr                RLF 0   broken after 0   URLLC critical p99 8.41 loss 0.0%  URLLC standard p99 8.62 loss 0.0%  mMTC p99 7.854 loss 0.0%  eMBB unloaded p99 24.422 loss 0.0%
+  round 2 hfsc               RLF 0   broken after 0   URLLC critical p99 7.321 loss 0.0%  URLLC standard p99 7.141 loss 0.0%  mMTC p99 6.713 loss 0.0%  eMBB unloaded p99 36.066 loss 0.0%
+evidence: docs/evidence/open5gs-scheduler-algorithms/overload/20261108-195102Z
+experiment exit 0
+broken after experiment: 0
+OVERLOAD DONE

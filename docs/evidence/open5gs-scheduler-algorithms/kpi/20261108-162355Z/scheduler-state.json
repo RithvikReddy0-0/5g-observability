@@ -1,0 +1,101 @@
+{
+  "mode": "fifo",
+  "directions": [
+    "downlink",
+    "uplink"
+  ],
+  "cell_mbps": {
+    "downlink": 10000.0,
+    "uplink": 10000.0
+  },
+  "shares": {
+    "eMBB": 60.0,
+    "URLLC": 10.0,
+    "mMTC": 5.0
+  },
+  "prio": {
+    "eMBB": 3,
+    "URLLC": 1,
+    "mMTC": 4
+  },
+  "signalling_share": 2.0,
+  "default_share": 3.0,
+  "devices": {
+    "downlink": "veth04a282c",
+    "uplink": "eth0"
+  },
+  "ue_pid": 2066174,
+  "applies": 62,
+  "errors": 0,
+  "last_error": "",
+  "applied_at": 1794155050.9021685,
+  "tracked_addresses": {
+    "URLLC/0": [
+      "10.46.5.160",
+      "10.46.5.162",
+      "10.46.5.166"
+    ]
+  },
+  "classes": {
+    "downlink": [
+      {
+        "classid": "1:1",
+        "slice": "cell",
+        "tier": "",
+        "rate_mbps": 10000.0,
+        "ceil_mbps": 10000.0,
+        "prio": null,
+        "leaf": null,
+        "kind": "htb",
+        "quantum": null,
+        "rt": null
+      },
+      {
+        "classid": "1:10",
+        "slice": "all",
+        "tier": "",
+        "rate_mbps": 10000.0,
+        "ceil_mbps": 10000.0,
+        "prio": 0,
+        "leaf": "pfifo limit 1000",
+        "kind": "htb",
+        "quantum": null,
+        "rt": null
+      }
+    ],
+    "uplink": [
+      {
+        "classid": "1:1",
+        "slice": "cell",
+        "tier": "",
+        "rate_mbps": 10000.0,
+        "ceil_mbps": 10000.0,
+        "prio": null,
+        "leaf": null,
+        "kind": "htb",
+        "quantum": null,
+        "rt": null
+      },
+      {
+        "classid": "1:10",
+        "slice": "all",
+        "tier": "",
+        "rate_mbps": 10000.0,
+        "ceil_mbps": 10000.0,
+        "prio": 0,
+        "leaf": "pfifo limit 1000",
+        "kind": "htb",
+        "quantum": null,
+        "rt": null
+      }
+    ]
+  },
+  "tree_modes": {
+    "downlink": "fifo",
+    "uplink": "fifo"
+  },
+  "filters": {
+    "downlink": [],
+    "uplink": []
+  }
+}

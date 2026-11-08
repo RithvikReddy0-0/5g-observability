@@ -1,0 +1,51 @@
+{
+  "mode": "off",
+  "directions": [
+    "downlink",
+    "uplink"
+  ],
+  "cell_mbps": {
+    "downlink": 250.0,
+    "uplink": 100.0
+  },
+  "shares": {
+    "eMBB": 60.0,
+    "URLLC": 10.0,
+    "mMTC": 5.0
+  },
+  "prio": {
+    "eMBB": 3,
+    "URLLC": 1,
+    "mMTC": 4
+  },
+  "signalling_share": 2.0,
+  "default_share": 3.0,
+  "devices": {
+    "downlink": "veth3edea78",
+    "uplink": "eth0"
+  },
+  "ue_pid": 764535,
+  "applies": 13,
+  "errors": 0,
+  "last_error": "",
+  "applied_at": 1794149885.9327006,
+  "tracked_addresses": {
+    "URLLC/0": [
+      "10.46.3.190",
+      "10.46.3.191",
+      "10.46.3.194"
+    ]
+  },
+  "classes": {
+    "downlink": [],
+    "uplink": []
+  },
+  "tree_modes": {
+    "downlink": "off",
+    "uplink": "off"
+  },
+  "filters": {
+    "downlink": [],
+    "uplink": []
+  }
+}

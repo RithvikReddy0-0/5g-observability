@@ -1,0 +1,22 @@
+devices: critical URLLC ['10.46.6.204', '10.46.6.205', '10.46.6.208'], standard URLLC 7, eMBB 20, mMTC 70
+D: eMBB offers 150 Mbps into a 100 Mbps cell (the cell, not the CPU, is the bottleneck)
+  round 1 off                RLF 0   broken after 0   URLLC critical p99 58.41 loss 0.0%  URLLC standard p99 58.508 loss 0.0%  mMTC p99 50.816 loss 0.0%  eMBB unloaded p99 4634.61 loss 0.0%
+  round 1 fifo               RLF 98  broken after 126 URLLC critical p99 116.38 loss 64.33%  URLLC standard p99 144.5 loss 32.37%  mMTC p99 129.39 loss 40.0%  eMBB unloaded p99 None loss 100.0%
+    126 UEs without a data path before round 1 sliced: re-attaching all
+  round 1 sliced             RLF 0   broken after 0   URLLC critical p99 105.02 loss 0.0%  URLLC standard p99 108.01 loss 0.0%  mMTC p99 85.703 loss 0.0%  eMBB unloaded p99 64180.63 loss 0.37%
+  round 1 prio               RLF 88  broken after 110 URLLC critical p99 18.602 loss 0.0%  URLLC standard p99 20.006 loss 0.0%  mMTC p99 None loss 100.0%  eMBB unloaded p99 179.43 loss 43.7%
+    110 UEs without a data path before round 1 drr: re-attaching all
+  round 1 drr                RLF 0   broken after 0   URLLC critical p99 13.9 loss 0.0%  URLLC standard p99 13.703 loss 0.0%  mMTC p99 11.555 loss 0.0%  eMBB unloaded p99 57.464 loss 0.0%
+  round 1 hfsc               RLF 0   broken after 0   URLLC critical p99 21.201 loss 0.0%  URLLC standard p99 21.802 loss 0.0%  mMTC p99 30.606 loss 0.0%  eMBB unloaded p99 263.81 loss 0.0%
+  round 2 hfsc               RLF 0   broken after 0   URLLC critical p99 10.006 loss 0.0%  URLLC standard p99 9.802 loss 0.0%  mMTC p99 7.233 loss 0.0%  eMBB unloaded p99 35.486 loss 0.0%
+  round 2 drr                RLF 0   broken after 0   URLLC critical p99 14.701 loss 0.0%  URLLC standard p99 13.902 loss 0.0%  mMTC p99 15.024 loss 0.0%  eMBB unloaded p99 122.88 loss 0.0%
+  round 2 prio               RLF 180 broken after 130 URLLC critical p99 23.954 loss 94.81%  URLLC standard p99 21.584 loss 94.89%  mMTC p99 None loss 100.0%  eMBB unloaded p99 100.15 loss 81.48%
+    130 UEs without a data path before round 2 sliced: re-attaching all
+  round 2 sliced             RLF 0   broken after 0   URLLC critical p99 5.54 loss 0.0%  URLLC standard p99 5.8 loss 0.0%  mMTC p99 5.255 loss 0.0%  eMBB unloaded p99 9.516 loss 0.0%
+  round 2 fifo               RLF 97  broken after 124 URLLC critical p99 106.0 loss 10.19%  URLLC standard p99 106.64 loss 94.93%  mMTC p99 106.0 loss 11.11%  eMBB unloaded p99 108.0 loss 67.59%
+    124 UEs without a data path before round 2 off: re-attaching all
+  round 2 off                RLF 0   broken after 0   URLLC critical p99 5.33 loss 0.0%  URLLC standard p99 6.09 loss 0.0%  mMTC p99 4.341 loss 0.0%  eMBB unloaded p99 8.246 loss 0.0%
+evidence: docs/evidence/open5gs-scheduler-algorithms/overload/20261108-184258Z
+experiment exit 0
+broken after experiment: 0
+OVERLOAD DONE

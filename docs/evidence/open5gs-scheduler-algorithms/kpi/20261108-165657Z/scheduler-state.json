@@ -1,0 +1,347 @@
+{
+  "mode": "sliced",
+  "directions": [
+    "downlink",
+    "uplink"
+  ],
+  "cell_mbps": {
+    "downlink": 250.0,
+    "uplink": 100.0
+  },
+  "shares": {
+    "eMBB": 60.0,
+    "URLLC": 10.0,
+    "mMTC": 5.0
+  },
+  "prio": {
+    "eMBB": 3,
+    "URLLC": 1,
+    "mMTC": 4
+  },
+  "signalling_share": 2.0,
+  "default_share": 3.0,
+  "devices": {
+    "downlink": "veth6a8e83b",
+    "uplink": "eth0"
+  },
+  "ue_pid": 2553675,
+  "applies": 82,
+  "errors": 0,
+  "last_error": "",
+  "applied_at": 1794157035.778106,
+  "tracked_addresses": {
+    "URLLC/0": [
+      "10.46.6.114",
+      "10.46.6.118",
+      "10.46.6.120"
+    ]
+  },
+  "classes": {
+    "downlink": [
+      {
+        "classid": "1:1",
+        "slice": "cell",
+        "tier": "",
+        "rate_mbps": 250.0,
+        "ceil_mbps": 250.0,
+        "prio": null,
+        "leaf": null,
+        "kind": "htb",
+        "quantum": null,
+        "rt": null
+      },
+      {
+        "classid": "1:10",
+        "slice": "signalling",
+        "tier": "",
+        "rate_mbps": 5.0,
+        "ceil_mbps": 250.0,
+        "prio": 0,
+        "leaf": "pfifo limit 256",
+        "kind": "htb",
+        "quantum": null,
+        "rt": null
+      },
+      {
+        "classid": "1:99",
+        "slice": "other",
+        "tier": "",
+        "rate_mbps": 7.5,
+        "ceil_mbps": 250.0,
+        "prio": 6,
+        "leaf": "fq_codel",
+        "kind": "htb",
+        "quantum": null,
+        "rt": null
+      },
+      {
+        "classid": "1:20",
+        "slice": "eMBB",
+        "tier": "",
+        "rate_mbps": 150.0,
+        "ceil_mbps": 250.0,
+        "prio": 3,
+        "leaf": "fq_codel",
+        "kind": "htb",
+        "quantum": null,
+        "rt": null
+      },
+      {
+        "classid": "1:30",
+        "slice": "URLLC",
+        "tier": "all",
+        "rate_mbps": 25.0,
+        "ceil_mbps": 250.0,
+        "prio": null,
+        "leaf": null,
+        "kind": "htb",
+        "quantum": null,
+        "rt": null
+      },
+      {
+        "classid": "1:31",
+        "slice": "URLLC",
+        "tier": "arp1",
+        "rate_mbps": 7.5,
+        "ceil_mbps": 250.0,
+        "prio": 1,
+        "leaf": "pfifo limit 64",
+        "kind": "htb",
+        "quantum": null,
+        "rt": null
+      },
+      {
+        "classid": "1:32",
+        "slice": "URLLC",
+        "tier": "arp2",
+        "rate_mbps": 17.5,
+        "ceil_mbps": 250.0,
+        "prio": 2,
+        "leaf": "pfifo limit 64",
+        "kind": "htb",
+        "quantum": null,
+        "rt": null
+      },
+      {
+        "classid": "1:40",
+        "slice": "mMTC",
+        "tier": "",
+        "rate_mbps": 12.5,
+        "ceil_mbps": 250.0,
+        "prio": 4,
+        "leaf": "fq_codel",
+        "kind": "htb",
+        "quantum": null,
+        "rt": null
+      }
+    ],
+    "uplink": [
+      {
+        "classid": "1:1",
+        "slice": "cell",
+        "tier": "",
+        "rate_mbps": 100.0,
+        "ceil_mbps": 100.0,
+        "prio": null,
+        "leaf": null,
+        "kind": "htb",
+        "quantum": null,
+        "rt": null
+      },
+      {
+        "classid": "1:10",
+        "slice": "signalling",
+        "tier": "",
+        "rate_mbps": 2.0,
+        "ceil_mbps": 100.0,
+        "prio": 0,
+        "leaf": "pfifo limit 256",
+        "kind": "htb",
+        "quantum": null,
+        "rt": null
+      },
+      {
+        "classid": "1:99",
+        "slice": "other",
+        "tier": "",
+        "rate_mbps": 3.0,
+        "ceil_mbps": 100.0,
+        "prio": 6,
+        "leaf": "fq_codel",
+        "kind": "htb",
+        "quantum": null,
+        "rt": null
+      },
+      {
+        "classid": "1:20",
+        "slice": "eMBB",
+        "tier": "",
+        "rate_mbps": 60.0,
+        "ceil_mbps": 100.0,
+        "prio": 3,
+        "leaf": "fq_codel",
+        "kind": "htb",
+        "quantum": null,
+        "rt": null
+      },
+      {
+        "classid": "1:30",
+        "slice": "URLLC",
+        "tier": "all",
+        "rate_mbps": 10.0,
+        "ceil_mbps": 100.0,
+        "prio": null,
+        "leaf": null,
+        "kind": "htb",
+        "quantum": null,
+        "rt": null
+      },
+      {
+        "classid": "1:31",
+        "slice": "URLLC",
+        "tier": "arp1",
+        "rate_mbps": 3.0,
+        "ceil_mbps": 100.0,
+        "prio": 1,
+        "leaf": "pfifo limit 64",
+        "kind": "htb",
+        "quantum": null,
+        "rt": null
+      },
+      {
+        "classid": "1:32",
+        "slice": "URLLC",
+        "tier": "arp2",
+        "rate_mbps": 7.0,
+        "ceil_mbps": 100.0,
+        "prio": 2,
+        "leaf": "pfifo limit 64",
+        "kind": "htb",
+        "quantum": null,
+        "rt": null
+      },
+      {
+        "classid": "1:40",
+        "slice": "mMTC",
+        "tier": "",
+        "rate_mbps": 5.0,
+        "ceil_mbps": 100.0,
+        "prio": 4,
+        "leaf": "fq_codel",
+        "kind": "htb",
+        "quantum": null,
+        "rt": null
+      }
+    ]
+  },
+  "tree_modes": {
+    "downlink": "sliced",
+    "uplink": "sliced"
+  },
+  "filters": {
+    "downlink": [
+      {
+        "prio": 1,
+        "classid": "1:10",
+        "what": "rls msg 4"
+      },
+      {
+        "prio": 1,
+        "classid": "1:10",
+        "what": "rls msg 5"
+      },
+      {
+        "prio": 1,
+        "classid": "1:10",
+        "what": "rls msg 7"
+      },
+      {
+        "prio": 2,
+        "classid": "1:10",
+        "what": "rrc"
+      },
+      {
+        "prio": 3,
+        "classid": "1:31",
+        "what": "URLLC arp1 10.46.6.114"
+      },
+      {
+        "prio": 3,
+        "classid": "1:31",
+        "what": "URLLC arp1 10.46.6.118"
+      },
+      {
+        "prio": 3,
+        "classid": "1:31",
+        "what": "URLLC arp1 10.46.6.120"
+      },
+      {
+        "prio": 4,
+        "classid": "1:20",
+        "what": "eMBB pool"
+      },
+      {
+        "prio": 4,
+        "classid": "1:32",
+        "what": "URLLC pool (arp2)"
+      },
+      {
+        "prio": 4,
+        "classid": "1:40",
+        "what": "mMTC pool"
+      }
+    ],
+    "uplink": [
+      {
+        "prio": 1,
+        "classid": "1:10",
+        "what": "rls msg 4"
+      },
+      {
+        "prio": 1,
+        "classid": "1:10",
+        "what": "rls msg 5"
+      },
+      {
+        "prio": 1,
+        "classid": "1:10",
+        "what": "rls msg 7"
+      },
+      {
+        "prio": 2,
+        "classid": "1:10",
+        "what": "rrc"
+      },
+      {
+        "prio": 3,
+        "classid": "1:31",
+        "what": "URLLC arp1 10.46.6.114"
+      },
+      {
+        "prio": 3,
+        "classid": "1:31",
+        "what": "URLLC arp1 10.46.6.118"
+      },
+      {
+        "prio": 3,
+        "classid": "1:31",
+        "what": "URLLC arp1 10.46.6.120"
+      },
+      {
+        "prio": 4,
+        "classid": "1:20",
+        "what": "eMBB pool"
+      },
+      {
+        "prio": 4,
+        "classid": "1:32",
+        "what": "URLLC pool (arp2)"
+      },
+      {
+        "prio": 4,
+        "classid": "1:40",
+        "what": "mMTC pool"
+      }
+    ]
+  }
+}
