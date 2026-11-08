@@ -88,11 +88,10 @@ Instrumented here: the slice orchestrator (`admission.decide` with verdict, slic
 `admission.preempt` as a child; `controller.cut|raise` with from/to/why/policy; `slice.active`) and
 the network orchestrator (`netorch.activate|deactivate|scale` with one `netorch.step` child per step and
 its duration; its operation log also gains the epoch start `t0`). The start scripts set
-`OBS_TRACE_FILE=/tmp/o5gs_traces.jsonl`. The packet scheduler and the KPI runner were being changed on
-the live stack at the time, so their instrumentation is a **follow-up patch**, verified to apply and
-to emit spans: `docs/observability/patches/0001-packet-scheduler-traces.patch` (`scheduler.apply`
-spans with mode, devices, outcome, duration) and `0002-kpi-runner-traces.patch` (`kpi.instance`,
-`kpi.embb_load`, `kpi.attach`). Scheduler re-applies are visible without the patch anyway: its
+`OBS_TRACE_FILE=/tmp/o5gs_traces.jsonl`. The packet scheduler (`scheduler.apply` spans with mode, devices, outcome,
+duration) and the KPI runner (`kpi.instance`, `kpi.embb_load`, `kpi.attach`) were being changed on the
+live stack at the time, so their instrumentation was first kept as patches and applied once the
+scheduler experiments (ADR-021) had finished. Scheduler re-applies are visible without the patch anyway: its
 `applied mode=…` log lines are a parsing rule.
 
 ### 4. Correlation engine (`tools/observability/correlate.py`)

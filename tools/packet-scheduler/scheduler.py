@@ -78,6 +78,42 @@ INTERVAL = float(os.environ.get("SCHED_INTERVAL", "5"))
 FIRST_IMSI = int(os.environ.get("FIRST_IMSI", "208930000000001"))   # provision_subscribers.py
 FIFO_LIMIT = int(os.environ.get("SCHED_FIFO_LIMIT", "1000"))         # packets: Linux's usual txqueuelen
 
+
+def _tracer(service):
+    """Re-apply traces (ADR-024, tools/observability/trace.py): every rebuild of the cell is a span with
+    its mode, devices, outcome and duration. Off unless OBS_TRACE_FILE or OTEL_EXPORTER_OTLP_ENDPOINT is
+    set; never fatal."""
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(
+            "obs_trace", os.path.join(REPO, "tools", "observability", "trace.py"))
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return mod.Tracer(service)
+    except Exception:
+        class _Off:
+            def span(self, name, **a):
+                return self
+
+            def event(self, name, **a):
+                return None
+
+            def set(self, **a):
+                return self
+
+            def fail(self, e):
+                pass
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *a):
+                return False
+        return _Off()
+
+
+TRACE = _tracer("packet-scheduler")
+
 # ─────────────────────────── the packet format ───────────────────────────
 
 RLS_PORT = 4997                 # cons::RadioLinkPort
@@ -561,6 +597,16 @@ class Scheduler:
         self.collect(pid, host_dev)
 
     def apply(self, cfg, pid, host_dev, tiers, sig):
+        with TRACE.span("scheduler.apply", mode=cfg["mode"], cell_dl_mbps=cfg["cell"]["downlink"],
+                        cell_ul_mbps=cfg["cell"]["uplink"], ue_pid=pid,
+                        reason="first apply" if self.applied is None else "desired state changed") as sp:
+            self._apply(cfg, pid, host_dev, tiers, sig)
+            sp.set(ok=self.applied == sig, devices=self.devices, applies=self.applies,
+                   tracked={k: len(v) for k, v in self.tracked.items()})
+            if self.applied != sig:
+                sp.fail(self.last_error or "apply failed")
+
+    def _apply(self, cfg, pid, host_dev, tiers, sig):
         ok, trees, devs = True, {}, {}
         for d in DIRECTIONS:
             prefix, dev = tc_in(d, pid, host_dev)

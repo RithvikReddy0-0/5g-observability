@@ -50,6 +50,8 @@ fi
 docker run -d --name "$NAME" --restart unless-stopped \
   --network host --pid host --privileged \
   -e PORT="$PORT" \
+  -e OBS_TRACE_FILE="${OBS_TRACE_FILE-/host-tmp/o5gs_traces.jsonl}" \
+  -v /tmp:/host-tmp \
   -v "$REPO_ROOT:/repo:ro" \
   "$IMAGE" >/dev/null || { echo "FAILED to start" >&2; exit 1; }
 

@@ -115,18 +115,13 @@ Open http://localhost:3001 → "Open5GS — slices, sessions and traffic" → la
 fault events per slice, one logs panel per slice, and "Diagnosed causes". Without Loki, only those
 log panels show a datasource error.
 
-## 6. Packet scheduler and KPI runner traces (follow-up patches)
+## 6. Packet scheduler and KPI runner traces
 
-`scheduler.py` and `run_kpis.py` were being changed on the live stack, so their instrumentation is
-kept as patches against `0a25539`:
+`scheduler.py` (`scheduler.apply` spans) and `run_kpis.py` (`kpi.instance`, `kpi.embb_load`,
+`kpi.attach`) emit spans too. They were first kept as patches because both files were being changed
+on the live stack; the patches were applied to main once the scheduler experiments finished.
 
-```bash
-git apply --3way docs/observability/patches/0001-packet-scheduler-traces.patch   # scheduler.py + start_scheduler.sh
-git apply --3way docs/observability/patches/0002-kpi-runner-traces.patch         # run_kpis.py
-python3 tools/packet-scheduler/scheduler.py --check && python3 tools/packet-scheduler/test_scheduler.py
-```
-
-The scheduler patch mounts the host's `/tmp` into the scheduler container so its spans land in the
+`start_scheduler.sh` mounts the host's `/tmp` into the scheduler container so its spans land in the
 same `/tmp/o5gs_traces.jsonl`. Restarting the scheduler with `--stop` **removes the queues** (mode
 off) until it starts again — only between experiments:
 
