@@ -127,7 +127,7 @@ def percentile(sorted_vals, q):
     return round(sorted_vals[i], 3)
 
 
-OVER_MS = (1, 2, 5, 10, 20, 50, 100)
+OVER_MS = (1, 2, 5, 10, 20, 30, 50, 100)   # 10: URLLC slice budget (5QI 82); 30: TS 22.261 Table 7.2.3.2-1
 
 
 def summary(vals):
