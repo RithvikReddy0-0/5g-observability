@@ -3,6 +3,5 @@
 *.sh    text eol=lf
 *.yaml  text eol=lf
 *.yml   text eol=lf
-# ADR-024: the Alloy pipeline is read by a Linux container; the follow-up patches must apply byte-exact.
+# ADR-024: the Alloy pipeline is read by a Linux container.
 *.alloy text eol=lf
-docs/observability/patches/*.patch text eol=lf
