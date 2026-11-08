@@ -53,6 +53,9 @@ What this shows:
    one-way latency is uplink, where the cell (100 Mbps) is far from full; one candidate is the cost
    of putting any classful qdisc in place of the veth's default `noqueue` under eMBB's packet rate.
    This is open.
+   **Update, same day (later):** a controlled test of 36 interleaved runs did not reproduce this and
+   does not support the `noqueue` hypothesis; the tail varies 2–4× from run to run regardless of the
+   scheduler. See [`../open5gs-urllc-tail/`](../open5gs-urllc-tail/README.md).
 5. **The October → November rise (0.90 → 1.00) is not the scheduler's doing**: with it off, URLLC
    scores 1.00 today as well. The earlier text that credited it is withdrawn.
 

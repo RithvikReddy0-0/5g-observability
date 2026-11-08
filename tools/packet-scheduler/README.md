@@ -37,13 +37,20 @@ UERANSIM's radio link is UDP port 4997 (RLS). Offsets from the outer IP header:
 All settings live in `deployments/slices.env`. At run time:
 
 ```
-curl -s -XPOST localhost:9114/config -d '{"mode":"fifo"}'                  # sliced | fifo | off
+curl -s -XPOST localhost:9114/config -d '{"mode":"fifo"}'                  # sliced | prio | drr | hfsc | fifo | off
+curl -s -XPOST localhost:9114/config -d '{"directions":["uplink"]}'        # schedule one direction only
 curl -s -XPOST localhost:9114/config -d '{"cell_dl_mbps":150}'
 curl -s -XPOST localhost:9114/config -d '{"shares":{"eMBB":50,"mMTC":15}}'
 curl -s -XPOST localhost:9114/config -d '{"prio":{"mMTC":3}}'
 ```
 
 Run-time changes are not persisted: a restart returns to `slices.env`.
+
+`prio` (strict priority), `drr` (deficit round robin) and `hfsc` (real-time curves for signalling and
+URLLC) keep the same classifier and classes and only change the tree (ADR-021,
+`docs/evidence/open5gs-scheduler-algorithms/`). `sliced` (HTB) stays the default: prio caused mass
+radio-link failures under overload, DRR added ~2 ms of URLLC median latency under load, HFSC delivered
+less eMBB at nominal load. `python3 scheduler.py --print <mode>` shows any mode's tc commands.
 
 ## Files
 
