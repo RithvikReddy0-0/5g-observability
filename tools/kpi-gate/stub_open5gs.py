@@ -161,6 +161,9 @@ def healthy():
             drops = counter(40, 5000) if sl == "eMBB" else const(0)
             sched.add("packet_scheduler_class_drops_total", drops, **lab)
 
+    # ADR-024 fault-diagnosis service (prometheus.yml job fault-diagnosis); optional, advisory only.
+    t["fault-diagnosis"] = Target("fault-diagnosis", "10.53.0.1:9115", {"component": "fault-diagnosis"})
+
     t["prometheus"] = Target("prometheus", "localhost:9090")
     return t
 
@@ -230,10 +233,11 @@ def signalling_drops(t):
 
 
 def advisories_only(t):
-    """Optional processes stopped and a few registration failures: advisories must WARN, and
-    the deployment must still PASS. A stopped orchestrator once failed this gate on a healthy
+    """Optional processes stopped (both orchestrators, the cell scheduler, the fault-diagnosis
+    service) and a few registration failures: advisories must WARN, and the deployment must
+    still PASS. A stopped orchestrator once failed this gate on a healthy
     stack; the stopped scheduler's drop counters vanish and must read as 0, not as no data."""
-    for name in ("slice-orchestrator", "network-orchestrator", "packet-scheduler"):
+    for name in ("slice-orchestrator", "network-orchestrator", "packet-scheduler", "fault-diagnosis"):
         t[name].up = False
     t["amf"].add("fivegs_amffunction_rm_reginitfail",
                  lambda age: 4.0 if age > 60 else 6.0, cause="111")
@@ -263,7 +267,8 @@ SCENARIOS = {
     "signalling-drops": (signalling_drops, 1, {"scheduler-no-signalling-drops"}, TAIL),
     "advisories-only": (advisories_only, 0, set(),
                         TAIL | {"orchestrator-reachable", "network-orchestrator-reachable",
-                                "packet-scheduler-reachable", "no-registration-failures"}),
+                                "packet-scheduler-reachable", "fault-diagnosis-reachable",
+                                "no-registration-failures"}),
 }
 
 
