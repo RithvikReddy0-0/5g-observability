@@ -131,7 +131,25 @@ jobs:
 
       - name: Python tools and exporters compile
         run: |
-          python3 -m py_compile tools/kpi-gate/*.py tools/kpi/*.py tools/standards/*.py tools/check_open5gs_slices.py tools/slice-orchestrator/*.py tools/network-orchestrator/*.py tools/packet-scheduler/*.py tools/mac-sim/*.py deployments/open5gs/k8s/render.py scripts/open5gs/*.py             deployments/open5gs/observability/*.py             && echo "all Python compiles"
+          python3 -m py_compile tools/kpi-gate/*.py tools/kpi/*.py tools/standards/*.py tools/check_open5gs_slices.py tools/slice-orchestrator/*.py tools/network-orchestrator/*.py tools/packet-scheduler/*.py tools/mac-sim/*.py deployments/open5gs/k8s/render.py scripts/open5gs/*.py             deployments/open5gs/observability/*.py tools/observability/*.py             && echo "all Python compiles"
+
+      - name: the Alloy log pipeline and the Grafana dashboard are current with their generators
+        run: |
+          # ADR-024: config.alloy is GENERATED from the parsing rules in tools/observability/logparse.py,
+          # the same rules the tests run on real log lines; the dashboard from gen_dashboard.py.
+          python3 tools/observability/logparse.py --alloy deployments/open5gs/observability/alloy/config.alloy
+          (cd deployments/open5gs/observability/grafana && python3 gen_dashboard.py dashboards/open5gs-slices.json)
+          if ! git diff --exit-code --stat deployments/open5gs/observability/alloy/ deployments/open5gs/observability/grafana/dashboards/; then
+            echo "::error::regenerate config.alloy (logparse.py --alloy) or the dashboard (gen_dashboard.py) and commit"
+            exit 1
+          fi
+          echo "log pipeline and dashboard match their generators"
+
+      - name: the optional logs pipeline pins every image by digest
+        run: |
+          bad=$(grep -E '^\s*image:' deployments/open5gs/docker-compose.logs.yaml | grep -vE '@sha256:[0-9a-f]{64}' || true)
+          if [ -n "$bad" ]; then echo "::error::image not pinned by digest: $bad"; exit 1; fi
+          echo "every image in docker-compose.logs.yaml is pinned by digest"
 
   kpi-gate:
     name: KPI gate is defined and effective
@@ -204,6 +222,15 @@ jobs:
           # PF equal time, M-LWDF oldest first, static shares, RadioSaber channel-aware and fair),
           # plus determinism and common random numbers across schedulers. A few seconds.
           python3 tools/mac-sim/test_macsim.py
+
+      - name: observability — log parsing, decision traces, correlation and fault diagnosis
+        run: |
+          # ADR-024: parsing rules on real Open5GS/UERANSIM lines (tests/fixtures/observability), the trace
+          # helper (JSON lines and OTLP/JSON to a stub collector), the orchestrators' spans, the correlation
+          # statistics on recorded series, and every diagnosis rule. Then the recorded incidents of
+          # docs/evidence as labelled cases: precision, recall and top-1 of the diagnosis.
+          python3 tools/observability/test_observability.py
+          python3 tools/observability/diagnose.py --validate
 
       - name: gate PASSES a conforming deployment
         run: |

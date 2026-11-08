@@ -1,0 +1,13 @@
+# Loki, for the per-slice log panels (ADR-024). Optional: when the logs pipeline
+# (docker-compose.logs.yaml) is not running, only the log panels show an error; nothing else changes.
+# Takes effect when Grafana restarts.
+apiVersion: 1
+datasources:
+  - name: Loki-Open5GS
+    uid: loki-o5gs
+    type: loki
+    access: proxy
+    url: http://10.53.0.43:3100
+    isDefault: false
+    jsonData:
+      maxLines: 1000

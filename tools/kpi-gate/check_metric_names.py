@@ -31,6 +31,7 @@ EXPORTERS = {
     "upf_slice_": ["deployments/open5gs/observability/upf_slice_exporter.py"],
     "ue_probe_": ["deployments/open5gs/observability/ue_probe_exporter.py"],
     "packet_scheduler_": ["tools/packet-scheduler/scheduler.py"],
+    "fault_diagnosis_": ["tools/observability/diagnose.py"],
 }
 DEFAULT_DEFS = ["deployments/kpi-gates.json", "deployments/open5gs/kpi-gates.json"]
 

@@ -43,13 +43,13 @@
     {
       "id": "no-scrape-failures",
       "title": "No network or exporter target is down",
-      "expr": "count(up{job!~\"slice-orchestrator|network-orchestrator|packet-scheduler\"} == 0) or vector(0)",
+      "expr": "count(up{job!~\"slice-orchestrator|network-orchestrator|packet-scheduler|fault-diagnosis\"} == 0) or vector(0)",
       "op": "eq",
       "threshold": 0,
       "unit": "targets",
       "severity": "gate",
       "requires": "core",
-      "why": "Includes the per-slice traffic and UE probe exporters: a broken observability plane must fail the gate rather than report a silent green. Both orchestrators and the packet scheduler are excluded — they are optional processes above the network, and a stopped orchestrator once failed this gate on a healthy stack (the slice orchestrator in Phase 2b, the network orchestrator after a WSL restart on 2026-11-08); each has its own advisory."
+      "why": "Includes the per-slice traffic and UE probe exporters: a broken observability plane must fail the gate rather than report a silent green. Both orchestrators, the packet scheduler and the fault-diagnosis service (ADR-024) are excluded — they are optional processes above the network, and a stopped orchestrator once failed this gate on a healthy stack (the slice orchestrator in Phase 2b, the network orchestrator after a WSL restart on 2026-11-08); each has its own advisory."
     },
     {
       "id": "pfcp-associated",
@@ -314,6 +314,17 @@
       "severity": "advisory",
       "requires": "core",
       "why": "Advisory: the queues it installed stay in place while it is down, but they are no longer re-applied when the UE container is recreated, and the per-class counters stop. Start it with scripts/open5gs/start_scheduler.sh."
+    },
+    {
+      "id": "fault-diagnosis-reachable",
+      "title": "The fault-diagnosis service is being scraped",
+      "expr": "max(up{job=\"fault-diagnosis\"})",
+      "op": "gte",
+      "threshold": 1,
+      "unit": "up",
+      "severity": "advisory",
+      "requires": "core",
+      "why": "Advisory: it only explains faults (correlated metrics, logs and decision traces, ranked causes); the network is unaffected while it is down. Start it with scripts/open5gs/start_diagnosis.sh (ADR-024)."
     },
     {
       "id": "scheduler-no-signalling-drops",

@@ -50,6 +50,44 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 SLICES_ENV = os.environ.get("SLICES_ENV", os.path.join(REPO, "deployments", "slices.env"))
+
+
+def _tracer(service):
+    """Lifecycle traces (ADR-024, tools/observability/trace.py): each operation is a span and each of
+    its steps a child span with its duration. Off unless OBS_TRACE_FILE or OTEL_EXPORTER_OTLP_ENDPOINT
+    is set; never fatal."""
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(
+            "obs_trace", os.path.join(REPO, "tools", "observability", "trace.py"))
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return mod.Tracer(service)
+    except Exception:
+        class _Off:
+            enabled = False
+
+            def span(self, name, **a):
+                return self
+
+            def event(self, name, **a):
+                return None
+
+            def set(self, **a):
+                return self
+
+            def fail(self, e):
+                pass
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *a):
+                return False
+        return _Off()
+
+
+TRACE = _tracer("network-orchestrator")
 COMPOSE = os.environ.get("COMPOSE", os.path.join(REPO, "deployments", "open5gs", "docker-compose.yaml"))
 PORT = int(os.environ.get("PORT", "9113"))
 SLICE_ORCH = os.environ.get("SLICE_ORCH", "http://localhost:9111")
@@ -265,7 +303,9 @@ class Op:
 
     def step(self, label, fn):
         t = time.time()
-        detail = fn()
+        with TRACE.span("netorch.step", slice=self.name, op=self.kind, step=label) as sp:
+            detail = fn()
+            sp.set(detail=detail)
         self.steps.append({"step": label, "seconds": round(time.time() - t, 2), "detail": detail})
         return detail
 
@@ -275,7 +315,8 @@ class Op:
     def as_dict(self):
         return {"id": self.id, "op": self.kind, "slice": self.name, "reason": self.reason, "args": self.args,
                 "result": self.result, "error": self.error, "warnings": self.warnings, "seconds": round((self.t_end or time.time()) - self.t0, 2),
-                "started": time.strftime("%H:%M:%S", time.localtime(self.t0)), "steps": self.steps}
+                "started": time.strftime("%H:%M:%S", time.localtime(self.t0)), "t0": round(self.t0, 3),
+                "steps": self.steps}
 
 
 def _finish(op, result, error=None):
@@ -521,7 +562,11 @@ def submit(kind, name, reason="manual", wait=False, **args):
 
     def run():
         try:
-            RUNNERS[kind](op)
+            with TRACE.span("netorch.%s" % kind, slice=name, reason=reason, op_id=op.id, **args) as sp:
+                RUNNERS[kind](op)
+                sp.set(result=op.result, error=op.error, warnings=op.warnings)
+                if op.result not in ("done", "running"):
+                    sp.fail(op.error or op.result)
         except Exception as e:                    # never leave the lock held
             _finish(op, "failed", "unexpected: %s" % e)
         finally:

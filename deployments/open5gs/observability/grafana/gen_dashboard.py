@@ -5,9 +5,9 @@ Run: python3 gen_dashboard.py dashboards/open5gs-slices.json
 
 Generate the Open5GS slice dashboard. Every query uses metric and label names observed on
 the running stack (snssai="1-010203", slice="eMBB"), not names assumed from documentation."""
-import json, sys
+import json, os, sys
 
-DS = {"type": "prometheus", "uid": "prom-o5gs"}
+DS ={"type": "prometheus", "uid": "prom-o5gs"}
 panels, pid = [], [0]
 
 
@@ -33,9 +33,10 @@ def stat(title, expr, x, y, w=6, desc=""):
     })
 
 
-def ts(title, targets, x, y, w=12, h=8, unit="none", desc="", stack=False):
+def ts(title, targets, x, y, w=12, h=8, unit="none", desc="", stack=False, ds=None):
+    ds = ds or DS
     panels.append({
-        "type": "timeseries", "title": title, "id": nid(), "datasource": DS, "description": desc,
+        "type": "timeseries", "title": title, "id": nid(), "datasource": ds, "description": desc,
         "gridPos": {"h": h, "w": w, "x": x, "y": y},
         "fieldConfig": {"defaults": {"unit": unit, "min": 0,
                                      "custom": {"lineWidth": 2, "fillOpacity": 12,
@@ -50,7 +51,20 @@ def ts(title, targets, x, y, w=12, h=8, unit="none", desc="", stack=False):
                         ]},
         "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max"]},
                     "tooltip": {"mode": "multi"}},
-        "targets": [dict(refId=chr(65 + i), datasource=DS, **t) for i, t in enumerate(targets)],
+        "targets": [dict(refId=chr(65 + i), datasource=ds, **t) for i, t in enumerate(targets)],
+    })
+
+
+LOKI = {"type": "loki", "uid": "loki-o5gs"}
+
+
+def logs(title, expr, x, y, w=8, h=10, desc=""):
+    panels.append({
+        "type": "logs", "title": title, "id": nid(), "datasource": LOKI, "description": desc,
+        "gridPos": {"h": h, "w": w, "x": x, "y": y},
+        "options": {"showTime": True, "wrapLogMessage": True, "sortOrder": "Descending",
+                    "enableLogDetails": True, "dedupStrategy": "none", "prettifyLogMessage": False},
+        "targets": [{"refId": "A", "datasource": LOKI, "expr": expr, "queryType": "range"}],
     })
 
 
@@ -221,6 +235,38 @@ ts("Uplink carried per class", [
     {"expr": 'sum by (slice, tier) (rate(packet_scheduler_class_bytes_total{direction="uplink",slice!="cell",tier!="all"}[30s])) * 8',
      "legendFormat": "{{slice}} {{tier}}"}],
    12, y, unit="bps", desc="URLLC uplink splits 3:7 between ARP tiers, as its devices do.")
+y += 8
+
+# Per-slice logs (ADR-024). Loki is OPTIONAL (deployments/open5gs/docker-compose.logs.yaml): without it
+# only these panels show a datasource error. Labels come from tools/observability/logparse.py's rules,
+# applied by the generated Alloy pipeline: component, slice, level, event.
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "..", "tools", "observability"))
+import logparse  # noqa: E402
+
+FAULTS = "|".join(sorted(logparse.FAULT_EVENTS))
+row("Logs per slice — Open5GS and UERANSIM text logs, parsed into events (ADR-024; needs the logs pipeline)", y); y += 1
+ts("Log events per slice (per minute)", [
+    {"expr": 'sum by (slice, event) (count_over_time({job="o5gs", slice=~".+", event=~".+"}[1m]))',
+     "legendFormat": "{{slice}} {{event}}"}],
+   0, y, unit="none", ds=LOKI,
+   desc=("Registrations, PDU session establishment and release, PFCP and N2 events, radio-link failures, UE restarts; "
+         "slice from S-NSSAI, DNN, the per-slice container, a UE or UPF address, else the IMSI's home slice."))
+ts("Fault events per slice (per minute)", [
+    {"expr": 'sum by (slice, event) (count_over_time({job="o5gs", event=~"%s"}[1m]))' % FAULTS,
+     "legendFormat": "{{slice}} {{event}}"}],
+   12, y, unit="none", ds=LOKI,
+   desc="Only events that in themselves mean something went wrong (logparse.FAULT_EVENTS).")
+y += 8
+for i, sl in enumerate(("eMBB", "URLLC", "mMTC")):
+    logs("%s — warnings, errors and events" % sl,
+         '{job="o5gs", slice="%s"} | level=~"warning|error" or event=~".+"' % sl, 8 * i, y,
+         desc="Every o5gs-* container's lines attributed to %s. IMSIs and addresses stay in the line, not in labels." % sl)
+y += 10
+ts("Diagnosed causes (score 0-1, last run)", [
+    {"expr": "max by (cause, slice) (fault_diagnosis_cause_score)", "legendFormat": "{{cause}} {{slice}}"}],
+   0, y, w=24, h=8, unit="none",
+   desc=("tools/observability/diagnose.py --serve (scripts/open5gs/start_diagnosis.sh): every 2 min it correlates the "
+         "last 10 min of metrics, logs and decision traces and scores each known cause. GET :9115/diagnosis has the evidence."))
 y += 8
 
 dash = {
