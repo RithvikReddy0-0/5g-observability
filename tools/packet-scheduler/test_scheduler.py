@@ -263,6 +263,48 @@ class Configuration(unittest.TestCase):
         self.assertTrue(any("mode must be" in e for e in S.validate(bad)))
 
 
+class Concurrency(unittest.TestCase):
+    """POST /config applies from the HTTP thread while the main loop applies on its own; the two
+    must never rebuild the qdiscs at the same time. They once did: tc refused the second batch
+    ("Exclusivity flag on, cannot modify") and the cell ran half-built until the next cycle."""
+
+    def test_two_steps_never_install_at_the_same_time(self):
+        import threading
+        import time
+        from unittest import mock
+        sched = S.Scheduler()
+        guard, state = threading.Lock(), {"active": 0, "overlap": False, "calls": 0}
+
+        def fake_run(args, stdin=None, timeout=20):
+            with guard:
+                state["active"] += 1
+                state["calls"] += 1
+                state["overlap"] |= state["active"] > 1
+            time.sleep(0.02)
+            with guard:
+                state["active"] -= 1
+            return 0, ""
+
+        start = threading.Barrier(2)
+
+        def go():
+            start.wait()
+            sched.step()
+
+        with mock.patch.object(S, "run", fake_run), \
+                mock.patch.object(S, "find_ue_container", return_value=(4242, 1)), \
+                mock.patch.object(S, "host_device", return_value="vethtest"), \
+                mock.patch.object(S, "tier_addresses", return_value={}), \
+                mock.patch.object(sched, "collect", lambda *a: None):
+            threads = [threading.Thread(target=go) for _ in range(2)]
+            for t in threads:
+                t.start()
+            for t in threads:
+                t.join(10)
+        self.assertGreater(state["calls"], 0)
+        self.assertFalse(state["overlap"], "two applies ran tc at the same time")
+
+
 def read_pcap(path):
     """Minimal pcap reader (stdlib): yields the IPv4 packets of an Ethernet or Linux-cooked capture."""
     with open(path, "rb") as f:

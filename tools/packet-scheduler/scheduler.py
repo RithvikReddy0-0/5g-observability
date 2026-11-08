@@ -386,6 +386,9 @@ class Scheduler:
         if errs:
             raise SystemExit("invalid scheduler configuration:\n  " + "\n  ".join(errs))
         self.lock = threading.Lock()
+        # One step at a time: the main loop and POST /config (HTTP thread) both call step(), and two
+        # concurrent rebuilds of the same qdisc fail ("Exclusivity flag on, cannot modify").
+        self.step_lock = threading.Lock()
         self.applied = None             # signature of what is installed
         self.trees = {}
         self.devices = {}
@@ -402,6 +405,10 @@ class Scheduler:
                           sort_keys=True)
 
     def step(self):
+        with self.step_lock:
+            self._step()
+
+    def _step(self):
         pid, ino = find_ue_container()
         if pid is None:
             with self.lock:
