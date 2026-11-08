@@ -1,0 +1,25 @@
+$ cat docs/evidence/open5gs-algorithm-comparison/simulation/simulation.md docs/evidence/open5gs-algorithm-comparison/simulation/autoscale.md
+## A. Admission on a contested URLLC slice (20 Mbps; control 10 E + blog 12 E offered; 20 000 s)
+
+| Policy | control blocked | blog blocked | value carried (k units) |
+|---|---|---|---|
+| greedy (previous default) | 20.92 % | 21.44 % | 1963.3 |
+| trunk reservation, 4 Mbps | 2.12 % | 53.56 % | 2186.0 |
+| threshold pricing | 0.36 % | 81.07 % | 2089.3 |
+
+## B. Sizing eMBB (video 20 E x 8 Mbps + file 8 E x 15 Mbps = 280 Mbps mean; 20 000 s)
+
+| Method | capacity | video blocked (simulated / KR predicted) | file blocked (simulated / KR predicted) |
+|---|---|---|---|
+| mean x 1.25 (previous default) | 350 Mbps | 3.27 % / 2.94 % | 6.42 % / 5.79 % |
+| Kaufman-Roberts, 1 % target | 412 Mbps | 0.51 % / 0.46 % | 1.21 % / 0.98 % |
+## C. Switching mMTC on and off: periodic IoT bursts, 6 simulated hours, activation 17 s
+
+| Burst every | Policy | demands refused | slice up (share of time) | switch operations |
+|---|---|---|---|---|
+| 300 s (60 s long) | always on | 0 of 4435 (0.0 %) | 100 % | 0 |
+| 300 s (60 s long) | reactive | 1866 of 4435 (42.1 %) | 60 % | 143 |
+| 300 s (60 s long) | predictive | 161 of 4435 (3.6 %) | 69 % | 143 |
+| 600 s (60 s long) | always on | 0 of 2214 (0.0 %) | 100 % | 0 |
+| 600 s (60 s long) | reactive | 925 of 2214 (41.8 %) | 30 % | 71 |
+| 600 s (60 s long) | predictive | 114 of 2214 (5.1 %) | 35 % | 71 |

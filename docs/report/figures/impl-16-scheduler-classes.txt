@@ -1,0 +1,24 @@
+$ python3 tools/packet-scheduler/scheduler.py --show
+packet scheduler: mode sliced, cell 250 Mbps down / 100 Mbps up, on veth9b178f7 (host veth) and eth0 (UE container)
+critical URLLC devices tracked from their logs: 10.46.0.112, 10.46.0.113, 10.46.0.115
+
+class    slice       tier   prio  guar Mbps  ceil Mbps queue              pkts down      pkts up    drops
+1:10     signalling  -      0           5.0      250.0 pfifo limit 256        17587        14586        0
+1:99     other       -      6           7.5      250.0 fq_codel                 421          525        0
+1:20     eMBB        -      3         150.0      250.0 fq_codel                 840          840        0
+1:30     URLLC       all    -          25.0      250.0 (parent)                 420        75489        0
+1:31     URLLC       arp1   1           7.5      250.0 pfifo limit 64           126        22647        0
+1:32     URLLC       arp2   2          17.5      250.0 pfifo limit 64           294        52842        0
+1:40     mMTC        -      4          12.5      250.0 fq_codel                2960         4025        0
+
+filters (downlink; uplink reads the inner SOURCE address instead of the destination):
+  prio 1  rls msg 4                                -> 1:10
+  prio 1  rls msg 5                                -> 1:10
+  prio 1  rls msg 7                                -> 1:10
+  prio 2  rrc                                      -> 1:10
+  prio 3  URLLC arp1 10.46.0.112                   -> 1:31
+  prio 3  URLLC arp1 10.46.0.113                   -> 1:31
+  prio 3  URLLC arp1 10.46.0.115                   -> 1:31
+  prio 4  eMBB pool                                -> 1:20
+  prio 4  URLLC pool (arp2)                        -> 1:32
+  prio 4  mMTC pool                                -> 1:40

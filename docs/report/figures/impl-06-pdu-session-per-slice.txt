@@ -1,0 +1,34 @@
+$ for i in 001 021 031; do docker exec o5gs-ue nr-cli imsi-208930000000$i -e ps-list; done
+== imsi-208930000000001
+ state: PS-ACTIVE
+ apn: internet
+  sst: 0x01
+  sd: 0x010203
+ address: 10.45.1.237
+ ambr: up[200000Kb/s] down[200000Kb/s]
+ state: PS-ACTIVE
+ apn: urllc
+  sst: 0x02
+  sd: 0x112233
+ address: 10.46.2.14
+ ambr: up[20000Kb/s] down[20000Kb/s]
+== imsi-208930000000021
+ state: PS-ACTIVE
+ apn: urllc
+  sst: 0x02
+  sd: 0x112233
+ address: 10.46.2.6
+ ambr: up[20000Kb/s] down[20000Kb/s]
+ state: PS-ACTIVE
+ apn: internet
+  sst: 0x01
+  sd: 0x010203
+ address: 10.45.2.1
+ ambr: up[200000Kb/s] down[200000Kb/s]
+== imsi-208930000000031
+ state: PS-ACTIVE
+ apn: iot
+  sst: 0x03
+  sd: 0x334455
+ address: 10.47.4.192
+ ambr: up[1000Kb/s] down[1000Kb/s]

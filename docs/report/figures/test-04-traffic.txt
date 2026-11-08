@@ -1,0 +1,14 @@
+$ bash scripts/open5gs/traffic.sh 150 3 down both
+== downlink, 150s, 3 UEs on each loaded slice (both) — flows run simultaneously
+
+  eMBB  (session AMBR 200 Mbps)
+    UE 10.45.0.2      156.6 Mbps
+    UE 10.45.0.3      152.3 Mbps
+    UE 10.45.0.5      145.5 Mbps
+    total   454.3 Mbps   mean per session  151.4 Mbps   (76% of AMBR over 150s)
+
+  URLLC  (session AMBR 20 Mbps)
+    UE 10.46.0.2       19.4 Mbps
+    UE 10.46.0.3       19.4 Mbps
+    UE 10.46.0.4       19.4 Mbps
+    total    58.1 Mbps   mean per session   19.4 Mbps   (97% of AMBR over 150s)

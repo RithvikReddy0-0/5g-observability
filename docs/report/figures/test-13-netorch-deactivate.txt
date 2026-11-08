@@ -1,0 +1,11 @@
+$ python3 tools/network-orchestrator/netorch.py deactivate mMTC; python3 tools/network-orchestrator/netorch.py status
+  stop admitting        0.0s  slice orchestrator admits nothing more; 0 flows active
+  drain                 0.0s  no admitted flows left
+  ues                  13.3s  70 UEs deregistered and stopped, 0 still up
+  second sessions       0.9s  other slices' devices released their second session on mMTC (0 left)
+  network functions     3.0s  gNB, data network and UPF stopped
+  verify                0.9s  other slices kept every UE; core still holds 1 session(s) on mMTC
+deactivate mMTC: done in 19.3s
+eMBB   ACTIVE       UEs  20/20   core sessions 30    NFs upf dn gnb  cpus 0.0
+URLLC  ACTIVE       UEs  10/10   core sessions 30    NFs upf dn gnb  cpus 0.0
+mMTC   DORMANT      UEs   0/70   core sessions 1     NFs -  cpus None

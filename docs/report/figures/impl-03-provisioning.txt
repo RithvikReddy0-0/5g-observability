@@ -1,0 +1,8 @@
+$ python3 scripts/open5gs/provision_subscribers.py
+provisioning 100 subscribers into o5gs-mongodb (database open5gs)
+upserted 100 subscribers
+total in db: 100
+  home slice sst 1/010203  dnn=internet  5qi=9  arp=8  -> 20 subscribers
+  home slice sst 2/112233  dnn=urllc  5qi=82  arp=1  -> 3 subscribers
+  home slice sst 2/112233  dnn=urllc  5qi=82  arp=2  -> 7 subscribers
+  home slice sst 3/334455  dnn=iot  5qi=9  arp=12  -> 70 subscribers

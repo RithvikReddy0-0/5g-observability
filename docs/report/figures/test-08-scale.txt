@@ -1,0 +1,10 @@
+$ sed -n '13,20p;/Part 2/,/^$/p' docs/evidence/open5gs-scale/README.md
+
+| UEs at once | All attached in | Registration p50 / p95 | PDU session p50 / p95 | Reg. failures | Peak CPU (% of one core) |
+|---|---|---|---|---|---|
+| 1 | 111 s | 39 / 75 ms | 223 / 231 ms | 0 | every NF < 6 % |
+| 10 (default) | 35 s | 141 / 194 ms | 48 / 75 ms | 0 | SCP 19 · gNB-mMTC 15 · AMF 8 · UDM 8 |
+| 25 | 16 s | 300 / 404 ms | 95 / 146 ms | 0 | SCP 37 · gNB-mMTC 22 · AMF 18 · MongoDB 17 · UDM 16 |
+| 100 | **7 s** | **2409 / 2526 ms** | 221 / 524 ms | 0 | **SCP 83** · MongoDB 56 · AMF 52 · UDM 40 · UDR 34 |
+
+## Part 2 — scale steps: eMBB 20 + URLLC 10 + more mMTC devices, at rest

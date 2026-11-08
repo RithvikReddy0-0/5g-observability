@@ -24,9 +24,9 @@ the ratified ODE. That distinction determines what could and could not be proven
 | Phase-1 acceptance (runnable subset) | **PASS=12, FAIL=0** | `tests/acceptance.sh` |
 | KPI gate enforces thresholds in CI | **10 enforced, 2 ODE-only** | `make gate`: 10/10 PASS on a live deployment, exit 1 with an NF stopped |
 | **Open5GS: UEs with a working PDU session** | **100 / 100** in three slices (eMBB 20, URLLC 10, mMTC 70) | interface per UE + ping/iperf3 through each slice's UPF |
-| **Open5GS: per-slice KPIs (Phase 2b)** | **URLLC 0.90 · eMBB 0.37 · mMTC 1.00** | scored against the team's targets; Excel report |
+| **Open5GS: per-slice KPIs, with the packet scheduler** | **URLLC 1.00 · eMBB 0.32 · mMTC 1.00** (URLLC p99 7.3 ms, inside 10 ms for the first time; was 0.90 / 0.37 / 1.00 before ADR-019) | scored against the team's targets; Excel report, run 20261108-092934Z |
 | **Open5GS: where this laptop stops** | **~300 UEs** (clean up to 200) | `scale_test.sh`: attach bursts and steps, cgroup CPU |
-| **Open5GS: KPI gate incl. user plane** | **PASS, 0 failed** (22 passed, 2 advisory, 24 KPIs) | live stack, each slice at its own size |
+| **Open5GS: KPI gate incl. user plane** | **PASS, 0 failed** (24 passed, 3 advisory, 27 KPIs) | live stack, each slice at its own size, incl. "the cell drops no signalling" |
 | **Open5GS: URLLC isolated from a saturated eMBB** | **10 / 10** reachable, 3 of 3 runs | `isolation_test.sh`, a gNB + UPF per slice |
 | **Open5GS: orchestrator flows delivered** | **164 / 165** | real UDP flows, both slices saturated |
 | **Open5GS: priority inside URLLC (ARP)** | **5 / 5** critical demands admitted by pre-emption | standard demands refused while the slice is full |
@@ -35,7 +35,13 @@ the ratified ODE. That distinction determines what could and could not be proven
 | **Simulated: admission, sizing, switching** | reservation: critical blocking 21 % → 2 %; Kaufman–Roberts meets 1 % blocking (mean × 1.25: 3–6 %); predictive switching: refusals 42 % → 4–5 % | real decision code, 20 000 s / 6 h |
 | **Open5GS: slice lifecycle (network orchestrator)** | mMTC off in **14.5 s**, on in **12.2 s**; core sessions 70 → 0 → 70 | each step verified; URLLC 0 packets lost meanwhile; a missed deadline rolled back |
 | **Open5GS: closed loop on demand** | mMTC activated when IoT demand appeared, deactivated after 67 s idle | 21 IoT demands refused while it came up, then 81 admitted |
-| **Open5GS: acceptance** | **PASS=22, FAIL=0** | `tests/acceptance-open5gs.sh` |
+| **Open5GS: packet scheduler — shared cell, no scheduler vs sliced** | FIFO cell: **93–99 of 100 UEs lost their radio link** in every overload run; sliced: **0**, URLLC 0 % loss | `make o5gs-scheduler-test`, 2 rounds per comparison ([ADR-019](adr/ADR-019-packet-scheduler.md)) |
+| **Open5GS: packet scheduler where the cell is the bottleneck** | URLLC p99 **4.3–5.0 ms**, mMTC 4.3–5.5 ms, idle eMBB device 10–18 ms (FIFO: ~107 ms, 97–99 radio-link failures) | eMBB 150 Mbps into a 100 Mbps cell |
+| **Open5GS: ARP per packet on the cell** | critical URLLC p99 **3.2 / 7.8 ms, 0 % loss** while the standard tier floods it (FIFO: 106 / 235 ms, 26 % loss) | six standard devices at their AMBR into a 100 Mbps cell |
+| **Open5GS: guaranteed share as a knob** | mMTC delivered 3.7 / 5.6 / 8.4 / 11.2 / 14.0 Mbps for guarantees of 3 / 6 / 9 / 12 / 15 | 60 Mbps cell, share swept |
+| **Open5GS: multi-session UEs** | **130 sessions** (eMBB 30, URLLC 30, mMTC 70), 130 / 130 data paths; 6 / 6 demands on the other slice run on the requester's own session | [ADR-020](adr/ADR-020-multi-session-ues.md) |
+| **Open5GS: slice lifecycle with second sessions** | URLLC off **10.8 s** (eMBB phones keep their registration, core URLLC sessions → 0), on **34.5 s** (20 / 20 second sessions back, data path sampled) | `scripts/open5gs/multi_session_demo.sh` |
+| **Open5GS: acceptance** | **PASS=24, FAIL=0** (incl. second sessions; baseline tagged `open5gs-baseline-20261108`) | `tests/acceptance-open5gs.sh` |
 | **Open5GS: broken deploy rolled back** | **automatic** | `deploy.sh`, gate failed 8 KPIs |
 | **Open5GS on Kubernetes** | **same gate PASS** | minikube, 22 pods, 100 UEs in three slices |
 | PDU session / user-plane data path | **BLOCKED** | needs gtp5g — ODE only |

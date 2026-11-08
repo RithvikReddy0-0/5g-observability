@@ -1,0 +1,9 @@
+$ grep -h -E '^(== |DECISION|  \[  FAIL|  restored|  re-gated)' docs/evidence/open5gs-deploy/deploy-20260914-0922*.txt
+== 09:22:25 1. validate the candidate (static, the running stack is not touched)
+DECISION: REJECTED before deployment — static validation failed; the running stack is unchanged
+== 09:22:56 1. validate the candidate (static, the running stack is not touched)
+== 09:22:58 2. last known-good
+== 09:23:01 3. apply the candidate
+== 09:25:17 4. KPI gate on the candidate
+== 09:25:18 5. ROLLBACK — the candidate failed the gate
+DECISION: REJECTED and ROLLED BACK — the stack is on the known-good configuration and passes the gate

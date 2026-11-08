@@ -1,0 +1,11 @@
+$ docker exec o5gs-ue sh /etc/ueransim/ue-slice.sh status; ip -4 -o addr show | grep uesimtun
+eMBB active 20 20
+URLLC active 10 10
+mMTC active 70 70
+
+PDU sessions by pool and kind (PSI 1 = home, ADR-020):
+     20 10.45 home
+     10 10.45 second
+     10 10.46 home
+     20 10.46 second
+     70 10.47 home

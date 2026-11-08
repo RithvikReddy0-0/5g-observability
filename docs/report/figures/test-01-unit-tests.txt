@@ -1,0 +1,15 @@
+$ python3 tools/slice-orchestrator/test_decide.py; python3 tools/network-orchestrator/test_netorch.py; python3 tools/kpi/scorecard.py --self-test; python3 tools/kpi-gate/kpi_gate.py --self-test; python3 tools/check_open5gs_slices.py
+Ran 53 tests in 2.183s
+
+OK
+Ran 19 tests in 0.935s
+
+OK
+self-test passed — at-target scores 1.0, misses score target/measured, unknown is not scored
+
+self-test passed — the gate rejects breaches and accepts conforming values
+Ran 23 tests in 0.262s
+
+OK
+5 UE session definition(s) checked, 0 inconsistency(ies)
+UE plan matches O5GS_UES: eMBB 20, URLLC 10, mMTC 70 (100 UEs)

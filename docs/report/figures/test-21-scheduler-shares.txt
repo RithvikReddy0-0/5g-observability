@@ -1,0 +1,10 @@
+$ sed -n '/^## C/,$p' docs/evidence/open5gs-scheduler/20261108-075626Z/summary.md
+## C — shares: eMBB 160 + mMTC 40 Mbps offered into a 60 Mbps cell
+
+| mMTC share | mMTC guaranteed | mMTC delivered | eMBB delivered | URLLC critical p99 |
+|---|---|---|---|---|
+| 5 % | 3.0 Mbps | 3.69 Mbps | 52.44 Mbps | 66.827 |
+| 10 % | 6.0 Mbps | 5.6 Mbps | 50.65 Mbps | 17.604 |
+| 15 % | 9.0 Mbps | 8.44 Mbps | 47.69 Mbps | 21.702 |
+| 20 % | 12.0 Mbps | 11.18 Mbps | 45.04 Mbps | 21.904 |
+| 25 % | 15.0 Mbps | 13.98 Mbps | 42.31 Mbps | 19.201 |

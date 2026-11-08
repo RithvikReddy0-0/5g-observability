@@ -1,0 +1,12 @@
+$ sed -n '1,12p' docs/evidence/open5gs-network-orchestrator/2-rollback.txt
+== experiment 2: an activation that misses its deadline is rolled back
+deactivate mMTC: done in 14.7s
+
+-- activate with ACTIVATE_DEADLINE=10 s
+  rollback              0.0s  stopped o5gs-upf-mmtc
+activate mMTC: rolled_back in 11.2s — PFCP association of o5gs-upf-mmtc with the SMF not reached within 10s
+
+eMBB   ACTIVE       UEs  20/20   core sessions 20    NFs upf dn gnb  cpus 0.0
+URLLC  ACTIVE       UEs  10/10   core sessions 10    NFs upf dn gnb  cpus 0.0
+mMTC   DORMANT      UEs   0/70   core sessions 0     NFs -  cpus None
+  mMTC containers running: 0

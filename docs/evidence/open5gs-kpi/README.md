@@ -14,6 +14,21 @@
 KPIs, targets and weights: [`deployments/open5gs/kpi-scorecard.json`](../../../deployments/open5gs/kpi-scorecard.json),
 explained in [`docs/kpi-scorecard.md`](../../kpi-scorecard.md).
 
+## Run `20261108-092934Z` — with the packet scheduler and multi-session UEs
+
+Standard instance only (`make o5gs-kpi`), same load as below, with the packet scheduler on (ADR-019,
+250 Mbps downlink cell) and eMBB/URLLC devices holding a second session (ADR-020).
+
+| Slice | Measured | Score |
+|---|---|---|
+| URLLC | latency mean 1.65 ms, p95 3.85 ms, **p99 7.26 ms** (target 10 ms: met), loss 0 | **1.00** (was 0.90) |
+| eMBB | 5th percentile 11.25 Mbps, aggregate 228.1 Mbps (capped by the cell) | 0.32 (was 0.37) |
+| mMTC | registration 100 %, report loss 0, p99 5.0 ms | 1.00 |
+
+URLLC meets its tail budget for the first time on this laptop: its packets are served first on the
+cell, and capping eMBB at the cell also lowers the CPU load that set URLLC's tail before. eMBB pays
+for it in aggregate throughput. [Scorecard](20261108-092934Z/scorecard.md).
+
 ## Run `20261001-124845Z`
 
 The stack ran with eMBB 20, URLLC 10 and mMTC 70 UEs, the URLLC and mMTC traffic profiles always on,

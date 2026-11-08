@@ -1,0 +1,21 @@
+$ tc filter show dev veth9b178f7; tc -s class show dev veth9b178f7 classid 1:31   # the kernel's own view
+filter parent 1: protocol ip pref 1 u32 chain 0 fh 800::800 order 2048 key ht 800 bkt 0 flowid 1:10 not_in_hw 
+  match 00110000/00ff0000 at 8
+  match 13850000/ffff0000 at 20
+  match 04000000/ff000000 at 32
+filter parent 1: protocol ip pref 1 u32 chain 0 fh 800::801 order 2049 key ht 800 bkt 0 flowid 1:10 not_in_hw 
+  match 00110000/00ff0000 at 8
+  match 13850000/ffff0000 at 20
+  match 05000000/ff000000 at 32
+filter parent 1: protocol ip pref 1 u32 chain 0 fh 800::802 order 2050 key ht 800 bkt 0 flowid 1:10 not_in_hw 
+  match 00110000/00ff0000 at 8
+  match 13850000/ffff0000 at 20
+  match 07000000/ff000000 at 32
+filter parent 1: protocol ip pref 2 u32 chain 0 fh 801::800 order 2048 key ht 801 bkt 0 flowid 1:10 not_in_hw 
+  match 00110000/00ff0000 at 8
+
+class htb 1:31 parent 1:30 leaf 31: prio 1 rate 7500Kbit ceil 250Mbit burst 64Kb cburst 256Kb
+ Sent 19608 bytes 129 pkt (dropped 0, overlimits 0 requeues 0) 
+ backlog 0b 0p requeues 0
+ lended: 129 borrowed: 0 giants: 0
+ tokens: 1088216 ctokens: 130996

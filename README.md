@@ -40,16 +40,19 @@ gtp5g) are pinned by SHA in [`manifest.lock`](manifest.lock) and fetched into a 
 | Dynamic allocation (Phase 2b) | ✅ ARP priority inside URLLC: critical devices pre-empt standard ones, 5/5. Feedback controller moves eMBB's admission limit: eMBB flows getting their rate 68 % → 100 %, URLLC p95 20.5 → 12.5 ms. Slice planning from demand ([results](docs/evidence/open5gs-orchestrator-dynamic/README.md), [ADR-016](docs/adr/ADR-016-dynamic-slice-allocation.md)) |
 | Algorithms compared (state of the art) | ✅ For every orchestration decision, the strongest methods from the literature were implemented and raced under identical conditions. A **PI controller** kept URLLC within budget 100 % of the time (AIMD: 79.5 %), with as much eMBB as no control. Trunk reservation, Kaufman–Roberts sizing and predictive switching won their comparisons. All four are now the defaults ([comparison](docs/algorithm-comparison.md), [ADR-018](docs/adr/ADR-018-algorithm-comparison.md)) |
 | Network orchestrator (slice lifecycle) | ✅ mMTC deactivated in 14.5 s (core sessions 70 → 0, other slices untouched) and activated in 12.2 s with every step verified. A missed deadline is rolled back automatically. Closed loop switches mMTC on IoT demand and off when idle. CPU quota per slice ([results](docs/evidence/open5gs-network-orchestrator/README.md), [ADR-017](docs/adr/ADR-017-network-orchestrator.md)) |
-| KPI gate — Open5GS | ✅ 0 failed on the live stack (24 KPIs: 19 enforced, 5 advisory; each slice at its own size) |
+| Packet scheduler (ADR-019) | ✅ Every radio packet is classified from its headers (signalling or user data, which slice, which ARP tier) and the slices share an emulated cell by guaranteed shares and priorities. Without it, an overloaded shared cell made 93–99 of 100 UEs lose their radio link; with it, none, and URLLC p99 4–5 ms where the cell is the bottleneck. URLLC now meets its 10 ms p99 budget in the KPI run ([evidence](docs/evidence/open5gs-scheduler/README.md), [ADR-019](docs/adr/ADR-019-packet-scheduler.md)) |
+| Multi-session UEs (ADR-020) | ✅ eMBB and URLLC devices hold a session on both slices (130 sessions); a demand placed on the other slice runs on the requester's own session; switching a slice off releases only the other devices' session on it ([evidence](docs/evidence/open5gs-multi-session/README.md), [ADR-020](docs/adr/ADR-020-multi-session-ues.md)) |
+| KPI gate — Open5GS | ✅ 0 failed on the live stack (27 KPIs: 24 passed, 3 advisory; each slice at its own size; the cell drops no signalling) |
 | Deploy with automatic rollback | ✅ `scripts/open5gs/deploy.sh` — static reject, gate-fail rollback, deploy all demonstrated; the three-slice topology itself was deployed through it |
-| Per-slice KPIs (Phase 2b) | ✅ measured and scored against the team's targets: URLLC 0.90 · eMBB 0.37 · mMTC 1.00; three one-parameter sweeps; Excel report ([results](docs/evidence/open5gs-kpi/README.md), [ADR-015](docs/adr/ADR-015-traffic-profiles-and-kpi-scorecard.md)) |
+| Per-slice KPIs (Phase 2b) | ✅ measured and scored against the team's targets: URLLC 1.00 · eMBB 0.32 · mMTC 1.00 with the packet scheduler (0.90 · 0.37 · 1.00 before it); three one-parameter sweeps; Excel report ([results](docs/evidence/open5gs-kpi/README.md), [ADR-015](docs/adr/ADR-015-traffic-profiles-and-kpi-scorecard.md)) |
 | Kubernetes — Open5GS | ✅ minikube, manifests generated from compose; three slices and 100 UEs, same KPI gate passes ([ADR-013](docs/adr/ADR-013-kubernetes-open5gs.md)) |
 | Structured JSON logs | ⚠️ not configurable upstream — documented gap ([`docs/logging.md`](docs/logging.md)) |
-| Phase 1 freeze / baseline tag | ❌ not possible without the user plane |
+| Phase 1 freeze (free5GC) | ❌ not possible without the user plane (ODE) |
+| Open5GS baseline tag | ✅ `open5gs-baseline-20261108`, before the scheduler and multi-session changes |
 
 Run the checks yourself: `tests/acceptance.sh` (currently PASS=12, FAIL=0, SKIP-ODE=7, GAP=1).
 It refuses to report Phase 1 complete on a non-baseline host.
-Open5GS stack: `make o5gs-test` (currently PASS=22, FAIL=0, SKIP-ODE=1, GAP=1, OWNER=1).
+Open5GS stack: `make o5gs-test` (currently PASS=24, FAIL=0, SKIP-ODE=1, GAP=1, OWNER=0).
 
 ## Repository layout
 

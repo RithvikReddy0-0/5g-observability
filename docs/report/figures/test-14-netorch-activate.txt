@@ -1,0 +1,12 @@
+$ python3 tools/network-orchestrator/netorch.py activate mMTC; python3 tools/network-orchestrator/netorch.py status
+  upf                   3.3s  associated with the SMF (10.53.0.9)
+  data network          0.4s  running
+  gnb                   1.5s  NG Setup done
+  ues                   5.5s  70/70 UEs with a PDU session
+  data path             3.8s  3/3 sampled UEs reach 10.47.0.1 through the UPF
+  second sessions       2.0s  0/0 other slices' devices have their second session on mMTC again; 0/0 sampled reach 10.47.0.1
+  admit                 0.0s  slice orchestrator admits
+activate mMTC: done in 16.6s
+eMBB   ACTIVE       UEs  20/20   core sessions 30    NFs upf dn gnb  cpus 0.0
+URLLC  ACTIVE       UEs  10/10   core sessions 30    NFs upf dn gnb  cpus 0.0
+mMTC   ACTIVE       UEs  70/70   core sessions 70    NFs upf dn gnb  cpus 0.0

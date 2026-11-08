@@ -197,6 +197,36 @@ A dormant slice's UEs are **parked** (`ran/ue-slice.sh`): the UE supervisor leav
 restart of the UE container keeps them down. `deploy.sh` refuses to run while a slice is dormant.
 Evidence: [`open5gs-network-orchestrator`](evidence/open5gs-network-orchestrator/README.md).
 
+## Packet scheduler ([ADR-019](adr/ADR-019-packet-scheduler.md))
+
+Every UE's radio traffic crosses one link, the UE container's interface: that is the cell. The
+scheduler (`make o5gs-scheduler`, a privileged container on the host network) gives it a capacity
+(`SCHED_CELL_DL_MBPS` 250, `SCHED_CELL_UL_MBPS` 100) and classifies every packet from its headers:
+RLS message and PDU type (signalling or user data), then the UE's inner address (slice, and ARP tier
+for URLLC). HTB serves signalling, URLLC critical, URLLC standard, eMBB, mMTC in that order, each
+with a guaranteed share it may exceed. `python3 tools/packet-scheduler/scheduler.py --show` prints
+the live tree; `POST :9114/config` changes mode, cell and shares at run time.
+
+| Experiment (`make o5gs-scheduler-test`) | FIFO cell (no scheduler) | Sliced |
+|---|---|---|
+| eMBB 2× the cell, CPU saturated | 95, 99 radio-link failures; URLLC 77–100 % loss | 0; URLLC 0 % loss (p99 27–48 ms: CPU) |
+| eMBB 1.5× the cell | 97, 99 radio-link failures; ~107 ms | 0; URLLC p99 4.3–5.0 ms |
+| URLLC standard tier floods the cell | critical p99 106 / 235 ms, 26 % loss | critical p99 3.2 / 7.8 ms, 0 % |
+
+With the scheduler on, eMBB is capped by the cell (228 Mbps aggregate in the KPI run) and URLLC's
+p99 is 7.3 ms. Evidence: [`open5gs-scheduler`](evidence/open5gs-scheduler/README.md).
+
+## Multi-session UEs ([ADR-020](adr/ADR-020-multi-session-ues.md))
+
+eMBB and URLLC devices open a second PDU session on the other slice they are permitted on, on
+demand once every UE is up (`extraSessions:` in their config; a configured default session cannot be
+released — UERANSIM re-opens it at once). PSI 1 is the home session; interface names do not say
+which session is which, so `docker exec o5gs-ue sh /etc/ueransim/ue-slice.sh sessions` lists them:
+`<imsi> <psi> <interface> <address> home|second`. 130 sessions in all; the SMF counts eMBB 30,
+URLLC 30, mMTC 70. The slice orchestrator runs a flow on the requester's own session; deactivating
+a slice releases the other devices' second session on it and activation opens it again. Evidence:
+[`open5gs-multi-session`](evidence/open5gs-multi-session/README.md).
+
 ---
 
 ## Which metrics can be trusted
@@ -381,6 +411,7 @@ Every container restarts by policy and the UEs re-attach on their own. **Keep a 
   and the per-UE liveness probe stops being trustworthy ([scale](evidence/open5gs-scale/README.md)).
 - **Grafana and the orchestrator on Kubernetes**, and anything beyond single-node minikube.
 - **CPU isolation between slices** — URLLC's tail budget is not met on this laptop.
-- **A slice-aggregate rate limit in the network** — only admission enforces it.
-- **Tagging a baseline** — the owner's decision.
+- **Radio-level scheduling.** The packet scheduler works on IP packets of an emulated cell; UERANSIM
+  has no resource blocks or slots. A real RAN (OpenAirInterface, srsRAN) is needed for that.
+- **The packet scheduler on Kubernetes** (it would be a privileged DaemonSet).
 - The **bare-metal environment freeze** (`VERSIONS.lock`) — needs the ODE.

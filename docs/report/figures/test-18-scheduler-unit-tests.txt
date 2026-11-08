@@ -1,0 +1,29 @@
+$ python3 tools/packet-scheduler/test_scheduler.py -v 2>&1 | tail -28
+test_anything_else_lands_in_the_default_class (__main__.Classification.test_anything_else_lands_in_the_default_class) ... ok
+test_critical_subscribers_get_their_own_tier (__main__.Classification.test_critical_subscribers_get_their_own_tier) ... ok
+test_direction_matters (__main__.Classification.test_direction_matters) ... ok
+test_signalling_is_recognised_in_both_directions (__main__.Classification.test_signalling_is_recognised_in_both_directions) ... ok
+test_slice_comes_from_the_packet_not_from_the_gnb (__main__.Classification.test_slice_comes_from_the_packet_not_from_the_gnb) ... ok
+test_truncated_packets_do_not_match (__main__.Classification.test_truncated_packets_do_not_match) ... ok
+test_user_data_goes_to_the_slice_of_the_inner_address (__main__.Classification.test_user_data_goes_to_the_slice_of_the_inner_address) ... ok
+test_a_slice_without_a_share_is_rejected (__main__.Configuration.test_a_slice_without_a_share_is_rejected) ... ok
+test_an_unknown_mode_is_rejected (__main__.Configuration.test_an_unknown_mode_is_rejected) ... ok
+test_overcommitted_guarantees_are_rejected (__main__.Configuration.test_overcommitted_guarantees_are_rejected) ... ok
+test_the_repository_configuration_is_valid (__main__.Configuration.test_the_repository_configuration_is_valid) ... ok
+test_tiers_follow_imsi_order (__main__.Configuration.test_tiers_follow_imsi_order) ... ok
+test_offsets_follow_the_rls_layout (__main__.Format.test_offsets_follow_the_rls_layout) ... ok
+test_u32_offsets_need_no_alignment_tricks_beyond_u16 (__main__.Format.test_u32_offsets_need_no_alignment_tricks_beyond_u16) ... ok
+test_every_captured_radio_packet_is_classified_into_a_slice_or_signalling (__main__.RealTraffic.test_every_captured_radio_packet_is_classified_into_a_slice_or_signalling) ... ok
+test_delay_critical_slices_get_short_fifos_others_fair_queues (__main__.Tree.test_delay_critical_slices_get_short_fifos_others_fair_queues) ... ok
+test_fifo_mode_is_one_queue_at_the_same_capacity_with_no_filters (__main__.Tree.test_fifo_mode_is_one_queue_at_the_same_capacity_with_no_filters) ... ok
+test_guarantees_are_shares_of_the_cell_and_every_class_may_borrow_it (__main__.Tree.test_guarantees_are_shares_of_the_cell_and_every_class_may_borrow_it) ... ok
+test_off_mode_installs_nothing (__main__.Tree.test_off_mode_installs_nothing) ... ok
+test_priorities_order_the_classes (__main__.Tree.test_priorities_order_the_classes) ... ok
+test_tc_lines_are_well_formed (__main__.Tree.test_tc_lines_are_well_formed) ... ok
+test_unknown_critical_addresses_fall_back_to_the_pool (__main__.Tree.test_unknown_critical_addresses_fall_back_to_the_pool) ... ok
+test_uplink_uses_the_uplink_cell (__main__.Tree.test_uplink_uses_the_uplink_cell) ... ok
+
+----------------------------------------------------------------------
+Ran 23 tests in 0.148s
+
+OK

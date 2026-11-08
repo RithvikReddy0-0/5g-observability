@@ -1,0 +1,10 @@
+$ for g in o5gs-gnb-embb o5gs-gnb-urllc o5gs-gnb-mmtc; do docker logs $g | grep "NG Setup"; done
+== o5gs-gnb-embb
+[2026-11-08 08:41:37.707] [ngap] [info] NG Setup procedure is successful
+gnb-entrypoint: NG Setup done; watching the N2 association
+== o5gs-gnb-urllc
+[2026-11-08 09:27:36.882] [ngap] [info] NG Setup procedure is successful
+gnb-entrypoint: NG Setup done; watching the N2 association
+== o5gs-gnb-mmtc
+[2026-11-08 07:25:59.661] [ngap] [info] NG Setup procedure is successful
+gnb-entrypoint: NG Setup done; watching the N2 association

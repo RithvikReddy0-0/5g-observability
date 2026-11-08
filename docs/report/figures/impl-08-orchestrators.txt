@@ -1,0 +1,10 @@
+$ python3 tools/network-orchestrator/netorch.py status; curl -s localhost:9111/state
+eMBB   ACTIVE       UEs  20/20   core sessions 30    NFs upf dn gnb  cpus 0.0
+URLLC  ACTIVE       UEs  10/10   core sessions 30    NFs upf dn gnb  cpus 0.0
+mMTC   ACTIVE       UEs  70/70   core sessions 70    NFs upf dn gnb  cpus 0.0
+
+slice orchestrator: open5gs | executing flows: True
+  eMBB   active=True  capacity   500 Mbps  admission limit  500.0 Mbps  5QI 9
+  URLLC  active=True  capacity    20 Mbps  admission limit   20.0 Mbps  5QI 82
+  mMTC   active=True  capacity    10 Mbps  admission limit   10.0 Mbps  5QI 9
+  controller: policy pi, protects URLLC p95 - last reading 3.219 ms

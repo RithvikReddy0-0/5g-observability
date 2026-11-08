@@ -1,0 +1,41 @@
+$ cat docs/evidence/open5gs-multi-session/20261108-092615Z/3-lifecycle.txt
+== 3. lifecycle with second sessions — URLLC off, then on
+  before:
+  10.45 home       20
+  10.45 second     10
+  10.46 home       10
+  10.46 second     20
+  10.47 home       70
+
+-- deactivate URLLC
+  stop admitting        0.0s  slice orchestrator admits nothing more; 0 flows active
+  drain                 0.0s  no admitted flows left
+  ues                   3.6s  10 UEs deregistered and stopped, 0 still up
+  second sessions       1.7s  other slices' devices released their second session on URLLC (0 left)
+  network functions     2.9s  gNB, data network and UPF stopped
+  verify                1.2s  other slices kept every UE; core still holds 0 session(s) on URLLC
+deactivate URLLC: done in 10.8s
+
+  after deactivation:
+  10.45 home       20
+  10.47 home       70
+  core (SMF) sessions: 1-010203 20, 2-112233 0, 3-334455 70
+  eMBB phones still registered with their home session: 20/20
+
+-- activate URLLC
+  upf                   3.4s  associated with the SMF (10.53.0.8)
+  data network          0.3s  running
+  gnb                   1.7s  NG Setup done
+  ues                   2.0s  10/10 UEs with a PDU session
+  data path             3.8s  3/3 sampled UEs reach 10.46.0.1 through the UPF
+  second sessions      23.2s  20/20 other slices' devices have their second session on URLLC again; 3/3 sampled reach 10.46.0.1
+  admit                 0.0s  slice orchestrator admits
+activate URLLC: done in 34.5s
+
+  after activation:
+  10.45 home       20
+  10.45 second     10
+  10.46 home       10
+  10.46 second     20
+  10.47 home       70
+  core (SMF) sessions: 1-010203 30, 2-112233 30, 3-334455 70

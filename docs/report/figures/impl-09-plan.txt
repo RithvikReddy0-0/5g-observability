@@ -1,0 +1,5 @@
+$ curl -X POST localhost:9111/plan -d '{"demands":[{"class":"control","count":10},{"class":"video","count":20},{"class":"sensor","count":70}]}'
+slices needed: 3
+  eMBB   demand  160.00 Mbps  required (Kaufman-Roberts, 1% blocking)  240.00 Mbps  (old mean x 1.25:  200.00)
+  URLLC  demand   10.00 Mbps  required (Kaufman-Roberts, 1% blocking)   18.00 Mbps  (old mean x 1.25:   12.50)
+  mMTC   demand    0.70 Mbps  required (Kaufman-Roberts, 1% blocking)    0.85 Mbps  (old mean x 1.25:    0.88)

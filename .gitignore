@@ -33,3 +33,11 @@ Thumbs.db
 
 # scripts/open5gs/deploy.sh state: known-good and rejected snapshots (local, never committed)
 /.deploy/
+
+# The project report has the team's names and roll numbers: kept local (2026-11-08).
+# Its figures (docs/report/figures) and the tools that make them are committed.
+docs/report/full/
+docs/report/*.tex
+docs/report/*.pdf
+docs/report/*.log
+docs/report/*.aux

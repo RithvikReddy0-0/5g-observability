@@ -1,0 +1,8 @@
+$ sed -n 47,53p docs/adr/ADR-011-dedicated-user-plane-per-slice.md   # isolation test, every run
+| Topology | URLLC min reachable, eMBB saturated | URLLC worst RTT, eMBB saturated | gNB drops, eMBB saturated |
+|---|---|---|---|
+| Shared (4 runs) | 6, 8, 9, 10 / 10 | 7.4 – 10.0 ms | 12 817 (shared gNB) |
+| **Dedicated (3 runs)** | **10, 10, 10 / 10** | **5.5 – 7.0 ms** | eMBB gNB 14 000 – 17 800 · **URLLC gNB 0** |
+
+The eMBB flood still overflows a gNB — its own. Congestion now stays inside the slice that
+caused it: eMBB probes still miss (7–9 / 10 under its own load), URLLC does not.

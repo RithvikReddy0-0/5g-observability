@@ -1,0 +1,8 @@
+$ python3 tools/check_open5gs_slices.py
+deployments/open5gs/ran/ue-slice-a.yaml: slice (1, 66051), DNN 'internet' -> gNB ['10.53.0.30'] -> UPF 10.53.0.7: consistent
+deployments/open5gs/ran/ue-slice-a.yaml: slice (2, 1122867), DNN 'urllc' -> gNB ['10.53.0.30'] -> UPF 10.53.0.8: consistent
+deployments/open5gs/ran/ue-slice-b.yaml: slice (2, 1122867), DNN 'urllc' -> gNB ['10.53.0.32'] -> UPF 10.53.0.8: consistent
+deployments/open5gs/ran/ue-slice-b.yaml: slice (1, 66051), DNN 'internet' -> gNB ['10.53.0.32'] -> UPF 10.53.0.7: consistent
+deployments/open5gs/ran/ue-slice-c.yaml: slice (3, 3359829), DNN 'iot' -> gNB ['10.53.0.34'] -> UPF 10.53.0.9: consistent
+5 UE session definition(s) checked, 0 inconsistency(ies)
+UE plan matches O5GS_UES: eMBB 20, URLLC 10, mMTC 70 (100 UEs)

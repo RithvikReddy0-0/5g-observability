@@ -1,0 +1,30 @@
+$ python3 tools/kpi-gate/kpi_gate.py --defs deployments/open5gs/kpi-gates.json   # one line per KPI
+  [  PASS  ] All 6 Open5GS metric exporters are scrapeable
+  [  PASS  ] No network or exporter target is down
+  [  PASS  ] The SMF is associated over N4 with all three slice UPFs
+  [  PASS  ] All three slice gNBs are connected over N2
+  [  PASS  ] All 100 UEs are attached
+  [  PASS  ] Every PDU session has a user-plane session at a UPF
+  [  PASS  ] Each slice's own UPF holds sessions
+  [  PASS  ] eMBB holds its 30 PDU sessions (20 devices + 10 URLLC devices' second sessions)
+  [  PASS  ] URLLC holds its 30 PDU sessions (10 devices + 20 eMBB devices' second sessions)
+  [  PASS  ] mMTC holds its 70 PDU sessions
+  [  PASS  ] All three slices appear in the SMF's slice-labelled metrics
+  [  PASS  ] The UPFs hold QoS flows for all three slices' DNNs
+  [  PASS  ] All three slices' UPF devices are measurable
+  [  PASS  ] Every eMBB UE (20) answered through its UPF within 30 s
+  [  PASS  ] Every URLLC UE (10) answered through its UPF within 30 s
+  [  PASS  ] Every mMTC UE (70) answered through its UPF within 30 s
+  [  PASS  ] URLLC average round-trip time within its 10 ms budget (1 min)
+  [  PASS  ] eMBB worst round-trip time within its 300 ms budget (1 min)
+  [  PASS  ] mMTC worst round-trip time within its 1000 ms budget (1 min)
+  [  WARN  ] URLLC worst-case round-trip time within 10 ms (1 min)
+  [  PASS  ] No URLLC probe lost in the last minute
+  [  PASS  ] No UE registration failures in the last 5 minutes
+  [  PASS  ] All three slices carried user traffic in the last 5 minutes
+  [  PASS  ] The slice orchestrator is being scraped
+  [  PASS  ] The network orchestrator is being scraped
+  [  PASS  ] The packet scheduler is being scraped
+  [  PASS  ] The cell scheduler drops no signalling
+  26 passed   0 failed   1 advisory   0 skipped (ODE)
+GATE PASSED

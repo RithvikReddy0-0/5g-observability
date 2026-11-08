@@ -1,0 +1,46 @@
+$ bash tests/acceptance-open5gs.sh
+===================================================================
+Open5GS acceptance checks — 2026-11-08T09:38:56Z
+===================================================================
+
+-- Environment & reproducibility --
+  [ PASS ] Open5GS pinned to a full SHA in manifest.lock (157f611a530e292e40ec50f9d23f0ef5d4fcd6a6)
+  [ PASS ] bootstrap --verify-only: every upstream matches manifest.lock
+  [ PASS ] external/ is not tracked by git
+  [ PASS ] running Open5GS binaries were built from the pinned commit
+  [ PASS ] UERANSIM image built from the pin with its recorded local patches (ueransim-udp-socket-buffers ueransim-monotonic-clock; ADR-012, ADR-014)
+  [ PASS ] user plane runs with no kernel module (userspace UPF over TUN, one per slice)
+  [SKIP-ODE] VERSIONS.lock environment freeze (bare-metal ODE values, not a property of the core)
+
+-- Core bring-up --
+  [ PASS ] all 23 containers running
+  [ PASS ] NRF holds registrations for AMF SMF AUSF UDM UDR PCF BSF NSSF (queried over the NRF API)
+  [ PASS ] all three slice gNBs completed NG Setup with the AMF
+  [ PASS ] SMF associated over N4 with all three slice UPFs (3 PFCP peers)
+  [ PASS ] 100 subscribers: eMBB 20, URLLC 10, mMTC 70 by home slice (100 {"1/010203":20,"2/112233":10,"3/334455":70})
+  [ PASS ] Prometheus: 14/14 stack targets up
+  [ GAP  ] structured JSON logs — Open5GS writes text logs; not configurable, same gap as free5GC (ADR-005, docs/logging.md)
+
+-- End-to-end function --
+  [ PASS ] UE registration: 100/100 UEs registered
+  [ PASS ] PDU session established, UE addressed from its slice's pool: eMBB 20/20, URLLC 10/10, mMTC 70/70
+  [ PASS ] second PDU session on the other permitted slice: eMBB devices on URLLC 20/20, URLLC devices on eMBB 10/10 (ADR-020)
+  [ PASS ] end-to-end user plane: ping and iperf3 through the UPF on all three slices, internet egress (PASS=14  FAIL=0)
+  [ PASS ] each slice's traffic is carried by its own UPF (sessions: eMBB UPF 50, URLLC UPF 30, mMTC UPF 71 — presence, ADR-011)
+  [ PASS ] slices consistent across AMF, NSSF, gNBs, SMF routing and UPF pools
+  [ PASS ] KPI gate passes (26 passed   0 failed   1 advisory)
+
+-- Understanding & documentation --
+  [ PASS ] Interface Catalog authored
+  [ PASS ] PDU Session sequence diagram authored from observed behaviour, including the data path (capture kept)
+  [ PASS ] Open5GS runbook present (docs/open5gs.md)
+  [ PASS ] teardown (down -v) and rebuild return to a working stack — rebuild-20260925-053313Z.txt
+
+-- Freeze --
+  [ PASS ] baseline tagged (open5gs-baseline-20261108; 0 commits since)
+
+===================================================================
+PASS=24  FAIL=0  SKIP-ODE=1  GAP=1  OWNER=0
+===================================================================
+RESULT: PASS (non-baseline host) — every runnable criterion passed.
+        Not complete: 1 need the ODE, 1 documented gap(s), 0 owner decision(s).

@@ -1,0 +1,32 @@
+$ bash scripts/open5gs/verify_user_plane.sh
+===================================================================
+Open5GS user-plane verification — 2026-11-08T09:36:17Z
+===================================================================
+
+-- PDU sessions --
+  [ PASS ] 100 of 100 UEs hold a PDU session address
+
+-- slice A (eMBB): pool 10.45.0.0/16, o5gs-upf-embb device ogstun --
+  [ PASS ] UE interface uesimtun00010 has 10.45.1.237 (address came from the slice's own pool)
+  [ PASS ] ping 10.45.0.1 via uesimtun00010: 5/5 replies, avg rtt 2.785 ms
+  [ PASS ] UPF ogstun received 756 bytes during the ping — traffic went through the UPF
+  [ PASS ] iperf3 UE -> o5gs-upf-embb -> o5gs-dn-embb: 90.2 Mbps
+
+-- slice B (URLLC): pool 10.46.0.0/16, o5gs-upf-urllc device ogstun2 --
+  [ PASS ] UE interface uesimtun00240 has 10.46.2.4 (address came from the slice's own pool)
+  [ PASS ] ping 10.46.0.1 via uesimtun00240: 5/5 replies, avg rtt 2.582 ms
+  [ PASS ] UPF ogstun2 received 49180 bytes during the ping — traffic went through the UPF
+  [ PASS ] iperf3 UE -> o5gs-upf-urllc -> o5gs-dn-urllc: 24.8 Mbps
+
+-- slice C (mMTC): pool 10.47.0.0/16, o5gs-upf-mmtc device ogstun3 --
+  [ PASS ] UE interface uesimtun00330 has 10.47.4.189 (address came from the slice's own pool)
+  [ PASS ] ping 10.47.0.1 via uesimtun00330: 5/5 replies, avg rtt 3.281 ms
+  [ PASS ] UPF ogstun3 received 724 bytes during the ping — traffic went through the UPF
+  [ PASS ] iperf3 UE -> o5gs-upf-mmtc -> o5gs-dn-mmtc: 1.0 Mbps
+
+-- beyond the core --
+  [ PASS ] UE on slice A reached 8.8.8.8 through the UPF's NAT (real internet egress)
+
+===================================================================
+  PASS=14  FAIL=0  WARN=0
+===================================================================

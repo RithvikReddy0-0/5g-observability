@@ -1,0 +1,17 @@
+$ curl -s http://10.53.0.52:9130/metrics; curl -s http://10.53.0.53:9130/metrics   # URLLC and mMTC KPI collectors
+kpi_packets_received_total{slice="URLLC"} 244495
+kpi_packets_expected_total{slice="URLLC"} 244495
+kpi_owd_ms{slice="URLLC",stat="mean"} 1.808
+kpi_owd_ms{slice="URLLC",stat="p50"} 1.535
+kpi_owd_ms{slice="URLLC",stat="p95"} 2.84
+kpi_owd_ms{slice="URLLC",stat="p99"} 7.794
+kpi_owd_ms{slice="URLLC",stat="max"} 55.345
+kpi_devices_active{slice="URLLC"} 10
+kpi_packets_received_total{slice="mMTC"} 44958
+kpi_packets_expected_total{slice="mMTC"} 44958
+kpi_owd_ms{slice="mMTC",stat="mean"} 1.9
+kpi_owd_ms{slice="mMTC",stat="p50"} 2.0
+kpi_owd_ms{slice="mMTC",stat="p95"} 3.0
+kpi_owd_ms{slice="mMTC",stat="p99"} 4.0
+kpi_owd_ms{slice="mMTC",stat="max"} 11.0
+kpi_devices_active{slice="mMTC"} 70
