@@ -1,0 +1,137 @@
+{
+  "schema_version": "1",
+  "_comment": [
+    "GST attributes of GSMA PRD NG.116 'Generic Network Slice Template', Version 10.0, October 2024",
+    "(https://www.gsma.com/newsroom/wp-content/uploads//NG.116-v10.0.pdf), clause 3.4. Extracted from the",
+    "document's attribute tables for ADR-023: each parameter's name, 'Measurement unit' and 'Presence' as",
+    "printed. Names are kept as printed, including the document's own inconsistencies (the uplink table of",
+    "3.4.31 labels its maximum parameter's table 'Averaging Window' in the PDF; the parameter text calls it",
+    "'Maximum uplink throughput', which is used here). 3.4.9 Isolation level is 'FFS in GSMA NG' and has no",
+    "table; 3.4.10 and 3.4.22 are Void. In v10.0 no parameter is Mandatory.",
+    "Conditional parameters carry the condition as the document states it (or 'see clause' when it is long).",
+    "The en dash in 'Guaranteed/Maximum Flow Bit Rate – Downlink/Uplink' is written as an ASCII hyphen."
+  ],
+  "document": "GSMA NG.116 v10.0 (October 2024)",
+  "attributes": [
+    {"clause": "3.4.1", "name": "Availability", "parameters": [
+      {"name": "Availability", "unit": "percent", "presence": "Optional"}]},
+    {"clause": "3.4.2", "name": "Area of service", "parameters": [
+      {"name": "Area of service", "unit": "NA", "presence": "Optional"},
+      {"name": "Region specification", "unit": "NA", "presence": "Conditional", "condition": "completed for every country listed in Area of service"},
+      {"name": "Minimum altitude", "unit": "m", "presence": "Optional"}]},
+    {"clause": "3.4.3", "name": "Delay tolerance", "parameters": [
+      {"name": "Delay tolerance", "unit": "NA", "presence": "Optional", "allowed": ["Not supported", "Supported"]}]},
+    {"clause": "3.4.4", "name": "Deterministic communication", "parameters": [
+      {"name": "Availability", "unit": "NA", "presence": "Optional", "allowed": ["Not supported", "Supported"]},
+      {"name": "Periodicity", "unit": "Seconds", "presence": "Conditional", "condition": "must be present when Availability is Supported"}]},
+    {"clause": "3.4.5", "name": "Downlink throughput per network slice", "parameters": [
+      {"name": "Guaranteed downlink throughput quota", "unit": "kbps", "presence": "Optional"},
+      {"name": "Maximum downlink throughput", "unit": "kbps", "presence": "Optional"}]},
+    {"clause": "3.4.6", "name": "Downlink maximum throughput per UE", "parameters": [
+      {"name": "Maximum downlink throughput per UE value", "unit": "kbps", "presence": "Optional"},
+      {"name": "Service category", "unit": "NA", "presence": "Optional"}]},
+    {"clause": "3.4.7", "name": "Energy efficiency", "parameters": [
+      {"name": "Energy efficiency", "unit": "NA", "presence": "Optional", "allowed": ["Not Supported", "Supported"]}]},
+    {"clause": "3.4.8", "name": "Group communication support", "parameters": [
+      {"name": "Group communication support", "unit": "NA", "presence": "Optional"}]},
+    {"clause": "3.4.11", "name": "Maximum supported packet size", "parameters": [
+      {"name": "Maximum supported packet size", "unit": "Bytes", "presence": "Optional"}]},
+    {"clause": "3.4.12", "name": "Mission critical support", "parameters": [
+      {"name": "Mission critical support", "unit": "NA", "presence": "Optional"},
+      {"name": "Mission-critical capability support", "unit": "NA", "presence": "Conditional", "condition": "see clause"},
+      {"name": "Mission-critical service support", "unit": "NA", "presence": "Conditional", "condition": "see clause"}]},
+    {"clause": "3.4.13", "name": "MMTel support", "parameters": [
+      {"name": "MMTel support", "unit": "NA", "presence": "Optional"}]},
+    {"clause": "3.4.14", "name": "NB-IoT Support", "parameters": [
+      {"name": "NB-IoT Support", "unit": "NA", "presence": "Optional"}]},
+    {"clause": "3.4.15", "name": "Network functions owned by Network Slice Customer", "parameters": [
+      {"name": "Network functions owned by Network Slice Customer", "unit": "NA", "presence": "Optional"}]},
+    {"clause": "3.4.16", "name": "Maximum number of PDU sessions", "parameters": [
+      {"name": "Maximum number of PDU sessions", "unit": "PDU sessions", "presence": "Optional"},
+      {"name": "EPS counting required", "unit": "NA", "presence": "Optional", "allowed": ["Yes", "No"]},
+      {"name": "LBO PDU Sessions Counting required", "unit": "NA", "presence": "Optional", "allowed": ["Yes", "No"]}]},
+    {"clause": "3.4.17", "name": "Maximum number of UEs", "parameters": [
+      {"name": "Maximum number of UEs", "unit": "NA", "presence": "Optional"},
+      {"name": "EPS counting required", "unit": "NA", "presence": "Optional", "allowed": ["Yes", "No"]},
+      {"name": "Roaming UEs Counting required", "unit": "NA", "presence": "Optional", "allowed": ["Yes", "No"]}]},
+    {"clause": "3.4.18", "name": "Performance monitoring", "parameters": [
+      {"name": "Availability", "unit": "NA", "presence": "Optional"},
+      {"name": "Monitoring sample frequency", "unit": "NA", "presence": "Optional", "allowed": ["Per second", "Per minute", "Per-hour"]}]},
+    {"clause": "3.4.19", "name": "Performance prediction", "parameters": [
+      {"name": "Availability", "unit": "NA", "presence": "Optional"},
+      {"name": "Prediction frequency", "unit": "NA", "presence": "Optional"}]},
+    {"clause": "3.4.20", "name": "Positioning support", "parameters": [
+      {"name": "Availability", "unit": "NA", "presence": "Optional"},
+      {"name": "Prediction frequency", "unit": "NA", "presence": "Optional"},
+      {"name": "Accuracy", "unit": "meter", "presence": "Optional"}]},
+    {"clause": "3.4.21", "name": "Radio spectrum", "parameters": [
+      {"name": "Radio spectrum", "unit": "NA", "presence": "Optional"}]},
+    {"clause": "3.4.23", "name": "Monitoring and analytics", "parameters": [
+      {"name": "Monitoring and analytics", "unit": "NA", "presence": "Optional"}]},
+    {"clause": "3.4.24", "name": "Session and Service Continuity support", "parameters": [
+      {"name": "Session and Service Continuity support", "unit": "NA", "presence": "Optional", "allowed": ["SSC mode 1", "SSC mode 2", "SSC mode 3"]}]},
+    {"clause": "3.4.25", "name": "Simultaneous use of the network slice", "parameters": [
+      {"name": "Simultaneous Use Class", "unit": "NA", "presence": "Optional"},
+      {"name": "Service category", "unit": "NA", "presence": "Optional"}]},
+    {"clause": "3.4.26", "name": "Slice quality of service", "parameters": [
+      {"name": "3GPP 5QI", "unit": "NA", "presence": "Optional"},
+      {"name": "Resource Type", "unit": "NA", "presence": "Conditional", "condition": "for each Operator-specific 5QI value selected", "allowed": ["GBR", "Delay critical GBR", "Non-GBR"]},
+      {"name": "Priority Level", "unit": "NA", "presence": "Conditional", "condition": "for each Operator-specific 5QI, and for a standardised 5QI with non-default Priority Level"},
+      {"name": "Packet Delay Budget", "unit": "Seconds", "presence": "Conditional", "condition": "for each Operator-specific 5QI value selected"},
+      {"name": "Packet Error Rate", "unit": "NA", "presence": "Conditional", "condition": "for each Operator-specific 5QI value selected"},
+      {"name": "Averaging Window", "unit": "millisecond", "presence": "Optional"},
+      {"name": "Maximum Data Burst Volume", "unit": "Bytes", "presence": "Optional"},
+      {"name": "Guaranteed Flow Bit Rate - Downlink", "unit": "kbps", "presence": "Optional"},
+      {"name": "Guaranteed Flow Bit Rate - Uplink", "unit": "kbps", "presence": "Optional"},
+      {"name": "Maximum Flow Bit Rate - Downlink", "unit": "kbps", "presence": "Optional"},
+      {"name": "Maximum Flow Bit Rate - Uplink", "unit": "kbps", "presence": "Optional"},
+      {"name": "Maximum Packet Loss Rate", "unit": "NA", "presence": "Optional"}]},
+    {"clause": "3.4.27", "name": "Support for non-IP traffic", "parameters": [
+      {"name": "Support for non-IP traffic", "unit": "NA", "presence": "Optional"}]},
+    {"clause": "3.4.28", "name": "Supported device velocity", "parameters": [
+      {"name": "Supported device velocity", "unit": "Kilometres per hour (km/h)", "presence": "Optional"}]},
+    {"clause": "3.4.29", "name": "Synchronicity", "parameters": [
+      {"name": "Availability", "unit": "NA", "presence": "Optional"},
+      {"name": "Accuracy", "unit": "second", "presence": "Optional"}]},
+    {"clause": "3.4.30", "name": "UE density", "parameters": [
+      {"name": "UE density", "unit": "Number per km2", "presence": "Optional"}]},
+    {"clause": "3.4.31", "name": "Uplink throughput per network slice", "parameters": [
+      {"name": "Guaranteed uplink throughput quota", "unit": "kbps", "presence": "Optional"},
+      {"name": "Maximum uplink throughput", "unit": "kbps", "presence": "Optional"}]},
+    {"clause": "3.4.32", "name": "Uplink maximum throughput per UE", "parameters": [
+      {"name": "Maximum Uplink Throughput per UE value", "unit": "kbps", "presence": "Optional"},
+      {"name": "Service category", "unit": "NA", "presence": "Optional"}]},
+    {"clause": "3.4.33", "name": "User management openness", "parameters": [
+      {"name": "User management openness", "unit": "NA", "presence": "Optional"}]},
+    {"clause": "3.4.34", "name": "Data network access", "parameters": [
+      {"name": "Data access per data network", "unit": "NA", "presence": "Optional"},
+      {"name": "Tunnelling mechanism", "unit": "NA", "presence": "Conditional", "condition": "must be present if Data access per data network is Termination in the private network"},
+      {"name": "LBO Allowed", "unit": "NA", "presence": "Optional"}]},
+    {"clause": "3.4.35", "name": "V2X-PC5 Network Scheduled Mode", "parameters": [
+      {"name": "V2X-PC5 Network Schedule Mode", "unit": "NA", "presence": "Optional"},
+      {"name": "Default mode of communication for NR PC5", "unit": "NA", "presence": "Conditional", "condition": "see clause"}]},
+    {"clause": "3.4.36", "name": "Latency from (last) UPF to Application Server", "parameters": [
+      {"name": "Latency from UPF to Application Server", "unit": "second", "presence": "Optional"}]},
+    {"clause": "3.4.37", "name": "Network Slice Specific Authentication and Authorization (NSSAA) Required", "parameters": [
+      {"name": "NSSAA required", "unit": "NA", "presence": "Optional", "allowed": ["Not supported", "Supported"]}]},
+    {"clause": "3.4.38", "name": "Multimedia Priority Service", "parameters": [
+      {"name": "Multimedia Priority Service", "unit": "NA", "presence": "Optional"},
+      {"name": "Multimedia Priority Service capability support", "unit": "NA", "presence": "Conditional", "condition": "see clause"},
+      {"name": "Multimedia Priority Service support", "unit": "NA", "presence": "Conditional", "condition": "see clause"}]},
+    {"clause": "3.4.39", "name": "Supported data network", "parameters": [
+      {"name": "Supported data network list", "unit": "NA", "presence": "Optional"},
+      {"name": "Service category", "unit": "NA", "presence": "Optional"}]},
+    {"clause": "3.4.40", "name": "Maximum number of UEs with at least one PDU session/PDN", "parameters": [
+      {"name": "Maximum number of UEs with at least one PDU session/PDN connection", "unit": "NA", "presence": "Optional"}]},
+    {"clause": "3.4.41", "name": "V2X-PC5 parameter provisioning", "parameters": [
+      {"name": "V2X-PC5 Parameter Provisioning", "unit": "NA", "presence": "Conditional", "condition": "see clause"}]},
+    {"clause": "3.4.42", "name": "PDU Set support", "parameters": [
+      {"name": "PDU Set support", "unit": "NA", "presence": "Optional"}]}
+  ],
+  "standardized_5qi_used": {
+    "_comment": "TS 23.501 V17.9.0 Table 5.7.4-1 rows for the 5QIs this project uses, as read from the document. NG.116 3.4.26: a standardised 5QI fills its QoS characteristics with these defaults.",
+    "9":  {"resource_type": "Non-GBR", "priority_level": 90, "packet_delay_budget_s": 0.3, "packet_error_rate": 1e-6},
+    "82": {"resource_type": "Delay critical GBR", "priority_level": 19, "packet_delay_budget_s": 0.01, "packet_error_rate": 1e-4,
+           "maximum_data_burst_volume_bytes": 255, "averaging_window_ms": 2000}
+  }
+}

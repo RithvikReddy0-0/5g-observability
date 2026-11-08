@@ -1,0 +1,97 @@
+# NEST for the eMBB slice (ADR-023): GSMA NG.116 v10.0's Generic Network Slice Template filled
+# with this deployment's values. Format and rules: see urllc.nest.yaml and
+# tools/standards/check_nest.py.
+#
+# GSMA's eMBB NEST (NG.116 clause 4.1, Table 77) is "eMBB with IMS support": Availability 99,999,
+# MMTel, SSC mode 1, Internet and IMS data networks, 5QIs 1,2,5,6,7,8,9. This slice has no IMS;
+# only the 5QI family is shared.
+#
+# The project's eMBB targets (5th-percentile user rate >= 50 Mbps, aggregate >= 500 Mbps) are
+# user-experienced rates. NG.116 v10.0 has no attribute for an experienced or minimum user rate,
+# only maxima and GBR quotas, so they stay in kpi-scorecard.json and are mapped to TS 22.261 and
+# TS 28.554 in docs/standards-mapping.md. The maxima below are ceilings: a run is checked to stay
+# within them, which is a consistency check, not a performance target.
+schema_version: "1"
+gst: GSMA NG.116 v10.0
+nest:
+  name: eMBB
+  sst: 1
+  sd: "010203"
+  gsma_reference_nest: "NG.116 clause 4.1, NEST for enhanced Mobile Broadband with IMS support (IMS not used here)"
+attributes:
+  - attribute: Slice quality of service
+    clause: "3.4.26"
+    parameter: 3GPP 5QI
+    value: 9
+    unit: NA
+    from: "slices.env:SLICE_A_5QI"
+    source: "deployments/slices.env SLICE_A_5QI (non-GBR, best effort)"
+  - attribute: Slice quality of service
+    clause: "3.4.26"
+    parameter: Resource Type
+    value: Non-GBR
+    unit: NA
+    from: "TS23501:9:resource_type"
+    source: "TS 23.501 V17.9.0 Table 5.7.4-1, 5QI 9 (standardised default)"
+  - attribute: Downlink throughput per network slice
+    clause: "3.4.5"
+    parameter: Guaranteed downlink throughput quota
+    value: 0
+    unit: kbps
+    source: "best effort: 5QI 9 is non-GBR, so no GBR quota (NG.116 3.4.5: 0 = best effort)"
+  - attribute: Downlink throughput per network slice
+    clause: "3.4.5"
+    parameter: Maximum downlink throughput
+    value: 500000
+    unit: kbps
+    from: "slices.env:SLICE_A_CAPACITY_MBPS"
+    source: "deployments/slices.env SLICE_A_CAPACITY_MBPS: the ceiling the slice orchestrator admits against"
+    check: max_within
+    measure: embb.dl_aggregate_mbps
+    measure_unit: Mbps
+  - attribute: Downlink maximum throughput per UE
+    clause: "3.4.6"
+    parameter: Maximum downlink throughput per UE value
+    value: 200000
+    unit: kbps
+    from: "slices.env:SLICE_A_SESSION_AMBR_DL"
+    source: "session AMBR downlink, enforced by the gNB"
+    check: max_within
+    measure: embb.dl_max_mbps
+    measure_unit: Mbps
+  - attribute: Uplink maximum throughput per UE
+    clause: "3.4.32"
+    parameter: Maximum Uplink Throughput per UE value
+    value: 200000
+    unit: kbps
+    from: "slices.env:SLICE_A_SESSION_AMBR_UL"
+    source: "session AMBR uplink"
+  - attribute: Maximum number of UEs
+    clause: "3.4.17"
+    parameter: Maximum number of UEs
+    value: 20
+    unit: NA
+    from: "slices.env:O5GS_UES:A"
+    source: "deployments/slices.env O5GS_UES (eMBB devices on the Open5GS stack)"
+    check: max_within
+    measure: embb.ues_loaded
+    measure_unit: NA
+  - attribute: Maximum number of PDU sessions
+    clause: "3.4.16"
+    parameter: Maximum number of PDU sessions
+    value: 30
+    unit: PDU sessions
+    from: "kpi-gates.json:sessions-embb"
+    source: "20 home sessions + 10 URLLC devices' second sessions (ADR-020); the deployment gate expects 30"
+  - attribute: Supported data network
+    clause: "3.4.39"
+    parameter: Supported data network list
+    value: internet
+    unit: NA
+    source: "deployments/open5gs/config/smf.yaml and scripts/open5gs/provision_subscribers.py DNN for slice A"
+  - attribute: Supported device velocity
+    clause: "3.4.28"
+    parameter: Supported device velocity
+    value: 0
+    unit: Kilometres per hour (km/h)
+    source: "testbed fact: UERANSIM simulates no mobility (stationary devices)"

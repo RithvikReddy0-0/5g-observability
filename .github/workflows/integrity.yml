@@ -131,7 +131,7 @@ jobs:
 
       - name: Python tools and exporters compile
         run: |
-          python3 -m py_compile tools/kpi-gate/*.py tools/kpi/*.py tools/check_open5gs_slices.py tools/slice-orchestrator/*.py tools/network-orchestrator/*.py tools/packet-scheduler/*.py deployments/open5gs/k8s/render.py scripts/open5gs/*.py             deployments/open5gs/observability/*.py             && echo "all Python compiles"
+          python3 -m py_compile tools/kpi-gate/*.py tools/kpi/*.py tools/standards/*.py tools/check_open5gs_slices.py tools/slice-orchestrator/*.py tools/network-orchestrator/*.py tools/packet-scheduler/*.py deployments/open5gs/k8s/render.py scripts/open5gs/*.py             deployments/open5gs/observability/*.py             && echo "all Python compiles"
 
   kpi-gate:
     name: KPI gate is defined and effective
@@ -160,6 +160,21 @@ jobs:
           # and per-slice weights that do not sum to 1; then proves the scoring rules on known values.
           python3 tools/kpi/scorecard.py --check
           python3 tools/kpi/scorecard.py --self-test
+
+      - name: KPI statistics against published reference values
+        run: |
+          # ADR-023: Mann-Whitney U (exact, permutation, normal), Cliff's delta, Clopper-Pearson,
+          # rule of three and the bootstraps, checked against textbook values. A comparison of
+          # arms goes through these before it is reported as a difference.
+          python3 tools/kpi/test_stats.py
+
+      - name: slice NESTs are valid GSMA NG.116 v10.0 and match the deployment
+        run: |
+          # ADR-023: attribute names, clauses, units and allowed values from NG.116; every `from:`
+          # value re-read from slices.env, kpi-scorecard.json, kpi-gates.json or TS 23.501's 5QI
+          # table. The tests prove each kind of broken template is rejected. No stack needed.
+          python3 tools/standards/check_nest.py
+          python3 tools/standards/test_check_nest.py
 
       - name: slice orchestrator placement rules
         run: |
