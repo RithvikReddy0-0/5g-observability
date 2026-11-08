@@ -111,6 +111,9 @@ class Tally:
             "loss_ratio": round(1 - received / expected, 6) if expected else None,
             "devices": len(per_dev),
             "owd_ms": summary(self.owd),
+            # how many packets arrived later than each bound: reliability in TS 22.261's sense is
+            # delivery within the service's latency bound, not just delivery
+            "owd_over_ms": {str(t): sum(1 for x in self.owd if x > t) for t in OVER_MS},
             "jitter_ms_mean": round(sum(self.jitter) / len(self.jitter), 3) if self.jitter else None,
             "malformed": self.malformed,
             "per_device": {str(k): v for k, v in sorted(per_dev.items())},
@@ -124,13 +127,16 @@ def percentile(sorted_vals, q):
     return round(sorted_vals[i], 3)
 
 
+OVER_MS = (1, 2, 5, 10, 20, 50, 100)
+
+
 def summary(vals):
     if not vals:
         return {"n": 0}
     v = sorted(vals)
     return {"n": len(v), "mean": round(sum(v) / len(v), 3), "min": round(v[0], 3),
             "p50": percentile(v, 0.50), "p95": percentile(v, 0.95), "p99": percentile(v, 0.99),
-            "max": round(v[-1], 3)}
+            "p999": percentile(v, 0.999), "max": round(v[-1], 3)}
 
 
 life = Tally()

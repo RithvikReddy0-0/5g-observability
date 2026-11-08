@@ -373,32 +373,35 @@ data:
     owd_sum\"] / d[\"received\"], 3) if d[\"received\"] else None\n        return {\n            \"slice\": SLICE, \"mode\"\
     : MODE,\n            \"duration_s\": round(time.monotonic() - self.started, 1),\n            \"received\": received, \"\
     expected\": expected,\n            \"loss_ratio\": round(1 - received / expected, 6) if expected else None,\n        \
-    \    \"devices\": len(per_dev),\n            \"owd_ms\": summary(self.owd),\n            \"jitter_ms_mean\": round(sum(self.jitter)\
-    \ / len(self.jitter), 3) if self.jitter else None,\n            \"malformed\": self.malformed,\n            \"per_device\"\
-    : {str(k): v for k, v in sorted(per_dev.items())},\n        }\n\n\ndef percentile(sorted_vals, q):\n    if not sorted_vals:\n\
-    \        return None\n    i = min(len(sorted_vals) - 1, max(0, int(round(q * (len(sorted_vals) - 1)))))\n    return round(sorted_vals[i],\
-    \ 3)\n\n\ndef summary(vals):\n    if not vals:\n        return {\"n\": 0}\n    v = sorted(vals)\n    return {\"n\": len(v),\
-    \ \"mean\": round(sum(v) / len(v), 3), \"min\": round(v[0], 3),\n            \"p50\": percentile(v, 0.50), \"p95\": percentile(v,\
-    \ 0.95), \"p99\": percentile(v, 0.99),\n            \"max\": round(v[-1], 3)}\n\n\nlife = Tally()\nrun = Tally()\nrecent\
-    \ = collections.deque()         # (monotonic s, owd ms) for the rolling window\nlast_seen = {}                       #\
-    \ device -> monotonic s\n\n\ndef parse(data, now_ns):\n    \"\"\"-> (device, epoch, seq, one-way delay ms) or None.\"\"\
-    \"\n    if MODE == \"urllc\":\n        if len(data) < URLLC.size:\n            return None\n        dev, epoch, seq, t_ns\
-    \ = URLLC.unpack_from(data)\n        return dev, epoch, seq, (now_ns - t_ns) / 1e6\n    if len(data) != 10:\n        return\
-    \ None\n    dev, epoch = MMTC_HEAD.unpack_from(data)\n    seq = int.from_bytes(data[3:6], \"big\")\n    t_ms = int.from_bytes(data[6:10],\
-    \ \"big\")\n    owd = ((now_ns // 1_000_000) - t_ms) % (1 << 32)\n    return dev, epoch, seq, float(owd)\n\n\ndef receive_loop():\n\
-    \    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\n    sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF,\
-    \ 4 << 20)\n    sock.bind((\"0.0.0.0\", UDP_PORT))\n    while True:\n        data, _ = sock.recvfrom(2048)\n        now_ns\
-    \ = time.monotonic_ns()\n        p = parse(data, now_ns)\n        with lock:\n            if p is None:\n            \
-    \    life.malformed += 1\n                run.malformed += 1\n                continue\n            dev, epoch, seq, owd\
-    \ = p\n            life.add(dev, epoch, seq, owd)\n            run.add(dev, epoch, seq, owd)\n            now = now_ns\
-    \ / 1e9\n            recent.append((now, owd))\n            last_seen[dev] = now\n            # The lifetime tally keeps\
-    \ counts, not every sample.\n            if len(life.owd) > 10000:\n                del life.owd[:5000]\n            \
-    \    del life.jitter[:5000]\n\n\ndef render_metrics():\n    now = time.monotonic()\n    with lock:\n        while recent\
-    \ and recent[0][0] < now - WINDOW:\n            recent.popleft()\n        window = summary([o for _, o in recent])\n \
-    \       fast = summary([o for t, o in recent if t >= now - RECENT_WINDOW])\n        received, expected = life.counts()\n\
-    \        active = sum(1 for t in last_seen.values() if t >= now - ACTIVE_WINDOW)\n        seen = len(last_seen)\n    lab\
-    \ = 'slice=\"%s\"' % SLICE\n    out = [\n        \"# HELP kpi_packets_received_total Measurement packets received from\
-    \ the slice's UEs.\",\n        \"# TYPE kpi_packets_received_total counter\",\n        \"kpi_packets_received_total{%s}\
+    \    \"devices\": len(per_dev),\n            \"owd_ms\": summary(self.owd),\n            # how many packets arrived later\
+    \ than each bound: reliability in TS 22.261's sense is\n            # delivery within the service's latency bound, not\
+    \ just delivery\n            \"owd_over_ms\": {str(t): sum(1 for x in self.owd if x > t) for t in OVER_MS},\n        \
+    \    \"jitter_ms_mean\": round(sum(self.jitter) / len(self.jitter), 3) if self.jitter else None,\n            \"malformed\"\
+    : self.malformed,\n            \"per_device\": {str(k): v for k, v in sorted(per_dev.items())},\n        }\n\n\ndef percentile(sorted_vals,\
+    \ q):\n    if not sorted_vals:\n        return None\n    i = min(len(sorted_vals) - 1, max(0, int(round(q * (len(sorted_vals)\
+    \ - 1)))))\n    return round(sorted_vals[i], 3)\n\n\nOVER_MS = (1, 2, 5, 10, 20, 50, 100)\n\n\ndef summary(vals):\n  \
+    \  if not vals:\n        return {\"n\": 0}\n    v = sorted(vals)\n    return {\"n\": len(v), \"mean\": round(sum(v) /\
+    \ len(v), 3), \"min\": round(v[0], 3),\n            \"p50\": percentile(v, 0.50), \"p95\": percentile(v, 0.95), \"p99\"\
+    : percentile(v, 0.99),\n            \"p999\": percentile(v, 0.999), \"max\": round(v[-1], 3)}\n\n\nlife = Tally()\nrun\
+    \ = Tally()\nrecent = collections.deque()         # (monotonic s, owd ms) for the rolling window\nlast_seen = {}     \
+    \                  # device -> monotonic s\n\n\ndef parse(data, now_ns):\n    \"\"\"-> (device, epoch, seq, one-way delay\
+    \ ms) or None.\"\"\"\n    if MODE == \"urllc\":\n        if len(data) < URLLC.size:\n            return None\n       \
+    \ dev, epoch, seq, t_ns = URLLC.unpack_from(data)\n        return dev, epoch, seq, (now_ns - t_ns) / 1e6\n    if len(data)\
+    \ != 10:\n        return None\n    dev, epoch = MMTC_HEAD.unpack_from(data)\n    seq = int.from_bytes(data[3:6], \"big\"\
+    )\n    t_ms = int.from_bytes(data[6:10], \"big\")\n    owd = ((now_ns // 1_000_000) - t_ms) % (1 << 32)\n    return dev,\
+    \ epoch, seq, float(owd)\n\n\ndef receive_loop():\n    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\n    sock.setsockopt(socket.SOL_SOCKET,\
+    \ socket.SO_RCVBUF, 4 << 20)\n    sock.bind((\"0.0.0.0\", UDP_PORT))\n    while True:\n        data, _ = sock.recvfrom(2048)\n\
+    \        now_ns = time.monotonic_ns()\n        p = parse(data, now_ns)\n        with lock:\n            if p is None:\n\
+    \                life.malformed += 1\n                run.malformed += 1\n                continue\n            dev, epoch,\
+    \ seq, owd = p\n            life.add(dev, epoch, seq, owd)\n            run.add(dev, epoch, seq, owd)\n            now\
+    \ = now_ns / 1e9\n            recent.append((now, owd))\n            last_seen[dev] = now\n            # The lifetime\
+    \ tally keeps counts, not every sample.\n            if len(life.owd) > 10000:\n                del life.owd[:5000]\n\
+    \                del life.jitter[:5000]\n\n\ndef render_metrics():\n    now = time.monotonic()\n    with lock:\n     \
+    \   while recent and recent[0][0] < now - WINDOW:\n            recent.popleft()\n        window = summary([o for _, o\
+    \ in recent])\n        fast = summary([o for t, o in recent if t >= now - RECENT_WINDOW])\n        received, expected\
+    \ = life.counts()\n        active = sum(1 for t in last_seen.values() if t >= now - ACTIVE_WINDOW)\n        seen = len(last_seen)\n\
+    \    lab = 'slice=\"%s\"' % SLICE\n    out = [\n        \"# HELP kpi_packets_received_total Measurement packets received\
+    \ from the slice's UEs.\",\n        \"# TYPE kpi_packets_received_total counter\",\n        \"kpi_packets_received_total{%s}\
     \ %d\" % (lab, received),\n        \"# HELP kpi_packets_expected_total Packets the senders' sequence numbers say were\
     \ sent.\",\n        \"# TYPE kpi_packets_expected_total counter\",\n        \"kpi_packets_expected_total{%s} %d\" % (lab,\
     \ expected),\n        \"# HELP kpi_owd_ms One-way delay UE -> data network over the last WINDOW seconds.\",\n        \"\

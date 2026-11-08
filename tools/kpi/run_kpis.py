@@ -20,7 +20,9 @@ instances by varying one parameter".
 
 Output: docs/evidence/open5gs-kpi/<timestamp>/ — instances.jsonl (every measurement, raw),
 kpi-report.xlsx, scorecard.md, one CSV per sweep. Run from the repo root on the Docker host.
-DURATION (default 60 s) and STANDARD_DURATION (150 s: >= 1000 IoT reports) set window lengths.
+DURATION (default 60 s) and STANDARD_DURATION (150 s: >= 1000 IoT reports) set window lengths;
+a long standard instance (STANDARD_DURATION=660: >= 300 000 URLLC packets) tests reliability.
+KPI_EVIDENCE=<dir under docs/evidence> writes the run somewhere other than open5gs-kpi.
 RUN_DIR=<existing run> adds to that run instead; a re-run instance replaces its earlier record
 in the report (both stay in instances.jsonl).
 """
@@ -239,6 +241,8 @@ def instance(label, param=None, value=None, embb_ues=None, duration=None):
         "urllc.owd_p95_ms": u["owd_ms"].get("p95"), "urllc.owd_p99_ms": u["owd_ms"].get("p99"),
         "urllc.owd_max_ms": u["owd_ms"].get("max"), "urllc.loss_ratio": u["loss_ratio"],
         "urllc.jitter_ms": u["jitter_ms_mean"], "urllc.packets": u["received"], "urllc.devices": u["devices"],
+        "urllc.expected": u.get("expected"), "urllc.owd_p999_ms": u["owd_ms"].get("p999"),
+        "urllc.late_over_10ms": (u.get("owd_over_ms") or {}).get("10"),
         "embb.ues_loaded": embb_ues, "embb.flows_completed": len(rates),
         "embb.dl_p5_mbps": round(nearest_rank(rates, 0.05), 2) if rates else None,
         "embb.dl_mean_mbps": round(sum(rates) / len(rates), 2) if rates else None,
@@ -260,7 +264,7 @@ def instance(label, param=None, value=None, embb_ues=None, duration=None):
     card = scorecard.score(defs, measured)
     rec = {"label": label, "param": param, "value": value, "started": datetime.datetime.fromtimestamp(t0).isoformat(timespec="seconds"),
            "duration_s": duration, "measured": measured, "card": card, "registration": reg,
-           "embb_flows": flows,
+           "embb_flows": flows, "urllc_owd_over_ms": u.get("owd_over_ms"),
            "urllc_per_device": u.get("per_device"), "mmtc_per_device": m.get("per_device")}
     with open(os.path.join(OUT, "instances.jsonl"), "a", encoding="utf-8") as f:
         f.write(json.dumps(rec) + "\n")
@@ -539,7 +543,7 @@ def new_run_dir():
             raise SystemExit("RUN_DIR %s has no instances.jsonl" % OUT)
         return OUT
     ts = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%d-%H%M%SZ")
-    OUT = os.path.join(REPO, "docs", "evidence", "open5gs-kpi", ts)
+    OUT = os.path.join(REPO, "docs", "evidence", os.environ.get("KPI_EVIDENCE", "open5gs-kpi"), ts)
     os.makedirs(OUT, exist_ok=True)
     commit = sh(["git", "rev-parse", "HEAD"], cwd=REPO).stdout.strip()
     dirty = sh(["git", "diff", "--quiet"], cwd=REPO).returncode != 0
