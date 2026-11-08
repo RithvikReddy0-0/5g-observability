@@ -99,7 +99,8 @@ def to_k8s_ue(doc):
     return d
 
 
-HOST_JOBS = ("slice-orchestrator", "network-orchestrator", "packet-scheduler")   # packet-scheduler: ADR-019, compose only
+HOST_JOBS = ("slice-orchestrator", "network-orchestrator", "packet-scheduler",   # packet-scheduler: ADR-019, compose only
+             "fault-diagnosis")                                                  # ADR-024, a host process too
 
 
 def to_k8s_prometheus(doc):

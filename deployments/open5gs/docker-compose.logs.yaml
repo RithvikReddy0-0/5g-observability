@@ -1,0 +1,66 @@
+# OPTIONAL per-slice log pipeline for the Open5GS stack (ADR-024): Grafana Alloy -> Loki -> Grafana.
+#
+# A separate Compose project on the stack's existing network, so it can be started and stopped without
+# touching a single 5G container, and the network keeps working (and the KPI gate keeps passing)
+# whether it runs or not. Nothing in the gate or the stack depends on it.
+#
+#   docker compose -f deployments/open5gs/docker-compose.logs.yaml -p o5gs-logs up -d
+#   docker compose -f deployments/open5gs/docker-compose.logs.yaml -p o5gs-logs down      (keeps the volume)
+#
+# Alloy, not Promtail: Promtail reached end of life on 2026-03-02 and its features moved to Alloy.
+# Alloy reads every o5gs-* container's log through the Docker socket (read-only) and labels each line
+# with component, slice, level and event using the rules in tools/observability/logparse.py; the
+# pipeline (observability/alloy/config.alloy) is GENERATED from those rules and checked in CI.
+#
+# Memory: hard limits 384 MiB (Loki) + 192 MiB (Alloy) = 576 MiB at most; each also gets a Go soft
+# limit (GOMEMLIMIT) below its hard limit so the runtime collects before the kernel kills it. CPU is
+# capped at half a core each so that log shipping can never compete with the user plane.
+#
+# Address plan (see docker-compose.yaml): .43 loki, .44 alloy.
+#
+# Images are pinned by the multi-arch index digest Docker Hub reports for the tag (checked
+# 2026-11-08 against hub.docker.com/v2/repositories/grafana/{loki,alloy}/tags/<tag>).
+
+services:
+  loki:
+    container_name: o5gs-loki
+    image: grafana/loki@sha256:1107dd5274e0ada47e42472b7a7e71f3b2a2fe878878108f3e2f9e51528f0193  # 3.7.8
+    restart: unless-stopped
+    command: ["-config.file=/etc/loki/loki.yaml"]
+    environment:
+      GOMEMLIMIT: 300MiB
+    mem_limit: 384m
+    cpus: 0.5
+    volumes:
+      - ./observability/loki/loki.yaml:/etc/loki/loki.yaml:ro
+      - o5gs-loki:/loki
+    ports: ["127.0.0.1:3100:3100"]       # the correlation engine on the host; Grafana uses .43 directly
+    networks:
+      o5gs: { ipv4_address: 10.53.0.43 }
+
+  alloy:
+    container_name: o5gs-alloy
+    image: grafana/alloy@sha256:2aa2099af76c0098d4af7a4d6e48f86cb66dc1a000222ad927a1c67c6542d13f  # v1.20.1
+    restart: unless-stopped
+    command: ["run", "/etc/alloy/config.alloy", "--storage.path=/var/lib/alloy/data",
+              "--server.http.listen-addr=0.0.0.0:12345"]
+    environment:
+      GOMEMLIMIT: 150MiB
+    mem_limit: 192m
+    cpus: 0.5
+    volumes:
+      - ./observability/alloy/config.alloy:/etc/alloy/config.alloy:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - o5gs-alloy:/var/lib/alloy/data
+    depends_on: [loki]
+    networks:
+      o5gs: { ipv4_address: 10.53.0.44 }
+
+networks:
+  o5gs:
+    name: o5gs_net
+    external: true
+
+volumes:
+  o5gs-loki:
+  o5gs-alloy:

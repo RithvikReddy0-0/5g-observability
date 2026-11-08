@@ -3466,6 +3466,423 @@
           "legendFormat": "{{slice}} {{tier}}"
         }
       ]
+    },
+    {
+      "type": "row",
+      "title": "Logs per slice \u2014 Open5GS and UERANSIM text logs, parsed into events (ADR-024; needs the logs pipeline)",
+      "id": 55,
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 124
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Log events per slice (per minute)",
+      "id": 56,
+      "datasource": {
+        "type": "loki",
+        "uid": "loki-o5gs"
+      },
+      "description": "Registrations, PDU session establishment and release, PFCP and N2 events, radio-link failures, UE restarts; slice from S-NSSAI, DNN, the per-slice container, a UE or UPF address, else the IMSI's home slice.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 125
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "min": 0,
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "stacking": {
+              "mode": "none"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(eMBB|1-010203|internet).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#2E6E8E"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(URLLC|2-112233|urllc).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#C7601F"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(mMTC|3-334455|iot).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#5A8F3C"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki-o5gs"
+          },
+          "expr": "sum by (slice, event) (count_over_time({job=\"o5gs\", slice=~\".+\", event=~\".+\"}[1m]))",
+          "legendFormat": "{{slice}} {{event}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Fault events per slice (per minute)",
+      "id": 57,
+      "datasource": {
+        "type": "loki",
+        "uid": "loki-o5gs"
+      },
+      "description": "Only events that in themselves mean something went wrong (logparse.FAULT_EVENTS).",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 125
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "min": 0,
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "stacking": {
+              "mode": "none"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(eMBB|1-010203|internet).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#2E6E8E"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(URLLC|2-112233|urllc).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#C7601F"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(mMTC|3-334455|iot).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#5A8F3C"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki-o5gs"
+          },
+          "expr": "sum by (slice, event) (count_over_time({job=\"o5gs\", event=~\"access_barred|auth_failure|cell_selection_failure|gnb_removed|ip_pool_exhausted|n2_association_shutdown|n2_connect_failed|nf_deregistered|nf_terminating|ng_setup_failed|no_upf_associated|pdu_session_not_found|pdu_session_reject|pfcp_deassociated|pfcp_heartbeat_lost|pfcp_no_response|pfcp_node_unknown|pfcp_restoration|pfcp_retry_failed|radio_link_failure|registration_reject|scheduler_step_failed|ue_restart|ue_start_timeout\"}[1m]))",
+          "legendFormat": "{{slice}} {{event}}"
+        }
+      ]
+    },
+    {
+      "type": "logs",
+      "title": "eMBB \u2014 warnings, errors and events",
+      "id": 58,
+      "datasource": {
+        "type": "loki",
+        "uid": "loki-o5gs"
+      },
+      "description": "Every o5gs-* container's lines attributed to eMBB. IMSIs and addresses stay in the line, not in labels.",
+      "gridPos": {
+        "h": 10,
+        "w": 8,
+        "x": 0,
+        "y": 133
+      },
+      "options": {
+        "showTime": true,
+        "wrapLogMessage": true,
+        "sortOrder": "Descending",
+        "enableLogDetails": true,
+        "dedupStrategy": "none",
+        "prettifyLogMessage": false
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki-o5gs"
+          },
+          "expr": "{job=\"o5gs\", slice=\"eMBB\"} | level=~\"warning|error\" or event=~\".+\"",
+          "queryType": "range"
+        }
+      ]
+    },
+    {
+      "type": "logs",
+      "title": "URLLC \u2014 warnings, errors and events",
+      "id": 59,
+      "datasource": {
+        "type": "loki",
+        "uid": "loki-o5gs"
+      },
+      "description": "Every o5gs-* container's lines attributed to URLLC. IMSIs and addresses stay in the line, not in labels.",
+      "gridPos": {
+        "h": 10,
+        "w": 8,
+        "x": 8,
+        "y": 133
+      },
+      "options": {
+        "showTime": true,
+        "wrapLogMessage": true,
+        "sortOrder": "Descending",
+        "enableLogDetails": true,
+        "dedupStrategy": "none",
+        "prettifyLogMessage": false
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki-o5gs"
+          },
+          "expr": "{job=\"o5gs\", slice=\"URLLC\"} | level=~\"warning|error\" or event=~\".+\"",
+          "queryType": "range"
+        }
+      ]
+    },
+    {
+      "type": "logs",
+      "title": "mMTC \u2014 warnings, errors and events",
+      "id": 60,
+      "datasource": {
+        "type": "loki",
+        "uid": "loki-o5gs"
+      },
+      "description": "Every o5gs-* container's lines attributed to mMTC. IMSIs and addresses stay in the line, not in labels.",
+      "gridPos": {
+        "h": 10,
+        "w": 8,
+        "x": 16,
+        "y": 133
+      },
+      "options": {
+        "showTime": true,
+        "wrapLogMessage": true,
+        "sortOrder": "Descending",
+        "enableLogDetails": true,
+        "dedupStrategy": "none",
+        "prettifyLogMessage": false
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki-o5gs"
+          },
+          "expr": "{job=\"o5gs\", slice=\"mMTC\"} | level=~\"warning|error\" or event=~\".+\"",
+          "queryType": "range"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Diagnosed causes (score 0-1, last run)",
+      "id": 61,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prom-o5gs"
+      },
+      "description": "tools/observability/diagnose.py --serve (scripts/open5gs/start_diagnosis.sh): every 2 min it correlates the last 10 min of metrics, logs and decision traces and scores each known cause. GET :9115/diagnosis has the evidence.",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 143
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "min": 0,
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "stacking": {
+              "mode": "none"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(eMBB|1-010203|internet).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#2E6E8E"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(URLLC|2-112233|urllc).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#C7601F"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(mMTC|3-334455|iot).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#5A8F3C"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-o5gs"
+          },
+          "expr": "max by (cause, slice) (fault_diagnosis_cause_score)",
+          "legendFormat": "{{cause}} {{slice}}"
+        }
+      ]
     }
   ]
 }

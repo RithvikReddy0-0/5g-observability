@@ -71,6 +71,15 @@ scrape_configs:
       - targets: ["10.53.0.1:9114"]
         labels: { component: packet-scheduler }
 
+  # Fault diagnosis (ADR-024): an OPTIONAL host process (scripts/open5gs/start_diagnosis.sh) that
+  # correlates metrics, logs and decision traces and exports fault_diagnosis_*. Excluded from the
+  # gate's no-scrape-failures, like the orchestrators; it has its own advisory.
+  - job_name: fault-diagnosis
+    scrape_interval: 30s
+    static_configs:
+      - targets: ["10.53.0.1:9115"]
+        labels: { component: fault-diagnosis }
+
   - job_name: prometheus
     static_configs:
       - targets: ["localhost:9090"]
