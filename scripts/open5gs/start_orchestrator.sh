@@ -37,6 +37,8 @@ case "${1:-}" in
     exit 0 ;;
 esac
 
+# Decision traces (ADR-024) go to OBS_TRACE_FILE, one JSON line per decision; OBS_TRACE_FILE= (empty)
+# turns them off.
 if pgrep -f "$PATTERN" >/dev/null; then
   echo "open5gs orchestrator already running (pid $(pgrep -f "$PATTERN" | tr '\n' ' '))"
   exit 0
@@ -45,6 +47,7 @@ fi
 CORE=open5gs PORT="$PORT" DB_CONTAINER=o5gs-mongodb \
 PROMETHEUS_URL="${PROMETHEUS_URL:-http://localhost:9091}" EXECUTE="${EXECUTE:-1}" \
 FLOW_SECONDS="${FLOW_SECONDS:-20}" CONTROL="${CONTROL:-1}" \
+OBS_TRACE_FILE="${OBS_TRACE_FILE-/tmp/o5gs_traces.jsonl}" \
   setsid nohup python3 "$APP" --instance open5gs > "$LOG" 2>&1 < /dev/null &
 
 for _ in $(seq 20); do

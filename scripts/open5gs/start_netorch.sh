@@ -32,7 +32,8 @@ if pgrep -f "$PATTERN" >/dev/null; then
   exit 0
 fi
 
-PORT="$PORT" setsid nohup python3 "$APP" --serve > "$LOG" 2>&1 < /dev/null &
+# Decision traces (ADR-024): one JSON line per operation and step; OBS_TRACE_FILE= (empty) turns them off.
+PORT="$PORT" OBS_TRACE_FILE="${OBS_TRACE_FILE-/tmp/o5gs_traces.jsonl}" setsid nohup python3 "$APP" --serve > "$LOG" 2>&1 < /dev/null &
 
 for _ in $(seq 20); do
   curl -s --max-time 2 "http://localhost:$PORT/" >/dev/null 2>&1 && break

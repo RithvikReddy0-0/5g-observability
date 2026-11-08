@@ -84,6 +84,40 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 SLICES_ENV = os.environ.get("SLICES_ENV", os.path.join(REPO, "deployments", "slices.env"))
 PORT = int(os.environ.get("PORT", "9110"))
+
+
+def _tracer(service):
+    """Decision traces (ADR-024, tools/observability/trace.py): admit / refuse / pre-empt and every
+    controller move. Off unless OBS_TRACE_FILE or OTEL_EXPORTER_OTLP_ENDPOINT is set; never fatal."""
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(
+            "obs_trace", os.path.join(REPO, "tools", "observability", "trace.py"))
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return mod.Tracer(service)
+    except Exception:
+        class _Off:
+            enabled = False
+
+            def span(self, name, **a):
+                return self
+
+            def event(self, name, **a):
+                return None
+
+            def set(self, **a):
+                return self
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *a):
+                return False
+        return _Off()
+
+
+TRACE = _tracer("slice-orchestrator")
 DB_CONTAINER = os.environ.get("DB_CONTAINER", "mongodb")
 FLOW_TTL = int(os.environ.get("FLOW_TTL", "45"))          # seconds a demand holds capacity
 SUB_REFRESH = int(os.environ.get("SUB_REFRESH", "60"))    # seconds between subscriber reloads
@@ -437,6 +471,8 @@ def preempt(victims, by_supi):
     flows = [f for f in flows if f["id"] not in ids]
     for f in victims:
         f["preempted"] = by_supi
+        TRACE.event("admission.preempt", slice=f.get("slice"), flow=f["id"], victim=f["supi"], by=by_supi,
+                    traffic_class=f["cls"], mbps=f["mbps"], victim_arp=f["arp"]["priority"])
         bump("preempted", f["snssai"], f["cls"], "arp")
         count_priority(next(s for s in SLICES if snssai(s) == f["snssai"]), f["arp"], "preempted")
         if f.get("device"):
@@ -578,6 +614,17 @@ def decide(supi, cls, mbps=None):
         "slice_limit_mbps": round(limit(chosen), 2),
         "flow": execution,
     }
+
+
+def decide_traced(supi, cls, mbps=None):
+    """decide() inside an 'admission.decide' span: the verdict, the slice and the reason, with any
+    pre-emptions as child events. What the HTTP handler calls."""
+    with TRACE.span("admission.decide", supi=supi, traffic_class=cls, mbps=mbps) as sp:
+        result = decide(supi, cls, mbps)
+        sp.set(admitted=result.get("admitted"), slice=(result.get("slice") or {}).get("name"),
+               reason=result.get("reason"), preempted=len(result.get("preempted") or []),
+               slice_limit_mbps=result.get("slice_limit_mbps"))
+    return result
 
 
 # ─────────────────────────── real traffic (Open5GS, EXECUTE=1) ───────────────────────────
@@ -813,6 +860,10 @@ def control_step(latency, now=None):
             del control["log"][:-200]
             print("CONTROL %-5s %-5s %6.1f -> %6.1f Mbps  (%s)" % (action, name, cur, new, why), flush=True)
     control["steps"] += 1
+    for a in actions:
+        TRACE.event("controller.%s" % a["action"], slice=a["slice"], action=a["action"], **{
+            "from": a["from"], "to": a["to"], "why": a["why"], "policy": a.get("policy", CONTROL_POLICY),
+            "latency_ms": latency})
     return actions
 
 
@@ -1218,6 +1269,7 @@ class Handler(BaseHTTPRequestHandler):
                     self._send(400, '{"error":"need {\\"name\\": <slice>, \\"active\\": true|false}"}')
                     return
                 s["active"] = req["active"]
+                TRACE.event("slice.active", slice=s["name"], active=s["active"])
                 body = {"name": s["name"], "active": s["active"],
                         "active_flows": len([f for f in flows if f["snssai"] == snssai(s)]),
                         "allocated_mbps": round(allocated(snssai(s)), 2)}
@@ -1226,7 +1278,7 @@ class Handler(BaseHTTPRequestHandler):
         supi = req.get("supi", "")
         cls = req.get("traffic_class", req.get("type", ""))
         with _lock:
-            result = decide(supi, cls, req.get("mbps"))
+            result = decide_traced(supi, cls, req.get("mbps"))
         self._send(200 if result.get("admitted") else 409, json.dumps(result))
 
     def log_message(self, *a):
