@@ -119,48 +119,50 @@ data:
     ${CHECK_STRIKES:-3}\"\nSTART_BATCH=\"${START_BATCH:-10}\"\nFIRST_IMSI=\"${FIRST_IMSI:-208930000000001}\"\nmkdir -p \"\
     $STATE\" \"$RUN\"\nrm -f \"$STATE/startup\"     # /tmp survives a container restart; a stale record would look like this\
     \ start\nmkdir -p /tmp/UERANSIM.proc-table && chmod 777 /tmp/UERANSIM.proc-table   # see \"a third shared thing\"\nrm\
-    \ -f /tmp/UERANSIM.proc-table/*   # no nr-ue runs yet, so every entry is stale (prune_proc_table)\n\n# Slice plan, in\
-    \ IMSI order: <config>:<UEs>:<gateway>:<name>. IMSIs are assigned contiguously\n# from FIRST_IMSI in this order \u2014\
-    \ the same rule as scripts/open5gs/provision_subscribers.py, and\n# the counts must equal O5GS_UES in deployments/slices.env\
-    \ (tools/check_open5gs_slices.py).\nUE_PLAN=\"${UE_PLAN:-ue-slice-a.yaml:20:10.45.0.1:eMBB ue-slice-b.yaml:10:10.46.0.1:URLLC\
-    \ ue-slice-c.yaml:70:10.47.0.1:mMTC}\"\n\n# A measurement run may change the plan without recreating this container \u2014\
-    \ which needs `docker\n# compose`, not always available on this host. scripts/open5gs/scale_test.sh and\n# tools/kpi/run_kpis.py\
-    \ write UE_PLAN= / START_BATCH= lines here, restart the container, and\n# delete the file (and restart again) to restore\
-    \ the plan above.\nif [ -f /tmp/ue-plan.override ]; then\n  # shellcheck disable=SC1091\n  . /tmp/ue-plan.override\n \
-    \ echo \"ue-entrypoint: plan overridden for this run by /tmp/ue-plan.override\"\nfi\n\n# Per-slice reachability/latency\
-    \ exporter on :9121, measured from these UEs' own interfaces.\n# Runs here rather than as a sidecar: a sidecar sharing\
-    \ this network namespace is stranded\n# in a dead one when this container restarts. Respawned if it ever exits.\n( while\
-    \ true; do python3 -u /opt/o5gs-obs/ue_probe_exporter.py; sleep 2; done ) &\n\n# The URLLC and mMTC devices' own traffic\
-    \ (ADR-015): small periodic packets from each UE's own\n# address to its slice's data network, where kpi_collector.py\
-    \ measures latency and loss. It finds\n# the UEs itself and follows them across restarts. Metrics on :9122.\n( while true;\
-    \ do python3 -u /opt/o5gs-obs/traffic_agent.py; sleep 2; done ) &\n\ntotal=$(plan | wc -l)\nif [ \"$total\" -le 0 ]; then\n\
-    \  log \"UE_PLAN is empty, idling\"; exec sleep infinity\nfi\n\n# Each UE's own interface prefix, \"uesimtun\" + the last\
-    \ four digits of its IMSI (UERANSIM allows\n# 12 characters). Its one session is then uesimtun<NNNN>0 \u2014 still matched\
-    \ by every tool that\n# looks for \"uesimtun\" \u2014 and no prefix is the start of another, so no two UEs can collide.\n\
-    # The routing table nr-ue will ask for is rt_<interface>; give each a unique id up front, from\n# 2000 up \u2014 nr-ue\
-    \ itself allocates from 1000, so an entry left by an older run cannot collide.\nplan | while read -r imsi cfg gw name;\
-    \ do\n  t=$(tag_of \"$imsi\")\n  { cat \"$CFG/$cfg\"; echo; echo \"tunName: \\\"uesimtun$t\\\"\"; } > \"$RUN/$imsi.yaml\"\
-    \n  grep -q \"[[:space:]]rt_uesimtun${t}0\\$\" /etc/iproute2/rt_tables 2>/dev/null \\\n    || printf '%d\\trt_uesimtun%s0\\\
-    n' $(( 2000 + imsi % 10000 )) \"$t\" >> /etc/iproute2/rt_tables\ndone\n\nlog \"starting $total UEs ($UE_PLAN), $START_BATCH\
-    \ at a time\"\nstarted=$(date +%s)\nplan > \"$STATE/plan\"\nbatch=\"\"\nn=0\nwhile read -r imsi cfg gw name; do\n  parked\
-    \ \"$name\" && continue          # deactivated by the network orchestrator: stays down\n  launch_ue \"$imsi\"\n  batch=\"\
-    $batch $imsi\"; n=$((n + 1))\n  if [ \"$n\" -ge \"$START_BATCH\" ]; then\n    # shellcheck disable=SC2086\n    wait_up\
-    \ $batch; batch=\"\"; n=0\n  fi\ndone < \"$STATE/plan\"\n# shellcheck disable=SC2086\n[ -n \"$batch\" ] && wait_up $batch\n\
-    \nup=0\nwhile read -r imsi cfg gw name; do\n  parked \"$name\" && continue\n  if [ -n \"$(tun_of \"$imsi\")\" ]; then\
-    \ up=$((up + 1))\n  else log \"$name imsi-$imsi did not come up within ${START_WAIT}s; the supervisor will retry\"; fi\n\
-    done < \"$STATE/plan\"\nlog \"$up/$total UEs up in $(( $(date +%s) - started ))s\"\necho \"$up $total $(( $(date +%s)\
-    \ - started )) $START_BATCH\" > \"$STATE/startup\"\n\nlog \"supervising: ping each UE's gateway every ${CHECK_EVERY}s,\
-    \ restart after ${CHECK_STRIKES} misses\"\nwhile true; do\n  sleep \"$CHECK_EVERY\"\n  while read -r imsi cfg gw name;\
-    \ do\n    parked \"$name\" && continue        # deliberately down (ADR-017): not a failure\n    pid=$(cat \"$STATE/$imsi.pid\"\
-    \ 2>/dev/null)\n    t=$(tun_of \"$imsi\")\n    if ! kill -0 \"$pid\" 2>/dev/null; then\n      reason=\"process exited\"\
-    \n    elif [ -z \"$t\" ]; then\n      reason=\"its session address $(ip_of \"$imsi\") is on no interface\"\n    elif ping\
-    \ -I \"$t\" -c 1 -W 2 \"$gw\" >/dev/null 2>&1; then\n      echo 0 > \"$STATE/$imsi.strikes\"; continue\n    else\n   \
-    \   reason=\"no reply through the UPF on $t ($(ip_of \"$imsi\"))\"\n    fi\n    s=$(( $(cat \"$STATE/$imsi.strikes\" 2>/dev/null\
-    \ || echo 0) + 1 ))\n    echo \"$s\" > \"$STATE/$imsi.strikes\"\n    if [ \"$s\" -ge \"$CHECK_STRIKES\" ]; then\n    \
-    \  log \"$name imsi-$imsi unhealthy ($reason, $s checks): restarting this UE only\"\n      echo \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\
-    \ imsi-$imsi $name $reason\" >> \"$STATE/restarts.log\"\n      stop_ue \"$imsi\"\n      launch_ue \"$imsi\"\n      wait_up\
-    \ \"$imsi\"\n      if [ -n \"$(tun_of \"$imsi\")\" ]; then log \"$name imsi-$imsi back on $(tun_of \"$imsi\")\"\n    \
-    \  else log \"$name imsi-$imsi restart did not complete; will retry\"; fi\n    fi\n  done < \"$STATE/plan\"\ndone\n"
+    \ -f /tmp/UERANSIM.proc-table/*   # no nr-ue runs yet, so every entry is stale (prune_proc_table)\n# Same for UE logs:\
+    \ /tmp outlives a container restart, so logs of UEs from an earlier, larger plan\n# (the scale test attaches up to 300)\
+    \ stayed behind and every \"count the logs\" check read 240/100.\nrm -f /tmp/ue-[0-9]*.log\n\n# Slice plan, in IMSI order:\
+    \ <config>:<UEs>:<gateway>:<name>. IMSIs are assigned contiguously\n# from FIRST_IMSI in this order \u2014 the same rule\
+    \ as scripts/open5gs/provision_subscribers.py, and\n# the counts must equal O5GS_UES in deployments/slices.env (tools/check_open5gs_slices.py).\n\
+    UE_PLAN=\"${UE_PLAN:-ue-slice-a.yaml:20:10.45.0.1:eMBB ue-slice-b.yaml:10:10.46.0.1:URLLC ue-slice-c.yaml:70:10.47.0.1:mMTC}\"\
+    \n\n# A measurement run may change the plan without recreating this container \u2014 which needs `docker\n# compose`,\
+    \ not always available on this host. scripts/open5gs/scale_test.sh and\n# tools/kpi/run_kpis.py write UE_PLAN= / START_BATCH=\
+    \ lines here, restart the container, and\n# delete the file (and restart again) to restore the plan above.\nif [ -f /tmp/ue-plan.override\
+    \ ]; then\n  # shellcheck disable=SC1091\n  . /tmp/ue-plan.override\n  echo \"ue-entrypoint: plan overridden for this\
+    \ run by /tmp/ue-plan.override\"\nfi\n\n# Per-slice reachability/latency exporter on :9121, measured from these UEs' own\
+    \ interfaces.\n# Runs here rather than as a sidecar: a sidecar sharing this network namespace is stranded\n# in a dead\
+    \ one when this container restarts. Respawned if it ever exits.\n( while true; do python3 -u /opt/o5gs-obs/ue_probe_exporter.py;\
+    \ sleep 2; done ) &\n\n# The URLLC and mMTC devices' own traffic (ADR-015): small periodic packets from each UE's own\n\
+    # address to its slice's data network, where kpi_collector.py measures latency and loss. It finds\n# the UEs itself and\
+    \ follows them across restarts. Metrics on :9122.\n( while true; do python3 -u /opt/o5gs-obs/traffic_agent.py; sleep 2;\
+    \ done ) &\n\ntotal=$(plan | wc -l)\nif [ \"$total\" -le 0 ]; then\n  log \"UE_PLAN is empty, idling\"; exec sleep infinity\n\
+    fi\n\n# Each UE's own interface prefix, \"uesimtun\" + the last four digits of its IMSI (UERANSIM allows\n# 12 characters).\
+    \ Its one session is then uesimtun<NNNN>0 \u2014 still matched by every tool that\n# looks for \"uesimtun\" \u2014 and\
+    \ no prefix is the start of another, so no two UEs can collide.\n# The routing table nr-ue will ask for is rt_<interface>;\
+    \ give each a unique id up front, from\n# 2000 up \u2014 nr-ue itself allocates from 1000, so an entry left by an older\
+    \ run cannot collide.\nplan | while read -r imsi cfg gw name; do\n  t=$(tag_of \"$imsi\")\n  { cat \"$CFG/$cfg\"; echo;\
+    \ echo \"tunName: \\\"uesimtun$t\\\"\"; } > \"$RUN/$imsi.yaml\"\n  grep -q \"[[:space:]]rt_uesimtun${t}0\\$\" /etc/iproute2/rt_tables\
+    \ 2>/dev/null \\\n    || printf '%d\\trt_uesimtun%s0\\n' $(( 2000 + imsi % 10000 )) \"$t\" >> /etc/iproute2/rt_tables\n\
+    done\n\nlog \"starting $total UEs ($UE_PLAN), $START_BATCH at a time\"\nstarted=$(date +%s)\nplan > \"$STATE/plan\"\n\
+    batch=\"\"\nn=0\nwhile read -r imsi cfg gw name; do\n  parked \"$name\" && continue          # deactivated by the network\
+    \ orchestrator: stays down\n  launch_ue \"$imsi\"\n  batch=\"$batch $imsi\"; n=$((n + 1))\n  if [ \"$n\" -ge \"$START_BATCH\"\
+    \ ]; then\n    # shellcheck disable=SC2086\n    wait_up $batch; batch=\"\"; n=0\n  fi\ndone < \"$STATE/plan\"\n# shellcheck\
+    \ disable=SC2086\n[ -n \"$batch\" ] && wait_up $batch\n\nup=0\nwhile read -r imsi cfg gw name; do\n  parked \"$name\"\
+    \ && continue\n  if [ -n \"$(tun_of \"$imsi\")\" ]; then up=$((up + 1))\n  else log \"$name imsi-$imsi did not come up\
+    \ within ${START_WAIT}s; the supervisor will retry\"; fi\ndone < \"$STATE/plan\"\nlog \"$up/$total UEs up in $(( $(date\
+    \ +%s) - started ))s\"\necho \"$up $total $(( $(date +%s) - started )) $START_BATCH\" > \"$STATE/startup\"\n\nlog \"supervising:\
+    \ ping each UE's gateway every ${CHECK_EVERY}s, restart after ${CHECK_STRIKES} misses\"\nwhile true; do\n  sleep \"$CHECK_EVERY\"\
+    \n  while read -r imsi cfg gw name; do\n    parked \"$name\" && continue        # deliberately down (ADR-017): not a failure\n\
+    \    pid=$(cat \"$STATE/$imsi.pid\" 2>/dev/null)\n    t=$(tun_of \"$imsi\")\n    if ! kill -0 \"$pid\" 2>/dev/null; then\n\
+    \      reason=\"process exited\"\n    elif [ -z \"$t\" ]; then\n      reason=\"its session address $(ip_of \"$imsi\")\
+    \ is on no interface\"\n    elif ping -I \"$t\" -c 1 -W 2 \"$gw\" >/dev/null 2>&1; then\n      echo 0 > \"$STATE/$imsi.strikes\"\
+    ; continue\n    else\n      reason=\"no reply through the UPF on $t ($(ip_of \"$imsi\"))\"\n    fi\n    s=$(( $(cat \"\
+    $STATE/$imsi.strikes\" 2>/dev/null || echo 0) + 1 ))\n    echo \"$s\" > \"$STATE/$imsi.strikes\"\n    if [ \"$s\" -ge\
+    \ \"$CHECK_STRIKES\" ]; then\n      log \"$name imsi-$imsi unhealthy ($reason, $s checks): restarting this UE only\"\n\
+    \      echo \"$(date -u +%Y-%m-%dT%H:%M:%SZ) imsi-$imsi $name $reason\" >> \"$STATE/restarts.log\"\n      stop_ue \"$imsi\"\
+    \n      launch_ue \"$imsi\"\n      wait_up \"$imsi\"\n      if [ -n \"$(tun_of \"$imsi\")\" ]; then log \"$name imsi-$imsi\
+    \ back on $(tun_of \"$imsi\")\"\n      else log \"$name imsi-$imsi restart did not complete; will retry\"; fi\n    fi\n\
+    \  done < \"$STATE/plan\"\ndone\n"
   ue-lib.sh: "#!/bin/sh\n# ue-lib.sh \u2014 UE process helpers shared by ue-entrypoint.sh (start + supervise every UE) and\n\
     # ue-slice.sh (park / unpark one slice's UEs for the network orchestrator, ADR-017).\n# Sourced, not run. Expects UE_PLAN\
     \ and FIRST_IMSI to be set when plan() is used.\n\nCFG=/etc/ueransim\nRUN=/tmp/ue-cfg\nSTATE=/tmp/ues\nSTART_WAIT=\"${UE_START_WAIT:-60}\"\

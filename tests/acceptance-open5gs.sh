@@ -67,14 +67,16 @@ subs=$(docker exec o5gs-mongodb mongo open5gs --quiet --eval 'var r={}; db.subsc
   && echo "$subs" | grep -q '"3/334455":70' \
   && ok "100 subscribers: eMBB 20, URLLC 10, mMTC 70 by home slice ($subs)" || no "subscribers: ${subs:-unreadable}"
 targets=$(curl -s --max-time 5 http://localhost:9091/api/v1/targets | python3 -c "import json,sys
-t=[x for x in json.load(sys.stdin)['data']['activeTargets'] if x['labels']['job']!='slice-orchestrator']
+t=[x for x in json.load(sys.stdin)['data']['activeTargets'] if x['labels']['job'] not in ('slice-orchestrator', 'network-orchestrator')]
 print(sum(x['health']=='up' for x in t), len(t))" 2>/dev/null)
 set -- ${targets:-0 0}
 [ "$1" -gt 0 ] && [ "$1" = "$2" ] && ok "Prometheus: $1/$2 stack targets up" || no "Prometheus targets up: ${1}/${2}"
 gapd "structured JSON logs — Open5GS writes text logs; not configurable, same gap as free5GC (ADR-005, docs/logging.md)"
 
 echo; echo "-- End-to-end function --"
-reg=$(docker exec o5gs-ue sh -c "grep -l 'Initial Registration is successful' /tmp/ue-2089*.log 2>/dev/null | wc -l" | tr -d ' ')
+# the 100 planned UEs only: logs of UEs from an earlier, larger plan must not count (it read 240/100)
+logs=$(i=1; while [ "$i" -le 100 ]; do printf '/tmp/ue-20893%010d.log ' "$i"; i=$((i+1)); done)
+reg=$(docker exec o5gs-ue sh -c "grep -l 'Initial Registration is successful' $logs 2>/dev/null | wc -l" | tr -d ' ')
 [ "${reg:-0}" -ge 100 ] && ok "UE registration: $reg/100 UEs registered" || no "UE registration: ${reg:-0}/100"
 live=$(docker exec o5gs-ue sh -c 'for f in /tmp/ue-2089*.log; do a=$(sed -n "s/.*TUN interface\[uesimtun[0-9]*, \([0-9.]*\)\].*/\1/p" $f | tail -1); [ -n "$a" ] && ip -4 -o addr show | grep -q " $a/" && echo "$a"; done' 2>/dev/null)
 na=$(echo "$live" | grep -c '^10\.45\.'); nb=$(echo "$live" | grep -c '^10\.46\.'); nc=$(echo "$live" | grep -c '^10\.47\.')

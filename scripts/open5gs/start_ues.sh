@@ -92,7 +92,9 @@ for s in $PLAN; do
 done
 elapsed=$(( $(date +%s) - t0 ))
 
-logs="/tmp/ue-2089*.log"   # one log per UE: ran/ue-entrypoint.sh runs a process per UE
+# One log per UE (ran/ue-entrypoint.sh runs a process per UE). Count only the UEs in this plan:
+# a glob also counted logs left behind by earlier, larger plans and printed 240/100.
+logs=$(i=1; while [ "$i" -le "$want" ]; do printf '/tmp/ue-20893%010d.log ' "$i"; i=$((i+1)); done)
 # One log per UE, so count the LOGS containing each line. Single-UE nr-ue logs carry no IMSI
 # tag; an earlier "[<imsi>|" pattern matched nothing and reported 0/20 with 20 UEs attached.
 reg=$(docker exec "$UE" sh -c "grep -l 'Initial Registration is successful' $logs 2>/dev/null | wc -l" | tr -d '\r ')

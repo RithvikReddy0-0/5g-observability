@@ -43,13 +43,13 @@
     {
       "id": "no-scrape-failures",
       "title": "No network or exporter target is down",
-      "expr": "count(up{job!=\"slice-orchestrator\"} == 0) or vector(0)",
+      "expr": "count(up{job!~\"slice-orchestrator|network-orchestrator\"} == 0) or vector(0)",
       "op": "eq",
       "threshold": 0,
       "unit": "targets",
       "severity": "gate",
       "requires": "core",
-      "why": "Includes the per-slice traffic and UE probe exporters: a broken observability plane must fail the gate rather than report a silent green. The slice orchestrator is excluded — it is an optional host process above the network, and a stopped orchestrator once failed this gate on a healthy stack; it has its own advisory."
+      "why": "Includes the per-slice traffic and UE probe exporters: a broken observability plane must fail the gate rather than report a silent green. Both orchestrators are excluded — they are optional host processes above the network, and a stopped orchestrator once failed this gate on a healthy stack (the slice orchestrator in Phase 2b, the network orchestrator after a WSL restart on 2026-11-08); each has its own advisory."
     },
     {
       "id": "pfcp-associated",
@@ -292,6 +292,17 @@
       "severity": "advisory",
       "requires": "core",
       "why": "Advisory: demand admission is unavailable while it is down, but the network itself is unaffected. Start it with scripts/open5gs/start_orchestrator.sh."
+    },
+    {
+      "id": "network-orchestrator-reachable",
+      "title": "The network orchestrator is being scraped",
+      "expr": "max(up{job=\"network-orchestrator\"})",
+      "op": "gte",
+      "threshold": 1,
+      "unit": "up",
+      "severity": "advisory",
+      "requires": "core",
+      "why": "Advisory: slices cannot be activated, deactivated or scaled while it is down, but the running slices are unaffected. Start it with scripts/open5gs/start_netorch.sh."
     }
   ]
 }

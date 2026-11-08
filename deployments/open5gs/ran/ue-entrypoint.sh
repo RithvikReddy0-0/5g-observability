@@ -46,6 +46,9 @@ mkdir -p "$STATE" "$RUN"
 rm -f "$STATE/startup"     # /tmp survives a container restart; a stale record would look like this start
 mkdir -p /tmp/UERANSIM.proc-table && chmod 777 /tmp/UERANSIM.proc-table   # see "a third shared thing"
 rm -f /tmp/UERANSIM.proc-table/*   # no nr-ue runs yet, so every entry is stale (prune_proc_table)
+# Same for UE logs: /tmp outlives a container restart, so logs of UEs from an earlier, larger plan
+# (the scale test attaches up to 300) stayed behind and every "count the logs" check read 240/100.
+rm -f /tmp/ue-[0-9]*.log
 
 # Slice plan, in IMSI order: <config>:<UEs>:<gateway>:<name>. IMSIs are assigned contiguously
 # from FIRST_IMSI in this order — the same rule as scripts/open5gs/provision_subscribers.py, and
