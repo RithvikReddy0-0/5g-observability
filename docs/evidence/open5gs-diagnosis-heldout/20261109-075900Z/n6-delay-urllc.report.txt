@@ -1,0 +1,23 @@
+correlation window 08:37:52Z .. 08:40:52Z (baseline 08:34:52Z .. 08:37:52Z)
+
+ranked anomalies:
+    50.0  metric upf_sessions{mMTC}           290 -> 290 (worst 190) sessions z 70.0
+    50.0  log    deregistration{-}            x100 (baseline 0)  e.g. [imsi-208930000000101] Implicit De-registered
+    50.0  log    upf_session_removed{mMTC}    x100 (baseline 0)  e.g. [Removed] Number of UPF-sessions is now 289
+    14.9  metric urllc_owd_p95                3.77 -> 18.7 (worst 19.2) ms z 14.9
+     8.8  metric rtt_max{URLLC}               6.8 -> 6.54 (worst 34.9) ms z 8.8
+     5.1  metric rtt_avg{URLLC}               3.55 -> 4.03 (worst 10.9) ms z 5.1
+     4.7  metric rtt_max{mMTC}                11.7 -> 10.5 (worst 35.9) ms z 4.7
+     4.3  metric rtt_avg{mMTC}                3.49 -> 3.13 (worst 9.66) ms z 4.3
+
+timeline:
+  08:38:07Z  metric urllc_owd_p95 changed: 3.77 -> 18.7 ms (z 14.9)
+  08:38:52Z  metric rtt_avg{mMTC} changed: 3.49 -> 3.13 ms (z 4.3)
+  08:38:52Z  metric rtt_max{mMTC} changed: 11.7 -> 10.5 ms (z 4.7)
+  08:39:37Z  metric rtt_max{URLLC} changed: 6.8 -> 6.54 ms (z 8.8)
+  08:39:52Z  metric rtt_avg{URLLC} changed: 3.55 -> 4.03 ms (z 5.1)
+  08:40:45Z  log    upf_session_removed x100 on mMTC (first: [Removed] Number of UPF-sessions is now 289)
+  08:40:45Z  log    deregistration x100 on - (first: [imsi-208930000000101] Implicit De-registered)
+  08:40:52Z  metric upf_sessions{mMTC} changed: 290 -> 290 sessions (z 70.0)
+
+no fault found (every rule below 0.50)

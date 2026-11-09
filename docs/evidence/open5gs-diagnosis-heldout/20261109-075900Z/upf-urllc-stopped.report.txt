@@ -1,0 +1,64 @@
+correlation window 08:06:24Z .. 08:09:24Z (baseline 08:03:24Z .. 08:06:24Z)
+
+ranked anomalies:
+    50.0  log    ip_pool_exhausted{eMBB}      x86 (baseline 0)  e.g. All IP addresses in all subnets are occupied
+    50.0  log    ip_pool_exhausted{mMTC}      x88 (baseline 0)  e.g. All IP addresses in all subnets are occupied
+    50.0  log    pdu_session_established{URLLC} x87 (baseline 0)  e.g. UE SUPI[imsi-208930000000001] DNN[urllc] IPv4[10.46.10.177] IPv6[]
+    50.0  log    pdu_session_request{URLLC}   x87 (baseline 0)  e.g. UE SUPI[imsi-208930000000001] DNN[urllc] LBO[0] S_NSSAI[SST:2 SD:0x112233] smCon
+    44.0  log    upf_session_added{mMTC}      x44 (baseline 0)  e.g. [Added] Number of UPF-Sessions is now 172
+    43.0  log    upf_session_added{eMBB}      x43 (baseline 0)  e.g. [Added] Number of UPF-Sessions is now 51
+    39.0  log    pfcp_no_response{mMTC}       x39 (baseline 0)  e.g. [57410] LOCAL  No Reponse. Give up! for step 1 type 50 peer [10.53.0.9]:8805
+    38.0  log    pfcp_no_response{eMBB}       x38 (baseline 0)  e.g. [57411] LOCAL  No Reponse. Give up! for step 1 type 50 peer [10.53.0.7]:8805
+    20.0  metric sessions{URLLC}              30 -> 10 (worst 7) sessions z 20.0
+    20.0  log    pdu_session_release{eMBB}    x20 (baseline 0)  e.g. [imsi-208930000000001:2] Session Release [PFCP-Delete-Trigger:5]
+    10.0  metric reachable{URLLC}             10 -> 0 (worst 0) UEs z 10.0
+    10.0  log    pdu_session_release{URLLC}   x10 (baseline 0)  e.g. [imsi-208930000000022:1] Session Release [PFCP-Delete-Trigger:5]
+     6.5  metric probe_round_s                0.151 -> 0.131 (worst 1.08) s z 6.5
+     6.1  metric rtt_max{mMTC}                10.8 -> 17.7 (worst 33.1) ms z 6.1
+     5.4  metric rtt_avg{eMBB}                5.38 -> 6.25 (worst 14.7) ms z 5.4
+
+timeline:
+  08:06:09Z  metric rtt_avg{mMTC} changed: 3.38 -> 5 ms (z 4.3)
+  08:06:09Z  metric rtt_max{mMTC} changed: 10.8 -> 17.7 ms (z 6.1)
+  08:06:39Z  metric reachable{URLLC} changed: 10 -> 0 UEs (z 10.0)
+  08:06:41Z  log    pfcp_heartbeat_lost x1 on URLLC (first: No Heartbeat from UPF [10.53.0.8]:8805)
+  08:06:41Z  log    pfcp_no_response x5 on URLLC (first: [57407] LOCAL  No Reponse. Give up! for step 1 type 1 peer [10.53.0.8]:8805)
+  08:06:41Z  log    pdu_session_release x20 on eMBB (first: [imsi-208930000000001:2] Session Release [PFCP-Delete-Trigger:5])
+  08:06:41Z  log    pdu_session_release x10 on URLLC (first: [imsi-208930000000022:1] Session Release [PFCP-Delete-Trigger:5])
+  08:06:41Z  log    pdu_session_request x87 on URLLC (first: UE SUPI[imsi-208930000000001] DNN[urllc] LBO[0] S_NSSAI[SST:2 SD:0x112233] smContextRef[NULL] smContextResour
+  08:06:41Z  log    pdu_session_established x87 on URLLC (first: UE SUPI[imsi-208930000000001] DNN[urllc] IPv4[10.46.10.177] IPv6[])
+  08:06:41Z  log    ip_pool_exhausted x88 on mMTC (first: All IP addresses in all subnets are occupied)
+  08:06:41Z  log    upf_session_added x44 on mMTC (first: [Added] Number of UPF-Sessions is now 172)
+  08:06:41Z  log    ip_pool_exhausted x86 on eMBB (first: All IP addresses in all subnets are occupied)
+  08:06:41Z  log    upf_session_added x43 on eMBB (first: [Added] Number of UPF-Sessions is now 51)
+  08:06:49Z  log    pfcp_no_response x39 on mMTC (first: [57410] LOCAL  No Reponse. Give up! for step 1 type 50 peer [10.53.0.9]:8805)
+  08:06:49Z  log    pfcp_no_response x38 on eMBB (first: [57411] LOCAL  No Reponse. Give up! for step 1 type 50 peer [10.53.0.7]:8805)
+  08:06:52Z  log    pfcp_retry_failed x4 on URLLC (first: Retry association with peer failed [10.53.0.8]:8805)
+  08:06:54Z  metric probe_round_s changed: 0.151 -> 0.131 s (z 6.5)
+  08:06:54Z  metric sessions{URLLC} changed: 30 -> 10 sessions (z 20.0)
+  08:07:05Z  log    ue_restart x1 on URLLC (first: URLLC imsi-208930000000021 unhealthy (its session address 10.46.10.151 is on no interface, 3 checks): restarting this U
+  08:07:07Z  trace  packet-scheduler scheduler.apply mode=sliced reason=desired state changed
+  08:07:09Z  metric rtt_max{eMBB} changed: 12.5 -> 18.1 ms (z 4.3)
+  08:08:13Z  trace  packet-scheduler scheduler.apply mode=sliced reason=desired state changed
+  08:08:39Z  metric rtt_avg{eMBB} changed: 5.38 -> 6.25 ms (z 5.4)
+  08:09:13Z  trace  packet-scheduler scheduler.apply mode=sliced reason=desired state changed
+
+1. [critical 0.95] A scrape target is down
+     evidence (metric) up{job="open5gs"}: open5gs is down
+     evidence (metric) up{job="upf-slice-traffic"}: upf-slice-traffic is down
+     -> open5gs is part of the network's observability: docker ps / docker logs for its container; the gate fails while it is down.
+     -> upf-slice-traffic is part of the network's observability: docker ps / docker logs for its container; the gate fails while it is down.
+2. [critical 0.85] N4/PFCP association between the SMF and a slice's UPF was lost — slices URLLC, eMBB, mMTC
+     evidence (metric) sum(pfcp_peers_active{nf="smf"}): SMF has 2 of 3 UPF associations
+     evidence (log) pfcp_heartbeat_lost: heartbeat lost x1 {'URLLC': 1}; e.g. No Heartbeat from UPF [10.53.0.8]:8805
+     evidence (log) pfcp_deassociated: de-associated x1 {'URLLC': 1}; e.g. PFCP de-associated [10.53.0.8]:8805
+     evidence (log) pfcp_no_response: requests unanswered x82 {'URLLC': 5, 'eMBB': 38, 'mMTC': 39}; e.g. [57407] LOCAL  No Reponse. Give up! for step 1 type 1 peer [10.53.0.8]:8805
+     evidence (log) pfcp_retry_failed: re-association failed x4 {'URLLC': 4}; e.g. Retry association with peer failed [10.53.0.8]:8805
+     -> Check the slice's UPF container: docker ps --filter name=o5gs-upf; a restart shows as 'Remote PFCP restarted' at the SMF.
+     -> After a UPF restart confirm sessions were restored: sum by (snssai)(fivegs_smffunction_sm_sessionnbr) and the slice's ue_probe_reachable.
+     -> If the SMF was restarted, stop the UPFs first, restart the SMF, then start the UPFs - a UPF older than the SMF keeps stale PFCP state (docs/open5gs.md operating notes; deploy.sh does this).
+3. [critical 0.95] Radio-link failures: UEs registered but without a data path — slices URLLC — explained by pfcp-association-loss
+     evidence (log) ue-entrypoint: unhealthy ... restarting this UE only: 1 UE restart(s) by the supervisor, per slice {'URLLC': 1}
+     evidence (metric) ue_probe_reachable{slice="URLLC"}: URLLC reachable UEs 10 -> 0
+     -> Each affected UE is restarted by the UE supervisor within ~30 s (ran/ue-entrypoint.sh); if many are left broken, re-attach: scripts/open5gs/start_ues.sh.
+     -> Find what stopped the gNB heartbeats (2 s, UERANSIM): a FIFO cell dropping signalling, a starved UE container, or wall-clock steps; cell-congestion and cpu-saturation findings say which.

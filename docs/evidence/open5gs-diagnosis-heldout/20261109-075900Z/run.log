@@ -1,0 +1,18 @@
+07:59:01Z held-out diagnosis test, commit 4ce595c, hold 180s, settle 240s
+07:59:01Z == healthy-before: none: the stack as it is (expected [], acceptable [])
+08:02:23Z    reported [] | top1 None | missed [] | false positives [] | URLLC p95 3.584 -> 2.388 ms
+08:06:23Z == upf-urllc-stopped: docker stop o5gs-upf-urllc (expected ['pfcp-association-loss'], acceptable ['target-down', 'rlf-no-data-path'])
+08:09:47Z   1 UEs without a data path after undo: re-attaching
+08:10:44Z    reported [('target-down', 'critical', 0.95, []), ('pfcp-association-loss', 'critical', 0.85, ['URLLC', 'eMBB', 'mMTC']), ('rlf-no-data-path', 'critical', 0.95, ['URLLC'])] | top1 False | missed [] | false positives [] | URLLC p95 3.81 -> None ms
+08:14:44Z == gnb-mmtc-stopped: docker stop o5gs-gnb-mmtc (expected ['gnb-n2-down'], acceptable ['target-down', 'rlf-no-data-path', 'registration-failure'])
+08:18:09Z   70 UEs without a data path after undo: re-attaching
+08:19:06Z    reported [('rlf-no-data-path', 'critical', 0.95, ['mMTC']), ('gnb-n2-down', 'critical', 0.75, []), ('registration-failure', 'critical', 0.6, [])] | top1 False | missed [] | false positives [] | URLLC p95 3.278 -> 4.157 ms
+08:23:06Z == pcf-stopped: docker stop o5gs-pcf (expected ['target-down'], acceptable [])
+08:26:29Z    reported [('target-down', 'critical', 0.95, [])] | top1 True | missed [] | false positives [] | URLLC p95 3.884 -> 3.862 ms
+08:30:29Z == upf-urllc-cpu-hog: two busy loops inside o5gs-upf-urllc (expected ['cpu-saturation'], acceptable [])
+08:33:51Z    reported [] | top1 False | missed ['cpu-saturation'] | false positives [] | URLLC p95 3.442 -> 2.224 ms
+08:37:51Z == n6-delay-urllc: netem +15 ms on o5gs-upf-urllc's packets to the URLLC data network (no rule describes this) (expected [], acceptable [])
+08:41:14Z    reported [] | top1 None | missed [] | false positives [] | URLLC p95 3.767 -> 19.194 ms
+08:45:14Z == healthy-after: none: the stack after all faults were undone (expected [], acceptable [])
+08:48:36Z    reported [] | top1 None | missed [] | false positives [] | URLLC p95 2.463 -> 2.432 ms
+08:48:36Z done: /mnt/c/Users/Rithvik Reddy/Desktop/5g-observability/docs/evidence/open5gs-diagnosis-heldout/20261109-075900Z

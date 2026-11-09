@@ -1,0 +1,77 @@
+{
+  "healthy": false,
+  "verified": true,
+  "unverified_reason": null,
+  "causes": [
+    {
+      "id": "rlf-no-data-path",
+      "title": "Radio-link failures: UEs registered but without a data path",
+      "score": 0.95,
+      "severity": "critical",
+      "evidence": [
+        {
+          "source": "metric",
+          "ref": "ue_probe_reachable{slice=\"mMTC\"}",
+          "detail": "mMTC reachable UEs 70 -> 0"
+        },
+        {
+          "source": "metric",
+          "ref": "fivegs_smffunction_sm_sessionnbr",
+          "detail": "the core still counts every session: the loss is below the core"
+        }
+      ],
+      "actions": [
+        "Each affected UE is restarted by the UE supervisor within ~30 s (ran/ue-entrypoint.sh); if many are left broken, re-attach: scripts/open5gs/start_ues.sh.",
+        "Find what stopped the gNB heartbeats (2 s, UERANSIM): a FIFO cell dropping signalling, a starved UE container, or wall-clock steps; cell-congestion and cpu-saturation findings say which."
+      ],
+      "slices": [
+        "mMTC"
+      ],
+      "hint": null,
+      "explained_by": []
+    },
+    {
+      "id": "gnb-n2-down",
+      "title": "A slice's gNB has no N2 connection to the AMF",
+      "score": 0.75,
+      "severity": "critical",
+      "slices": [],
+      "evidence": [
+        {
+          "source": "metric",
+          "ref": "sum(gnb)",
+          "detail": "2 of 3 gNBs connected over N2"
+        }
+      ],
+      "actions": [
+        "Check the gNB's AMF address and port (ran/gnb-<slice>.yaml, amfConfigs: 10.53.0.5:38412).",
+        "The gNBs are supervised and retry (ran/gnb-entrypoint.sh): docker logs o5gs-gnb-<slice> shows each attempt.",
+        "If this came with a deploy, scripts/open5gs/deploy.sh rolls back on the gate failure."
+      ],
+      "explained_by": []
+    },
+    {
+      "id": "registration-failure",
+      "title": "UEs fail to register or attach",
+      "score": 0.6,
+      "severity": "critical",
+      "slices": [],
+      "evidence": [
+        {
+          "source": "metric",
+          "ref": "sum(ran_ue)",
+          "detail": "UEs on the RAN 200 -> 30"
+        }
+      ],
+      "actions": [
+        "Look at the AMF's reasons: docker logs o5gs-amf | grep -E 'reject|failure'.",
+        "Check every NF is registered at the NRF (docker logs o5gs-nrf | grep 'NF registered').",
+        "Expected for a few minutes after a Docker engine restart; UEs recover on retry (gate advisory)."
+      ],
+      "explained_by": [
+        "gnb-n2-down"
+      ]
+    }
+  ],
+  "facts_source": "correlation"
+}

@@ -1,0 +1,8 @@
+correlation window 08:45:15Z .. 08:48:15Z (baseline 08:42:15Z .. 08:45:15Z)
+
+ranked anomalies:
+  none above |z| 3.5
+
+timeline:
+
+no fault found (every rule below 0.50)

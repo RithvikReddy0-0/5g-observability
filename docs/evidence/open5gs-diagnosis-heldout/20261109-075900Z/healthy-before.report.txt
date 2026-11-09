@@ -1,0 +1,17 @@
+correlation window 07:59:01Z .. 08:02:01Z (baseline 07:56:01Z .. 07:59:01Z)
+
+ranked anomalies:
+    23.0  metric measured_mbps{eMBB}          496 -> 0.008 (worst 0.005) Mbps z 23.0
+    19.8  metric dl_mbps{eMBB}                468 -> 0.00376 (worst 0.00368) Mbps z 19.8
+     7.0  metric rtt_avg{URLLC}               2.6 -> 4.73 (worst 12.6) ms z 7.0
+     6.4  metric rtt_max{URLLC}               5.84 -> 8.82 (worst 28.5) ms z 6.4
+     4.6  metric rtt_max{mMTC}                9.02 -> 12 (worst 23.1) ms z 4.6
+
+timeline:
+  07:58:16Z  metric rtt_max{mMTC} changed: 9.02 -> 12 ms (z 4.6)
+  07:58:46Z  metric rtt_max{URLLC} changed: 5.84 -> 8.82 ms (z 6.4)
+  07:59:01Z  metric dl_mbps{eMBB} changed: 468 -> 0.00376 Mbps (z 19.8)
+  07:59:01Z  metric measured_mbps{eMBB} changed: 496 -> 0.008 Mbps (z 23.0)
+  07:59:46Z  metric rtt_avg{URLLC} changed: 2.6 -> 4.73 ms (z 7.0)
+
+no fault found (every rule below 0.50)

@@ -1,0 +1,29 @@
+{
+  "healthy": false,
+  "verified": true,
+  "unverified_reason": null,
+  "causes": [
+    {
+      "id": "target-down",
+      "title": "A scrape target is down",
+      "score": 0.95,
+      "severity": "critical",
+      "slices": [],
+      "evidence": [
+        {
+          "source": "metric",
+          "ref": "up{job=\"open5gs\"}",
+          "detail": "open5gs is down"
+        }
+      ],
+      "actions": [
+        "open5gs is part of the network's observability: docker ps / docker logs for its container; the gate fails while it is down."
+      ],
+      "jobs": [
+        "open5gs"
+      ],
+      "explained_by": []
+    }
+  ],
+  "facts_source": "correlation"
+}

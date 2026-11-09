@@ -1,0 +1,27 @@
+correlation window 08:14:46Z .. 08:17:46Z (baseline 08:11:46Z .. 08:14:46Z)
+
+ranked anomalies:
+    50.0  metric ran_ue                       200 -> 30 (worst 30) UEs z 170.0
+    50.0  metric reachable{mMTC}              70 -> 0 (worst 0) UEs z 70.0
+     9.9  metric probe_round_s                0.152 -> 1.14 (worst 1.16) s z 9.9
+
+timeline:
+  08:15:01Z  metric probe_round_s changed: 0.152 -> 1.14 s (z 9.9)
+  08:15:01Z  metric ran_ue changed: 200 -> 30 UEs (z 170.0)
+  08:15:01Z  metric reachable{mMTC} changed: 70 -> 0 UEs (z 70.0)
+
+1. [critical 0.95] Radio-link failures: UEs registered but without a data path — slices mMTC
+     evidence (metric) ue_probe_reachable{slice="mMTC"}: mMTC reachable UEs 70 -> 0
+     evidence (metric) fivegs_smffunction_sm_sessionnbr: the core still counts every session: the loss is below the core
+     -> Each affected UE is restarted by the UE supervisor within ~30 s (ran/ue-entrypoint.sh); if many are left broken, re-attach: scripts/open5gs/start_ues.sh.
+     -> Find what stopped the gNB heartbeats (2 s, UERANSIM): a FIFO cell dropping signalling, a starved UE container, or wall-clock steps; cell-congestion and cpu-saturation findings say which.
+2. [critical 0.75] A slice's gNB has no N2 connection to the AMF
+     evidence (metric) sum(gnb): 2 of 3 gNBs connected over N2
+     -> Check the gNB's AMF address and port (ran/gnb-<slice>.yaml, amfConfigs: 10.53.0.5:38412).
+     -> The gNBs are supervised and retry (ran/gnb-entrypoint.sh): docker logs o5gs-gnb-<slice> shows each attempt.
+     -> If this came with a deploy, scripts/open5gs/deploy.sh rolls back on the gate failure.
+3. [critical 0.60] UEs fail to register or attach — explained by gnb-n2-down
+     evidence (metric) sum(ran_ue): UEs on the RAN 200 -> 30
+     -> Look at the AMF's reasons: docker logs o5gs-amf | grep -E 'reject|failure'.
+     -> Check every NF is registered at the NRF (docker logs o5gs-nrf | grep 'NF registered').
+     -> Expected for a few minutes after a Docker engine restart; UEs recover on retry (gate advisory).

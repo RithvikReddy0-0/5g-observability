@@ -1,0 +1,11 @@
+correlation window 08:23:07Z .. 08:26:07Z (baseline 08:20:07Z .. 08:23:07Z)
+
+ranked anomalies:
+     3.7  metric rtt_max{eMBB}                11.1 -> 16.5 (worst 25) ms z 3.7
+
+timeline:
+  08:23:07Z  metric rtt_max{eMBB} changed: 11.1 -> 16.5 ms (z 3.7)
+
+1. [critical 0.95] A scrape target is down
+     evidence (metric) up{job="open5gs"}: open5gs is down
+     -> open5gs is part of the network's observability: docker ps / docker logs for its container; the gate fails while it is down.

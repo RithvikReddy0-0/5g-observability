@@ -1,0 +1,109 @@
+{
+  "healthy": false,
+  "verified": true,
+  "unverified_reason": null,
+  "causes": [
+    {
+      "id": "target-down",
+      "title": "A scrape target is down",
+      "score": 0.95,
+      "severity": "critical",
+      "slices": [],
+      "evidence": [
+        {
+          "source": "metric",
+          "ref": "up{job=\"open5gs\"}",
+          "detail": "open5gs is down"
+        },
+        {
+          "source": "metric",
+          "ref": "up{job=\"upf-slice-traffic\"}",
+          "detail": "upf-slice-traffic is down"
+        }
+      ],
+      "actions": [
+        "open5gs is part of the network's observability: docker ps / docker logs for its container; the gate fails while it is down.",
+        "upf-slice-traffic is part of the network's observability: docker ps / docker logs for its container; the gate fails while it is down."
+      ],
+      "jobs": [
+        "open5gs",
+        "upf-slice-traffic"
+      ],
+      "explained_by": []
+    },
+    {
+      "id": "pfcp-association-loss",
+      "title": "N4/PFCP association between the SMF and a slice's UPF was lost",
+      "score": 0.85,
+      "severity": "critical",
+      "slices": [
+        "URLLC",
+        "eMBB",
+        "mMTC"
+      ],
+      "evidence": [
+        {
+          "source": "metric",
+          "ref": "sum(pfcp_peers_active{nf=\"smf\"})",
+          "detail": "SMF has 2 of 3 UPF associations"
+        },
+        {
+          "source": "log",
+          "ref": "pfcp_heartbeat_lost",
+          "detail": "heartbeat lost x1 {'URLLC': 1}; e.g. No Heartbeat from UPF [10.53.0.8]:8805"
+        },
+        {
+          "source": "log",
+          "ref": "pfcp_deassociated",
+          "detail": "de-associated x1 {'URLLC': 1}; e.g. PFCP de-associated [10.53.0.8]:8805"
+        },
+        {
+          "source": "log",
+          "ref": "pfcp_no_response",
+          "detail": "requests unanswered x82 {'URLLC': 5, 'eMBB': 38, 'mMTC': 39}; e.g. [57407] LOCAL  No Reponse. Give up! for step 1 type 1 peer [10.53.0.8]:8805"
+        },
+        {
+          "source": "log",
+          "ref": "pfcp_retry_failed",
+          "detail": "re-association failed x4 {'URLLC': 4}; e.g. Retry association with peer failed [10.53.0.8]:8805"
+        }
+      ],
+      "actions": [
+        "Check the slice's UPF container: docker ps --filter name=o5gs-upf; a restart shows as 'Remote PFCP restarted' at the SMF.",
+        "After a UPF restart confirm sessions were restored: sum by (snssai)(fivegs_smffunction_sm_sessionnbr) and the slice's ue_probe_reachable.",
+        "If the SMF was restarted, stop the UPFs first, restart the SMF, then start the UPFs - a UPF older than the SMF keeps stale PFCP state (docs/open5gs.md operating notes; deploy.sh does this)."
+      ],
+      "explained_by": []
+    },
+    {
+      "id": "rlf-no-data-path",
+      "title": "Radio-link failures: UEs registered but without a data path",
+      "score": 0.95,
+      "severity": "critical",
+      "evidence": [
+        {
+          "source": "log",
+          "ref": "ue-entrypoint: unhealthy ... restarting this UE only",
+          "detail": "1 UE restart(s) by the supervisor, per slice {'URLLC': 1}"
+        },
+        {
+          "source": "metric",
+          "ref": "ue_probe_reachable{slice=\"URLLC\"}",
+          "detail": "URLLC reachable UEs 10 -> 0"
+        }
+      ],
+      "actions": [
+        "Each affected UE is restarted by the UE supervisor within ~30 s (ran/ue-entrypoint.sh); if many are left broken, re-attach: scripts/open5gs/start_ues.sh.",
+        "Find what stopped the gNB heartbeats (2 s, UERANSIM): a FIFO cell dropping signalling, a starved UE container, or wall-clock steps; cell-congestion and cpu-saturation findings say which."
+      ],
+      "slices": [
+        "URLLC"
+      ],
+      "hint": null,
+      "explained_by": [
+        "pfcp-association-loss"
+      ]
+    }
+  ],
+  "facts_source": "correlation"
+}

@@ -1,0 +1,195 @@
+[
+ {
+  "id": "healthy-before",
+  "fault": "none: the stack as it is",
+  "expected": [],
+  "acceptable": [],
+  "reported": [],
+  "healthy_verdict": true,
+  "top1": null,
+  "expected_found": [],
+  "expected_missed": [],
+  "false_positives": [],
+  "urllc_p95_before": 3.584,
+  "urllc_p95_during": 2.388,
+  "broken_after_heal": 0,
+  "injected": {}
+ },
+ {
+  "id": "upf-urllc-stopped",
+  "fault": "docker stop o5gs-upf-urllc",
+  "expected": [
+   "pfcp-association-loss"
+  ],
+  "acceptable": [
+   "target-down",
+   "rlf-no-data-path"
+  ],
+  "reported": [
+   [
+    "target-down",
+    "critical",
+    0.95,
+    []
+   ],
+   [
+    "pfcp-association-loss",
+    "critical",
+    0.85,
+    [
+     "URLLC",
+     "eMBB",
+     "mMTC"
+    ]
+   ],
+   [
+    "rlf-no-data-path",
+    "critical",
+    0.95,
+    [
+     "URLLC"
+    ]
+   ]
+  ],
+  "healthy_verdict": false,
+  "top1": false,
+  "expected_found": [
+   "pfcp-association-loss"
+  ],
+  "expected_missed": [],
+  "false_positives": [],
+  "urllc_p95_before": 3.81,
+  "urllc_p95_during": null,
+  "broken_after_heal": 0,
+  "injected": {}
+ },
+ {
+  "id": "gnb-mmtc-stopped",
+  "fault": "docker stop o5gs-gnb-mmtc",
+  "expected": [
+   "gnb-n2-down"
+  ],
+  "acceptable": [
+   "target-down",
+   "rlf-no-data-path",
+   "registration-failure"
+  ],
+  "reported": [
+   [
+    "rlf-no-data-path",
+    "critical",
+    0.95,
+    [
+     "mMTC"
+    ]
+   ],
+   [
+    "gnb-n2-down",
+    "critical",
+    0.75,
+    []
+   ],
+   [
+    "registration-failure",
+    "critical",
+    0.6,
+    []
+   ]
+  ],
+  "healthy_verdict": false,
+  "top1": false,
+  "expected_found": [
+   "gnb-n2-down"
+  ],
+  "expected_missed": [],
+  "false_positives": [],
+  "urllc_p95_before": 3.278,
+  "urllc_p95_during": 4.157,
+  "broken_after_heal": 0,
+  "injected": {}
+ },
+ {
+  "id": "pcf-stopped",
+  "fault": "docker stop o5gs-pcf",
+  "expected": [
+   "target-down"
+  ],
+  "acceptable": [],
+  "reported": [
+   [
+    "target-down",
+    "critical",
+    0.95,
+    []
+   ]
+  ],
+  "healthy_verdict": false,
+  "top1": true,
+  "expected_found": [
+   "target-down"
+  ],
+  "expected_missed": [],
+  "false_positives": [],
+  "urllc_p95_before": 3.884,
+  "urllc_p95_during": 3.862,
+  "broken_after_heal": 0,
+  "injected": {}
+ },
+ {
+  "id": "upf-urllc-cpu-hog",
+  "fault": "two busy loops inside o5gs-upf-urllc",
+  "expected": [
+   "cpu-saturation"
+  ],
+  "acceptable": [],
+  "reported": [],
+  "healthy_verdict": true,
+  "top1": false,
+  "expected_found": [],
+  "expected_missed": [
+   "cpu-saturation"
+  ],
+  "false_positives": [],
+  "urllc_p95_before": 3.442,
+  "urllc_p95_during": 2.224,
+  "broken_after_heal": 0,
+  "injected": {
+   "killed": ""
+  }
+ },
+ {
+  "id": "n6-delay-urllc",
+  "fault": "netem +15 ms on o5gs-upf-urllc's packets to the URLLC data network (no rule describes this)",
+  "expected": [],
+  "acceptable": [],
+  "reported": [],
+  "healthy_verdict": true,
+  "top1": null,
+  "expected_found": [],
+  "expected_missed": [],
+  "false_positives": [],
+  "urllc_p95_before": 3.767,
+  "urllc_p95_during": 19.194,
+  "broken_after_heal": 0,
+  "injected": {
+   "dev": "eth0",
+   "dn": "10.53.0.52"
+  }
+ },
+ {
+  "id": "healthy-after",
+  "fault": "none: the stack after all faults were undone",
+  "expected": [],
+  "acceptable": [],
+  "reported": [],
+  "healthy_verdict": true,
+  "top1": null,
+  "expected_found": [],
+  "expected_missed": [],
+  "false_positives": [],
+  "urllc_p95_before": 2.463,
+  "urllc_p95_during": 2.432,
+  "broken_after_heal": 0,
+  "injected": {}
+ }
+]
