@@ -1,0 +1,44 @@
+# verification 2026-11-09T00:18:56Z, commit 73e631d + working tree (logparse/trace fixes)
+## alloy errors in the last 2 min (after the one-off backfill): 104
+## memory (docker stats, 3 samples 20 s apart)
+o5gs-loki 97.95MiB / 384MiB 1.75%
+o5gs-alloy 72.71MiB / 192MiB 52.23%
+o5gs-loki 98.12MiB / 384MiB 5.65%
+o5gs-alloy 72.99MiB / 192MiB 50.77%
+o5gs-loki 100.6MiB / 384MiB 3.65%
+o5gs-alloy 73.01MiB / 192MiB 50.06%
+your 131072x1 screen size is bogus. expect trouble
+diagnose.py RSS 26.6 MiB
+## loki ingest over 10 min
+   (no slice) 10296
+   scheduler_apply 1
+   ue_recovered 1
+   ue_restart 1
+   upf_session 1
+   upf_session_added 1
+   upf_session_removed 1
+## traces
+  spans: {('slice-orchestrator', 'admission.decide'): 1, ('packet-scheduler', 'scheduler.apply'): 1}
+## diagnosis
+fault_diagnosis_up 1
+fault_diagnosis_runs_total 9
+fault_diagnosis_causes 0
+fault_diagnosis_healthy 1
+  prometheus up{job=fault-diagnosis}: ['1']
+correlation window 00:05:03Z .. 00:20:03Z (baseline 23:50:03Z .. 00:05:03Z)
+
+ranked anomalies:
+     7.2  metric rtt_max{mMTC}                15.9 -> 15.4 (worst 53.1) ms z 7.2
+     5.0  metric rtt_max{eMBB}                14 -> 16.6 (worst 49.5) ms z 5.0
+     4.7  metric rtt_avg{eMBB}                6.69 -> 6.66 (worst 20.8) ms z 4.7
+
+timeline:
+  00:04:33Z  metric rtt_max{eMBB} changed: 14 -> 16.6 ms (z 5.0)
+  00:06:03Z  metric rtt_max{mMTC} changed: 15.9 -> 15.4 ms (z 7.2)
+  00:07:57Z  trace  packet-scheduler scheduler.apply mode=sliced reason=first apply
+  00:15:33Z  metric rtt_avg{eMBB} changed: 6.69 -> 6.66 ms (z 4.7)
+
+no fault found (every rule below 0.50)
+               total        used        free      shared  buff/cache   available
+Mem:            7783        3291         578           5        4110        4491
+Swap:           2048           0        2048

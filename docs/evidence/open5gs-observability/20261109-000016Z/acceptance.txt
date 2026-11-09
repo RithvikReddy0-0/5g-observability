@@ -1,0 +1,4 @@
+PASS=24  FAIL=0  SKIP-ODE=1  GAP=1  OWNER=0
+===================================================================
+RESULT: PASS (non-baseline host) — every runnable criterion passed.
+        Not complete: 1 need the ODE, 1 documented gap(s), 0 owner decision(s).
