@@ -77,7 +77,7 @@ p = 0.65 ([`../open5gs-urllc-tail/stats.md`](../open5gs-urllc-tail/stats.md)).
 
 At nominal load:
 
-1. **The four algorithms cannot be told apart on URLLC.** Medians 9.1–10.4 ms, every range overlaps
+1. **The four algorithms cannot be told apart on URLLC.** Medians 9.1–10.3 ms, every range overlaps
    every other, p ≥ 0.63 against HTB. The same mode varies up to 2× between rounds (round 4, in the
    evening, was the fastest for every mode). None lost a URLLC packet on any device or an mMTC
    report; no run left a UE without a data path or logged a radio-link failure.

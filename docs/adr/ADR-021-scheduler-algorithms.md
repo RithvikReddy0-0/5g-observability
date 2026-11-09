@@ -104,7 +104,7 @@ All on 2026-11-08 (UTC), code `61f4c5b`.
 
 | | sliced (HTB) | prio | drr | hfsc |
 |---|---|---|---|---|
-| Nominal: URLLC p99, median (range), ms | 9.3 (6.6–10.6) | 9.1 (7.4–10.8) | 10.4 (6.7–14.5) | 9.5 (8.2–11.6) |
+| Nominal: URLLC p99, median (range), ms | 9.3 (6.6–10.6) | 9.1 (7.4–10.8) | 10.3 (6.7–14.5) | 9.4 (8.2–11.6) |
 | Nominal: eMBB aggregate, Mbps | 225 (223–229) | 224 (223–229) | 221 (218–229) | **202 (184–219)** |
 | Nominal: eMBB 5th percentile, Mbps | 11.0 | 9.0 | 9.1 | 9.9 |
 | Nominal: URLLC / mMTC loss, overall score | 0 / 0, 0.77 | 0 / 0, 0.76 | 0 / 0, 0.75 | 0 / 0, 0.76 |
