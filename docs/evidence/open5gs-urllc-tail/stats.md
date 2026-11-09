@@ -14,20 +14,20 @@
 
 | Spearman ρ with urllc.owd_p99_ms over 36 runs | ρ |
 |---|---|
-| cpu.amf | -0.54 |
-| cpu.dn-mmtc | -0.54 |
-| cpu.dn-urllc | +0.66 |
-| cpu.gnb-embb | +0.00 |
-| cpu.gnb-mmtc | +0.86 |
+| cpu.amf | constant, undefined |
+| cpu.dn-mmtc | constant, undefined |
+| cpu.dn-urllc | +0.69 |
+| cpu.gnb-embb | +0.01 |
+| cpu.gnb-mmtc | +0.88 |
 | cpu.gnb-urllc | +0.80 |
-| cpu.smf | -0.03 |
+| cpu.smf | +0.30 |
 | cpu.ue | -0.39 |
 | cpu.upf-embb | +0.01 |
-| cpu.upf-mmtc | +0.72 |
-| cpu.upf-urllc | +0.76 |
-| host.load1_end | -0.20 |
+| cpu.upf-mmtc | +0.85 |
+| cpu.upf-urllc | +0.77 |
+| host.load1_end | -0.19 |
 | host.load1_start | -0.29 |
-| embb.dl_aggregate_mbps | -0.27 |
+| embb.dl_aggregate_mbps | -0.26 |
 | run order | -0.54 |
 
 | Arm | mean rank of urllc.owd_p99_ms within a round (1 = shortest), 4 complete rounds |

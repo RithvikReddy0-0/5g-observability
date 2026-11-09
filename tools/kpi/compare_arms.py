@@ -76,11 +76,11 @@ def fmt(v, f):
 
 
 def ranks(v):
-    order = sorted(range(len(v)), key=lambda i: v[i])
-    r = [0] * len(v)
-    for k, i in enumerate(order):
-        r[i] = k
-    return r
+    """Mid-ranks: tied values share their average rank. Sequential ranks for ties (as before
+    2026-11-09) made Spearman's rho depend on input order; CPU figures rounded to 0.1 % tie often."""
+    sys.path.insert(0, HERE)
+    from stats import _ranks
+    return _ranks(v)[0]
 
 
 def spearman(x, y):
@@ -122,7 +122,8 @@ def stats(index, comparisons, key="urllc.owd_p99_ms"):
     for k in keys:
         x = [r["m"].get(k) for r in runs]
         if None not in x:
-            print("| %s | %+.2f |" % (k, spearman(x, y)))
+            rho = spearman(x, y)
+            print("| %s | %s |" % (k, "constant, undefined" if rho != rho else "%+.2f" % rho))
     print("| run order | %+.2f |" % spearman([int(r["seq"] or 0) for r in runs], y))
     blocked(runs, key)
 

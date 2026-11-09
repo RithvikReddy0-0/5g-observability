@@ -157,6 +157,30 @@ class ClopperPearson(unittest.TestCase):
         self.assertAlmostEqual(1 - S.binom_cdf(219309, 331237, lo), 0.025, places=9)
 
 
+class CompareArmsSpearman(unittest.TestCase):
+    """compare_arms.py's rank correlation (docs/evidence/open5gs-urllc-tail/stats.md)."""
+
+    def setUp(self):
+        import compare_arms
+        self.C = compare_arms
+
+    def test_tied_values_share_their_rank(self):
+        # Before 2026-11-09 ties got sequential ranks in input order (= run order), so the result
+        # depended on the order of the runs. Reversing the input must not change rho.
+        x = [1.0, 1.0, 1.0, 2.0, 2.0, 3.0]
+        y = [5.0, 3.0, 4.0, 6.0, 7.0, 9.0]
+        rho = self.C.spearman(x, y)
+        self.assertAlmostEqual(rho, self.C.spearman(x[::-1], y[::-1]), places=12)
+        # Reference: Pearson correlation of the mid-ranks, worked by hand:
+        # rx = [2, 2, 2, 4.5, 4.5, 6], ry = [3, 1, 2, 4, 5, 6] -> 15 / sqrt(15 * 17.5) = 0.92582
+        # (scipy.stats.spearmanr gives the same).
+        self.assertAlmostEqual(rho, 15 / math.sqrt(15 * 17.5), places=12)
+
+    def test_a_constant_column_has_no_correlation(self):
+        # The AMF's CPU read the same in all 36 runs; the old ranks reported run order's -0.54.
+        self.assertTrue(math.isnan(self.C.spearman([0.0] * 5, [3.0, 1.0, 4.0, 1.5, 9.0])))
+
+
 class RuleOfThree(unittest.TestCase):
     def test_worked_examples(self):
         # Wikipedia, "Rule of three (statistics)": 1500 subjects with no adverse event -> fewer

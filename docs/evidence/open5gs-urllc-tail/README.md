@@ -123,9 +123,15 @@ the drift between rounds (round 4, in the evening, was the fastest round for eve
 Friedman chi-square 5.93, df 8, p = 0.65
 
 Spearman rank correlation of URLLC p99 with what else was measured, over all 36 runs: the URLLC and
-mMTC gNBs and UPFs and the URLLC data network +0.66 to +0.86 (gNB-mMTC +0.86, gNB-URLLC +0.80);
-eMBB throughput −0.27; host load average −0.20 to −0.29; the UE container −0.39; run order −0.54
-(later runs were faster).
+mMTC gNBs and UPFs and the URLLC data network +0.69 to +0.88 (gNB-mMTC +0.88, UPF-mMTC +0.85,
+gNB-URLLC +0.80); eMBB throughput −0.26; host load average −0.19 to −0.29; the UE container −0.39;
+run order −0.54 (later runs were faster). The AMF and mMTC data network read the same CPU in every
+run, so they have no correlation.
+
+*Corrected 2026-11-09:* the first version of this table ranked tied values in input order, which
+is run order; the two constant columns then showed run order's −0.54, and the CPU columns were
+off by up to 0.13. `compare_arms.py` now uses mid-ranks (as `stats.py` does), and every value
+above matches `scipy.stats.spearmanr`. No conclusion changes.
 
 ## What this shows
 
@@ -140,7 +146,7 @@ eMBB throughput −0.27; host load average −0.20 to −0.29; the UE container 
    from an effect. Point 4 of the earlier same-day comparison should be read as **not confirmed**.
 4. **What tracks the tail is CPU time for fixed work.** The URLLC gNB needed 7.3–12.3 % of a core for
    the same 500 pkt/s; runs where it (and the other lightly loaded containers) needed more had the
-   longer URLLC tail (ρ up to +0.86). Neither the arm, the eMBB load nor the host load average does.
+   longer URLLC tail (ρ up to +0.88). Neither the arm, the eMBB load nor the host load average does.
    The same work costing up to 70 % more CPU time points at the host itself running slower in some
    runs — this is a laptop running Windows with the stack in a WSL2 VM (frequency scaling, Windows
    activity and VM scheduling are outside the experiment). Consistent, not proven.
