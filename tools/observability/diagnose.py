@@ -580,7 +580,10 @@ RULES = [rule_cpu_saturation, rule_cell_congestion, rule_rlf_no_data_path, rule_
 # (consequence, cause): when both are found, the consequence is explained by the cause.
 CAUSAL = [("rlf-no-data-path", "cell-congestion"), ("rlf-no-data-path", "cpu-saturation"),
           ("registration-failure", "gnb-n2-down"), ("registration-failure", "pfcp-association-loss"),
-          ("orchestrator-throttling", "cpu-saturation"), ("rlf-no-data-path", "pfcp-association-loss")]
+          ("orchestrator-throttling", "cpu-saturation"), ("rlf-no-data-path", "pfcp-association-loss"),
+          # a gNB without N2 takes its UEs' data path with it (held-out test, 2026-11-09: the
+          # consequence outranked the cause when the mMTC gNB was stopped)
+          ("rlf-no-data-path", "gnb-n2-down")]
 
 
 def diagnose(f, report_at=REPORT_AT):
@@ -623,6 +626,35 @@ def render(result):
 # ─────────────────────────── live facts beyond Prometheus ───────────────────────────
 
 
+def parse_docker_stats(text):
+    """`docker stats --no-stream --format '{{.Name}} {{.CPUPerc}}'` -> {"upf-urllc": 207.9, ...} for
+    this stack's containers (names without the o5gs- prefix, as the recorded incidents use)."""
+    cpu = {}
+    for line in text.splitlines():
+        name, _, pct = line.strip().partition(" ")
+        if name.startswith("o5gs-") and pct.strip().endswith("%"):
+            try:
+                cpu[name[5:]] = float(pct.strip()[:-1])
+            except ValueError:
+                pass
+    return cpu
+
+
+def parse_cpu_quotas(text, ncpu):
+    """`docker inspect -f '{{.Name}} {{.HostConfig.NanoCpus}}' ...` -> {"upf-urllc": 0.5, ...}. No
+    quota (0) and a quota of every host core (how "unlimited" is set: --cpus 0 is a no-op) are left out."""
+    quota = {}
+    for line in text.splitlines():
+        name, _, nano = line.strip().lstrip("/").partition(" ")
+        try:
+            cores = int(nano) / 1e9
+        except ValueError:
+            continue
+        if name.startswith("o5gs-") and 0 < cores < (ncpu or 1e9):
+            quota[name[5:]] = cores
+    return quota
+
+
 def host_info(use_docker=False):
     info = {"ncpu": os.cpu_count(), "planned_ues": PLANNED_UES}
     try:
@@ -637,6 +669,22 @@ def host_info(use_docker=False):
                                  capture_output=True, text=True, timeout=10).stdout.strip()
             info["ue_log_count"] = int(out)
         except (OSError, ValueError, subprocess.TimeoutExpired):
+            pass
+        # Per-container CPU and quotas, live (a snapshot at diagnosis time). Before 2026-11-09 only
+        # the recorded incidents supplied these, so rule_cpu_saturation's container branch could not
+        # fire on the live stack.
+        try:
+            out = subprocess.run([logparse.DOCKER, "stats", "--no-stream", "--format", "{{.Name}} {{.CPUPerc}}"],
+                                 capture_output=True, text=True, timeout=30).stdout
+            cpu = parse_docker_stats(out)
+            if cpu:
+                info["container_cpu"] = cpu
+                out = subprocess.run([logparse.DOCKER, "inspect", "-f", "{{.Name}} {{.HostConfig.NanoCpus}}"]
+                                     + ["o5gs-" + c for c in sorted(cpu)], capture_output=True, text=True, timeout=30).stdout
+                quota = parse_cpu_quotas(out, info.get("ncpu"))
+                if quota:
+                    info["cpu_quota"] = quota
+        except (OSError, subprocess.TimeoutExpired):
             pass
     env = logparse._read_env(logparse.SLICES_ENV)
     info["capacity_mbps"] = {}

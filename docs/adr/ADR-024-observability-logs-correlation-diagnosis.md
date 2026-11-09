@@ -195,6 +195,30 @@ judgment, stated per case. The scheduler runs carry no CPU measurement, so CPU s
 70–97 % of a core, URLLC p99 10–20 ms); that is consistent with ADR-016's diagnosis but the repository
 leaves those causes open, so they are not counted (nor is the one unlabelled scheduler run).
 
+## Results — held-out: faults injected live (2026-11-09)
+
+`tools/observability/inject_faults.py` injected faults the rules were not written from, with each
+case's expected causes committed before the run
+([evidence](../evidence/open5gs-diagnosis-heldout/README.md)).
+
+**Score on 7 cases (4 faulty):**
+- **Expected cause found:** 3 of 4.
+- **Top-1 right:** 1 of 4.
+- **False positives:** 0 in all 7, including a +15 ms N6 delay that no rule describes (the anomaly is shown, no cause named) and two healthy windows.
+
+**This is the figure for unseen faults**, from a small sample. The misses:
+- **Stopped URLLC UPF:** "target down" ranked above the PFCP loss; both are true.
+- **Stopped mMTC gNB:** the consequence (UEs without a data path) ranked above the cause.
+- **Busy loops in an unquota'd UPF on 12 cores:** these harmed nothing (URLLC p95 fell), and the CPU rule rightly needs a latency breach.
+
+**Two changes followed, both tested:**
+1. A gNB without N2 now explains RLF / no data path.
+2. The live path collects per-container CPU and quotas; before, only recorded incidents supplied them.
+
+A post-hoc run, reported separately and not as held-out, checks them:
+- the stopped gNB now ranks first;
+- a UPF starved by a 0.5-CPU quota (URLLC p95 3.5 → 56.5 ms) is diagnosed as CPU saturation, citing the live quota data.
+
 ## Consequences
 
 - A KPI breach or a failed gate now comes with a ranked, cited explanation, live (`:9115/diagnosis`)

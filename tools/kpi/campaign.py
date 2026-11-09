@@ -97,7 +97,7 @@ def broken_ues():
 
 
 def log(fh, msg):
-    line = "%s %s" % (datetime.datetime.utcnow().strftime("%H:%M:%SZ"), msg)
+    line = "%s %s" % (datetime.datetime.now(datetime.timezone.utc).strftime("%H:%M:%SZ"), msg)
     print(line, flush=True)
     fh.write(line + "\n")
     fh.flush()
@@ -125,7 +125,7 @@ def main(argv):
             st = apply(arms[arm])
             log(lg, "#%d round %d %s: applied %s cell %s" % (seq, rnd, arm, st["mode"], st.get("cell_mbps")))
             before = set(os.listdir(kpi_dir))
-            started = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+            started = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
             env = dict(os.environ, KPI_EVIDENCE=os.path.join(evidence, "kpi"))
             rc = subprocess.run([sys.executable, os.path.join(REPO, "tools", "kpi", "run_kpis.py"), "standard"],
                                 cwd=REPO, env=env).returncode

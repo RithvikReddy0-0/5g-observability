@@ -1,0 +1,20 @@
+correlation window 09:01:37Z .. 09:04:37Z (baseline 08:58:37Z .. 09:01:37Z)
+
+ranked anomalies:
+    50.0  metric urllc_owd_p95                3.49 -> 59.3 (worst 60.8) ms z 55.9
+    14.2  metric rtt_avg{URLLC}               4.81 -> 7.99 (worst 37) ms z 14.2
+    12.1  metric rtt_max{URLLC}               9.28 -> 18.1 (worst 83.9) ms z 12.1
+
+timeline:
+  09:01:52Z  metric urllc_owd_p95 changed: 3.49 -> 59.3 ms (z 55.8)
+  09:02:07Z  metric rtt_avg{URLLC} changed: 4.81 -> 7.99 ms (z 14.2)
+  09:02:07Z  metric rtt_max{URLLC} changed: 9.28 -> 18.1 ms (z 12.1)
+
+1. [critical 0.85] CPU saturation: latency is CPU contention, not queueing — slices URLLC
+     evidence (snapshot) docker stats upf-urllc: upf-urllc at 51% CPU against a quota of 0.5 CPUs
+     evidence (metric) max(ue_probe_rtt_ms{slice="URLLC",stat="max"}): URLLC probe RTT worst 83.9 ms > budget 10 ms
+     evidence (metric) kpi_owd_recent_ms{slice="URLLC",stat="p95"}: URLLC one-way p95 (median over the window) 59.3 ms > budget 10 ms
+     -> Cap the load that costs the CPU: run the slice orchestrator with the feedback controller (CONTROL=1, default policy pi) so eMBB's admission limit follows URLLC latency (ADR-016/018).
+     -> Give eMBB's gNB and UPF a CPU quota: tools/network-orchestrator/netorch.py scale eMBB 1 (366 -> 121 Mbps, URLLC p99 11.0 -> 10.4 ms measured, ADR-017).
+     -> Check what is burning CPU: docker stats --no-stream; never generate test traffic inside a UPF (ADR-012).
+     -> A queue cannot fix this (ADR-019 finding 5): changing scheduler shares will not help.

@@ -15,6 +15,7 @@ reported is an expected one; a reported cause that is neither expected nor accep
 positive; for a case with no expected cause, any cause at critical/warning severity is a false positive.
 
     python3 tools/observability/inject_faults.py [case ...]     all cases, or the named ones
+    python3 tools/observability/inject_faults.py --posthoc       the post-hoc cases (not held-out)
 Writes docs/evidence/open5gs-diagnosis-heldout/<UTC timestamp>/ (results.json, summary.md, one
 diagnosis JSON per case, run.log). Run from the repo root on the Docker host, nothing else running.
 """
@@ -50,6 +51,17 @@ CASES = [
     dict(id="n6-delay-urllc", fault="netem +15 ms on o5gs-upf-urllc's packets to the URLLC data network "
          "(no rule describes this)", expected=[], acceptable=[]),
     dict(id="healthy-after", fault="none: the stack after all faults were undone", expected=[], acceptable=[]),
+]
+
+# NOT held-out: written after the first run (20261109-075900Z) had been scored, to check two changes
+# made because of it (the gNB -> RLF causal link; live per-container CPU) and to inject a CPU fault
+# that actually starves the UPF (the first, two busy loops on a 12-core host with no quota, harmed
+# nothing: URLLC p95 fell). Reported separately from the held-out score.
+POSTHOC = [
+    dict(id="gnb-mmtc-stopped", fault="docker stop o5gs-gnb-mmtc (re-run after the causal-link fix)",
+         expected=["gnb-n2-down"], acceptable=["target-down", "rlf-no-data-path", "registration-failure"]),
+    dict(id="upf-urllc-cpu-starved", fault="o5gs-upf-urllc limited to 0.5 CPU (docker update) plus two busy loops in it",
+         expected=["cpu-saturation"], acceptable=[]),
 ]
 
 
@@ -96,7 +108,9 @@ def inject(case):
         sh(["docker", "stop", "o5gs-gnb-mmtc"], check=True)
     elif c == "pcf-stopped":
         sh(["docker", "stop", "o5gs-pcf"], check=True)
-    elif c == "upf-urllc-cpu-hog":
+    elif c in ("upf-urllc-cpu-hog", "upf-urllc-cpu-starved"):
+        if c == "upf-urllc-cpu-starved":
+            sh(["docker", "update", "--cpus", "0.5", "o5gs-upf-urllc"], check=True)
         for _ in range(2):
             sh(["docker", "exec", "-d", "o5gs-upf-urllc", "timeout", str(HOLD + 60), "sh", "-c", "while :; do :; done"],
                check=True)
@@ -119,7 +133,7 @@ def undo(case, state):
         sh(["docker", "start", "o5gs-gnb-mmtc"], check=True)
     elif c == "pcf-stopped":
         sh(["docker", "start", "o5gs-pcf"], check=True)
-    elif c == "upf-urllc-cpu-hog":
+    elif c in ("upf-urllc-cpu-hog", "upf-urllc-cpu-starved"):
         # The UPF image has no ps/awk: kill the loops from the scheduler container (host PID namespace).
         killer = ("import os,signal\n"
                   "me=os.getpid(); n=0\n"
@@ -130,6 +144,9 @@ def undo(case, state):
                   "  except OSError: pass\n"
                   "print(n)\n")
         state["killed"] = sh(["docker", "exec", "o5gs-scheduler", "python3", "-c", killer])
+        if c == "upf-urllc-cpu-starved":
+            # "unlimited" is a quota of every host core: `docker update --cpus 0` is a silent no-op
+            sh(["docker", "update", "--cpus", str(os.cpu_count() or 12), "o5gs-upf-urllc"], check=True)
     elif c == "n6-delay-urllc":
         in_netns("o5gs-upf-urllc", ["tc", "qdisc", "del", "dev", state["dev"], "root"])
 
@@ -169,20 +186,23 @@ def main(argv):
     if argv and argv[0] in ("-h", "--help"):
         print(__doc__.strip())
         return 0
-    cases = [c for c in CASES if not argv or c["id"] in argv]
-    ts = datetime.datetime.utcnow().strftime("%Y%m%d-%H%M%SZ")
+    posthoc = "--posthoc" in argv
+    argv = [a for a in argv if a != "--posthoc"]
+    cases = [c for c in (POSTHOC if posthoc else CASES) if not argv or c["id"] in argv]
+    ts = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%d-%H%M%SZ") + ("-posthoc" if posthoc else "")
     out = os.path.join(REPO, "docs", "evidence", "open5gs-diagnosis-heldout", ts)
     os.makedirs(out, exist_ok=True)
     logf = open(os.path.join(out, "run.log"), "a", encoding="utf-8")
 
     def log(msg):
-        line = "%s %s" % (datetime.datetime.utcnow().strftime("%H:%M:%SZ"), msg)
+        line = "%s %s" % (datetime.datetime.now(datetime.timezone.utc).strftime("%H:%M:%SZ"), msg)
         print(line, flush=True)
         logf.write(line + "\n")
         logf.flush()
 
     commit = sh(["git", "-C", REPO, "rev-parse", "--short", "HEAD"])
-    log("held-out diagnosis test, commit %s, hold %ds, settle %ds" % (commit, HOLD, SETTLE))
+    log("%s diagnosis test, commit %s, hold %ds, settle %ds"
+        % ("POST-HOC (not held-out)" if posthoc else "held-out", commit, HOLD, SETTLE))
     rows = []
     for case in cases:
         log("== %s: %s (expected %s, acceptable %s)" % (case["id"], case["fault"], case["expected"], case["acceptable"]))

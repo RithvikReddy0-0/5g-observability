@@ -1,0 +1,78 @@
+[
+ {
+  "id": "gnb-mmtc-stopped",
+  "fault": "docker stop o5gs-gnb-mmtc (re-run after the causal-link fix)",
+  "expected": [
+   "gnb-n2-down"
+  ],
+  "acceptable": [
+   "target-down",
+   "rlf-no-data-path",
+   "registration-failure"
+  ],
+  "reported": [
+   [
+    "gnb-n2-down",
+    "critical",
+    0.75,
+    []
+   ],
+   [
+    "rlf-no-data-path",
+    "critical",
+    0.95,
+    [
+     "mMTC"
+    ]
+   ],
+   [
+    "registration-failure",
+    "critical",
+    0.6,
+    []
+   ]
+  ],
+  "healthy_verdict": false,
+  "top1": true,
+  "expected_found": [
+   "gnb-n2-down"
+  ],
+  "expected_missed": [],
+  "false_positives": [],
+  "urllc_p95_before": 3.021,
+  "urllc_p95_during": 2.506,
+  "broken_after_heal": 0,
+  "injected": {}
+ },
+ {
+  "id": "upf-urllc-cpu-starved",
+  "fault": "o5gs-upf-urllc limited to 0.5 CPU (docker update) plus two busy loops in it",
+  "expected": [
+   "cpu-saturation"
+  ],
+  "acceptable": [],
+  "reported": [
+   [
+    "cpu-saturation",
+    "critical",
+    0.85,
+    [
+     "URLLC"
+    ]
+   ]
+  ],
+  "healthy_verdict": false,
+  "top1": true,
+  "expected_found": [
+   "cpu-saturation"
+  ],
+  "expected_missed": [],
+  "false_positives": [],
+  "urllc_p95_before": 3.548,
+  "urllc_p95_during": 56.502,
+  "broken_after_heal": 0,
+  "injected": {
+   "killed": ""
+  }
+ }
+]

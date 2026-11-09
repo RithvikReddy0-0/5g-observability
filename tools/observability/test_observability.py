@@ -530,6 +530,31 @@ class Diagnosis(unittest.TestCase):
             if line and not line.startswith("#"):
                 self.assertTrue(line.startswith("fault_diagnosis_"), line)
 
+    def test_live_container_cpu_and_quotas_are_parsed(self):
+        # As docker printed them on 2026-11-09 (two busy loops in the URLLC UPF; 12 host cores).
+        cpu = diagnose.parse_docker_stats("o5gs-upf-urllc 207.90%\no5gs-amf 0.31%\nsomething-else 50%\no5gs-ue --\n")
+        self.assertEqual(cpu, {"upf-urllc": 207.9, "amf": 0.31})
+        q = diagnose.parse_cpu_quotas("/o5gs-upf-urllc 500000000\n/o5gs-gnb-embb 0\n/o5gs-upf-embb 12000000000\n", 12)
+        self.assertEqual(q, {"upf-urllc": 0.5})         # no quota and "all 12 cores" are not limits
+
+    def test_a_down_gnb_explains_its_ues_losing_the_data_path(self):
+        # Held-out test 2026-11-09: with the mMTC gNB stopped, rlf-no-data-path (0.95) outranked
+        # gnb-n2-down (0.75). The consequence must rank below its cause.
+        def gnb(f):
+            return {"id": "gnb-n2-down", "score": 0.75, "severity": "critical", "evidence": [], "actions": []}
+
+        def rlf(f):
+            return {"id": "rlf-no-data-path", "score": 0.95, "severity": "critical", "evidence": [], "actions": []}
+
+        saved = diagnose.RULES
+        diagnose.RULES = [rlf, gnb]
+        try:
+            causes = diagnose.diagnose(self.F(info={}))["causes"]
+        finally:
+            diagnose.RULES = saved
+        self.assertEqual([c["id"] for c in causes], ["gnb-n2-down", "rlf-no-data-path"])
+        self.assertEqual(causes[1]["explained_by"], ["gnb-n2-down"])
+
     def test_recorded_incidents_keep_their_scores(self):
         rows, unlabelled, t = incidents.evaluate(incidents.all_cases())
         self.assertGreaterEqual(t["cases"], 45)

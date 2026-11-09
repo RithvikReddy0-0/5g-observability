@@ -1,0 +1,7 @@
+08:53:06Z POST-HOC (not held-out) diagnosis test, commit ff654cf, hold 180s, settle 240s
+08:53:06Z == gnb-mmtc-stopped: docker stop o5gs-gnb-mmtc (re-run after the causal-link fix) (expected ['gnb-n2-down'], acceptable ['target-down', 'rlf-no-data-path', 'registration-failure'])
+08:56:34Z   70 UEs without a data path after undo: re-attaching
+08:57:36Z    reported [('gnb-n2-down', 'critical', 0.75, []), ('rlf-no-data-path', 'critical', 0.95, ['mMTC']), ('registration-failure', 'critical', 0.6, [])] | top1 True | missed [] | false positives [] | URLLC p95 3.021 -> 2.506 ms
+09:01:36Z == upf-urllc-cpu-starved: o5gs-upf-urllc limited to 0.5 CPU (docker update) plus two busy loops in it (expected ['cpu-saturation'], acceptable [])
+09:05:02Z    reported [('cpu-saturation', 'critical', 0.85, ['URLLC'])] | top1 True | missed [] | false positives [] | URLLC p95 3.548 -> 56.502 ms
+09:05:02Z done: /mnt/c/Users/Rithvik Reddy/Desktop/5g-observability/docs/evidence/open5gs-diagnosis-heldout/20261109-085306Z-posthoc
