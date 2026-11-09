@@ -183,9 +183,11 @@ scheduler's mode and cell changed ([comparison](../evidence/open5gs-kpi/README.m
 6. At the same cell, sliced beats a plain queue at nominal load too: no loss on any slice and no
    radio-link failure, where FIFO lost URLLC packets and mMTC reports, left eMBB downloads unfinished
    and caused 3 radio-link failures.
-7. It does not beat **no cell**. Against `off`, the 250 Mbps cell halves eMBB, and URLLC's p99 is
-   longer with the scheduler in place (at 600 Mbps too, where eMBB is not capped). The cause of the
-   longer tail is open. A KPI comparison with an earlier month that credited the scheduler with
+7. It does not beat **no cell**. Against `off`, the 250 Mbps cell halves eMBB. These runs also showed
+   a longer URLLC p99 with the scheduler; 36 interleaved runs (ADR-021) did not reproduce it: the
+   tail varies 2–4× from run to run with host CPU speed, whatever the qdisc
+   ([evidence](../evidence/open5gs-urllc-tail/README.md)). FIFO's URLLC loss came from one device
+   per run whose radio link failed, not from loss spread over the slice. A KPI comparison with an earlier month that credited the scheduler with
    URLLC's 0.90 → 1.00 was not controlled and is withdrawn: with the scheduler off URLLC also scores 1.00.
 8. A race found while running these: `POST /config` and the main loop both called `step()`, and two
    concurrent rebuilds of the same qdisc failed ("Exclusivity flag on, cannot modify"); the cell ran

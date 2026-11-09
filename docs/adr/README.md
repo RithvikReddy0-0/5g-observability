@@ -18,3 +18,7 @@ immutable — supersede, don't edit). This directory holds any **future supersed
 | [018](ADR-018-algorithm-comparison.md) | Algorithms compared; the winners made default |
 | [019](ADR-019-packet-scheduler.md) | Packet scheduler: classify every radio packet, schedule slices on a shared cell |
 | [020](ADR-020-multi-session-ues.md) | Multi-session UEs: a session on every permitted slice |
+| [021](ADR-021-scheduler-algorithms.md) | Scheduler algorithms: strict priority, DRR and HFSC beside HTB; HTB stays the default |
+| [022](ADR-022-mac-scheduler-simulation.md) | A slot-level MAC scheduler simulation of the three slices (simulation only) |
+| [023](ADR-023-standards-and-statistics.md) | Standards alignment (GSMA NG.116 NESTs, 3GPP/IETF mapping) and statistical tests before claims |
+| [024](ADR-024-observability-logs-correlation-diagnosis.md) | Per-slice logs, decision traces, correlation and rule-based fault diagnosis |

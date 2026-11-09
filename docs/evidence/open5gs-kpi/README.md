@@ -41,13 +41,15 @@ What this shows:
    this load nothing queues and it scores best (0.86–0.88). It is the stack before ADR-019, not a model
    of a radio cell, which always has a capacity.
 2. **At the same cell capacity, the scheduler beats a plain queue.** FIFO at 600 Mbps lost 1.3–2.9 %
-   of URLLC packets (score 0.80) and once 0.5 % of mMTC reports; 1–2 eMBB downloads never finished
+   of URLLC packets (score 0.80), all of it on **one device per run** whose radio link failed (device
+   26: 3 064 packets; device 29: 1 322; the other nine lost none), and once 0.5 % of mMTC reports; 1–2 eMBB downloads never finished
    and the second run left 3 radio-link failures (3 UEs without a data path afterwards). Sliced at
    600 Mbps lost nothing on any slice, every download finished, no radio-link failure: overall 0.83
    against 0.66 and 0.77.
 3. **The 250 Mbps cell, not the scheduler, is what costs eMBB**: 214–228 Mbps at 250, 436–444 at 600.
    At 250 the cell splits eMBB evenly (5th percentile = mean ≈ 10.7 Mbps per device).
-4. **The scheduler did not improve URLLC's tail at nominal load; it made it longer.** Sliced p99
+4. **URLLC's tail at nominal load: these runs suggested the scheduler made it longer; a controlled
+   test did not reproduce that (update below).** Sliced p99
    7.3–14.7 ms (mean 11.4) at 250 and 10.4–14.0 ms at 600, against 6.1–9.8 ms off and 8.0–8.9 ms
    FIFO (whose p99 counts only the packets that arrived). The cause is not established. URLLC's
    one-way latency is uplink, where the cell (100 Mbps) is far from full; one candidate is the cost

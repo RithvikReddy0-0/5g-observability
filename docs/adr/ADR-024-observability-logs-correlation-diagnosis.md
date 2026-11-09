@@ -1,8 +1,10 @@
 # ADR-024 — Per-slice logs, decision traces, a correlation engine and rule-based fault diagnosis
 
-**Status:** Accepted for the offline parts (built and verified without the stack, 2026-11-09).
-Deployment on the live stack is pending: the coordinator runs the commands in
-[`docs/observability.md`](../observability.md) between experiments.
+**Status:** Accepted, 2026-11-09. Built and verified offline, then deployed on the live stack the same
+day ([evidence](../evidence/open5gs-observability/README.md)): ~220 MiB in all, KPI gate and
+acceptance still pass. Deploying found three faults no test had caught (the scheduler's spans dropped
+by `fs.protected_regular`, LogQL quoting Alloy refused, a backfill Loki rejected); all three are fixed
+and now tested, the Alloy one in CI against the pinned image.
 **Builds on:** ADR-005 / [`docs/logging.md`](../logging.md) (the cores write text logs, never JSON),
 ADR-015 (KPI collectors), ADR-016/018 (slice orchestrator and its controller), ADR-017 (network
 orchestrator), ADR-019 (packet scheduler).

@@ -215,8 +215,10 @@ the live tree; `POST :9114/config` changes mode, cell and shares at run time.
 
 With the scheduler on, eMBB is capped by the cell (214–228 Mbps aggregate at 250 Mbps). At nominal
 load the same-day KPI runs show what it buys and costs: against a plain FIFO at the same 600 Mbps
-cell, 0 % URLLC loss instead of 1.3–2.9 % and no radio-link failures; against no cell at all
-(`off`), lower eMBB throughput and a longer URLLC p99 (10–15 ms against 6–10 ms, cause open).
+cell, 0 % URLLC loss instead of 1.3–2.9 % (one device per run losing its radio link) and no
+radio-link failures; against no cell at all (`off`), lower eMBB throughput. A longer URLLC p99 seen
+in those runs did not reproduce in 36 interleaved runs (ADR-021): the tail follows host CPU speed,
+not the qdisc ([URLLC tail](evidence/open5gs-urllc-tail/README.md)).
 Evidence: [`open5gs-scheduler`](evidence/open5gs-scheduler/README.md),
 [same-day KPI comparison](evidence/open5gs-kpi/README.md).
 
