@@ -205,9 +205,12 @@ scheduler's mode and cell changed ([comparison](../evidence/open5gs-kpi/README.m
   PRBs, slots or channel. Radio-level scheduling needs a real RAN (OpenAirInterface or srsRAN).
 - (−) The offsets assume the UERANSIM 3.3.0 RLS layout and an outer IPv4 header without options.
   The unit tests pin both; a UERANSIM upgrade must re-run them against a fresh capture.
-- (−) The cell capacity is a declared number, set below what this laptop can push so that the queue
-  is the bottleneck. With the scheduler on, eMBB is capped at the cell (250 Mbps downlink): at nominal
-  load the overall KPI score is 0.75–0.77 at 250 Mbps against 0.83 at 600 and 0.86–0.88 with no cell.
-  The capacity is the largest single knob on the eMBB score.
+- (−) The cell capacity is a declared number. With the scheduler on, eMBB is capped at the cell: at
+  nominal load the overall KPI score is 0.75–0.77 at 250 Mbps against 0.83 at 600 and 0.86–0.88 with no
+  cell, with URLLC losing nothing at either size. The capacity is the largest single knob on the eMBB
+  score. **The default is 600 Mbps downlink / 100 Mbps uplink since 2026-11-09** (it was 250 / 100):
+  at 600 the queue still forms under overload, where scheduling matters, and nominal load is not
+  capped well below what the laptop delivers (483–548 Mbps unshaped). The overload experiments set
+  their own cell, so their results do not depend on the default.
 - (−) The scheduler is privileged and outside Compose (like the orchestrators, it is optional: the
   gate only advises when it is down). On Kubernetes it would be a privileged DaemonSet; not built.

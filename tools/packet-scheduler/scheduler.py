@@ -242,7 +242,7 @@ def load_config(env_path=SLICES_ENV, compose_path=COMPOSE):
     return {
         "mode": env.get("SCHED_MODE", "sliced"),
         "directions": env.get("SCHED_DIRECTIONS", " ".join(DIRECTIONS)).split(),
-        "cell": {"downlink": float(env.get("SCHED_CELL_DL_MBPS", "250")),
+        "cell": {"downlink": float(env.get("SCHED_CELL_DL_MBPS", "600")),
                  "uplink": float(env.get("SCHED_CELL_UL_MBPS", "100"))},
         "signalling_share": float(env.get("SCHED_SIGNALLING_SHARE", "2")),
         "default_share": float(env.get("SCHED_DEFAULT_SHARE", "3")),
