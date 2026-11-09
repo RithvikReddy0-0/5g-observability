@@ -347,86 +347,116 @@ data:
     \ seconds, kpi_devices_active, kpi_devices_seen\n  /run/start    starts a measurement run (clears the run accumulators)\n\
     \  /run/stats    JSON for the run so far: counts, loss, latency percentiles, jitter, per device\n\nEnvironment: SLICE\
     \ (URLLC|mMTC), MODE (urllc|mmtc), UDP_PORT, METRICS_PORT (9130),\nWINDOW (60 s), RECENT_WINDOW (10 s), ACTIVE_WINDOW\
-    \ (seconds a device counts as active after its last packet).\n\"\"\"\n\nimport collections\nimport json\nimport os\nimport\
-    \ socket\nimport struct\nimport threading\nimport time\nfrom http.server import BaseHTTPRequestHandler, ThreadingHTTPServer\n\
-    \nSLICE = os.environ.get(\"SLICE\", \"URLLC\")\nMODE = os.environ.get(\"MODE\", \"urllc\")\nUDP_PORT = int(os.environ.get(\"\
-    UDP_PORT\", \"5400\"))\nMETRICS_PORT = int(os.environ.get(\"METRICS_PORT\", \"9130\"))\nWINDOW = float(os.environ.get(\"\
-    WINDOW\", \"60\"))\n# A short window for control rather than display: the slice orchestrator's feedback controller\n#\
-    \ (ADR-016) steers admission from it every few seconds, and a 60 s view reacts too late.\nRECENT_WINDOW = float(os.environ.get(\"\
-    RECENT_WINDOW\", \"10\"))\nACTIVE_WINDOW = float(os.environ.get(\"ACTIVE_WINDOW\", \"10\" if MODE == \"urllc\" else \"\
-    90\"))\n\nURLLC = struct.Struct(\"!HBIQ\")      # 15 bytes\nMMTC_HEAD = struct.Struct(\"!HB\")    # + 3-byte seq + 4-byte\
-    \ ms = 10 bytes\n\nlock = threading.Lock()\n\n\nclass Tally:\n    \"\"\"Counters and latency samples for one span of time\
-    \ (the life of the process, or a run).\"\"\"\n\n    def __init__(self):\n        self.started = time.monotonic()\n   \
-    \     self.streams = {}            # (device, epoch) -> [first, last, received]\n        self.owd = []               \
-    \ # one-way delay samples, ms\n        self.jitter = []             # |owd - previous owd of the same device|, ms\n  \
-    \      self.last_owd = {}\n        self.per_device = collections.defaultdict(lambda: {\"received\": 0, \"owd_sum\": 0.0})\n\
-    \        self.malformed = 0\n\n    def add(self, dev, epoch, seq, owd_ms):\n        s = self.streams.get((dev, epoch))\n\
-    \        if s is None:\n            self.streams[(dev, epoch)] = [seq, seq, 1]\n        else:\n            s[0] = min(s[0],\
-    \ seq)\n            s[1] = max(s[1], seq)\n            s[2] += 1\n        self.owd.append(owd_ms)\n        if dev in self.last_owd:\n\
-    \            self.jitter.append(abs(owd_ms - self.last_owd[dev]))\n        self.last_owd[dev] = owd_ms\n        d = self.per_device[dev]\n\
-    \        d[\"received\"] += 1\n        d[\"owd_sum\"] += owd_ms\n\n    def counts(self):\n        received = sum(s[2]\
-    \ for s in self.streams.values())\n        expected = sum(s[1] - s[0] + 1 for s in self.streams.values())\n        return\
-    \ received, max(expected, received)\n\n    def stats(self):\n        received, expected = self.counts()\n        per_dev\
-    \ = {}\n        for (dev, _), (first, last, rcv) in self.streams.items():\n            p = per_dev.setdefault(dev, {\"\
-    received\": 0, \"expected\": 0})\n            p[\"received\"] += rcv\n            p[\"expected\"] += last - first + 1\n\
-    \        for dev, p in per_dev.items():\n            d = self.per_device[dev]\n            p[\"owd_mean_ms\"] = round(d[\"\
-    owd_sum\"] / d[\"received\"], 3) if d[\"received\"] else None\n        return {\n            \"slice\": SLICE, \"mode\"\
-    : MODE,\n            \"duration_s\": round(time.monotonic() - self.started, 1),\n            \"received\": received, \"\
-    expected\": expected,\n            \"loss_ratio\": round(1 - received / expected, 6) if expected else None,\n        \
-    \    \"devices\": len(per_dev),\n            \"owd_ms\": summary(self.owd),\n            # how many packets arrived later\
-    \ than each bound: reliability in TS 22.261's sense is\n            # delivery within the service's latency bound, not\
-    \ just delivery\n            \"owd_over_ms\": {str(t): sum(1 for x in self.owd if x > t) for t in OVER_MS},\n        \
-    \    \"jitter_ms_mean\": round(sum(self.jitter) / len(self.jitter), 3) if self.jitter else None,\n            \"malformed\"\
-    : self.malformed,\n            \"per_device\": {str(k): v for k, v in sorted(per_dev.items())},\n        }\n\n\ndef percentile(sorted_vals,\
-    \ q):\n    if not sorted_vals:\n        return None\n    i = min(len(sorted_vals) - 1, max(0, int(round(q * (len(sorted_vals)\
-    \ - 1)))))\n    return round(sorted_vals[i], 3)\n\n\nOVER_MS = (1, 2, 5, 10, 20, 30, 50, 100)   # 10: URLLC slice budget\
-    \ (5QI 82); 30: TS 22.261 Table 7.2.3.2-1\n\n\ndef summary(vals):\n    if not vals:\n        return {\"n\": 0}\n    v\
-    \ = sorted(vals)\n    return {\"n\": len(v), \"mean\": round(sum(v) / len(v), 3), \"min\": round(v[0], 3),\n         \
-    \   \"p50\": percentile(v, 0.50), \"p95\": percentile(v, 0.95), \"p99\": percentile(v, 0.99),\n            \"p999\": percentile(v,\
-    \ 0.999), \"max\": round(v[-1], 3)}\n\n\nlife = Tally()\nrun = Tally()\nrecent = collections.deque()         # (monotonic\
-    \ s, owd ms) for the rolling window\nlast_seen = {}                       # device -> monotonic s\n\n\ndef parse(data,\
-    \ now_ns):\n    \"\"\"-> (device, epoch, seq, one-way delay ms) or None.\"\"\"\n    if MODE == \"urllc\":\n        if\
-    \ len(data) < URLLC.size:\n            return None\n        dev, epoch, seq, t_ns = URLLC.unpack_from(data)\n        return\
-    \ dev, epoch, seq, (now_ns - t_ns) / 1e6\n    if len(data) != 10:\n        return None\n    dev, epoch = MMTC_HEAD.unpack_from(data)\n\
-    \    seq = int.from_bytes(data[3:6], \"big\")\n    t_ms = int.from_bytes(data[6:10], \"big\")\n    owd = ((now_ns // 1_000_000)\
-    \ - t_ms) % (1 << 32)\n    return dev, epoch, seq, float(owd)\n\n\ndef receive_loop():\n    sock = socket.socket(socket.AF_INET,\
-    \ socket.SOCK_DGRAM)\n    sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 4 << 20)\n    sock.bind((\"0.0.0.0\", UDP_PORT))\n\
-    \    while True:\n        data, _ = sock.recvfrom(2048)\n        now_ns = time.monotonic_ns()\n        p = parse(data,\
-    \ now_ns)\n        with lock:\n            if p is None:\n                life.malformed += 1\n                run.malformed\
-    \ += 1\n                continue\n            dev, epoch, seq, owd = p\n            life.add(dev, epoch, seq, owd)\n \
-    \           run.add(dev, epoch, seq, owd)\n            now = now_ns / 1e9\n            recent.append((now, owd))\n   \
-    \         last_seen[dev] = now\n            # The lifetime tally keeps counts, not every sample.\n            if len(life.owd)\
-    \ > 10000:\n                del life.owd[:5000]\n                del life.jitter[:5000]\n\n\ndef render_metrics():\n \
-    \   now = time.monotonic()\n    with lock:\n        while recent and recent[0][0] < now - WINDOW:\n            recent.popleft()\n\
-    \        window = summary([o for _, o in recent])\n        fast = summary([o for t, o in recent if t >= now - RECENT_WINDOW])\n\
-    \        received, expected = life.counts()\n        active = sum(1 for t in last_seen.values() if t >= now - ACTIVE_WINDOW)\n\
-    \        seen = len(last_seen)\n    lab = 'slice=\"%s\"' % SLICE\n    out = [\n        \"# HELP kpi_packets_received_total\
-    \ Measurement packets received from the slice's UEs.\",\n        \"# TYPE kpi_packets_received_total counter\",\n    \
-    \    \"kpi_packets_received_total{%s} %d\" % (lab, received),\n        \"# HELP kpi_packets_expected_total Packets the\
-    \ senders' sequence numbers say were sent.\",\n        \"# TYPE kpi_packets_expected_total counter\",\n        \"kpi_packets_expected_total{%s}\
-    \ %d\" % (lab, expected),\n        \"# HELP kpi_owd_ms One-way delay UE -> data network over the last WINDOW seconds.\"\
-    ,\n        \"# TYPE kpi_owd_ms gauge\",\n    ]\n    for stat in (\"mean\", \"p50\", \"p95\", \"p99\", \"max\"):\n    \
-    \    if stat in window and window[stat] is not None:\n            out.append('kpi_owd_ms{%s,stat=\"%s\"} %s' % (lab, stat,\
-    \ window[stat]))\n    out += [\n        \"# HELP kpi_owd_recent_ms One-way delay UE -> data network over the last RECENT_WINDOW\
-    \ seconds.\",\n        \"# TYPE kpi_owd_recent_ms gauge\",\n    ]\n    for stat in (\"mean\", \"p95\", \"p99\"):\n   \
-    \     if stat in fast and fast[stat] is not None:\n            out.append('kpi_owd_recent_ms{%s,stat=\"%s\"} %s' % (lab,\
-    \ stat, fast[stat]))\n    out += [\n        \"# HELP kpi_owd_samples One-way delay samples in the window.\",\n       \
-    \ \"# TYPE kpi_owd_samples gauge\",\n        \"kpi_owd_samples{%s} %d\" % (lab, window.get(\"n\", 0)),\n        \"# HELP\
-    \ kpi_devices_active Devices heard from within ACTIVE_WINDOW seconds.\",\n        \"# TYPE kpi_devices_active gauge\"\
-    ,\n        \"kpi_devices_active{%s} %d\" % (lab, active),\n        \"# HELP kpi_devices_seen Devices heard from since\
-    \ the collector started.\",\n        \"# TYPE kpi_devices_seen gauge\",\n        \"kpi_devices_seen{%s} %d\" % (lab, seen),\n\
-    \    ]\n    return \"\\n\".join(out) + \"\\n\"\n\n\nclass Handler(BaseHTTPRequestHandler):\n    def _send(self, code,\
-    \ body, ctype):\n        b = body.encode()\n        self.send_response(code)\n        self.send_header(\"Content-Type\"\
+    \ (seconds a device counts as active after its last packet).\n\"\"\"\n\nimport array\nimport collections\nimport json\n\
+    import os\nimport socket\nimport struct\nimport threading\nimport time\nfrom http.server import BaseHTTPRequestHandler,\
+    \ ThreadingHTTPServer\n\nSLICE = os.environ.get(\"SLICE\", \"URLLC\")\nMODE = os.environ.get(\"MODE\", \"urllc\")\nUDP_PORT\
+    \ = int(os.environ.get(\"UDP_PORT\", \"5400\"))\nMETRICS_PORT = int(os.environ.get(\"METRICS_PORT\", \"9130\"))\nWINDOW\
+    \ = float(os.environ.get(\"WINDOW\", \"60\"))\n# A short window for control rather than display: the slice orchestrator's\
+    \ feedback controller\n# (ADR-016) steers admission from it every few seconds, and a 60 s view reacts too late.\nRECENT_WINDOW\
+    \ = float(os.environ.get(\"RECENT_WINDOW\", \"10\"))\nACTIVE_WINDOW = float(os.environ.get(\"ACTIVE_WINDOW\", \"10\" if\
+    \ MODE == \"urllc\" else \"90\"))\n\nURLLC = struct.Struct(\"!HBIQ\")      # 15 bytes\nMMTC_HEAD = struct.Struct(\"!HB\"\
+    )    # + 3-byte seq + 4-byte ms = 10 bytes\n\nlock = threading.Lock()\n\n\ndef socket_drops(port=None, path=\"/proc/net/udp\"\
+    ):\n    \"\"\"Datagrams the kernel dropped at our socket (its receive buffer was full), from the last\n    column of /proc/net/udp.\
+    \ These are lost by the instrument, not by the network.\"\"\"\n    port = UDP_PORT if port is None else port\n    try:\n\
+    \        with open(path) as f:\n            next(f)\n            for line in f:\n                cols = line.split()\n\
+    \                if len(cols) > 12 and int(cols[1].split(\":\")[1], 16) == port:\n                    return int(cols[-1])\n\
+    \    except (OSError, ValueError, StopIteration):\n        pass\n    return None\n\n\n# Samples kept per run. A run's\
+    \ tally lives until the next /run/start, and between KPI runs nobody\n# calls it: at 500 URLLC packets/s, ten idle hours\
+    \ were 19 million samples in Python lists (552 MiB),\n# and replacing them under the lock stalled the receive loop for\
+    \ ~9 s at the start of the next run,\n# so every device lost the same ~430 packets (2026-11-09, docs/evidence/open5gs-cell-capacity).\n\
+    # Samples are now flat arrays (8 bytes each, freed at once) and capped; counts stay exact past it.\nMAX_RUN_SAMPLES =\
+    \ int(os.environ.get(\"KPI_MAX_RUN_SAMPLES\", \"4000000\"))   # ~2.2 h of URLLC\n\n\nclass Tally:\n    \"\"\"Counters\
+    \ and latency samples for one span of time (the life of the process, or a run).\"\"\"\n\n    def __init__(self, max_samples=None):\n\
+    \        self.started = time.monotonic()\n        self.drops_at_start = socket_drops() if max_samples is not None else\
+    \ None\n        self.streams = {}            # (device, epoch) -> [first, last, received]\n        self.owd = array.array(\"\
+    d\")      # one-way delay samples, ms\n        self.jitter = array.array(\"d\")   # |owd - previous owd of the same device|,\
+    \ ms\n        self.max_samples = max_samples\n        self.samples_truncated = False\n        self.last_owd = {}\n   \
+    \     self.per_device = collections.defaultdict(lambda: {\"received\": 0, \"owd_sum\": 0.0})\n        self.malformed =\
+    \ 0\n\n    def add(self, dev, epoch, seq, owd_ms):\n        s = self.streams.get((dev, epoch))\n        if s is None:\n\
+    \            self.streams[(dev, epoch)] = [seq, seq, 1]\n        else:\n            s[0] = min(s[0], seq)\n          \
+    \  s[1] = max(s[1], seq)\n            s[2] += 1\n        if self.max_samples is None or len(self.owd) < self.max_samples:\n\
+    \            self.owd.append(owd_ms)\n            if dev in self.last_owd:\n                self.jitter.append(abs(owd_ms\
+    \ - self.last_owd[dev]))\n        else:\n            self.samples_truncated = True\n        self.last_owd[dev] = owd_ms\n\
+    \        d = self.per_device[dev]\n        d[\"received\"] += 1\n        d[\"owd_sum\"] += owd_ms\n\n    def counts(self):\n\
+    \        received = sum(s[2] for s in self.streams.values())\n        expected = sum(s[1] - s[0] + 1 for s in self.streams.values())\n\
+    \        return received, max(expected, received)\n\n    def stats(self):\n        received, expected = self.counts()\n\
+    \        per_dev = {}\n        for (dev, _), (first, last, rcv) in self.streams.items():\n            p = per_dev.setdefault(dev,\
+    \ {\"received\": 0, \"expected\": 0})\n            p[\"received\"] += rcv\n            p[\"expected\"] += last - first\
+    \ + 1\n        for dev, p in per_dev.items():\n            d = self.per_device[dev]\n            p[\"owd_mean_ms\"] =\
+    \ round(d[\"owd_sum\"] / d[\"received\"], 3) if d[\"received\"] else None\n        return {\n            \"slice\": SLICE,\
+    \ \"mode\": MODE,\n            \"duration_s\": round(time.monotonic() - self.started, 1),\n            \"received\": received,\
+    \ \"expected\": expected,\n            \"loss_ratio\": round(1 - received / expected, 6) if expected else None,\n    \
+    \        \"devices\": len(per_dev),\n            \"owd_ms\": summary(self.owd),\n            # how many packets arrived\
+    \ later than each bound: reliability in TS 22.261's sense is\n            # delivery within the service's latency bound,\
+    \ not just delivery\n            \"owd_over_ms\": {str(t): sum(1 for x in self.owd if x > t) for t in OVER_MS},\n    \
+    \        \"jitter_ms_mean\": round(sum(self.jitter) / len(self.jitter), 3) if self.jitter else None,\n            \"malformed\"\
+    : self.malformed,\n            # latency figures cover the first MAX_RUN_SAMPLES packets only; counts and loss cover all\n\
+    \            \"samples_truncated\": self.samples_truncated,\n            # dropped by the kernel at this collector's own\
+    \ socket (buffer full): part of the loss\n            # above was the instrument's, not the network's\n            \"\
+    receiver_drops\": (None if self.drops_at_start is None or socket_drops() is None\n                               else\
+    \ socket_drops() - self.drops_at_start),\n            \"rcvbuf_bytes\": rcvbuf_bytes,\n            \"per_device\": {str(k):\
+    \ v for k, v in sorted(per_dev.items())},\n        }\n\n\ndef percentile(sorted_vals, q):\n    if not sorted_vals:\n \
+    \       return None\n    i = min(len(sorted_vals) - 1, max(0, int(round(q * (len(sorted_vals) - 1)))))\n    return round(sorted_vals[i],\
+    \ 3)\n\n\nOVER_MS = (1, 2, 5, 10, 20, 30, 50, 100)   # 10: URLLC slice budget (5QI 82); 30: TS 22.261 Table 7.2.3.2-1\n\
+    \n\ndef summary(vals):\n    if not vals:\n        return {\"n\": 0}\n    v = sorted(vals)\n    return {\"n\": len(v),\
+    \ \"mean\": round(sum(v) / len(v), 3), \"min\": round(v[0], 3),\n            \"p50\": percentile(v, 0.50), \"p95\": percentile(v,\
+    \ 0.95), \"p99\": percentile(v, 0.99),\n            \"p999\": percentile(v, 0.999), \"max\": round(v[-1], 3)}\n\n\nlife\
+    \ = Tally()\nrun = Tally(MAX_RUN_SAMPLES)\nrecent = collections.deque()         # (monotonic s, owd ms) for the rolling\
+    \ window\nlast_seen = {}                       # device -> monotonic s\n\n\ndef parse(data, now_ns):\n    \"\"\"-> (device,\
+    \ epoch, seq, one-way delay ms) or None.\"\"\"\n    if MODE == \"urllc\":\n        if len(data) < URLLC.size:\n      \
+    \      return None\n        dev, epoch, seq, t_ns = URLLC.unpack_from(data)\n        return dev, epoch, seq, (now_ns -\
+    \ t_ns) / 1e6\n    if len(data) != 10:\n        return None\n    dev, epoch = MMTC_HEAD.unpack_from(data)\n    seq = int.from_bytes(data[3:6],\
+    \ \"big\")\n    t_ms = int.from_bytes(data[6:10], \"big\")\n    owd = ((now_ns // 1_000_000) - t_ms) % (1 << 32)\n   \
+    \ return dev, epoch, seq, float(owd)\n\n\nRCVBUF = 4 << 20\nSO_RCVBUFFORCE = getattr(socket, \"SO_RCVBUFFORCE\", 33) \
+    \    # Linux; Python does not export it\nrcvbuf_bytes = None                  # what the kernel actually granted\n\n\n\
+    def open_socket():\n    \"\"\"The receive socket, with a buffer that rides out a few seconds of stall. A plain SO_RCVBUF\
+    \ is\n    capped at net.core.rmem_max (212 992 here): 4 MiB asked, 416 KiB granted, about one second of\n    URLLC. SO_RCVBUFFORCE\
+    \ ignores the cap; it needs CAP_NET_ADMIN, which the data-network\n    containers have (they set their own routes).\"\"\
+    \"\n    global rcvbuf_bytes\n    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\n    try:\n        sock.setsockopt(socket.SOL_SOCKET,\
+    \ SO_RCVBUFFORCE, RCVBUF)\n    except OSError:\n        sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, RCVBUF)\n\
+    \    rcvbuf_bytes = sock.getsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF)\n    sock.bind((\"0.0.0.0\", UDP_PORT))\n   \
+    \ return sock\n\n\ndef receive_loop():\n    sock = open_socket()\n    print(\"kpi-collector %s: UDP :%d, receive buffer\
+    \ %d bytes\" % (SLICE, UDP_PORT, rcvbuf_bytes), flush=True)\n    while True:\n        data, _ = sock.recvfrom(2048)\n\
+    \        now_ns = time.monotonic_ns()\n        p = parse(data, now_ns)\n        with lock:\n            if p is None:\n\
+    \                life.malformed += 1\n                run.malformed += 1\n                continue\n            dev, epoch,\
+    \ seq, owd = p\n            life.add(dev, epoch, seq, owd)\n            run.add(dev, epoch, seq, owd)\n            now\
+    \ = now_ns / 1e9\n            recent.append((now, owd))\n            last_seen[dev] = now\n            # The lifetime\
+    \ tally keeps counts, not every sample.\n            if len(life.owd) > 10000:\n                del life.owd[:5000]\n\
+    \                del life.jitter[:5000]\n\n\ndef render_metrics():\n    now = time.monotonic()\n    with lock:\n     \
+    \   while recent and recent[0][0] < now - WINDOW:\n            recent.popleft()\n        window = summary([o for _, o\
+    \ in recent])\n        fast = summary([o for t, o in recent if t >= now - RECENT_WINDOW])\n        received, expected\
+    \ = life.counts()\n        active = sum(1 for t in last_seen.values() if t >= now - ACTIVE_WINDOW)\n        seen = len(last_seen)\n\
+    \    lab = 'slice=\"%s\"' % SLICE\n    out = [\n        \"# HELP kpi_packets_received_total Measurement packets received\
+    \ from the slice's UEs.\",\n        \"# TYPE kpi_packets_received_total counter\",\n        \"kpi_packets_received_total{%s}\
+    \ %d\" % (lab, received),\n        \"# HELP kpi_packets_expected_total Packets the senders' sequence numbers say were\
+    \ sent.\",\n        \"# TYPE kpi_packets_expected_total counter\",\n        \"kpi_packets_expected_total{%s} %d\" % (lab,\
+    \ expected),\n        \"# HELP kpi_owd_ms One-way delay UE -> data network over the last WINDOW seconds.\",\n        \"\
+    # TYPE kpi_owd_ms gauge\",\n    ]\n    for stat in (\"mean\", \"p50\", \"p95\", \"p99\", \"max\"):\n        if stat in\
+    \ window and window[stat] is not None:\n            out.append('kpi_owd_ms{%s,stat=\"%s\"} %s' % (lab, stat, window[stat]))\n\
+    \    out += [\n        \"# HELP kpi_owd_recent_ms One-way delay UE -> data network over the last RECENT_WINDOW seconds.\"\
+    ,\n        \"# TYPE kpi_owd_recent_ms gauge\",\n    ]\n    for stat in (\"mean\", \"p95\", \"p99\"):\n        if stat\
+    \ in fast and fast[stat] is not None:\n            out.append('kpi_owd_recent_ms{%s,stat=\"%s\"} %s' % (lab, stat, fast[stat]))\n\
+    \    out += [\n        \"# HELP kpi_owd_samples One-way delay samples in the window.\",\n        \"# TYPE kpi_owd_samples\
+    \ gauge\",\n        \"kpi_owd_samples{%s} %d\" % (lab, window.get(\"n\", 0)),\n        \"# HELP kpi_devices_active Devices\
+    \ heard from within ACTIVE_WINDOW seconds.\",\n        \"# TYPE kpi_devices_active gauge\",\n        \"kpi_devices_active{%s}\
+    \ %d\" % (lab, active),\n        \"# HELP kpi_devices_seen Devices heard from since the collector started.\",\n      \
+    \  \"# TYPE kpi_devices_seen gauge\",\n        \"kpi_devices_seen{%s} %d\" % (lab, seen),\n    ]\n    drops = socket_drops()\n\
+    \    if drops is not None:\n        out += [\"# HELP kpi_receiver_drops_total Datagrams the kernel dropped at this collector's\
+    \ socket (buffer full).\",\n                \"# TYPE kpi_receiver_drops_total counter\",\n                \"kpi_receiver_drops_total{%s}\
+    \ %d\" % (lab, drops)]\n    return \"\\n\".join(out) + \"\\n\"\n\n\nclass Handler(BaseHTTPRequestHandler):\n    def _send(self,\
+    \ code, body, ctype):\n        b = body.encode()\n        self.send_response(code)\n        self.send_header(\"Content-Type\"\
     , ctype)\n        self.send_header(\"Content-Length\", str(len(b)))\n        self.end_headers()\n        self.wfile.write(b)\n\
     \n    def do_GET(self):\n        global run\n        path = self.path.split(\"?\")[0]\n        if path == \"/metrics\"\
     :\n            self._send(200, render_metrics(), \"text/plain; version=0.0.4\")\n        elif path == \"/run/start\":\n\
-    \            with lock:\n                run = Tally()\n            self._send(200, json.dumps({\"started\": True, \"\
-    slice\": SLICE}), \"application/json\")\n        elif path == \"/run/stats\":\n            with lock:\n              \
-    \  body = json.dumps(run.stats())\n            self._send(200, body, \"application/json\")\n        elif path == \"/healthz\"\
-    :\n            self._send(200, \"ok\\n\", \"text/plain\")\n        else:\n            self._send(404, \"not found\\n\"\
-    , \"text/plain\")\n\n    def log_message(self, *args):\n        pass\n\n\nif __name__ == \"__main__\":\n    print(\"kpi_collector:\
-    \ slice %s, %s packets on udp/%d, metrics on :%d\"\n          % (SLICE, MODE, UDP_PORT, METRICS_PORT), flush=True)\n \
-    \   threading.Thread(target=receive_loop, daemon=True).start()\n    ThreadingHTTPServer((\"0.0.0.0\", METRICS_PORT), Handler).serve_forever()\n"
+    \            fresh = Tally(MAX_RUN_SAMPLES)\n            with lock:\n                old, run = run, fresh\n         \
+    \   del old                  # freed outside the lock: the receive loop never waits on it\n            self._send(200,\
+    \ json.dumps({\"started\": True, \"slice\": SLICE}), \"application/json\")\n        elif path == \"/run/stats\":\n   \
+    \         with lock:\n                body = json.dumps(run.stats())\n            self._send(200, body, \"application/json\"\
+    )\n        elif path == \"/healthz\":\n            self._send(200, \"ok\\n\", \"text/plain\")\n        else:\n       \
+    \     self._send(404, \"not found\\n\", \"text/plain\")\n\n    def log_message(self, *args):\n        pass\n\n\nif __name__\
+    \ == \"__main__\":\n    print(\"kpi_collector: slice %s, %s packets on udp/%d, metrics on :%d\"\n          % (SLICE, MODE,\
+    \ UDP_PORT, METRICS_PORT), flush=True)\n    threading.Thread(target=receive_loop, daemon=True).start()\n    ThreadingHTTPServer((\"\
+    0.0.0.0\", METRICS_PORT), Handler).serve_forever()\n"
   traffic_agent.py: "#!/usr/bin/env python3\n\"\"\"\ntraffic_agent.py \u2014 what the URLLC and mMTC devices actually send\
     \ (Phase 2b, Track 2).\n\nRuns in the UE container, started by ran/ue-entrypoint.sh. Every UE of a profiled slice sends\n\
     from its OWN PDU-session address, so each packet crosses that slice's gNB and UPF before it\nreaches the slice's data\

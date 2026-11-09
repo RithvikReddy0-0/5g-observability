@@ -143,7 +143,8 @@ for script in ("ue-entrypoint.sh", "ue-lib.sh", "ue-slice.sh", "gnb-entrypoint.s
 configmap("o5gs-ran", ran)
 
 obs = {os.path.basename(p): open(p, encoding="utf-8").read()
-       for p in sorted(glob.glob(os.path.join(BASE, "observability", "*.py")))}
+       for p in sorted(glob.glob(os.path.join(BASE, "observability", "*.py")))
+       if not os.path.basename(p).startswith("test_")}          # unit tests are not deployed
 obs["upf-entrypoint.sh"] = open(os.path.join(BASE, "upf-entrypoint.sh"), encoding="utf-8").read()
 configmap("o5gs-obs", obs)
 configmap("o5gs-prometheus", {"prometheus.yml": dump(to_k8s_prometheus(load(os.path.join(BASE, "observability", "prometheus.yml"))))})

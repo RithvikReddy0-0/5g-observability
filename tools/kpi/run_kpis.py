@@ -302,6 +302,8 @@ def _instance(label, param=None, value=None, embb_ues=None, duration=None):
         "registration_success.eMBB": reg.get("eMBB", {}).get("success_rate"),
         "registration_success.URLLC": reg.get("URLLC", {}).get("success_rate"),
         "host.load1_start": round(load0[0], 2), "host.load1_end": round(os.getloadavg()[0], 2),
+        # lost at the collector's own socket (kernel buffer full), not in the network
+        "urllc.receiver_drops": u.get("receiver_drops"), "mmtc.receiver_drops": m.get("receiver_drops"),
     }
     for c, v in cpu_out.items():
         if v.get("cpu_avg") is not None:
@@ -319,6 +321,11 @@ def _instance(label, param=None, value=None, embb_ues=None, duration=None):
            measured["embb.dl_p5_mbps"], measured["embb.dl_aggregate_mbps"], len(rates), embb_ues,
            measured["mmtc.registration_success"],
            measured["mmtc.loss_ratio"], measured["mmtc.loss_resolution"], sl, card["overall"]))
+    for sl_name in ("urllc", "mmtc"):
+        d = measured.get("%s.receiver_drops" % sl_name)
+        if d:
+            log("  WARNING: %d %s packets were dropped at the KPI collector's own socket: that much of the "
+                "loss above is the instrument's, not the network's" % (d, sl_name.upper() if sl_name == "urllc" else "mMTC"))
     return rec
 
 

@@ -36,6 +36,7 @@ Environment: SLICE (URLLC|mMTC), MODE (urllc|mmtc), UDP_PORT, METRICS_PORT (9130
 WINDOW (60 s), RECENT_WINDOW (10 s), ACTIVE_WINDOW (seconds a device counts as active after its last packet).
 """
 
+import array
 import collections
 import json
 import os
@@ -61,14 +62,41 @@ MMTC_HEAD = struct.Struct("!HB")    # + 3-byte seq + 4-byte ms = 10 bytes
 lock = threading.Lock()
 
 
+def socket_drops(port=None, path="/proc/net/udp"):
+    """Datagrams the kernel dropped at our socket (its receive buffer was full), from the last
+    column of /proc/net/udp. These are lost by the instrument, not by the network."""
+    port = UDP_PORT if port is None else port
+    try:
+        with open(path) as f:
+            next(f)
+            for line in f:
+                cols = line.split()
+                if len(cols) > 12 and int(cols[1].split(":")[1], 16) == port:
+                    return int(cols[-1])
+    except (OSError, ValueError, StopIteration):
+        pass
+    return None
+
+
+# Samples kept per run. A run's tally lives until the next /run/start, and between KPI runs nobody
+# calls it: at 500 URLLC packets/s, ten idle hours were 19 million samples in Python lists (552 MiB),
+# and replacing them under the lock stalled the receive loop for ~9 s at the start of the next run,
+# so every device lost the same ~430 packets (2026-11-09, docs/evidence/open5gs-cell-capacity).
+# Samples are now flat arrays (8 bytes each, freed at once) and capped; counts stay exact past it.
+MAX_RUN_SAMPLES = int(os.environ.get("KPI_MAX_RUN_SAMPLES", "4000000"))   # ~2.2 h of URLLC
+
+
 class Tally:
     """Counters and latency samples for one span of time (the life of the process, or a run)."""
 
-    def __init__(self):
+    def __init__(self, max_samples=None):
         self.started = time.monotonic()
+        self.drops_at_start = socket_drops() if max_samples is not None else None
         self.streams = {}            # (device, epoch) -> [first, last, received]
-        self.owd = []                # one-way delay samples, ms
-        self.jitter = []             # |owd - previous owd of the same device|, ms
+        self.owd = array.array("d")      # one-way delay samples, ms
+        self.jitter = array.array("d")   # |owd - previous owd of the same device|, ms
+        self.max_samples = max_samples
+        self.samples_truncated = False
         self.last_owd = {}
         self.per_device = collections.defaultdict(lambda: {"received": 0, "owd_sum": 0.0})
         self.malformed = 0
@@ -81,9 +109,12 @@ class Tally:
             s[0] = min(s[0], seq)
             s[1] = max(s[1], seq)
             s[2] += 1
-        self.owd.append(owd_ms)
-        if dev in self.last_owd:
-            self.jitter.append(abs(owd_ms - self.last_owd[dev]))
+        if self.max_samples is None or len(self.owd) < self.max_samples:
+            self.owd.append(owd_ms)
+            if dev in self.last_owd:
+                self.jitter.append(abs(owd_ms - self.last_owd[dev]))
+        else:
+            self.samples_truncated = True
         self.last_owd[dev] = owd_ms
         d = self.per_device[dev]
         d["received"] += 1
@@ -116,6 +147,13 @@ class Tally:
             "owd_over_ms": {str(t): sum(1 for x in self.owd if x > t) for t in OVER_MS},
             "jitter_ms_mean": round(sum(self.jitter) / len(self.jitter), 3) if self.jitter else None,
             "malformed": self.malformed,
+            # latency figures cover the first MAX_RUN_SAMPLES packets only; counts and loss cover all
+            "samples_truncated": self.samples_truncated,
+            # dropped by the kernel at this collector's own socket (buffer full): part of the loss
+            # above was the instrument's, not the network's
+            "receiver_drops": (None if self.drops_at_start is None or socket_drops() is None
+                               else socket_drops() - self.drops_at_start),
+            "rcvbuf_bytes": rcvbuf_bytes,
             "per_device": {str(k): v for k, v in sorted(per_dev.items())},
         }
 
@@ -140,7 +178,7 @@ def summary(vals):
 
 
 life = Tally()
-run = Tally()
+run = Tally(MAX_RUN_SAMPLES)
 recent = collections.deque()         # (monotonic s, owd ms) for the rolling window
 last_seen = {}                       # device -> monotonic s
 
@@ -161,10 +199,30 @@ def parse(data, now_ns):
     return dev, epoch, seq, float(owd)
 
 
-def receive_loop():
+RCVBUF = 4 << 20
+SO_RCVBUFFORCE = getattr(socket, "SO_RCVBUFFORCE", 33)     # Linux; Python does not export it
+rcvbuf_bytes = None                  # what the kernel actually granted
+
+
+def open_socket():
+    """The receive socket, with a buffer that rides out a few seconds of stall. A plain SO_RCVBUF is
+    capped at net.core.rmem_max (212 992 here): 4 MiB asked, 416 KiB granted, about one second of
+    URLLC. SO_RCVBUFFORCE ignores the cap; it needs CAP_NET_ADMIN, which the data-network
+    containers have (they set their own routes)."""
+    global rcvbuf_bytes
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 4 << 20)
+    try:
+        sock.setsockopt(socket.SOL_SOCKET, SO_RCVBUFFORCE, RCVBUF)
+    except OSError:
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, RCVBUF)
+    rcvbuf_bytes = sock.getsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF)
     sock.bind(("0.0.0.0", UDP_PORT))
+    return sock
+
+
+def receive_loop():
+    sock = open_socket()
+    print("kpi-collector %s: UDP :%d, receive buffer %d bytes" % (SLICE, UDP_PORT, rcvbuf_bytes), flush=True)
     while True:
         data, _ = sock.recvfrom(2048)
         now_ns = time.monotonic_ns()
@@ -228,6 +286,11 @@ def render_metrics():
         "# TYPE kpi_devices_seen gauge",
         "kpi_devices_seen{%s} %d" % (lab, seen),
     ]
+    drops = socket_drops()
+    if drops is not None:
+        out += ["# HELP kpi_receiver_drops_total Datagrams the kernel dropped at this collector's socket (buffer full).",
+                "# TYPE kpi_receiver_drops_total counter",
+                "kpi_receiver_drops_total{%s} %d" % (lab, drops)]
     return "\n".join(out) + "\n"
 
 
@@ -246,8 +309,10 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/metrics":
             self._send(200, render_metrics(), "text/plain; version=0.0.4")
         elif path == "/run/start":
+            fresh = Tally(MAX_RUN_SAMPLES)
             with lock:
-                run = Tally()
+                old, run = run, fresh
+            del old                  # freed outside the lock: the receive loop never waits on it
             self._send(200, json.dumps({"started": True, "slice": SLICE}), "application/json")
         elif path == "/run/stats":
             with lock:

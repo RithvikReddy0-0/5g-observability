@@ -192,6 +192,13 @@ jobs:
           # arms goes through these before it is reported as a difference.
           python3 tools/kpi/test_stats.py
 
+      - name: KPI collector and campaign runner
+        run: |
+          # The collector's run tally is bounded and freed outside the lock (an idle night once made it
+          # stall ~9 s and drop 4 280 URLLC packets at its own socket); campaigns interleave arms ABBA.
+          python3 deployments/open5gs/observability/test_kpi_collector.py
+          python3 tools/kpi/test_campaign.py
+
       - name: slice NESTs are valid GSMA NG.116 v10.0 and match the deployment
         run: |
           # ADR-023: attribute names, clauses, units and allowed values from NG.116; every `from:`
