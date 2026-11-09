@@ -151,6 +151,12 @@ jobs:
           if [ -n "$bad" ]; then echo "::error::image not pinned by digest: $bad"; exit 1; fi
           echo "every image in docker-compose.logs.yaml is pinned by digest"
 
+      - name: Alloy accepts the generated log pipeline
+        run: |
+          # ADR-024: `alloy fmt` and the generator check both passed a pipeline Alloy then refused on the
+          # stack (LogQL quoting inside stage.match). This builds every component in the pinned image.
+          bash scripts/open5gs/check_alloy_config.sh
+
   kpi-gate:
     name: KPI gate is defined and effective
     runs-on: ubuntu-latest

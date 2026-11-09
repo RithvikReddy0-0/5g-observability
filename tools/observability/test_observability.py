@@ -181,6 +181,37 @@ class LogParsing(unittest.TestCase):
             self.assertIn('event = "%s"' % ev, committed)
         self.assertNotRegex(committed, r"imsi\s*=", "an IMSI must never become a Loki label")
 
+    def test_every_match_selector_is_valid_logql_quoting(self):
+        # `alloy fmt` checks only Alloy's own syntax; the selector inside is parsed when the pipeline
+        # starts. LogQL reads a double-quoted value as a Go string, so an escape Go does not know
+        # (re.escape's "\-") stops Alloy with "invalid char escape", and Alloy's match stage takes no
+        # backtick strings at all. Both happened on the first deployment (2026-11-09).
+        go_escape = re.compile(r'\\(?:[abfnrtv\\"\']|[0-7]{3}|x[0-9a-fA-F]{2}|u[0-9a-fA-F]{4}|U[0-9a-fA-F]{8})')
+        sels = [json.loads(m) for m in re.findall(r'^\s*selector = ("(?:[^"\\]|\\.)*")$',
+                                                  logparse.alloy_config(), re.M)]
+        self.assertGreater(len(sels), len(logparse.RULES))
+        matcher = re.compile(r'\s*(\w+)\s*(=~|!~|!=|=)\s*("(?:[^"\\]|\\.)*")\s*(?:,|$)')
+        for sel in sels:
+            m = re.match(r"\{(.*?)\}\s*(.*)$", sel)
+            self.assertIsNotNone(m, sel)
+            stream, pipeline = m.groups()
+            # Matcher values must be double-quoted: a backtick there is "expecting STRING" in Alloy.
+            pos = 0
+            while pos < len(stream):
+                mm = matcher.match(stream, pos)
+                self.assertIsNotNone(mm, "matcher values must be double-quoted strings: %r" % sel)
+                rest = go_escape.sub("", mm.group(3)[1:-1])
+                self.assertNotIn("\\", rest, "invalid Go escape in %r of %r" % (mm.group(3), sel))
+                if mm.group(2) in ("=~", "!~"):
+                    re.compile(json.loads(mm.group(3)))       # the unescaped value is the regex
+                pos = mm.end()
+            # The line filter is one double-quoted Go string as well (Alloy's match stage rejects a
+            # backtick raw string: "unexpected IDENTIFIER, expecting STRING"), holding a valid regex.
+            lf = re.match(r'^\|~ ("(?:[^"\\]|\\.)*")$', pipeline)
+            self.assertIsNotNone(lf, "line filter must be |~ \"...\": %r" % sel)
+            self.assertNotIn("\\", go_escape.sub("", lf.group(1)[1:-1]), "invalid Go escape in %r" % sel)
+            re.compile(json.loads(lf.group(1)))
+
 
 class Traces(unittest.TestCase):
     def setUp(self):
@@ -210,6 +241,24 @@ class Traces(unittest.TestCase):
         self.assertIn("boom", by["inner"]["error"])
         self.assertEqual(len({r["trace_id"] for r in recs}), 1)
         self.assertIsNone(by["outer"]["parent_id"])
+
+    def test_per_writer_files_are_read_with_the_main_one(self):
+        # The scheduler (root, in a container) cannot append to the orchestrators' file in /tmp
+        # (fs.protected_regular=2), so it writes t-scheduler.jsonl; readers must merge both, in
+        # time order, and must not pick up an unrelated file that merely shares the directory.
+        a = obs_trace.Tracer("slice-orchestrator", path=self.path, otlp_endpoint="")
+        b = obs_trace.Tracer("packet-scheduler", path=os.path.join(self.dir, "t-scheduler.jsonl"),
+                             otlp_endpoint="")
+        with a.span("admission.decide"):
+            pass
+        with b.span("scheduler.apply"):
+            pass
+        with a.span("controller.cut"):
+            pass
+        with open(os.path.join(self.dir, "other.jsonl"), "w") as fh:
+            fh.write('{"name": "unrelated", "start": 0, "end": 0}\n')
+        names = [r["name"] for r in obs_trace.read_spans(self.path)]
+        self.assertEqual(names, ["admission.decide", "scheduler.apply", "controller.cut"])
 
     def test_unwritable_file_never_reaches_the_caller(self):
         t = obs_trace.Tracer("svc", path=os.path.join(self.dir, "no", "such", "dir.jsonl"), otlp_endpoint="")

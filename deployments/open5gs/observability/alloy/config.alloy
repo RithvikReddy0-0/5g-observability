@@ -65,6 +65,13 @@ loki.source.docker "o5gs" {
 loki.process "o5gs" {
   forward_to = [loki.write.local.receiver]
 
+  // On first start Alloy reads each container's whole history (weeks); Loki rejects anything older
+  // than its window with a 400 per batch. Drop locally what retention (loki.yaml, 72h) would delete.
+  stage.drop {
+    older_than          = "72h"
+    drop_counter_reason = "older_than_retention"
+  }
+
   // Open5GS colours its output even without a TTY.
   stage.replace {
     expression = "(\\x1b\\[[0-9;]*m)"
@@ -86,332 +93,332 @@ loki.process "o5gs" {
   }
   // Events. Applied in reverse so that, as in parse_line(), the FIRST matching rule wins.
   stage.match {
-    selector = "{component=~\"network\\-orchestrator\"} |~ `NETORCH (?P<op>\\w+) +(?P<slice>eMBB|URLLC|mMTC) +(?P<result>\\w+)`"
+    selector = "{component=~\"network\\\\-orchestrator\"} |~ \"NETORCH (?P<op>\\\\w+) +(?P<slice>eMBB|URLLC|mMTC) +(?P<result>\\\\w+)\""
     stage.static_labels {
       values = { event = "lifecycle_operation" }
     }
   }
   stage.match {
-    selector = "{component=~\"slice\\-orchestrator\"} |~ `CONTROL (?P<action>cut|raise) +(?P<slice>eMBB|URLLC|mMTC)`"
+    selector = "{component=~\"slice\\\\-orchestrator\"} |~ \"CONTROL (?P<action>cut|raise) +(?P<slice>eMBB|URLLC|mMTC)\""
     stage.static_labels {
       values = { event = "controller_action" }
     }
   }
   stage.match {
-    selector = "{component=~\"scheduler\"} |~ `step failed`"
+    selector = "{component=~\"scheduler\"} |~ \"step failed\""
     stage.static_labels {
       values = { event = "scheduler_step_failed" }
     }
   }
   stage.match {
-    selector = "{component=~\"scheduler\"} |~ `applied mode=(?P<mode>\\w+) cell=.*\\(ok=(?P<ok>True|False)\\)`"
+    selector = "{component=~\"scheduler\"} |~ \"applied mode=(?P<mode>\\\\w+) cell=.*\\\\(ok=(?P<ok>True|False)\\\\)\""
     stage.static_labels {
       values = { event = "scheduler_apply" }
     }
   }
   stage.match {
-    selector = "{component=~\"ue\\-supervisor\"} |~ `(?P<up>\\d+)/(?P<total>\\d+) UEs up in`"
+    selector = "{component=~\"ue\\\\-supervisor\"} |~ \"(?P<up>\\\\d+)/(?P<total>\\\\d+) UEs up in\""
     stage.static_labels {
       values = { event = "ues_up" }
     }
   }
   stage.match {
-    selector = "{component=~\"ue\\-supervisor\"} |~ `(?P<slice>eMBB|URLLC|mMTC) (?P<imsi>imsi-\\d+) did not come up`"
+    selector = "{component=~\"ue\\\\-supervisor\"} |~ \"(?P<slice>eMBB|URLLC|mMTC) (?P<imsi>imsi-\\\\d+) did not come up\""
     stage.static_labels {
       values = { event = "ue_start_timeout" }
     }
   }
   stage.match {
-    selector = "{component=~\"ue\\-supervisor\"} |~ `(?P<slice>eMBB|URLLC|mMTC) (?P<imsi>imsi-\\d+) back on (?P<iface>\\S+)`"
+    selector = "{component=~\"ue\\\\-supervisor\"} |~ \"(?P<slice>eMBB|URLLC|mMTC) (?P<imsi>imsi-\\\\d+) back on (?P<iface>\\\\S+)\""
     stage.static_labels {
       values = { event = "ue_recovered" }
     }
   }
   stage.match {
-    selector = "{component=~\"ue\\-supervisor\"} |~ `(?P<slice>eMBB|URLLC|mMTC) (?P<imsi>imsi-\\d+) unhealthy \\((?P<why>[^)]*)`"
+    selector = "{component=~\"ue\\\\-supervisor\"} |~ \"(?P<slice>eMBB|URLLC|mMTC) (?P<imsi>imsi-\\\\d+) unhealthy \\\\((?P<why>[^)]*)\""
     stage.static_labels {
       values = { event = "ue_restart" }
     }
   }
   stage.match {
-    selector = "{component=~\"ue\"} |~ `Retransmitting PDU Session Establishment Request due to T3580 expiry`"
+    selector = "{component=~\"ue\"} |~ \"Retransmitting PDU Session Establishment Request due to T3580 expiry\""
     stage.static_labels {
       values = { event = "t3580_retransmit" }
     }
   }
   stage.match {
-    selector = "{component=~\"ue\"} |~ `Cell selection failure`"
+    selector = "{component=~\"ue\"} |~ \"Cell selection failure\""
     stage.static_labels {
       values = { event = "cell_selection_failure" }
     }
   }
   stage.match {
-    selector = "{component=~\"ue\"} |~ `considering access attempt is barred`"
+    selector = "{component=~\"ue\"} |~ \"considering access attempt is barred\""
     stage.static_labels {
       values = { event = "access_barred" }
     }
   }
   stage.match {
-    selector = "{component=~\"ue\"} |~ `TUN interface\\[(?P<iface>[^,\\]]+), (?P<ip>[\\d.]+)\\] is up`"
+    selector = "{component=~\"ue\"} |~ \"TUN interface\\\\[(?P<iface>[^,\\\\]]+), (?P<ip>[\\\\d.]+)\\\\] is up\""
     stage.static_labels {
       values = { event = "tun_up" }
     }
   }
   stage.match {
-    selector = "{component=~\"ue\"} |~ `PDU Session Establishment Reject received \\[(?P<cause>[^\\]]*)\\]`"
+    selector = "{component=~\"ue\"} |~ \"PDU Session Establishment Reject received \\\\[(?P<cause>[^\\\\]]*)\\\\]\""
     stage.static_labels {
       values = { event = "pdu_session_reject" }
     }
   }
   stage.match {
-    selector = "{component=~\"ue\"} |~ `PDU Session establishment is successful PSI\\[(?P<psi>\\d+)\\]`"
+    selector = "{component=~\"ue\"} |~ \"PDU Session establishment is successful PSI\\\\[(?P<psi>\\\\d+)\\\\]\""
     stage.static_labels {
       values = { event = "pdu_session_established" }
     }
   }
   stage.match {
-    selector = "{component=~\"ue\"} |~ `Initial Registration failed \\[(?P<cause>[^\\]]*)\\]`"
+    selector = "{component=~\"ue\"} |~ \"Initial Registration failed \\\\[(?P<cause>[^\\\\]]*)\\\\]\""
     stage.static_labels {
       values = { event = "registration_reject" }
     }
   }
   stage.match {
-    selector = "{component=~\"ue\"} |~ `Initial Registration is successful`"
+    selector = "{component=~\"ue\"} |~ \"Initial Registration is successful\""
     stage.static_labels {
       values = { event = "registration_complete" }
     }
   }
   stage.match {
-    selector = "{component=~\"gnb\"} |~ `PDU session resource\\(s\\) setup for UE\\[(?P<ue>\\d+)\\]`"
+    selector = "{component=~\"gnb\"} |~ \"PDU session resource\\\\(s\\\\) setup for UE\\\\[(?P<ue>\\\\d+)\\\\]\""
     stage.static_labels {
       values = { event = "pdu_session_resource_setup" }
     }
   }
   stage.match {
-    selector = "{component=~\"gnb\"} |~ `Uplink data failure, PDU session not found`"
+    selector = "{component=~\"gnb\"} |~ \"Uplink data failure, PDU session not found\""
     stage.static_labels {
       values = { event = "pdu_session_not_found" }
     }
   }
   stage.match {
-    selector = "{component=~\"gnb|ue\"} |~ `[Rr]adio link failure`"
+    selector = "{component=~\"gnb|ue\"} |~ \"[Rr]adio link failure\""
     stage.static_labels {
       values = { event = "radio_link_failure" }
     }
   }
   stage.match {
-    selector = "{component=~\"gnb\"} |~ `UE\\[(?P<ue>\\d+)\\] signal lost`"
+    selector = "{component=~\"gnb\"} |~ \"UE\\\\[(?P<ue>\\\\d+)\\\\] signal lost\""
     stage.static_labels {
       values = { event = "ue_signal_lost" }
     }
   }
   stage.match {
-    selector = "{component=~\"gnb\"} |~ `SCTP association shutdown`"
+    selector = "{component=~\"gnb\"} |~ \"SCTP association shutdown\""
     stage.static_labels {
       values = { event = "n2_association_shutdown" }
     }
   }
   stage.match {
-    selector = "{component=~\"gnb\"} |~ `Connecting to (?P<peer>[\\d.]+):(?P<port>\\d+) failed`"
+    selector = "{component=~\"gnb\"} |~ \"Connecting to (?P<peer>[\\\\d.]+):(?P<port>\\\\d+) failed\""
     stage.static_labels {
       values = { event = "n2_connect_failed" }
     }
   }
   stage.match {
-    selector = "{component=~\"gnb\"} |~ `NG Setup procedure is failed`"
+    selector = "{component=~\"gnb\"} |~ \"NG Setup procedure is failed\""
     stage.static_labels {
       values = { event = "ng_setup_failed" }
     }
   }
   stage.match {
-    selector = "{component=~\"gnb\"} |~ `NG Setup procedure is successful`"
+    selector = "{component=~\"gnb\"} |~ \"NG Setup procedure is successful\""
     stage.static_labels {
       values = { event = "ng_setup_ok" }
     }
   }
   stage.match {
-    selector = "{component=~\"amf|smf|upf|nrf|scp|ausf|udm|udr|pcf|bsf|nssf\"} |~ `initialize\\.\\.\\.done`"
+    selector = "{component=~\"amf|smf|upf|nrf|scp|ausf|udm|udr|pcf|bsf|nssf\"} |~ \"initialize\\\\.\\\\.\\\\.done\""
     stage.static_labels {
       values = { event = "nf_started" }
     }
   }
   stage.match {
-    selector = "{component=~\"amf|smf|upf|nrf|scp|ausf|udm|udr|pcf|bsf|nssf\"} |~ `SIGTERM received|daemon terminating`"
+    selector = "{component=~\"amf|smf|upf|nrf|scp|ausf|udm|udr|pcf|bsf|nssf\"} |~ \"SIGTERM received|daemon terminating\""
     stage.static_labels {
       values = { event = "nf_terminating" }
     }
   }
   stage.match {
-    selector = "{component=~\"nrf\"} |~ `\\[(?P<nf_id>[0-9a-f-]{36})\\] NF de-registered`"
+    selector = "{component=~\"nrf\"} |~ \"\\\\[(?P<nf_id>[0-9a-f-]{36})\\\\] NF de-registered\""
     stage.static_labels {
       values = { event = "nf_deregistered" }
     }
   }
   stage.match {
-    selector = "{component=~\"nrf\"} |~ `\\[(?P<nf_id>[0-9a-f-]{36})\\] NF registered`"
+    selector = "{component=~\"nrf\"} |~ \"\\\\[(?P<nf_id>[0-9a-f-]{36})\\\\] NF registered\""
     stage.static_labels {
       values = { event = "nf_registered" }
     }
   }
   stage.match {
-    selector = "{component=~\"smf\"} |~ `No UPFs are PFCP associated`"
+    selector = "{component=~\"smf\"} |~ \"No UPFs are PFCP associated\""
     stage.static_labels {
       values = { event = "no_upf_associated" }
     }
   }
   stage.match {
-    selector = "{component=~\"smf|upf\"} |~ `Cannot find PFCP-Node`"
+    selector = "{component=~\"smf|upf\"} |~ \"Cannot find PFCP-Node\""
     stage.static_labels {
       values = { event = "pfcp_node_unknown" }
     }
   }
   stage.match {
-    selector = "{component=~\"smf\"} |~ `Retry association with peer failed \\[(?P<peer>[\\d.]+)\\]`"
+    selector = "{component=~\"smf\"} |~ \"Retry association with peer failed \\\\[(?P<peer>[\\\\d.]+)\\\\]\""
     stage.static_labels {
       values = { event = "pfcp_retry_failed" }
     }
   }
   stage.match {
-    selector = "{component=~\"smf|upf\"} |~ `No Reponse\\. Give up! for step \\d+ type \\d+ peer \\[(?P<peer>[\\d.]+)\\]`"
+    selector = "{component=~\"smf|upf\"} |~ \"No Reponse\\\\. Give up! for step \\\\d+ type \\\\d+ peer \\\\[(?P<peer>[\\\\d.]+)\\\\]\""
     stage.static_labels {
       values = { event = "pfcp_no_response" }
     }
   }
   stage.match {
-    selector = "{component=~\"smf|upf\"} |~ `PFCP restoration|Remote PFCP restarted`"
+    selector = "{component=~\"smf|upf\"} |~ \"PFCP restoration|Remote PFCP restarted\""
     stage.static_labels {
       values = { event = "pfcp_restoration" }
     }
   }
   stage.match {
-    selector = "{component=~\"smf|upf\"} |~ `No Heartbeat from (?:UPF|SMF) \\[(?P<peer>[\\d.]+)\\]`"
+    selector = "{component=~\"smf|upf\"} |~ \"No Heartbeat from (?:UPF|SMF) \\\\[(?P<peer>[\\\\d.]+)\\\\]\""
     stage.static_labels {
       values = { event = "pfcp_heartbeat_lost" }
     }
   }
   stage.match {
-    selector = "{component=~\"smf|upf\"} |~ `PFCP de-associated \\[(?P<peer>[\\d.]+)\\]`"
+    selector = "{component=~\"smf|upf\"} |~ \"PFCP de-associated \\\\[(?P<peer>[\\\\d.]+)\\\\]\""
     stage.static_labels {
       values = { event = "pfcp_deassociated" }
     }
   }
   stage.match {
-    selector = "{component=~\"smf|upf\"} |~ `PFCP associated \\[(?P<peer>[\\d.]+)\\]`"
+    selector = "{component=~\"smf|upf\"} |~ \"PFCP associated \\\\[(?P<peer>[\\\\d.]+)\\\\]\""
     stage.static_labels {
       values = { event = "pfcp_associated" }
     }
   }
   stage.match {
-    selector = "{component=~\"upf|smf\"} |~ `All IP addresses in all subnets are occupied|ue_ip_alloc\\(\\) failed`"
+    selector = "{component=~\"upf|smf\"} |~ \"All IP addresses in all subnets are occupied|ue_ip_alloc\\\\(\\\\) failed\""
     stage.static_labels {
       values = { event = "ip_pool_exhausted" }
     }
   }
   stage.match {
-    selector = "{component=~\"upf\"} |~ `UE F-SEID\\[[^\\]]*\\] APN\\[(?P<dnn>[^\\]]*)\\] PDN-Type\\[\\d+\\] IPv4\\[(?P<ip>[\\d.]*)\\]`"
+    selector = "{component=~\"upf\"} |~ \"UE F-SEID\\\\[[^\\\\]]*\\\\] APN\\\\[(?P<dnn>[^\\\\]]*)\\\\] PDN-Type\\\\[\\\\d+\\\\] IPv4\\\\[(?P<ip>[\\\\d.]*)\\\\]\""
     stage.static_labels {
       values = { event = "upf_session" }
     }
   }
   stage.match {
-    selector = "{component=~\"upf\"} |~ `\\[Removed\\] Number of UPF-[Ss]essions is now (?P<count>\\d+)`"
+    selector = "{component=~\"upf\"} |~ \"\\\\[Removed\\\\] Number of UPF-[Ss]essions is now (?P<count>\\\\d+)\""
     stage.static_labels {
       values = { event = "upf_session_removed" }
     }
   }
   stage.match {
-    selector = "{component=~\"upf\"} |~ `\\[Added\\] Number of UPF-[Ss]essions is now (?P<count>\\d+)`"
+    selector = "{component=~\"upf\"} |~ \"\\\\[Added\\\\] Number of UPF-[Ss]essions is now (?P<count>\\\\d+)\""
     stage.static_labels {
       values = { event = "upf_session_added" }
     }
   }
   stage.match {
-    selector = "{component=~\"smf\"} |~ `\\[(?P<imsi>imsi-\\d+):(?P<psi>\\d+)\\] Session Release`"
+    selector = "{component=~\"smf\"} |~ \"\\\\[(?P<imsi>imsi-\\\\d+):(?P<psi>\\\\d+)\\\\] Session Release\""
     stage.static_labels {
       values = { event = "pdu_session_release" }
     }
   }
   stage.match {
-    selector = "{component=~\"smf\"} |~ `UE SUPI\\[(?P<imsi>imsi-\\d+)\\] DNN\\[(?P<dnn>[^\\]]*)\\] IPv4\\[(?P<ip>[\\d.]*)\\]`"
+    selector = "{component=~\"smf\"} |~ \"UE SUPI\\\\[(?P<imsi>imsi-\\\\d+)\\\\] DNN\\\\[(?P<dnn>[^\\\\]]*)\\\\] IPv4\\\\[(?P<ip>[\\\\d.]*)\\\\]\""
     stage.static_labels {
       values = { event = "pdu_session_established" }
     }
   }
   stage.match {
-    selector = "{component=~\"amf\"} |~ `UE SUPI\\[(?P<imsi>imsi-\\d+)\\] DNN\\[(?P<dnn>[^\\]]*)\\] LBO\\[\\d+\\] S_NSSAI\\[SST:(?P<sst>\\d+) SD:0x(?P<sd>[0-9a-fA-F]+)\\]`"
+    selector = "{component=~\"amf\"} |~ \"UE SUPI\\\\[(?P<imsi>imsi-\\\\d+)\\\\] DNN\\\\[(?P<dnn>[^\\\\]]*)\\\\] LBO\\\\[\\\\d+\\\\] S_NSSAI\\\\[SST:(?P<sst>\\\\d+) SD:0x(?P<sd>[0-9a-fA-F]+)\\\\]\""
     stage.static_labels {
       values = { event = "pdu_session_request" }
     }
   }
   stage.match {
-    selector = "{component=~\"amf\"} |~ `\\[Removed\\] Number of gNBs is now (?P<count>\\d+)`"
+    selector = "{component=~\"amf\"} |~ \"\\\\[Removed\\\\] Number of gNBs is now (?P<count>\\\\d+)\""
     stage.static_labels {
       values = { event = "gnb_removed" }
     }
   }
   stage.match {
-    selector = "{component=~\"amf\"} |~ `\\[Added\\] Number of gNBs is now (?P<count>\\d+)`"
+    selector = "{component=~\"amf\"} |~ \"\\\\[Added\\\\] Number of gNBs is now (?P<count>\\\\d+)\""
     stage.static_labels {
       values = { event = "gnb_added" }
     }
   }
   stage.match {
-    selector = "{component=~\"amf\"} |~ `gNB-N2 accepted\\[(?P<peer>[\\d.]+)\\]`"
+    selector = "{component=~\"amf\"} |~ \"gNB-N2 accepted\\\\[(?P<peer>[\\\\d.]+)\\\\]\""
     stage.static_labels {
       values = { event = "gnb_n2_accepted" }
     }
   }
   stage.match {
-    selector = "{component=~\"amf\"} |~ `\\[(?P<imsi>imsi-\\d+)\\] Service request`"
+    selector = "{component=~\"amf\"} |~ \"\\\\[(?P<imsi>imsi-\\\\d+)\\\\] Service request\""
     stage.static_labels {
       values = { event = "service_request" }
     }
   }
   stage.match {
-    selector = "{component=~\"amf\"} |~ `\\[(?P<imsi>imsi-\\d+)\\] (?:Deregistration request|Implicit De-registered|Explicit De-registered)`"
+    selector = "{component=~\"amf\"} |~ \"\\\\[(?P<imsi>imsi-\\\\d+)\\\\] (?:Deregistration request|Implicit De-registered|Explicit De-registered)\""
     stage.static_labels {
       values = { event = "deregistration" }
     }
   }
   stage.match {
-    selector = "{component=~\"amf\"} |~ `Authentication (?:failure|reject)|NAS MAC verification failed|No Security Context`"
+    selector = "{component=~\"amf\"} |~ \"Authentication (?:failure|reject)|NAS MAC verification failed|No Security Context\""
     stage.static_labels {
       values = { event = "auth_failure" }
     }
   }
   stage.match {
-    selector = "{component=~\"amf\"} |~ `\\[(?P<suci>suci-[\\d-]+)\\] Registration reject \\[(?P<cause>\\d+)\\]`"
+    selector = "{component=~\"amf\"} |~ \"\\\\[(?P<suci>suci-[\\\\d-]+)\\\\] Registration reject \\\\[(?P<cause>\\\\d+)\\\\]\""
     stage.static_labels {
       values = { event = "registration_reject" }
     }
   }
   stage.match {
-    selector = "{component=~\"amf\"} |~ `\\[(?P<imsi>imsi-\\d+)\\] Registration complete`"
+    selector = "{component=~\"amf\"} |~ \"\\\\[(?P<imsi>imsi-\\\\d+)\\\\] Registration complete\""
     stage.static_labels {
       values = { event = "registration_complete" }
     }
   }
   stage.match {
-    selector = "{component=~\"amf\"} |~ `\\] (?:INFO|WARNING): Registration request`"
+    selector = "{component=~\"amf\"} |~ \"\\\\] (?:INFO|WARNING): Registration request\""
     stage.static_labels {
       values = { event = "registration_request" }
     }
   }
   // Slice from the line itself (S-NSSAI, DNN/APN, supervisor's slice word), for shared NFs.
   stage.match {
-    selector = "{job=\"o5gs\", slice=\"\"} |~ `S_NSSAI\\[SST:1 SD:0x010203\\]|DNN\\[internet\\]|APN\\[internet\\]|ue-entrypoint: [\\d:]+ eMBB imsi-|IPv4\\[10\\.45\\.|peer \\[10\\.53\\.0\\.7\\]|(?:associated|Heartbeat from UPF) \\[10\\.53\\.0\\.7\\]`"
+    selector = "{job=\"o5gs\", slice=\"\"} |~ \"S_NSSAI\\\\[SST:1 SD:0x010203\\\\]|DNN\\\\[internet\\\\]|APN\\\\[internet\\\\]|ue-entrypoint: [\\\\d:]+ eMBB imsi-|IPv4\\\\[10\\\\.45\\\\.|peer \\\\[10\\\\.53\\\\.0\\\\.7\\\\]|(?:associated|Heartbeat from UPF) \\\\[10\\\\.53\\\\.0\\\\.7\\\\]\""
     stage.static_labels {
       values = { slice = "eMBB" }
     }
   }
   stage.match {
-    selector = "{job=\"o5gs\", slice=\"\"} |~ `S_NSSAI\\[SST:2 SD:0x112233\\]|DNN\\[urllc\\]|APN\\[urllc\\]|ue-entrypoint: [\\d:]+ URLLC imsi-|IPv4\\[10\\.46\\.|peer \\[10\\.53\\.0\\.8\\]|(?:associated|Heartbeat from UPF) \\[10\\.53\\.0\\.8\\]`"
+    selector = "{job=\"o5gs\", slice=\"\"} |~ \"S_NSSAI\\\\[SST:2 SD:0x112233\\\\]|DNN\\\\[urllc\\\\]|APN\\\\[urllc\\\\]|ue-entrypoint: [\\\\d:]+ URLLC imsi-|IPv4\\\\[10\\\\.46\\\\.|peer \\\\[10\\\\.53\\\\.0\\\\.8\\\\]|(?:associated|Heartbeat from UPF) \\\\[10\\\\.53\\\\.0\\\\.8\\\\]\""
     stage.static_labels {
       values = { slice = "URLLC" }
     }
   }
   stage.match {
-    selector = "{job=\"o5gs\", slice=\"\"} |~ `S_NSSAI\\[SST:3 SD:0x334455\\]|DNN\\[iot\\]|APN\\[iot\\]|ue-entrypoint: [\\d:]+ mMTC imsi-|IPv4\\[10\\.47\\.|peer \\[10\\.53\\.0\\.9\\]|(?:associated|Heartbeat from UPF) \\[10\\.53\\.0\\.9\\]`"
+    selector = "{job=\"o5gs\", slice=\"\"} |~ \"S_NSSAI\\\\[SST:3 SD:0x334455\\\\]|DNN\\\\[iot\\\\]|APN\\\\[iot\\\\]|ue-entrypoint: [\\\\d:]+ mMTC imsi-|IPv4\\\\[10\\\\.47\\\\.|peer \\\\[10\\\\.53\\\\.0\\\\.9\\\\]|(?:associated|Heartbeat from UPF) \\\\[10\\\\.53\\\\.0\\\\.9\\\\]\""
     stage.static_labels {
       values = { slice = "mMTC" }
     }

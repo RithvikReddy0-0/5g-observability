@@ -483,11 +483,15 @@ def _alloy_str(s):
     return '"' + s.replace("\\", "\\\\").replace('"', '\\"') + '"'
 
 
+def _logql_str(s):
+    """A LogQL double-quoted (Go) string literal holding s verbatim."""
+    return '"' + s.replace("\\", "\\\\").replace('"', '\\"') + '"'
+
+
 def _logql_line_filter(pattern):
-    # A LogQL raw (backtick) string needs no escaping of its own; _alloy_str escapes it for Alloy.
-    if "`" in pattern:
-        raise ValueError("a rule pattern may not contain a backtick: %r" % pattern)
-    return "|~ `" + pattern + "`"
+    # A double-quoted (Go) string: the match-stage selector parser of Alloy v1.20.1 rejects a backtick
+    # raw string here as well ("unexpected IDENTIFIER, expecting STRING"), measured on the stack.
+    return "|~ " + _logql_str(pattern)
 
 
 def alloy_config(slices=None):
@@ -554,6 +558,13 @@ def alloy_config(slices=None):
     w('loki.process "o5gs" {')
     w("  forward_to = [loki.write.local.receiver]")
     w("")
+    w("  // On first start Alloy reads each container's whole history (weeks); Loki rejects anything older")
+    w("  // than its window with a 400 per batch. Drop locally what retention (loki.yaml, 72h) would delete.")
+    w("  stage.drop {")
+    w('    older_than          = "72h"')
+    w('    drop_counter_reason = "older_than_retention"')
+    w("  }")
+    w("")
     w("  // Open5GS colours its output even without a TTY.")
     w("  stage.replace {")
     w('    expression = "(\\\\x1b\\\\[[0-9;]*m)"')
@@ -576,7 +587,10 @@ def alloy_config(slices=None):
     w("  // Events. Applied in reverse so that, as in parse_line(), the FIRST matching rule wins.")
     for ev, comps, pat, lvl in reversed(RULES):
         comp_re = "|".join(re.escape(c) for c in comps)
-        sel = '{component=~"%s"} %s' % (comp_re, _logql_line_filter(pat))
+        # LogQL reads a matcher value as a Go string (double quotes only: a backtick is a syntax error
+        # in Alloy's match stage), where re.escape's "\-" is an invalid escape and Alloy refuses the
+        # whole pipeline ("invalid char escape"). So every regex is escaped once more for Go.
+        sel = '{component=~%s} %s' % (_logql_str(comp_re), _logql_line_filter(pat))
         w("  stage.match {")
         w("    selector = %s" % _alloy_str(sel))
         w("    stage.static_labels {")

@@ -38,6 +38,7 @@ spans, never a decision. The OTLP export runs on a daemon thread with a bounded 
 Standard library only.
 """
 
+import glob
 import json
 import os
 import queue
@@ -46,7 +47,7 @@ import threading
 import time
 import urllib.request
 
-__all__ = ["Tracer", "tracer", "read_spans"]
+__all__ = ["Tracer", "tracer", "read_spans", "trace_files"]
 
 
 def _hex(bits):
@@ -256,24 +257,36 @@ def tracer(service):
     return _TRACERS[service]
 
 
+def trace_files(path):
+    """The trace file and its per-writer siblings: /tmp/o5gs_traces.jsonl also reads
+    /tmp/o5gs_traces-*.jsonl. A writer running as another user (the packet scheduler's container
+    runs as root) cannot append to a file someone else created in /tmp: with fs.protected_regular=2
+    the kernel refuses even root an O_CREAT open of another user's file in a sticky world-writable
+    directory. So such a writer gets its own file, e.g. o5gs_traces-scheduler.jsonl."""
+    stem, ext = os.path.splitext(path)
+    return [path] + sorted(glob.glob(glob.escape(stem) + "-*" + ext))
+
+
 def read_spans(path, since=None, until=None):
-    """Spans and events from a JSON-lines trace file, optionally within [since, until]."""
+    """Spans and events from a JSON-lines trace file and its per-writer siblings (trace_files),
+    optionally within [since, until]."""
     out = []
-    try:
-        fh = open(path, encoding="utf-8")
-    except OSError:
-        return out
-    with fh:
-        for line in fh:
-            try:
-                r = json.loads(line)
-            except ValueError:
-                continue
-            if since is not None and r.get("end", 0) < since:
-                continue
-            if until is not None and r.get("start", 0) > until:
-                continue
-            out.append(r)
+    for name in trace_files(path):
+        try:
+            fh = open(name, encoding="utf-8")
+        except OSError:
+            continue
+        with fh:
+            for line in fh:
+                try:
+                    r = json.loads(line)
+                except ValueError:
+                    continue
+                if since is not None and r.get("end", 0) < since:
+                    continue
+                if until is not None and r.get("start", 0) > until:
+                    continue
+                out.append(r)
     out.sort(key=lambda r: r.get("start", 0))
     return out
 

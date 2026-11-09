@@ -5,13 +5,15 @@ none of it running. Design and results: [ADR-024](adr/ADR-024-observability-logs
 
 | Piece | What | Where it runs | Memory |
 |---|---|---|---|
-| Decision traces | JSON lines from the slice and network orchestrators (and, after the patches, the scheduler and KPI runner) | inside those processes → `/tmp/o5gs_traces.jsonl` | none extra |
-| Fault diagnosis | `tools/observability/diagnose.py --serve` on :9115 | host process, like the orchestrators | ~25 MB (a stdlib Python process; estimate, not measured on the stack) |
-| Loki | log store, 72 h retention | container `o5gs-loki`, 10.53.0.43, `127.0.0.1:3100` | hard limit **384 MiB** (Go soft limit 300 MiB), 0.5 CPU |
-| Grafana Alloy | ships and labels every `o5gs-*` container's log | container `o5gs-alloy`, 10.53.0.44 | hard limit **192 MiB** (soft 150 MiB), 0.5 CPU |
+| Decision traces | JSON lines from the slice and network orchestrators, the packet scheduler and the KPI runner | inside those processes → `/tmp/o5gs_traces.jsonl` (the scheduler: `/tmp/o5gs_traces-scheduler.jsonl`, read together) | none extra |
+| Fault diagnosis | `tools/observability/diagnose.py --serve` on :9115 | host process, like the orchestrators | 25–27 MiB RSS (measured 2026-11-09) |
+| Loki | log store, 72 h retention | container `o5gs-loki`, 10.53.0.43, `127.0.0.1:3100` | hard limit **384 MiB** (Go soft limit 300 MiB), 0.5 CPU; measured 98–118 MiB |
+| Grafana Alloy | ships and labels every `o5gs-*` container's log | container `o5gs-alloy`, 10.53.0.44 | hard limit **192 MiB** (soft 150 MiB), 0.5 CPU; measured 72–73 MiB |
 
-Worst case for the whole set: **~600 MiB** (the two hard limits plus the service). Without the
-logs pipeline: ~25 MB. The real footprint has not been measured yet; step 4 below measures it.
+Worst case for the whole set: **~600 MiB** (the two hard limits plus the service). Measured on the
+stack (2026-11-09, 100 UEs, 130 sessions, idle between experiments): **~220 MiB** in all, Loki about
+100–118 MiB, Alloy 72 MiB, the service 27 MiB; host memory available went from 4.76 to 4.49 GiB.
+Evidence: [docs/evidence/open5gs-observability/20261109-000016Z](evidence/open5gs-observability/20261109-000016Z/).
 
 All commands from the repository root in the WSL distro, with the stack up (`make o5gs-up`).
 Run them **between experiments**: steps 1, 2 and 6 restart processes.
@@ -85,11 +87,38 @@ The digests are the multi-arch index digests Docker Hub's API reported for those
 2026-11-08; a pull that resolves to something else fails, which is the point. Use Compose v2
 (`docker compose`), never `/usr/bin/docker-compose` v1.29 (it crashed on this engine, ADR-014 evidence).
 
+Then check that Alloy really builds the pipeline (`fmt` does not parse the LogQL inside the match
+stages; CI runs this too):
+
+```bash
+bash scripts/open5gs/check_alloy_config.sh       # "Alloy builds every component of config.alloy"
+```
+
 ## 4. Start the logs pipeline
 
 ```bash
 docker compose -f deployments/open5gs/docker-compose.logs.yaml -p o5gs-logs up -d
 ```
+
+If `docker compose` is "unknown" (its plugin is a link into Docker Desktop's WSL mount and vanishes
+when Docker Desktop is not running; see the Makefile), the same two containers without Compose:
+
+```bash
+O=$PWD/deployments/open5gs/observability
+docker run -d --name o5gs-loki --restart unless-stopped -e GOMEMLIMIT=300MiB --memory 384m --cpus 0.5 \
+  -v "$O/loki/loki.yaml:/etc/loki/loki.yaml:ro" -v o5gs-logs_o5gs-loki:/loki \
+  -p 127.0.0.1:3100:3100 --network o5gs_net --ip 10.53.0.43 \
+  grafana/loki@sha256:1107dd5274e0ada47e42472b7a7e71f3b2a2fe878878108f3e2f9e51528f0193 -config.file=/etc/loki/loki.yaml
+docker run -d --name o5gs-alloy --restart unless-stopped -e GOMEMLIMIT=150MiB --memory 192m --cpus 0.5 \
+  -v "$O/alloy/config.alloy:/etc/alloy/config.alloy:ro" -v /var/run/docker.sock:/var/run/docker.sock:ro \
+  -v o5gs-logs_o5gs-alloy:/var/lib/alloy/data --network o5gs_net --ip 10.53.0.44 \
+  grafana/alloy@sha256:2aa2099af76c0098d4af7a4d6e48f86cb66dc1a000222ad927a1c67c6542d13f \
+  run /etc/alloy/config.alloy --storage.path=/var/lib/alloy/data --server.http.listen-addr=0.0.0.0:12345
+```
+
+On its first start Alloy reads each container's whole log history; the pipeline drops anything older
+than Loki's 72 h retention before sending (without that, Loki answered every batch with a 400 for
+minutes). Alloy keeps its read positions in its volume, so a restart does not re-read.
 
 Verify:
 
@@ -121,13 +150,19 @@ log panels show a datasource error.
 `kpi.attach`) emit spans too. They were first kept as patches because both files were being changed
 on the live stack; the patches were applied to main once the scheduler experiments finished.
 
-`start_scheduler.sh` mounts the host's `/tmp` into the scheduler container so its spans land in the
-same `/tmp/o5gs_traces.jsonl`. Restarting the scheduler with `--stop` **removes the queues** (mode
-off) until it starts again — only between experiments:
+`start_scheduler.sh` mounts the host's `/tmp` into the scheduler container, and the scheduler writes
+its spans to **its own file**, `/tmp/o5gs_traces-scheduler.jsonl`; the readers merge every
+`/tmp/o5gs_traces-*.jsonl` with the main file. One shared file does not work: the scheduler runs as
+root, the orchestrators as the WSL user, and with `fs.protected_regular=2` (Ubuntu's default) the
+kernel refuses even root an append-open of another user's file in sticky `/tmp`. The first
+deployment hit exactly that: the scheduler applied its cell but every span was dropped.
+
+Restarting the scheduler with `--stop` **removes the queues** (mode off) until it starts again —
+only between experiments:
 
 ```bash
 bash scripts/open5gs/start_scheduler.sh --stop && bash scripts/open5gs/start_scheduler.sh
-grep -c '"scheduler.apply"' /tmp/o5gs_traces.jsonl                           # >= 1
+grep -c '"scheduler.apply"' /tmp/o5gs_traces-scheduler.jsonl                 # >= 1
 ```
 
 The KPI runner needs no restart; run it with `OBS_TRACE_FILE=/tmp/o5gs_traces.jsonl`.
