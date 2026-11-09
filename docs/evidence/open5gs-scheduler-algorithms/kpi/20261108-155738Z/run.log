@@ -1,0 +1,6 @@
+15:57:40  run directory docs/evidence/open5gs-scheduler-algorithms/kpi/20261108-155738Z
+15:57:40  standard: fresh attach of all UEs (registration KPIs describe this attach)
+16:00:10    waiting for 20 eMBB interfaces on 10.45.0.0/16 ..... ok · waiting for 10 URLLC interfaces on 10.46.0.0/16 .. ok · waiting for 70 mMTC interfaces on 10.47.0.0/16 .................................................................................... ok · eMBB   interfaces     : 20 / 20   (10.45.0.0/16) · URLLC  interfaces     : 10 / 10   (10.46.0.0/16) · mMTC   interfaces     : 70 / 70   (10.47.0.0/16) · all attached in       : 140s
+16:00:40  instance standard: standard = - · eMBB devices downloading 20 · 150 s
+16:03:16    URLLC mean 1.859 p99 10.43 ms loss 0.0 · eMBB p5 11.01 agg 224.4 Mbps (20/20 flows completed) · mMTC reg 1.0 loss 0.0 (res 0.000923) · scores {'URLLC': 0.9938, 'eMBB': 0.3116, 'mMTC': 1.0} · overall 0.7685
+16:03:16  report: docs/evidence/open5gs-scheduler-algorithms/kpi/20261108-155738Z/kpi-report.xlsx (7 sheets)

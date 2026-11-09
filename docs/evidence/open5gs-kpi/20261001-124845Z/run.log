@@ -1,0 +1,57 @@
+12:48:50  run directory docs/evidence/open5gs-kpi/20261001-124845Z
+12:48:50  standard: fresh attach of all UEs (registration KPIs describe this attach)
+12:49:29    waiting for 20 eMBB interfaces on 10.45.0.0/16 ....... ok · waiting for 10 URLLC interfaces on 10.46.0.0/16 ... ok · waiting for 70 mMTC interfaces on 10.47.0.0/16 ................... ok · eMBB   interfaces     : 20 / 20   (10.45.0.0/16) · URLLC  interfaces     : 10 / 10   (10.46.0.0/16) · mMTC   interfaces     : 70 / 70   (10.47.0.0/16) · all attached in       : 36s
+12:50:01  instance standard: standard = - · eMBB devices downloading 20 · 150 s
+12:52:42    URLLC mean 3.934 p99 22.039 ms loss 0.0 · eMBB p5 10.83 agg 299.3 Mbps · mMTC reg 1.0 loss 0.0 (res 0.000918) · scores {'URLLC': 0.8992, 'eMBB': 0.3694, 'mMTC': 1.0} · overall 0.7562
+12:52:43  sweep embb_ues (eMBB devices downloading at once): 0 5 10 20
+12:52:43  instance embb_ues=0: embb_ues = 0 · eMBB devices downloading 0 · 60 s
+12:53:47    URLLC mean 2.475 p99 8.59 ms loss 0.0 · eMBB p5 None agg None Mbps · mMTC reg 1.0 loss 0.0 (res 0.002381) · scores {'URLLC': 1.0, 'eMBB': None, 'mMTC': 1.0} · overall None
+12:53:47  instance embb_ues=5: embb_ues = 5 · eMBB devices downloading 5 · 60 s
+12:54:52    URLLC mean 2.867 p99 14.606 ms loss 0.0 · eMBB p5 46.38 agg 357.7 Mbps · mMTC reg 1.0 loss 0.0 (res 0.002304) · scores {'URLLC': 0.9527, 'eMBB': 0.8427, 'mMTC': 1.0} · overall 0.9318
+12:54:52  instance embb_ues=10: embb_ues = 10 · eMBB devices downloading 10 · 60 s
+12:55:59    URLLC mean 2.683 p99 16.421 ms loss 0.0 · eMBB p5 12.64 agg 302.6 Mbps · mMTC reg 1.0 loss 0.0 (res 0.002242) · scores {'URLLC': 0.9413, 'eMBB': 0.3938, 'mMTC': 1.0} · overall 0.7784
+12:55:59  instance embb_ues=20: embb_ues = 20 · eMBB devices downloading 20 · 60 s
+12:57:09    URLLC mean 2.942 p99 15.167 ms loss 0.0 · eMBB p5 7.03 agg 275.1 Mbps · mMTC reg 1.0 loss 0.0 (res 0.002146) · scores {'URLLC': 0.9489, 'eMBB': 0.3044, 'mMTC': 1.0} · overall 0.7511
+12:57:09  sweep mmtc_interval (seconds between each IoT device's reports): 1 5 10 30
+12:57:24  instance mmtc_interval=1s: mmtc_interval = 1 · eMBB devices downloading 20 · 60 s
+12:58:33    URLLC mean 2.487 p99 11.872 ms loss 0.0 · eMBB p5 7.22 agg 254.6 Mbps · mMTC reg 1.0 loss 0.0 (res 0.000217) · scores {'URLLC': 0.9763, 'eMBB': 0.2903, 'mMTC': 1.0} · overall 0.7555
+12:58:40  instance mmtc_interval=5s: mmtc_interval = 5 · eMBB devices downloading 20 · 60 s
+12:59:49    URLLC mean 2.301 p99 10.458 ms loss 0.0 · eMBB p5 7.04 agg 261.7 Mbps · mMTC reg 1.0 loss 0.0 (res 0.001032) · scores {'URLLC': 0.9934, 'eMBB': 0.2938, 'mMTC': 1.0} · overall 0.7624
+13:00:00  instance mmtc_interval=10s: mmtc_interval = 10 · eMBB devices downloading 20 · 60 s
+13:01:08    URLLC mean 3.404 p99 18.807 ms loss 0.0 · eMBB p5 9.04 agg 283.2 Mbps · mMTC reg 1.0 loss 0.0 (res 0.002041) · scores {'URLLC': 0.9298, 'eMBB': 0.335, 'mMTC': 1.0} · overall 0.7549
+13:01:24  instance mmtc_interval=30s: mmtc_interval = 30 · eMBB devices downloading 20 · 60 s
+13:02:33    URLLC mean 3.608 p99 19.759 ms loss 0.0 · eMBB p5 5.49 agg 299.5 Mbps · mMTC reg 1.0 loss 0.0 (res 0.007143) · scores {'URLLC': 0.9235, 'eMBB': 0.3055, 'mMTC': 1.0} · overall 0.743
+13:03:10  sweep mmtc_devices (IoT (mMTC) devices attached): 70 140 210
+13:03:10    attaching 70 IoT devices (eMBB 20 + URLLC 10 + mMTC 70 = 100 UEs)
+13:03:32    100/100 UEs with a session; settling 30 s
+13:04:03  instance mmtc_devices=70: mmtc_devices = 70 · eMBB devices downloading 20 · 60 s
+13:05:12    URLLC mean 2.528 p99 11.291 ms loss 0.0 · eMBB p5 8.13 agg 288.4 Mbps · mMTC reg 1.0 loss 0.0 (res 0.002146) · scores {'URLLC': 0.9828, 'eMBB': 0.3283, 'mMTC': 1.0} · overall 0.7704
+13:05:12    attaching 140 IoT devices (eMBB 20 + URLLC 10 + mMTC 140 = 170 UEs)
+13:05:44    170/170 UEs with a session; settling 30 s
+13:06:15  instance mmtc_devices=140: mmtc_devices = 140 · eMBB devices downloading 20 · 60 s
+13:07:23    URLLC mean 2.661 p99 11.058 ms loss 0.0 · eMBB p5 6.47 agg 285.4 Mbps · mMTC reg 1.0 loss 0.0 (res 0.001089) · scores {'URLLC': 0.9856, 'eMBB': 0.306, 'mMTC': 1.0} · overall 0.7639
+13:07:23    attaching 210 IoT devices (eMBB 20 + URLLC 10 + mMTC 210 = 240 UEs)
+13:08:17    240/240 UEs with a session; settling 30 s
+13:08:48  instance mmtc_devices=210: mmtc_devices = 210 · eMBB devices downloading 20 · 60 s
+13:09:59    URLLC mean 4.279 p99 19.642 ms loss 0.0 · eMBB p5 4.91 agg 266.9 Mbps · mMTC reg 1.0 loss 0.0 (res 0.000712) · scores {'URLLC': 0.9055, 'eMBB': 0.2724, 'mMTC': 1.0} · overall 0.726
+13:09:59  restore: the standard 100 UEs
+13:10:43    all attached in       : 38s
+13:10:43  report: docs/evidence/open5gs-kpi/20261001-124845Z/kpi-report.xlsx (10 sheets)
+13:11:50  report: docs/evidence/open5gs-kpi/20261001-124845Z/kpi-report.xlsx (10 sheets)
+13:16:42  run directory docs/evidence/open5gs-kpi/20261001-124845Z
+13:16:42  sweep mmtc_devices (IoT (mMTC) devices attached): 70 140 210
+13:16:42    attaching 70 IoT devices (eMBB 20 + URLLC 10 + mMTC 70 = 100 UEs)
+13:17:00    100/100 UEs with a session; settling 30 s
+13:17:31  instance mmtc_devices=70: mmtc_devices = 70 · eMBB devices downloading 20 · 60 s
+13:18:41    URLLC mean 2.836 p99 17.198 ms loss 0.0 · eMBB p5 10.89 agg 423.9 Mbps · mMTC reg 1.0 loss 0.0 (res 0.002183) · scores {'URLLC': 0.9372, 'eMBB': 0.4698, 'mMTC': 1.0} · overall 0.8023
+13:18:41    attaching 140 IoT devices (eMBB 20 + URLLC 10 + mMTC 140 = 170 UEs)
+13:19:12    170/170 UEs with a session; settling 30 s
+13:19:44  instance mmtc_devices=140: mmtc_devices = 140 · eMBB devices downloading 20 · 60 s
+13:20:51    URLLC mean 1.997 p99 10.379 ms loss 0.0 · eMBB p5 8.35 agg 454.9 Mbps · mMTC reg 1.0 loss 0.0 (res 0.001127) · scores {'URLLC': 0.9945, 'eMBB': 0.4641, 'mMTC': 1.0} · overall 0.8195
+13:20:51    attaching 210 IoT devices (eMBB 20 + URLLC 10 + mMTC 210 = 240 UEs)
+13:21:32    240/240 UEs with a session; settling 30 s
+13:22:03  instance mmtc_devices=210: mmtc_devices = 210 · eMBB devices downloading 20 · 60 s
+13:23:10    URLLC mean 2.381 p99 16.998 ms loss 0.0 · eMBB p5 13.68 agg 436.0 Mbps · mMTC reg 1.0 loss 0.0 (res 0.000758) · scores {'URLLC': 0.9382, 'eMBB': 0.513, 'mMTC': 1.0} · overall 0.8171
+13:23:10  restore: the standard 100 UEs
+13:23:43    all attached in       : 27s
+13:23:43  report: docs/evidence/open5gs-kpi/20261001-124845Z/kpi-report.xlsx (10 sheets)

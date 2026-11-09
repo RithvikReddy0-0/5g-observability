@@ -1,0 +1,4 @@
+13:43:14  run directory docs/evidence/open5gs-kpi/20261108-134313Z
+13:43:14  standard: fresh attach of all UEs (registration KPIs describe this attach)
+13:44:04    waiting for 20 eMBB interfaces on 10.45.0.0/16 .... ok · waiting for 10 URLLC interfaces on 10.46.0.0/16 . ok · waiting for 70 mMTC interfaces on 10.47.0.0/16 ............... ok · eMBB   interfaces     : 20 / 20   (10.45.0.0/16) · URLLC  interfaces     : 10 / 10   (10.46.0.0/16) · mMTC   interfaces     : 70 / 70   (10.47.0.0/16) · all attached in       : 46s
+13:44:34  instance standard: standard = - · eMBB devices downloading 20 · 150 s

@@ -1,0 +1,141 @@
+# deploy 20261109-000016Z  commit 73e631d
+## before
+               total        used        free      shared  buff/cache   available
+Mem:            7783        3026        1811           5        3142        4757
+Swap:           2048           0        2048
+port 9111: 200
+port 9113: 200
+port 9114: 200
+port 9115: 000
+port 3100: 000
+## 0. offline checks
+
+OK
+  kpi-20261108-133106Z-0                       cpu-saturation 0.80
+  kpi-20261108-133647Z-0                       cpu-saturation 0.80
+
+labelled cases 49 (exactly right 49) · unlabelled 19
+precision 1.000 (60 of 60 reported causes expected or acceptable)
+recall    1.000 (50 of 50 expected causes found)
+top-1     0.929 (42 faulty cases)
+healthy   7 of 7 healthy cases with no critical/warning cause
+pipeline current
+## 1. orchestrators with traces
+open5gs orchestrator stopped
+open5gs slice orchestrator on :9111 (log: /tmp/o5gs_orchestrator.log)
+  slice-orchestrator on :9111 — core open5gs, 3 slices, 5 traffic classes, measured=True, execute=True, control=True
+    eMBB   1/010203  capacity 500Mbps  latency<=300ms  5QI 9
+    URLLC  2/112233  capacity 20Mbps  latency<=10ms  5QI 82
+    mMTC   3/334455  capacity 10Mbps  latency<=1000ms  5QI 9
+network orchestrator stopped
+network orchestrator on :9113 (log: /tmp/o5gs_netorch.log)
+  network-orchestrator on :9113 — slices eMBB (20 UEs), URLLC (10 UEs), mMTC (70 UEs), auto=False (on-demand mMTC, idle 120s)
+{"admitted": true, "supi": "imsi-208930000000001", "traffic_class": "blog", "slice": {"name": "URLLC", "sst": 2, "sd": "112233", "5qi": 82, "arp": 2}, "arp": {"priority": 2, "may_preempt": true, "preemptable": true}, "preempted": [], "mbps": 1.0, "slice_used_mbps": 1.0, "slice_measured_mbps": 0.37, "slice_capacity_mbps": 20.0, "slice_limit_mbps": 20.0, "flow": {"started": true, "device": "10.46.9.112", "device_kind": "own", "seconds": 20, "id": "2ecfc2ac"}}
+trace lines: 1
+{"type":"span","service":"slice-orchestrator","name":"admission.decide","trace_id":"b356dbaed63030feb444421d035de33b","span_id":"d3914cb9e4a7987c","parent_id":null,"start":1794182437.428397,"end":1794182437.765936,"duration_ms":337.538,"status":"ok","error":null,"attrs":{"supi":"imsi-208930000000001","traffic_class":"blog","mbps":null,"admitted":true,"slice":"URLLC","reason":null,"preempted":0,"sl
+## 1b. scheduler with traces (mounts /tmp)
+scheduler before: sliced None
+packet scheduler stopped; queues removed
+packet scheduler on :9114
+  packet-scheduler on :9114 — mode sliced, cell {'downlink': 250.0, 'uplink': 100.0} Mbps, slices eMBB 60% prio 3, URLLC 10% prio 1, mMTC 5% prio 4
+  00:00:42 applied mode=sliced cell={'downlink': 250.0, 'uplink': 100.0} on {'downlink': 'veth33302a0', 'uplink': 'eth0'} (ok=True)
+scheduler.apply spans: 0
+scheduler after: sliced None errors 0
+## 2. diagnosis service + prometheus job
+prometheus restarted
+fault diagnosis on :9115 (log: /tmp/o5gs_diagnosis.log)
+  fault-diagnosis on :9115 — every 120s over the last 600s; prometheus http://localhost:9091, loki http://localhost:3100, docker logs True
+## 3. pull + check images
+docker.io/grafana/loki@sha256:1107dd5274e0ada47e42472b7a7e71f3b2a2fe878878108f3e2f9e51528f0193
+docker.io/grafana/alloy@sha256:2aa2099af76c0098d4af7a4d6e48f86cb66dc1a000222ad927a1c67c6542d13f
+Alloy config parses
+## 4. logs pipeline
+unknown shorthand flag: 'f' in -f
+
+Usage:  docker [OPTIONS] COMMAND [ARG...]
+
+Run 'docker --help' for more information
+loki: 
+## 5. grafana
+grafana restarted
+# done 00:04:43Z  evidence docs/evidence/open5gs-observability/20261109-000016Z
+
+# part 2 00:07:54Z: scheduler's own trace file (fs.protected_regular=2 dropped its spans), logs pipeline without the compose plugin
+packet scheduler stopped; queues removed
+packet scheduler on :9114
+  packet-scheduler on :9114 — mode sliced, cell {'downlink': 250.0, 'uplink': 100.0} Mbps, slices eMBB 60% prio 3, URLLC 10% prio 1, mMTC 5% prio 4
+  00:07:57 applied mode=sliced cell={'downlink': 250.0, 'uplink': 100.0} on {'downlink': 'veth33302a0', 'uplink': 'eth0'} (ok=True)
+scheduler.apply spans: 1
+{"type":"span","service":"packet-scheduler","name":"scheduler.apply","trace_id":"c256f3f823bd19dd5164dda5fed00204","span_id":"9a2de7032f7e6635","parent_id":null,"start":1794182877.568674,"end":1794182877.612763,"duration_ms":44.089,"status":"ok","error":null,"attrs":{"mode":"sliced","cell_dl_mbps":250.0,"cell_ul_mbps":100.0,"ue_pid":530319,"reason":"first apply","ok":true,"devices":{"downlink":"veth33302a0","uplink":"eth0"},"applies":1,"tracked":{"URLLC/0":3}},"events":[]}
+
+read_spans merged: 2 ['packet-scheduler', 'slice-orchestrator']
+scheduler: sliced  errors 0
+## logs pipeline: docker compose plugin unavailable (dangling link into Docker Desktop's mount) -> equivalent docker run
+0f591eb11cf83ff402c4960a0d968ce637e88b732d72203fba6e69e18af7a1f3
+loki: ready
+ebece930182c5ad7e563e3fdb52105167dc3c36b4e411be9b6664d53c3b69f7a
+## verify
+alloy error lines: 1
+ts=2026-11-09T00:08:52.932010779Z level=error msg="failed to evaluate config" controller_path=/ controller_id="" node=loki.process.o5gs err="building component: invalid stage config invalid selector syntax for match stage: parse error at line 1, col 13: invalid char escape"
+slice values: {"status":"success"}
+event values: {"status":"success"}
+## diagnosis
+fault_diagnosis_up 1
+fault_diagnosis_runs_total 4
+fault_diagnosis_healthy 1
+{"status":"error","errorType":"bad_data","error":"invalid parameter \"query\": 1:6: parse error: unexpected \"=\""}
+
+o5gs-loki 43.43MiB / 384MiB 1.33%
+o5gs-alloy 0B / 0B 0.00%
+your 131072x1 screen size is bogus. expect trouble
+diagnose.py RSS 25.4 MiB
+               total        used        free      shared  buff/cache   available
+Mem:            7783        3091         840           5        4048        4691
+Swap:           2048           0        2048
+
+# part 3 00:10:29Z: Alloy refused the generated pipeline ("invalid char escape" in a match selector); regenerated with backtick label values
+alloy running: true restarts=9
+alloy error lines since restart: 16
+ts=2026-11-09T00:10:31.26375797Z level=error msg="failed to evaluate config" controller_path=/ controller_id="" trace_id=493c14412c2887e83ef0423d1ae5bc28 node=loki.process.o5gs err="building component: invalid stage config invalid selector syntax for match stage: parse error at line 1, col 13: syntax error: unexpected IDENTIFIER, expecting STRING"
+ts=2026-11-09T00:10:32.768643019Z level=error msg="failed to evaluate config" controller_path=/ controller_id="" trace_id=5ab426bb28e00899c750d35e91419e25 node=loki.process.o5gs err="building component: invalid stage config invalid selector syntax for match stage: parse error at line 1, col 13: syntax error: unexpected IDENTIFIER, expecting STRING"
+ts=2026-11-09T00:10:32.772604189Z level=error msg="failed to evaluate config" controller_path=/ controller_id="" node=loki.process.o5gs err="building component: invalid stage config invalid selector syntax for match stage: parse error at line 1, col 13: syntax error: unexpected IDENTIFIER, expecting STRING"
+slice values: {"status":"success"}
+component values: {"status":"success"}
+event values: {"status":"success"}
+level values: {"status":"success"}
+label cardinality check (no imsi label): {"status":"success"}
+
+# part 3 00:12:31Z: Alloy refused the generated pipeline ("invalid char escape" in a match selector); backticks are a syntax error there too; regenerated with the regex escaped as a Go string
+alloy running: true restarts=9
+alloy error lines since restart: 19
+ts=2026-11-09T00:12:24.777806474Z level=error msg="failed to evaluate config" controller_path=/ controller_id="" trace_id=e4dd873ba6e2ff5e67a739755034fa17 node=loki.process.o5gs err="building component: invalid stage config invalid selector syntax for match stage: parse error at line 1, col 42: syntax error: unexpected IDENTIFIER, expecting STRING"
+ts=2026-11-09T00:12:24.786181508Z level=error msg="failed to evaluate config" controller_path=/ controller_id="" node=loki.process.o5gs err="building component: invalid stage config invalid selector syntax for match stage: parse error at line 1, col 42: syntax error: unexpected IDENTIFIER, expecting STRING"
+ts=2026-11-09T00:12:32.4446763Z level=error msg="failed to evaluate config" controller_path=/ controller_id="" trace_id=2b395f01d5171a4b2a7a1a53353bc8d9 node=loki.process.o5gs err="building component: invalid stage config invalid selector syntax for match stage: parse error at line 1, col 42: syntax error: unexpected IDENTIFIER, expecting STRING"
+slice values: {"status":"success"}
+component values: {"status":"success"}
+event values: {"status":"success"}
+level values: {"status":"success"}
+label cardinality check (no imsi label): {"status":"success"}
+
+# part 3 00:16:56Z: Alloy refused the generated pipeline ("invalid char escape" in a match selector); matchers AND line filters must be Go double-quoted strings (backticks are a syntax error there); all 55 selectors checked one by one in Alloy first
+alloy running: true restarts=0
+alloy error lines since restart: 65
+ts=2026-11-09T00:17:17.696204949Z level=error msg="final error sending batch, no retries left, dropping data" component_path=/ component_id=loki.write.local component=endpoint host=10.53.0.43:3100 status=400 tenant="" error="server returned HTTP status 400 Bad Request (400): 1 errors like: entry for stream '{component=\"gnb\", container=\"o5gs-gnb-mmtc\", job=\"o5gs\", level=\"debug\", service_name=\"o5gs-gnb-mmtc\", slice=\"mMTC\"}' has timestamp too old: 2026-10-01T13:05:32Z, oldest acceptable timestamp is: 2026-11-02T00:17:17Z; 29 errors like: entry for stream '{component=\"smf\", container=\"o5gs-smf\", job=\"o5gs\", level=\"info\", service_name=\"o5gs-smf\"}' has timestamp too old: 2026-09-29T03:38:19Z, oldest acceptable timestamp is: 2026-11-02T00:17:17Z; 1 errors like: entry for stream '{component=\"mongodb\", container=\"o5gs-mongodb\", job=\"o5gs\", service_name=\"o5gs-mongodb\"}' has timestamp too old: 2026-10-23T09:21:27Z, oldest acceptable timestamp is: 2026-11-02T00:17:17Z; 2 errors like: entry for stream '{component=\"gnb\", container=\"o5gs-gnb-mmtc\", job=\"o5gs\", level=\"info\", service_name=\"o5gs-gnb-mmtc\", slice=\"mMTC\"}' has timestamp too old: 2026-10-01T13:05:32Z, oldest acceptable timestamp is: 2026-11-02T00:17:17Z; 1 errors like: entry for stream '{component=\"smf\", container=\"o5gs-smf\", event=\""
+ts=2026-11-09T00:17:18.8703923Z level=error msg="final error sending batch, no retries left, dropping data" component_path=/ component_id=loki.write.local component=endpoint host=10.53.0.43:3100 status=400 tenant="" error="server returned HTTP status 400 Bad Request (400): 15 errors like: entry for stream '{component=\"ausf\", container=\"o5gs-ausf\", job=\"o5gs\", level=\"info\", service_name=\"o5gs-ausf\"}' has timestamp too old: 2026-10-01T13:19:00Z, oldest acceptable timestamp is: 2026-11-02T00:17:18Z; 1 errors like: entry for stream '{component=\"udm\", container=\"o5gs-udm\", event=\"nf_started\", job=\"o5gs\", level=\"info\", service_name=\"o5gs-udm\"}' has timestamp too old: 2026-10-28T04:04:54Z, oldest acceptable timestamp is: 2026-11-02T00:17:18Z; 1 errors like: entry for stream '{component=\"mongodb\", container=\"o5gs-mongodb\", job=\"o5gs\", service_name=\"o5gs-mongodb\"}' has timestamp too old: 2026-10-23T09:59:28Z, oldest acceptable timestamp is: 2026-11-02T00:17:18Z; 6 errors like: entry for stream '{component=\"pcf\", container=\"o5gs-pcf\", job=\"o5gs\", level=\"info\", service_name=\"o5gs-pcf\"}' has timestamp too old: 2026-09-29T03:43:06Z, oldest acceptable timestamp is: 2026-11-02T00:17:18Z; 4 errors like: entry for stream '{component=\"gnb\", container=\"o5gs-gnb-mmtc\", job=\"o5gs\", level=\"info\", se"
+ts=2026-11-09T00:17:19.892184443Z level=error msg="final error sending batch, no retries left, dropping data" component_path=/ component_id=loki.write.local component=endpoint host=10.53.0.43:3100 status=400 tenant="" error="server returned HTTP status 400 Bad Request (400): 6 errors like: entry for stream '{component=\"ausf\", container=\"o5gs-ausf\", job=\"o5gs\", level=\"info\", service_name=\"o5gs-ausf\"}' has timestamp too old: 2026-10-01T13:19:10Z, oldest acceptable timestamp is: 2026-11-02T00:17:19Z; 1 errors like: entry for stream '{component=\"ausf\", container=\"o5gs-ausf\", job=\"o5gs\", level=\"warning\", service_name=\"o5gs-ausf\"}' has timestamp too old: 2026-10-01T13:19:11Z, oldest acceptable timestamp is: 2026-11-02T00:17:19Z; 2 errors like: entry for stream '{component=\"upf\", container=\"o5gs-upf-mmtc\", event=\"upf_session\", job=\"o5gs\", level=\"info\", service_name=\"o5gs-upf-mmtc\", slice=\"mMTC\"}' has timestamp too old: 2026-10-01T13:21:11Z, oldest acceptable timestamp is: 2026-11-02T00:17:19Z; 5 errors like: entry for stream '{component=\"amf\", container=\"o5gs-amf\", event=\"registration_request\", job=\"o5gs\", level=\"info\", service_name=\"o5gs-amf\"}' has timestamp too old: 2026-09-25T05:43:48Z, oldest acceptable timestamp is: 2026-11-02T00:17:19Z; 40 errors like: entry for stream '{component"
+slice values: {"status":"success","data":["URLLC","eMBB","mMTC"]}
+component values: {"status":"success","data":["alloy","ausf","bsf","dn","gnb","grafana","loki","mongodb","nrf","nssf","prometheus","scheduler","udm","udr","ue-supervisor","upf"]}
+event values: {"status":"success","data":["ip_pool_exhausted","nf_registered","nf_started","nf_terminating","ng_setup_ok","pdu_session_not_found","pdu_session_resource_setup","pfcp_associated","pfcp_deassociated","pfcp_node_unknown","scheduler_apply","ue_recovered","ue_restart","ue_signal_lost","ue_start_timeout","ues_up","upf_session","upf_session_added","upf_session_removed"]}
+level values: {"status":"success","data":["debug","error","info","warning"]}
+   {'component': 'alloy'} 1347
+   {'component': 'grafana'} 2
+   {'component': 'loki'} 413
+   {'component': 'mongodb'} 5
+label cardinality check (no imsi label): {"status":"success","data":["component","container","event","job","level","service_name","slice"]}
+
+# part 4 00:22:11Z: stage.drop older_than=72h (the first-start backfill made Loki answer 400 per batch)
+alloy errors in the 60 s after restart: 1
+ts=2026-11-09T00:22:12.077379258Z level=error msg="final error sending batch, no retries left, dropping data" component_path=/ component_id=loki.write.local component=endpoint host=10.53.0.43:3100 status=400 tenant="" error="server returned HTTP status 400 Bad Request (400): 10 errors like: entry fo
+loki labels: {"status":"success","data":["component","container","event","job","level","service_name","slice"]}
+o5gs-loki 117.8MiB / 384MiB
+o5gs-alloy 71.91MiB / 192MiB

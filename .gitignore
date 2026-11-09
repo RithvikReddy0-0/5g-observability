@@ -24,6 +24,9 @@ deployments/compose/cert/
 *.log
 # ...except recorded log lines the observability tests parse (ADR-024; small, anonymised)
 !tests/fixtures/observability/*.log
+# ...and the run logs kept as evidence (run_kpis.py run.log, campaign and deployment logs), which
+# evidence READMEs cite; they were silently left out of every commit before 2026-11-09.
+!docs/evidence/**/*.log
 *_logs.txt
 
 # --- OS / editor cruft ---
