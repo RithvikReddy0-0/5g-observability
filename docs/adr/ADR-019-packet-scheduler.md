@@ -211,6 +211,9 @@ scheduler's mode and cell changed ([comparison](../evidence/open5gs-kpi/README.m
   score. **The default is 600 Mbps downlink / 100 Mbps uplink since 2026-11-09** (it was 250 / 100):
   at 600 the queue still forms under overload, where scheduling matters, and nominal load is not
   capped well below what the laptop delivers (483–548 Mbps unshaped). The overload experiments set
-  their own cell, so their results do not depend on the default.
+  their own cell, so their results do not depend on the default. Confirmed the same day by five
+  interleaved rounds (ABBA; [evidence](../evidence/open5gs-cell-capacity/README.md)): overall score
+  0.80–0.85 at 600 against 0.75–0.77 at 250, eMBB 408–462 against 212–224 Mbps, both p = 0.029 with
+  600 ahead in every round; URLLC p99 and late packets no different (p = 1.0), loss 0 in both.
 - (−) The scheduler is privileged and outside Compose (like the orchestrators, it is optional: the
   gate only advises when it is down). On Kubernetes it would be a privileged DaemonSet; not built.

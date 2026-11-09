@@ -1,0 +1,46 @@
+Run 20261109-070351Z (round 1, cell 250): URLLC loss 5.20 %, p99 29.2 ms, max 9 485 ms.
+Evidence that the loss happened at the URLLC KPI collector's own socket, not in the network.
+Collected 2026-11-09 between 07:45 and 07:50 UTC from the live stack.
+
+1. Every URLLC device lost almost exactly the same number of packets (lost, expected):
+   21: 429/8227  22: 429/8227  23: 428/8228  24: 429/8227  25: 428/8227
+   26: 426/8228  27: 428/8227  28: 428/8227  29: 428/8227  30: 427/8227
+   = 4 280 packets lost in all (82 272 expected, 77 992 received); 428 x 20 ms = 8.6 s per device.
+
+2. The collector's lifetime counter (Prometheus, kpi_packets_received_total{slice="URLLC"}, 10 s steps)
+   never reset (no restart) and rose by 5 680 between 07:05:40 and 07:06:00 instead of ~10 000:
+   07:05:30 11642082 · 07:05:40 11647082 · 07:06:00 11652762 · 07:06:10 11657758
+   The run's /run/start was at ~07:05:43 (run.log: instance standard 07:05:43).
+
+3. Prometheus could not scrape the collector at 07:05:50 (up{instance="10.53.0.52:9130"} = 0); the
+   collector logged BrokenPipeError for that scrape (render_metrics waits on the same lock). The first
+   value after the stall: kpi_owd_recent_ms{slice="URLLC",stat="p95"} = 9 466 ms at 07:05:55.
+
+4. The kernel counted the drops at the collector's socket (in o5gs-dn-urllc, before the fix):
+   /proc/net/udp   00000000:1518 (port 5400) ... drops 4280
+   /proc/net/snmp  Udp: InDatagrams 12809023  InErrors 4280  RcvbufErrors 4280
+   4 280 = exactly the packets the run lost.
+
+5. The socket buffer: the collector asked for 4 MiB with SO_RCVBUF and got 425 984 bytes, because
+   net.core.rmem_max = 212 992 caps it (about one second of URLLC at 500 packets/s). With
+   SO_RCVBUFFORCE (the container has CAP_NET_ADMIN) the kernel grants 8 388 608 bytes.
+
+Mechanism: the per-run tally kept every delay sample in Python lists from one /run/start to the
+next; the previous KPI run had ended ~10.5 h earlier, so ~19 million samples (+ as many jitter
+values; the container used 552 MiB at 00:00, 4 h in). /run/start replaced the tally while holding
+the lock the receive loop needs, the receive loop stopped reading, the buffer filled in ~1 s and the
+kernel dropped the rest. Freeing 10 million warm list samples under a lock stalled a competing thread
+for 0.15 s in a benchmark on this host, so the ~9 s here implies the 10-hour-old memory was cold
+(paged out by the WSL2 VM or Windows); that last step is inferred, not measured. The fix removes the
+mechanism either way: samples are flat arrays freed in one call, capped at 4 million per run, and
+the old tally is released outside the lock; the receive buffer is forced to 8 MiB; and the collector
+now reports kpi_receiver_drops_total and, per run, receiver_drops, which run_kpis.py records and
+warns about, so instrument loss is never again counted as network loss without a flag.
+
+After the fix (round 5, 20261109-074847Z and -075428Z): receiver_drops 0 and 0; dn-urllc 13 MiB.
+
+What the fault diagnosis said during the stall (fault_diagnosis_cause_score, 07:05-07:09):
+cell-congestion URLLC 0.65 (already from 07:05:00, i.e. before the stall), cpu-saturation URLLC
+0.65-0.76, target-down 0.95 (the collector's failed scrape), registration-failure 0.60 (the fresh
+attach's authentication retries), orchestrator-throttling eMBB 0.60. It flagged the collector's
+target as down but named no cause that fits an instrument stall; no rule describes one.

@@ -11,6 +11,12 @@
 | `instances.jsonl` | every instance raw: measured values, the scorecard, per-device data |
 | `run.log`, `meta.json` | what ran, when, at which commit |
 
+Since 2026-11-09 each instance also records `urllc.receiver_drops` and `mmtc.receiver_drops`: packets
+the kernel dropped at the KPI collector's own socket. They count as loss, but the instrument's, not
+the network's, and `run.log` warns when they are not zero. They were added after a collector stall
+dropped 4 280 URLLC packets at the start of a run
+([details](../open5gs-cell-capacity/collector-stall.txt)).
+
 KPIs, targets and weights: [`deployments/open5gs/kpi-scorecard.json`](../../../deployments/open5gs/kpi-scorecard.json),
 explained in [`docs/kpi-scorecard.md`](../../kpi-scorecard.md).
 

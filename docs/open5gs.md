@@ -214,7 +214,9 @@ the live tree; `POST :9114/config` changes mode, cell and shares at run time.
 | URLLC standard tier floods the cell | critical p99 106 / 235 ms, 26 % loss | critical p99 3.2 / 7.8 ms, 0 % |
 
 With the scheduler on, eMBB is capped by the cell: 214–228 Mbps aggregate at 250 Mbps, 436–444 at
-600 Mbps, the default since 2026-11-09 (`SCHED_CELL_DL_MBPS` in `deployments/slices.env`). At nominal
+600 Mbps, the default since 2026-11-09 (`SCHED_CELL_DL_MBPS` in `deployments/slices.env`; five
+interleaved rounds: overall 0.80–0.85 against 0.75–0.77, URLLC no different,
+[evidence](evidence/open5gs-cell-capacity/README.md)). At nominal
 load the same-day KPI runs show what it buys and costs: against a plain FIFO at the same 600 Mbps
 cell, 0 % URLLC loss instead of 1.3–2.9 % (one device per run losing its radio link) and no
 radio-link failures; against no cell at all (`off`), lower eMBB throughput. A longer URLLC p99 seen

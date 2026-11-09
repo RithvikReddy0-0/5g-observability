@@ -1,0 +1,24 @@
+07:03:50Z campaign open5gs-cell-capacity: 4 rounds, arms {"cell250": {"mode": "sliced", "cell_dl_mbps": 250, "cell_ul_mbps": 100}, "cell600": {"mode": "sliced", "cell_dl_mbps": 600, "cell_ul_mbps": 100}}, commit 4ce595c
+07:03:50Z #1 round 1 cell250: applied sliced cell {'downlink': 250.0, 'uplink': 100.0}
+07:08:30Z #1 round 1 cell250: run 20261109-070351Z exit 0, broken after 0
+07:08:30Z #2 round 1 cell600: applied sliced cell {'downlink': 600.0, 'uplink': 100.0}
+07:12:48Z #2 round 1 cell600: run 20261109-070831Z exit 0, broken after 0
+07:12:48Z #3 round 2 cell600: applied sliced cell {'downlink': 600.0, 'uplink': 100.0}
+07:16:53Z #3 round 2 cell600: run 20261109-071248Z exit 0, broken after 0
+07:16:53Z #4 round 2 cell250: applied sliced cell {'downlink': 250.0, 'uplink': 100.0}
+07:21:04Z #4 round 2 cell250: run 20261109-071654Z exit 0, broken after 0
+07:21:04Z #5 round 3 cell250: applied sliced cell {'downlink': 250.0, 'uplink': 100.0}
+07:27:14Z #5 round 3 cell250: run 20261109-072105Z exit 0, broken after 0
+07:27:14Z #6 round 3 cell600: applied sliced cell {'downlink': 600.0, 'uplink': 100.0}
+07:32:41Z #6 round 3 cell600: run 20261109-072715Z exit 0, broken after 0
+07:32:41Z #7 round 4 cell600: applied sliced cell {'downlink': 600.0, 'uplink': 100.0}
+07:36:53Z #7 round 4 cell600: run 20261109-073242Z exit 0, broken after 0
+07:36:54Z #8 round 4 cell250: applied sliced cell {'downlink': 250.0, 'uplink': 100.0}
+07:41:19Z #8 round 4 cell250: run 20261109-073655Z exit 0, broken after 0
+07:41:19Z campaign done; scheduler back to slices.env: sliced cell {'downlink': 600.0, 'uplink': 100.0}
+07:48:46Z campaign open5gs-cell-capacity: 1 rounds, arms {"cell250": {"mode": "sliced", "cell_dl_mbps": 250, "cell_ul_mbps": 100}, "cell600": {"mode": "sliced", "cell_dl_mbps": 600, "cell_ul_mbps": 100}}, commit 4ce595c
+07:48:46Z #9 round 5 cell250: applied sliced cell {'downlink': 250.0, 'uplink': 100.0}
+07:54:28Z #9 round 5 cell250: run 20261109-074847Z exit 0, broken after 0
+07:54:28Z #10 round 5 cell600: applied sliced cell {'downlink': 600.0, 'uplink': 100.0}
+07:58:41Z #10 round 5 cell600: run 20261109-075428Z exit 0, broken after 0
+07:58:41Z campaign done; scheduler back to slices.env: sliced cell {'downlink': 600.0, 'uplink': 100.0}

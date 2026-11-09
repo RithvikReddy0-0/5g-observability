@@ -1,0 +1,1 @@
+cell600 sliced cell {"downlink": 600.0, "uplink": 100.0}

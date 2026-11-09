@@ -1,0 +1,36 @@
+== cell250
+  r1 20261109-070351Z [cell250 sliced cell {"downlink": 250.0, "uplink": 100.0}] overall 0.53 (U 0.29 E 0.30 M 1.00) eMBB 214 p5 10.4 flows 20 | URLLC p99 29.18 late 3132 loss 0.0520 devs 10 | mMTC loss 0.0000 | broken 0
+  r2 20261109-071654Z [cell250 sliced cell {"downlink": 250.0, "uplink": 100.0}] overall 0.77 (U 1.00 E 0.31 M 1.00) eMBB 222 p5 10.9 flows 20 | URLLC p99 7.96 late 523 loss 0.0000 devs 0 | mMTC loss 0.0000 | broken 0
+  r3 20261109-072105Z [cell250 sliced cell {"downlink": 250.0, "uplink": 100.0}] overall 0.77 (U 1.00 E 0.31 M 1.00) eMBB 224 p5 11.0 flows 20 | URLLC p99 6.38 late 310 loss 0.0000 devs 0 | mMTC loss 0.0000 | broken 0
+  r4 20261109-073655Z [cell250 sliced cell {"downlink": 250.0, "uplink": 100.0}] overall 0.76 (U 0.98 E 0.29 M 1.00) eMBB 212 p5 10.4 flows 20 | URLLC p99 11.69 late 1089 loss 0.0000 devs 0 | mMTC loss 0.0000 | broken 0
+  r5 20261109-074847Z [cell250 sliced cell {"downlink": 250.0, "uplink": 100.0}] overall 0.75 (U 0.95 E 0.29 M 1.00) eMBB 212 p5 10.4 flows 20 | URLLC p99 14.35 late 1585 loss 0.0000 devs 0 | mMTC loss 0.0000 | broken 0
+== cell600
+  r1 20261109-070831Z [cell600 sliced cell {"downlink": 600.0, "uplink": 100.0}] overall 0.83 (U 1.00 E 0.50 M 1.00) eMBB 445 p5 11.9 flows 20 | URLLC p99 6.83 late 290 loss 0.0000 devs 0 | mMTC loss 0.0000 | broken 0
+  r2 20261109-071248Z [cell600 sliced cell {"downlink": 600.0, "uplink": 100.0}] overall 0.84 (U 1.00 E 0.52 M 1.00) eMBB 431 p5 14.9 flows 20 | URLLC p99 7.26 late 393 loss 0.0000 devs 0 | mMTC loss 0.0000 | broken 0
+  r3 20261109-072715Z [cell600 sliced cell {"downlink": 600.0, "uplink": 100.0}] overall 0.80 (U 0.95 E 0.45 M 1.00) eMBB 410 p5 10.0 flows 20 | URLLC p99 15.54 late 1682 loss 0.0000 devs 0 | mMTC loss 0.0000 | broken 0
+  r4 20261109-073242Z [cell600 sliced cell {"downlink": 600.0, "uplink": 100.0}] overall 0.82 (U 0.98 E 0.47 M 1.00) eMBB 408 p5 12.3 flows 20 | URLLC p99 11.80 late 1106 loss 0.0000 devs 0 | mMTC loss 0.0000 | broken 0
+  r5 20261109-075428Z [cell600 sliced cell {"downlink": 600.0, "uplink": 100.0}] overall 0.85 (U 1.00 E 0.54 M 1.00) eMBB 462 p5 14.0 flows 20 | URLLC p99 6.02 late 180 loss 0.0000 devs 0 | mMTC loss 0.0000 | broken 0
+
+### primary: rounds 2-5 (round 1's 250 run hit the collector stall): rounds [2, 3, 4, 5]
+overall   250: median    0.764 [0.77, 0.77, 0.758, 0.749]   600: median    0.829 [0.841, 0.798, 0.817, 0.846]   p = 0.029 (exact)  Cliff's delta(250 vs 600) = -1.00
+embb_agg  250: median  217.150 [222, 224, 212, 212]   600: median  420.500 [431, 410, 408, 462]   p = 0.029 (exact)  Cliff's delta(250 vs 600) = -1.00
+embb      250: median    0.302 [0.309, 0.311, 0.295, 0.294]   600: median    0.499 [0.524, 0.448, 0.474, 0.538]   p = 0.029 (exact)  Cliff's delta(250 vs 600) = -1.00
+urllc     250: median    0.989 [1, 1, 0.978, 0.955]   600: median    0.989 [1, 0.947, 0.977, 1]   p = 0.829 (permutation)  Cliff's delta(250 vs 600) = +0.12
+p99       250: median    9.823 [7.96, 6.38, 11.7, 14.3]   600: median    9.527 [7.26, 15.5, 11.8, 6.02]   p = 1.000 (exact)  Cliff's delta(250 vs 600) = +0.00
+late10    250: median  806.000 [523, 310, 1.09e+03, 1.58e+03]   600: median  749.500 [393, 1.68e+03, 1.11e+03, 180]   p = 1.000 (exact)  Cliff's delta(250 vs 600) = +0.00
+loss      250: median    0.000 [0, 0, 0, 0]   600: median    0.000 [0, 0, 0, 0]   p = 1.000 (permutation)  Cliff's delta(250 vs 600) = +0.00
+paired 600-250 by round, overall: ['+0.0716', '+0.0277', '+0.0594', '+0.0967']
+paired 600-250 by round, embb_agg: ['+209', '+186', '+196', '+251']
+paired 600-250 by round, p99: ['-0.705', '+9.15', '+0.113', '-8.33']
+
+### all runs, round 1 included: rounds [1, 2, 3, 4, 5]
+overall   250: median    0.758 [0.528, 0.77, 0.77, 0.758, 0.749]   600: median    0.833 [0.833, 0.841, 0.798, 0.817, 0.846]   p = 0.008 (exact)  Cliff's delta(250 vs 600) = -1.00
+embb_agg  250: median  214.200 [214, 222, 224, 212, 212]   600: median  431.100 [445, 431, 410, 408, 462]   p = 0.008 (exact)  Cliff's delta(250 vs 600) = -1.00
+embb      250: median    0.297 [0.297, 0.309, 0.311, 0.295, 0.294]   600: median    0.499 [0.499, 0.524, 0.448, 0.474, 0.538]   p = 0.008 (exact)  Cliff's delta(250 vs 600) = -1.00
+urllc     250: median    0.978 [0.288, 1, 1, 0.978, 0.955]   600: median    1.000 [1, 1, 0.947, 0.977, 1]   p = 0.683 (permutation)  Cliff's delta(250 vs 600) = -0.20
+p99       250: median   11.685 [29.2, 7.96, 6.38, 11.7, 14.3]   600: median    7.257 [6.83, 7.26, 15.5, 11.8, 6.02]   p = 0.548 (exact)  Cliff's delta(250 vs 600) = +0.28
+late10    250: median 1089.000 [3.13e+03, 523, 310, 1.09e+03, 1.58e+03]   600: median  393.000 [290, 393, 1.68e+03, 1.11e+03, 180]   p = 0.421 (exact)  Cliff's delta(250 vs 600) = +0.36
+loss      250: median    0.000 [0.052, 0, 0, 0, 0]   600: median    0.000 [0, 0, 0, 0, 0]   p = 1.000 (permutation)  Cliff's delta(250 vs 600) = +0.20
+paired 600-250 by round, overall: ['+0.305', '+0.0716', '+0.0277', '+0.0594', '+0.0967']
+paired 600-250 by round, embb_agg: ['+231', '+209', '+186', '+196', '+251']
+paired 600-250 by round, p99: ['-22.4', '-0.705', '+9.15', '+0.113', '-8.33']
